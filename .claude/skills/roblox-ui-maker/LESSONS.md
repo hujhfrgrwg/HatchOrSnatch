@@ -59,6 +59,10 @@ Format: **rule**, then why (what went wrong or what the developer said).
   well copied and still be wrong for the game. - A neon/esports reference (dark panels, hot accents) was copied
   faithfully for a bright stud-style pet/egg game: "great job copying it, but this UI doesn't match our game or
   its theme at all."
+- **Match the game's tone, not only its palette: a competitive chase (knives, stealing, teams) is not a kids' pet sim.**
+  Rounded bubble fonts (Fredoka), thick cartoon outlines, sunbursts behind everything, glossy candy halves and sparkles read
+  childish even in the game's colours. Test 2 directions on 2 screens before building every page. - Round 2 "candy" (all
+  screens) was "far too childish for our type of game" after round 1 neon was "not our theme".
 - **Stud is the default, not universal.** When a game is declared "not stud" (scroll RPG, sleek shooter), no
   stud plates or textures anywhere, lobby included.
 - **"AI-looking UI" = flat beige rounded rectangles, one font, no depth, no motion.** Fix with a themed palette,

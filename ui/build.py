@@ -20,7 +20,9 @@ import re
 HERE = os.path.dirname(os.path.abspath(__file__))
 STYLE = os.environ.get('UI_STYLE', 'candy')
 FONTS = ("<link rel='preconnect' href='https://fonts.googleapis.com'>"
-         "<link href='https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=block' rel='stylesheet'>")
+         "<link href='https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700"
+         "&family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&display=block' rel='stylesheet'>")
+SKIN = os.environ.get('UI_SKIN', '')   # direction test: styles/<skin>.css on top of candy.css
 
 
 # ================================================================== base helpers (roblox-ui-maker markers)
@@ -743,6 +745,7 @@ def page(title, body, h=1080):
     return (f"<!doctype html><html><head><meta charset='utf-8'><title>{title}</title>"
             f"<meta name='viewport' content='width=device-width,initial-scale=1'>{FONTS}"
             f"<link rel='stylesheet' href='kit.css'><link id='preset' rel='stylesheet' href='styles/{STYLE}.css'>"
+            + (f"<link rel='stylesheet' href='styles/{SKIN}.css'>" if SKIN else '') +"
             "</head><body>"
             f"<div id='wrap'><div id='stage' style='height:{h}px'>{body}</div></div>{JS}</body></html>")
 
@@ -796,6 +799,12 @@ if __name__ == '__main__':
     for p in ('tex', 'icons'):
         if not os.path.exists(os.path.join(HERE, p)):
             print('WARN missing', p, '- see the usage lines at the top of this file')
+    if SKIN:  # direction test pages only: <page>_<skin>.html
+        for fname, title, desc, fn, h in SCREENS:
+            if fname.split('.')[0] in os.environ.get('UI_PAGES', 'hud,incubator,pets,hud_match').split(','):
+                with open(os.path.join(HERE, fname.replace('.html', f'_{SKIN}.html')), 'w') as f:
+                    f.write(page(title, fn(), h))
+        raise SystemExit(f'wrote {SKIN} direction pages')
     for fname, title, desc, fn, h in SCREENS:
         with open(os.path.join(HERE, fname), 'w') as f:
             f.write(page(title, fn(), h))
