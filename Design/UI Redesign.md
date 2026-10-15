@@ -4,7 +4,7 @@ updated: 2026-10-16
 ---
 # UI redesign
 
-Following `roblox-ui-maker`: the UI is designed in HTML first, Hunter approves it, and only then is it exported to a real ScreenGui in Studio. **Status (16 Oct): round 3 "sport" (`ui/styles/sport.css`, shots in `docs/ui/round3/`) is liked ("looks great so far"). Waiting on Hunter's ChatGPT icons, then Studio import. Nothing has changed in Studio** (a temporary photo-booth GUI was used to shoot the pets, then removed).
+Following `roblox-ui-maker`: the UI is designed in HTML first, Hunter approves it, and only then is it exported to a real ScreenGui in Studio. **Status (16 Oct): round 3 "sport" (`ui/styles/sport.css`, shots in `docs/ui/round3/`) is liked ("looks great so far"). Hunter's ChatGPT icons are in (40 of 45; `safe`, `catcher`, `runner`, `hunt`, `afk` still use the drawn stand-ins until they arrive as files). Next: Studio import. Nothing has changed in Studio** (a temporary photo-booth GUI was used to shoot the pets, then removed).
 
 ## History
 - **Round 1 (neon), 15 Oct: rejected.** Hunter: "great job copying it, but this UI doesn't match our game or its theme at all." The lesson went into the ui-maker LESSONS: check a reference against the game's own world before building from it. The source is kept as `ui/build_neon_round1.py`, with shots in `docs/ui/round1/`.
@@ -41,7 +41,9 @@ Overview: `docs/ui/round2/_overview.jpg`. Every page is in `docs/ui/round2/`.
 ## How it's made
 - Style: `ui/styles/candy.css`, with Fredoka (Roblox **FredokaOne**). One accent per screen: Quests pink, Incubator lime, Pets sky, Shop gold, Settings/Stats violet. A faint stud texture in header bands ties the UI to the world.
 - Pets and eggs: `ui/tools/photo_booth.luau` (temporary ViewportFrames on magenta in Studio) → `capture_screenshot` → `ui/tools/key_booth.py` (key out the magenta) → `ui/tools/outline.py` (shared ink edge and shadow). That gives 114 images: 29 pets × 3 colourways, 2 huge pets, 7 eggs.
-- Icons: 47 drawn for this game in `ui/tools/icons_svg.py` → `render_icons.mjs` → `outline.py`. To use ChatGPT-made icons instead, see `docs/ui/chatgpt_icon_prompt.md` (same slugs).
+- Icons: Hunter's ChatGPT set (prompt: `docs/ui/chatgpt_icon_prompt.md`). Originals go in `ui/icons_ai/inbox/<slug>.png|webp` (not committed); `python3 tools/ingest_ai_icons.py` trims them to 512 px in `ui/icons_ai/`, and `python3 tools/icon_variants.py` makes recoloured copies for items that share a drawing (Ember/Rainbow trail, Frost/Sunset case, Gold ability FX). `build.py` prefers `icons_ai/<slug>.png` over the 47 drawn stand-ins in `ui/icons/` (`tools/icons_svg.py` → `render_icons.mjs` → `outline.py`).
+- Icons that drifted from the brief (ChatGPT's own note): `case` is a loot chest, not a crystal shell round an egg; `entrance` is a portal, not a lightning strike (the item is "Bolt Entrance"); `abilityfx` is a swirl, not a spray can; `emote` is a cheering figure, not a glove. All are usable; `case` and `entrance` are worth regenerating.
+- Images pasted into chat while Claude is mid-task don't reach the cloud session's disk. Send icons as zips or attachments in a normal message.
 - Textures: ui-resources.com (halftone, grid, scratch, stud, sunbursts, shines). Credits are in `ui/tools/textures.json`; the files are fetched by `tools/fetch_textures.py` and not committed.
 - Rebuild: `cd ui && python3 tools/fetch_textures.py && python3 tools/icons_svg.py && node tools/render_icons.mjs && python3 tools/outline.py && python3 build.py`, then serve and open `index.html`. `node tools/shoot.mjs` renders `shots/`.
 

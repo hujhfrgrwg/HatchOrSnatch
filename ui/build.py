@@ -628,12 +628,12 @@ def s_pets():
 # ================================================================== Shop (EconomyConfig.SHOP + GDD emote)
 SHOP = [  # icon, name, wallet, price, kind label, desc, state
     ('trail', 'Sparkle Trail', 'gold', '40', 'One match', 'Your egg leaves sparkles.', 'ok'),
-    ('trail', 'Ember Trail', 'gold', '60', 'One match', 'Your egg leaves embers.', 'ok'),
+    ('trail_ember', 'Ember Trail', 'gold', '60', 'One match', 'Your egg leaves embers.', 'ok'),
     ('burst', 'Confetti Burst', 'gold', '75', 'Lobby, once', 'Pop confetti over your head.', 'ok'),
     ('emote', 'Happy Dance', 'gold', '500', 'Keep forever', 'A basic emote.', 'owned'),
-    ('case', 'Frost Egg Case', 'gold', '900', 'Keep forever', 'An icy shell around your egg.', 'ok'),
+    ('case_frost', 'Frost Egg Case', 'gold', '900', 'Keep forever', 'An icy shell around your egg.', 'ok'),
     ('entrance', 'Bolt Entrance', 'gold', '1,400', 'Keep forever', 'Arrive with a lightning strike.', 'poor'),
-    ('case', 'Sunset Egg Case', 'gold', '2,400', "This week's colour", 'Gold colourway, keep forever.', 'poor'),
+    ('case_sunset', 'Sunset Egg Case', 'gold', '2,400', "This week's colour", 'Gold colourway, keep forever.', 'poor'),
 ]
 
 
@@ -656,11 +656,11 @@ def s_shop(tab='gold'):
     b += btn(300, 22, 260, 64, 'lime' if tab == 'gems' else 'grey', row(icn('gem', 40), bl('Gems', 30)), name='TabGems')
     b += btn(574, 22, 300, 64, 'grey', row(icn('robux', 40), bl('Get Gems', 30)), name='TabGetGems', hid=True)
     items = SHOP if tab == 'gold' else [
-        ('trail', 'Rainbow Trail', 'gems', '150', 'Keep forever', 'A rainbow trail on your egg.', 'ok'),
-        ('abilityfx', 'Gold Ability FX', 'gems', '250', 'Keep forever', 'Same timing and size.', 'poor'),
+        ('trail_rainbow', 'Rainbow Trail', 'gems', '150', 'Keep forever', 'A rainbow trail on your egg.', 'ok'),
+        ('abilityfx_gold', 'Gold Ability FX', 'gems', '250', 'Keep forever', 'Same timing and size.', 'poor'),
         ('hatchfx', 'Royal Hatching', 'gems', '350', 'Keep forever', 'A bigger hatching ceremony.', 'poor'),
         ('crown', 'Showcase Slot', 'gems', '450', 'Keep forever', 'Show off one more pet in the lobby.', 'poor'),
-        ('sparkle', 'Themed Override', 'gems', '700', 'Keep forever', 'A themed look for your ability.', 'poor'),
+        ('abilityfx', 'Themed Override', 'gems', '700', 'Keep forever', 'A themed look for your ability.', 'poor'),
         ('trophy', 'Prestige Set', 'gems', '1,500', 'Keep forever', 'Trail, case and entrance set.', 'poor')]
     g = ''
     for i, it in enumerate(items[:8]):
@@ -717,7 +717,7 @@ def s_stats():
 
 # ================================================================== Settings (real settings only)
 SETTINGS = [('sound', 'Sound Effects', 'Hits, steals, crossings and UI clicks.', True),
-            ('sparkle', 'Reduce Effects', 'Fewer particles, no camera shake or speed zoom.', False),
+            ('burst', 'Reduce Effects', 'Fewer particles, no camera shake or speed zoom.', False),
             ('info', 'Show Hints', 'Tips on screen while you learn the game.', True),
             ('hunt', 'Volunteer To Hunt', 'Start matches as a Catcher when there is room.', False)]
 

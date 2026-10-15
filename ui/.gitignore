@@ -5,3 +5,5 @@ rbx/
 node_modules
 icons_raw/
 icons_svg/
+icons_ai/inbox/*
+!icons_ai/inbox/.gitkeep

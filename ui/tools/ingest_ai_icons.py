@@ -40,7 +40,10 @@ if __name__ == '__main__':
         if ext.lower() not in ('.png', '.jpg', '.jpeg', '.webp'):
             continue
         im = cut(Image.open(os.path.join(INBOX, f)))
-        im = im.crop(im.getbbox())
+        a = np.array(im)
+        a[..., 3][a[..., 3] < 12] = 0                      # faint haze some exports leave around the art
+        im = Image.fromarray(a)
+        im = im.crop(Image.fromarray(((a[..., 3] > 24) * 255).astype('uint8')).getbbox())
         s = max(im.size) + 16
         sq = Image.new('RGBA', (s, s), (0, 0, 0, 0))
         sq.alpha_composite(im, ((s - im.width) // 2, (s - im.height) // 2))
