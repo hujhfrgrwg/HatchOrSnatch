@@ -7,14 +7,20 @@ updated: 2026-10-15
 Start page for the project. Agents read this first (see `CLAUDE.md`).
 
 ## The game
-*Not written yet.* The one-paragraph pitch, core loop and target players go here, then a `Hatch or Snatch Game Plan.md` and a `Hatch or Snatch Decisions.md` (one line per decision Hunter makes, with the date).
+The game is now called **Evolve or Steal**. This repo, its notes and the `HOS-` ticket ids keep the Hatch or Snatch name.
+
+Evolve or Steal is an 8–16 player infection chase. Runners carry eggs that level up with every safe crossing. Catchers steal those eggs, and every Runner they catch joins them. After each match, players earn one egg material and craft materials into pets, and each pet grants one in-match ability. Gold is the earn-only cosmetic currency and Gems are the premium one. Pets and abilities are never sold.
+
+- **Design doc:** [[Evolve or Steal GDD v0.4 Summary]] (full PDF: `Design/GDD/Evolve or Steal GDD v0.4.pdf`)
+- **Decisions:** [[Evolve or Steal Decisions]]
+- **What's built:** [[Studio Place State 2026-10-15]] (latest audit of the Studio place against the GDD)
 
 ## Studio place
 | | |
 |---|---|
-| Place name | *(fill in)* |
-| Place id / universe id | *(fill in)* |
-| Owner | *(group or Hunter's account)* |
+| Place name | Evolve or Steal Prototype |
+| Place id / universe id | 92934789398619 / 10770957265 |
+| Owner | *(group or Hunter's account; not checked)* |
 
 ## Setup
 - **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
