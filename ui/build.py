@@ -22,7 +22,7 @@ STYLE = os.environ.get('UI_STYLE', 'candy')
 FONTS = ("<link rel='preconnect' href='https://fonts.googleapis.com'>"
          "<link href='https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700"
          "&family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&display=block' rel='stylesheet'>")
-SKIN = os.environ.get('UI_SKIN', '')   # direction test: styles/<skin>.css on top of candy.css
+SKIN = os.environ.get('UI_SKIN', 'sport')   # round 3: styles/sport.css on top of candy.css ('' = round 2 candy)
 
 
 # ================================================================== base helpers (roblox-ui-maker markers)
@@ -35,13 +35,18 @@ def T(text, size, cls='', fill='', style='', name=None, tag='span'):
     return f"<{tag} class='ot {cls} {fill}' data-t='{t}'{dn(name)} style='font-size:{size}px;{style}'>{t}</{tag}>"
 
 
+def ipath(icon):
+    """icons_ai/<slug>.png (ChatGPT set, docs/ui/chatgpt_icon_prompt.md) wins over icons/<slug>.png."""
+    return f'icons_ai/{icon}.png' if os.path.exists(os.path.join(HERE, 'icons_ai', icon + '.png')) else f'icons/{icon}.png'
+
+
 def I(icon, x, y, w, h=None, name=None, extra='', cls='ic'):
     h = h or w
-    return f"<img class='{cls}' src='icons/{icon}.png'{dn(name)} style='left:{x}px;top:{y}px;width:{w}px;height:{h}px;{extra}'>"
+    return f"<img class='{cls}' src='{ipath(icon)}'{dn(name)} style='left:{x}px;top:{y}px;width:{w}px;height:{h}px;{extra}'>"
 
 
 def icn(icon, w, name=None, extra=''):
-    return f"<img class='icn' src='icons/{icon}.png'{dn(name)} style='width:{w}px;height:{w}px;{extra}'>"
+    return f"<img class='icn' src='{ipath(icon)}'{dn(name)} style='width:{w}px;height:{w}px;{extra}'>"
 
 
 def grp(name, inner, anchor='C'):
@@ -146,7 +151,7 @@ def slot(x, y, s, rarity, icon=None, count=None, label=None, cls='', name=None, 
 def stars(n, of=3, size=26):
     out = ''
     for i in range(of):
-        out += f"<img class='icn' src='icons/star.png' style='width:{size}px;height:{size}px;{'' if i < n else 'filter:grayscale(1) brightness(.45);opacity:.8'}'>"
+        out += f"<img class='icn' src='{ipath('star')}' style='width:{size}px;height:{size}px;{'' if i < n else 'filter:grayscale(1) brightness(.45);opacity:.8'}'>"
     return f"<span style='display:inline-flex;gap:2px'>{out}</span>"
 
 
@@ -164,6 +169,8 @@ def closex(x, y):
 
 
 def panel(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112, title_size=62):
+    if SKIN == 'sport':
+        return panel_sport(gname, acc, title, icon, body, x, y, w, h, right, head_h, title_size)
     out = f"<div class='cglow a-{acc}' style='left:{x - 26}px;top:{y - 20}px;width:{w + 52}px;height:{h + 46}px'></div>"
     head = (f"<div class='ch' data-n='Header' style='height:{head_h}px'><div class='sweep'></div>"
             f"<img class='spk' src='tex/shine.png' style='left:{int(w * .3)}px;top:-34px;width:150px;height:150px;opacity:.9'>"
@@ -171,6 +178,24 @@ def panel(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112, title
             f"<span style='flex:1'></span>{right}<span style='width:96px'></span></div></div>")
     out += (f"<div class='cp a-{acc}' data-n='Panel' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'>{head}"
             f"<div class='body' style='top:{head_h}px'>{body}</div>{closex(w - 112, (head_h - 84) // 2 - 6)}</div>")
+    return grp(gname, out, 'C')
+
+
+def panel_sport(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112, title_size=62):
+    """Units-reference panel: the angled banner overlaps the panel top-left, a grey chip holds the
+    header info at the top right, the tilted X sits on the corner."""
+    bw = min(int(w * .52), 760)
+    out = f"<div class='cglow a-{acc}' style='left:{x - 16}px;top:{y - 12}px;width:{w + 32}px;height:{h + 28}px'></div>"
+    out += (f"<div class='cp a-{acc}' data-n='Panel' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'>"
+            f"<div class='body' style='top:{head_h}px'>{body}</div>"
+            + (f"<div class='schip' data-n='HeaderInfo' style='right:118px;top:20px'>{right}</div>" if right else '') + "</div>")
+    out += (f"<div class='sbn a-{acc}' data-n='Banner' style='left:{x - 18}px;top:{y - 50}px;width:{bw}px;height:132px'>"
+            f"<div class='shard' style='left:{bw - 56}px;top:10px;width:70px;height:46px'></div>"
+            f"<div class='shard' style='left:{bw - 30}px;top:62px;width:44px;height:30px'></div>"
+            f"<div class='o'></div><div class='f'></div>"
+            f"<img class='spk' src='{ipath('sparkle')}'>"
+            f"<div class='lbl'>{icn(icon, 96) if icon else ''}{T(title.upper(), title_size + 6, 'xl', name='Title')}</div></div>")
+    out += closex(x + w - 64, y - 38)
     return grp(gname, out, 'C')
 
 
@@ -253,11 +278,11 @@ def goal_pill():
 
 
 def hud_groups():
-    tl = hpill(250, 22, 236, 72, 'pink', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True)
-    tl += hpill(522, 22, 290, 72, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', size=32, badge=True)
+    tl = hpill(250, 22, 250, 72, 'pink', 'quests', 'QUESTS', 'QuestsButton', 'Quests', size=30, badge=True)
+    tl += hpill(534, 22, 290, 72, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', size=26, badge=True)
     tl += goal_pill()
     tr = hpill(1376, 22, 220, 72, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats')
-    tr += hpill(1632, 22, 262, 72, 'purple', 'settings', 'SETTINGS', 'SettingsButton', 'Settings', size=32)
+    tr += hpill(1632, 22, 262, 72, 'purple', 'settings', 'SETTINGS', 'SettingsButton', 'Settings', size=28)
     left = (hbtn(24, 252, 124, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop') +
             hbtn(24, 398, 124, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets') +
             hbtn(24, 544, 124, 'white', 'afk', 'AFK', 'AFKToggle', state='OFF') +
@@ -272,9 +297,9 @@ def s_hud():
 def s_hud_phone():
     """Landscape phone: canvas ~0.36x, so the rail and wallet grow; Roblox thumbstick/jump kept clear."""
     out = world() + topbar()
-    tl = hpill(250, 22, 262, 84, 'pink', 'quests', 'QUESTS', 'QuestsButton', 'Quests', size=36, badge=True)
-    tl += hpill(546, 22, 310, 84, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', size=36, badge=True)
-    tr = hpill(1470, 22, 196, 84, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats', size=36) + hbtn(1700, 14, 120, 'purple', 'settings', 'MENU', 'SettingsButton', 'Settings')
+    tl = hpill(250, 22, 262, 84, 'pink', 'quests', 'QUESTS', 'QuestsButton', 'Quests', size=32, badge=True)
+    tl += hpill(546, 22, 330, 84, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', size=30, badge=True)
+    tr = hpill(1446, 22, 226, 84, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats', size=32) + hbtn(1700, 14, 120, 'purple', 'settings', 'MENU', 'SettingsButton', 'Settings')
     left = (hbtn(24, 250, 150, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop') + hbtn(24, 430, 150, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets') +
             hbtn(1746, 330, 150, 'red', 'hunt', 'HUNT', 'VolunteerToggle', state='ON') + hbtn(1746, 510, 150, 'white', 'afk', 'AFK', 'AFKToggle', state='OFF'))
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', left, 'L') + lobby_status()
@@ -295,9 +320,9 @@ def s_hud_match():
     mb = btn(820, 12, 280, 50, 'lime', T('CROSSING 2', 26, 's', name='WaveText'), cls='sm', name='WaveChip')
     mb += at(960, 66, T('0:21', 104, 'xl', name='Timer'), w=500, align='center')
     mb += f"<div class='glass' style='left:600px;top:90px;width:222px;height:62px'></div>" + I('runner', 578, 76, 86) + at(682, 100, T('14', 40, 'l', 'f-sky', name='RunnersText'))
-    mb += at(740, 112, T('RUNNERS', 18, 'xs', 'f-dim'))
+    mb += at(732, 114, T('RUNNERS', 15, 'xs', 'f-dim'))
     mb += f"<div class='glass' style='left:1098px;top:90px;width:222px;height:62px'></div>" + I('catcher', 1240, 74, 90) + at(1120, 100, T('4', 40, 'l', 'f-red', name='CatchersText'))
-    mb += at(1160, 112, T('CATCHERS', 18, 'xs', 'f-dim'))
+    mb += at(1152, 114, T('CATCHERS', 15, 'xs', 'f-dim'))
     mb += at(960, 186, T('CLEAN STREAK', 20, 'xs', 'f-dim'), w=300, align='center')
     for i in range(3):
         mb += f"<div class='pip k-lime{' on' if i == 0 else ''}' data-n='Streak{i + 1}' style='left:{907 + i * 40}px;top:218px'></div>"
@@ -440,12 +465,12 @@ def s_pets():
     x0, y0, W, H = 250, 160, 1420, 800
     b = ''
     for i, (lab, active) in enumerate([('All  8', True), ('Double Dash', False), ('Decoy', False), ('Shield', False), ('More...', False)]):
-        b += btn(26 + i * 162, 22, 150, 54, 'blue' if active else 'grey', bl(lab, 20), cls='sm', name=f'Filter{i}')
+        b += btn(26 + i * 162, 22, 150, 54, 'purple' if active else 'grey', bl(lab, 20), cls='sm', name=f'Filter{i}')
     g = ''
     for i, (pid, pet, st, eq) in enumerate(OWNED):
         tier = tier_of(pid, pet)
         gx, gy = 18 + (i % 4) * 196, 18 + (i // 4) * 210
-        extra = at(14, 150, stars(st, 3, 24))
+        extra = at(34, 150, stars(st, 3, 24))
         if eq:
             extra += tag(66, 8, 'EQUIPPED', 'lime', 14, 28)
         g += slot(gx, gy, 182, tier, pet_img(pet, st), cls='sel' if i == 0 else '', name=f'Pet{i + 1}', art_pad=.05, inner_extra=extra)
@@ -496,7 +521,7 @@ def s_shop(tab='gold'):
     b += btn(574, 22, 300, 64, 'grey', row(icn('robux', 40), bl('Get Gems', 30)), name='TabGetGems', hid=True)
     items = SHOP if tab == 'gold' else [
         ('trail', 'Rainbow Trail', 'gems', '150', 'Keep forever', 'A rainbow trail on your egg.', 'ok'),
-        ('abilityfx', 'Gold Ability Colours', 'gems', '250', 'Keep forever', 'Same timing and size.', 'poor'),
+        ('abilityfx', 'Gold Ability FX', 'gems', '250', 'Keep forever', 'Same timing and size.', 'poor'),
         ('hatchfx', 'Royal Hatching', 'gems', '350', 'Keep forever', 'A bigger hatching ceremony.', 'poor'),
         ('crown', 'Showcase Slot', 'gems', '450', 'Keep forever', 'Show off one more pet in the lobby.', 'poor'),
         ('sparkle', 'Themed Override', 'gems', '700', 'Keep forever', 'A themed look for your ability.', 'poor'),
@@ -668,7 +693,7 @@ def s_states():
         out += slot(1180 + (j % 3) * 236, 80 + (j // 3) * 236, 210, r, ic, 'x1', TIER_NAME.get(r, r), cls=cls)
     out += cap(40, 430, 'Pet tiles: mastery colourways (showroom T1 / T2 / T3)')
     for t in (1, 2, 3):
-        out += slot(40 + (t - 1) * 230, 480, 210, 'common', pet_img('SurferDog', t), cls='fill', art_pad=.05, inner_extra=at(14, 170, stars(t)))
+        out += slot(40 + (t - 1) * 230, 480, 210, 'common', pet_img('SurferDog', t), cls='fill', art_pad=.05, inner_extra=at(34, 170, stars(t)))
     out += cap(760, 430, 'Bars + pips + tags')
     out += bar(760, 490, 400, 34, .66, 'pink') + bar(760, 540, 400, 34, 1, 'lime') + bar(760, 590, 400, 34, .2, 'purple')
     for i in range(4):
@@ -745,8 +770,8 @@ def page(title, body, h=1080):
     return (f"<!doctype html><html><head><meta charset='utf-8'><title>{title}</title>"
             f"<meta name='viewport' content='width=device-width,initial-scale=1'>{FONTS}"
             f"<link rel='stylesheet' href='kit.css'><link id='preset' rel='stylesheet' href='styles/{STYLE}.css'>"
-            + (f"<link rel='stylesheet' href='styles/{SKIN}.css'>" if SKIN else '') +"
-            "</head><body>"
+            + (f"<link rel='stylesheet' href='styles/{SKIN}.css'>" if SKIN else '')
+            + "</head><body>"
             f"<div id='wrap'><div id='stage' style='height:{h}px'>{body}</div></div>{JS}</body></html>")
 
 
@@ -799,12 +824,6 @@ if __name__ == '__main__':
     for p in ('tex', 'icons'):
         if not os.path.exists(os.path.join(HERE, p)):
             print('WARN missing', p, '- see the usage lines at the top of this file')
-    if SKIN:  # direction test pages only: <page>_<skin>.html
-        for fname, title, desc, fn, h in SCREENS:
-            if fname.split('.')[0] in os.environ.get('UI_PAGES', 'hud,incubator,pets,hud_match').split(','):
-                with open(os.path.join(HERE, fname.replace('.html', f'_{SKIN}.html')), 'w') as f:
-                    f.write(page(title, fn(), h))
-        raise SystemExit(f'wrote {SKIN} direction pages')
     for fname, title, desc, fn, h in SCREENS:
         with open(os.path.join(HERE, fname), 'w') as f:
             f.write(page(title, fn(), h))
