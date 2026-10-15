@@ -190,8 +190,6 @@ def panel_sport(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112,
             f"<div class='body' style='top:{head_h}px'>{body}</div>"
             + (f"<div class='schip' data-n='HeaderInfo' style='right:118px;top:20px'>{right}</div>" if right else '') + "</div>")
     out += (f"<div class='sbn a-{acc}' data-n='Banner' style='left:{x - 18}px;top:{y - 50}px;width:{bw}px;height:132px'>"
-            f"<div class='shard' style='left:{bw - 56}px;top:10px;width:70px;height:46px'></div>"
-            f"<div class='shard' style='left:{bw - 30}px;top:62px;width:44px;height:30px'></div>"
             f"<div class='o'></div><div class='f'></div>"
             f"<img class='spk' src='{ipath('sparkle')}'>"
             f"<div class='lbl'>{icn(icon, 96) if icon else ''}{T(title.upper(), title_size + 6, 'xl', name='Title')}</div></div>")

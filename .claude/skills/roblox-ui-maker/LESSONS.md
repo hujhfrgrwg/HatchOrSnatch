@@ -63,6 +63,8 @@ Format: **rule**, then why (what went wrong or what the developer said).
   Rounded bubble fonts (Fredoka), thick cartoon outlines, sunbursts behind everything, glossy candy halves and sparkles read
   childish even in the game's colours. Test 2 directions on 2 screens before building every page. - Round 2 "candy" (all
   screens) was "far too childish for our type of game" after round 1 neon was "not our theme".
+- **When remaking a reference, drop its decorative flourishes (shards, broken pieces, extra slashes) unless asked.** Keep the
+  shapes that carry structure. - Hunter on the banner's tail shards: "completely unnecessary... look out of place".
 - **Stud is the default, not universal.** When a game is declared "not stud" (scroll RPG, sleek shooter), no
   stud plates or textures anywhere, lobby included.
 - **"AI-looking UI" = flat beige rounded rectangles, one font, no depth, no motion.** Fix with a themed palette,

@@ -38,7 +38,7 @@ body, .ot { font-family: 'Fredoka', sans-serif; font-weight: 700; }
   -webkit-mask-image: linear-gradient(90deg, #000 0 10%, transparent 26%, transparent 62%, #000 92%); }
 .sbn > .f::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 9px; background: rgba(60,0,90,.35); }
 .sbn > .lbl { position: absolute; inset: 0 60px 0 0; display: flex; align-items: center; gap: 18px; padding-left: 26px; z-index: 2; }
-.sbn .shard { position: absolute; background: #b25cf0; border: 4px solid #050506; z-index: -1;
+/* banner tail shards removed (Hunter, 16 Oct: "completely unnecessary") */
   clip-path: polygon(18% 0, 100% 0, 82% 100%, 0 100%); }
 .sbn .spk { position: absolute; left: -46px; top: -48px; width: 110px; height: 110px; z-index: 3;
   filter: drop-shadow(0 0 10px rgba(255,255,255,.9)); }
