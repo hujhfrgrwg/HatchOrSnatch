@@ -3,7 +3,7 @@
 This folder is Hatch or Snatch, a Roblox game. It is separate from Faceoff (the duel shooter) and HOOKED! / Fishing with Pets (`C:\Hooked!`). Don't read or edit Faceoff or HOOKED files or Studio places from Hatch or Snatch sessions.
 
 - Start at `Hatch or Snatch Home.md`. It links the game plan, decisions and the notes for each area. Keep it current when you add notes.
-- The game's Roblox Studio place is edited through the Roblox Studio MCP (`.mcp.json`). The same MCP server serves every Studio window on Hunter's PC, so always call `get_connected_instances` first and pick the Hatch or Snatch place: **"Evolve or Steal Prototype"** (place id 92934789398619). The game is now called Evolve or Steal. Never edit the Faceoff place ("Face Off Workspace") or the HOOKED place.
+- The game's Roblox Studio place is edited through the Roblox Studio MCP (`.mcp.json`). The same MCP server serves every Studio window on Hunter's PC, so always call `get_connected_instances` first and pick the Hatch or Snatch place: **"Hatch or Snatch"** (place id 128015050187408; Hunter moved here on 15 Oct 2026; the older "Evolve or Steal Prototype" place, 92934789398619, is retired: don't edit it). The game is called Evolve or Steal. Never edit the Faceoff place ("Face Off Workspace") or the HOOKED place.
 - If the MCP is unreachable, Hunter starts it on his PC with `powershell -ExecutionPolicy Bypass -File tools\mcp\start_mcp_server.ps1` plus his ngrok tunnel. Never ask him to paste tokens or keys into chat.
 - Pre-edit backups go to `docs\backups\<TICKET>_<date>\` in this folder. Ticket ids start with `HOS-` (e.g. `HOS-EGG-001`).
 - Delivery reports and concept/reference images go in `docs\` in this folder.

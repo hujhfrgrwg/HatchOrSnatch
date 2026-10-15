@@ -1,0 +1,5 @@
+tex/
+shots/
+rbx/
+*.html
+node_modules
