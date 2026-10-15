@@ -1,85 +1,91 @@
-# ChatGPT icon prompt (Evolve or Steal UI)
+# ChatGPT icon prompt (round 3: sporty / competitive)
 
-Paste the **style block** once at the start of the chat, then ask for icons **one per image** (quality drops when several share an image). Save each as `<slug>.png` and drop them in `ui/icons_ai/`. Claude then runs them through `ui/tools/outline.py`, so they get the same ink edge and drop shadow as the pet photos, and swaps them in by slug.
+This is for the round-3 look, a blend of the purple "Summon / BattlePass / Leveling" sheet and the magenta "Inventory" panel (`docs/ui/refs_round3/`): dark panels, hot gradient buttons, bold clean type. The icons have to feel **sporty and competitive, not cute**. The round-2 candy set was "too childish".
 
-Pets and eggs are **not** on this list. They're photographed from the game's own models (`Workspace.FWP_PetShowroom`).
+**How to use it**
+1. Paste the **style block** once.
+2. Ask for icons **one per message**: `Icon: <slug>: <description>`.
+3. Save each one as `<slug>.png` in `ui/icons_ai/`.
+4. Claude trims each icon, fits it to the UI and swaps it in by slug.
 
-Note: the `roblox-ui-maker` skill has a "no AI-generated icons" rule by default. Using these means Hunter overrides that rule for this game.
+If an icon comes out cute (big eyes, faces, chubby shapes, pastel colours), reply: *"Less cute: sharper, more like a competitive shooter / Fortnite item icon."*
+
+Pets and eggs are **not** here. They're photographed from the game's own models (`Workspace.FWP_PetShowroom`).
 
 ---
 
 ## Style block (paste first)
 
 ```
-You are making game UI icons for a bright, cute Roblox game called "Evolve or Steal" (kids chase each other carrying eggs; eggs hatch into pets). Every icon must follow this exact style so they match as a set:
+You are making UI icons for a competitive Roblox game called "Evolve or Steal": players sprint across an arena carrying eggs while "Catchers" with knives try to tag them and steal the eggs. The UI is dark charcoal/purple panels with hot magenta, lime, cyan and orange gradient buttons. Icons must look SPORTY and COMPETITIVE, like premium Fortnite / Rivals / Blade Ball item icons. NOT cute, NOT kawaii, NOT a kids' sim.
 
-- Glossy cartoon "candy" style, like premium Roblox simulator UI icons: chunky rounded shapes, bold readable silhouette at small size (must read at 48 px).
-- Thick, even outer outline in very dark purple (#1b0a2b), about 6% of the icon width, same thickness on every icon.
-- Soft 3-tone shading: light top-left, saturated middle, deeper bottom-right. One or two crisp white glint highlights on the top-left. No gradients that go muddy.
-- Saturated, cheerful colours (candy pink, lime, sky blue, sunny gold, violet). No dull greys unless the object is metal.
-- Front or slight 3/4 view, centred, filling about 85% of the canvas, nothing cut off.
-- TRANSPARENT background (PNG with alpha). No background shape, no shadow on the ground, no glow halo, no frame.
-- NO text, letters or numbers anywhere in the image. No watermark, no signature.
+Rules for every icon, so they match as a set:
+- Bold, slightly angular shapes with crisp edges. Strong readable silhouette at 48 px.
+- Clean outer outline in near-black (#0c0a12), about 4% of the icon width, same on every icon.
+- Glossy semi-3D shading: one strong light from the top-left, a hard specular highlight, a darker rim at the bottom-right. Saturated colours, high contrast, no pastels, no muddy gradients.
+- Slight 3/4 dynamic angle where it suits the object (tilted, energetic), centred, filling about 85% of the canvas, nothing cut off.
+- No faces, no eyes, no smiles, no cartoon cheeks on objects.
+- TRANSPARENT background (PNG with alpha). No background shape, no circle badge behind it, no ground shadow, no glow halo.
+- NO text, letters or numbers anywhere. No watermark.
 - 1024 x 1024 square.
-Reply with one image per message. Wait for my next icon request.
+Reply with ONE image per message, then wait for my next icon.
 ```
 
-## Icons to request (one per message: "Icon: <slug> — <description>")
+## Icons to request
 
 **Currencies**
-- `gold`: a thick gold coin with a raised star in the middle
-- `gem`: a faceted emerald-green gem, classic diamond cut
-- `robux`: a green hexagon token with a square cut-out (Robux-style, generic)
+- `gold`: a thick gold coin seen at an angle, with an engraved star and a bevelled rim
+- `gem`: a sharp emerald-green faceted gem, tilted, with hard facet highlights
+- `robux`: a green hexagon token with a square hole (generic Robux style)
 
-**Egg pieces (crafting materials: cracked eggshell halves, top and bottom slightly apart)**
-- `piece_common`: white eggshell with small green square spots (Basic egg)
-- `piece_rare`: pale sky-blue eggshell with white square spots (Shiny egg)
-- `piece_epic`: deep violet eggshell with cyan square spots (Cosmic egg)
-- `piece_crowned`: shiny gold eggshell with white square spots (Golden egg)
+**Egg pieces (crafting materials: a jagged cracked eggshell shard, angular, not round-cute)**
+- `piece_common`: white shell shard with green square speckles
+- `piece_rare`: icy sky-blue shell shard with white square speckles
+- `piece_epic`: deep violet shell shard with cyan square speckles, faint inner glow
+- `piece_crowned`: polished gold shell shard with white speckles
 
 **Menu buttons**
-- `quests`: a rolled parchment scroll with a green checkmark badge in the corner
-- `incubator`: an egg under a glass dome on a gold base
-- `pets`: an orange paw print
-- `shop`: a pink shopping bag with a gold star on it
-- `stats`: three bars (blue, gold, green) on a white rounded card
-- `settings`: a silver cog wheel
-- `afk`: a yellow crescent moon with small "z" shapes, drawn as shapes, not letters
-- `hunt`: a red crosshair or target reticle
+- `quests`: a clipboard or bounty board with a bold checkmark
+- `incubator`: a sci-fi incubator capsule holding an egg, with metal ring and glowing glass
+- `pets`: a bold paw print, angular, with a slight metallic sheen
+- `shop`: a shopping bag with a lightning bolt emblem
+- `stats`: a podium or bar chart with a trophy star
+- `settings`: a chunky steel cog
+- `afk`: a pause symbol over a small moon
+- `hunt`: a red targeting reticle with a crosshair
 
 **Roles and match**
-- `runner`: a blue sneaker with speed lines
-- `catcher`: a cartoon toy knife or dagger with a gold guard (friendly, not gory)
-- `safe`: a green flag with a white checkmark
-- `steal`: a hand grabbing a white spotted egg
-- `trophy`: a gold trophy cup
-- `crown`: a gold crown with three coloured jewels
-- `star`: a gold five-point star
-- `lock`: a gold padlock
-- `check`: a green circle with a white checkmark
-- `clock`: a blue alarm clock or stopwatch face
-- `gift`: a pink gift box with a gold ribbon
-- `dice`: a white die with pink dots (random choice)
-- `target`: a red and white bullseye (focused choice)
+- `runner`: a speed sneaker with motion streaks
+- `catcher`: a sleek combat knife (cartoon-game style, clean, no blood)
+- `safe`: a checkpoint flag with a checkmark, waving
+- `steal`: a gloved hand snatching an egg
+- `trophy`: a gold trophy cup with angular handles
+- `crown`: a sharp gold crown with a red gem
+- `star`: a bevelled gold star
+- `lock`: a steel padlock
+- `check`: a bold green checkmark (no circle)
+- `clock`: a stopwatch
+- `gift`: a reward crate with glowing seams
+- `dice`: a tilted die (random choice)
+- `target`: a bullseye with an arrow in the centre (focused choice)
 - `sound`: a speaker with sound waves
-- `controls`: a dark game controller with coloured buttons
-- `refresh`: a purple circular arrow
-- `info`: a blue circle with a white "i" shape (draw it as a dot and bar, not a letter)
-- `plus`: a green plus sign
+- `controls`: a game controller
+- `refresh`: a circular arrow
+- `info`: an exclamation shield (do not use a letter)
 
-**Pet abilities (one per ability pool)**
-- `ab_dash`: double orange chevrons pointing right (Double Dash)
-- `ab_invis`: a cute pale-blue ghost, semi-transparent (Invisibility)
-- `ab_decoy`: two figures, one solid gold and one faded copy behind it (Decoy)
-- `ab_shield`: a teal bubble with a shield emblem inside (Shield)
-- `ab_wall`: a short wall of lavender bricks (Wall)
-- `ab_tackle`: a red boxing glove with impact lines (Pet Tackle)
+**Pet abilities (the six ability families)**
+- `ab_dash`: double forward chevrons with speed trails (Double Dash)
+- `ab_invis`: a fading silhouette of a runner made of particles (Invisibility)
+- `ab_decoy`: a runner silhouette and a hologram copy offset behind it (Decoy)
+- `ab_shield`: a hexagon energy shield bubble (Shield)
+- `ab_wall`: a slab of stone bricks rising from the ground (Wall)
+- `ab_tackle`: a charging impact burst with a fist (Pet Tackle)
 
 **Shop cosmetics**
-- `trail`: a comet star with a sparkly gold trail
-- `burst`: a party popper with confetti
-- `case`: a clear crystal shield around a white egg
-- `entrance`: a blue lightning bolt
-- `abilityfx`: a painter's palette with coloured paint dots
-- `hatchfx`: a cracked-open egg with gold sparkles
-- `emote`: a happy yellow smiley face
+- `trail`: a comet streak
+- `burst`: an exploding firework
+- `case`: a crystal armour shell around an egg
+- `entrance`: a lightning strike hitting the ground
+- `abilityfx`: a spray can with coloured paint splash
+- `hatchfx`: an egg cracking open with light beams
+- `emote`: a hand making a victory sign (simple glove)
