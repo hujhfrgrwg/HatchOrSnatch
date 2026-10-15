@@ -54,6 +54,11 @@ Format: **rule**, then why (what went wrong or what the developer said).
   Copy the reference's percentages, but keep this file's minimums (phone text >= 26, tap targets), and say
   where you scaled up. Big moments move where the reference puts them (headline line, world words), even if
   that removes screens you already built.
+- **Check a style reference against the game's own world and theme before building from it.** Capture the game
+  (lobby/arena), compare palette, mood and audience, and flag a clash before the first screen. A reference can be
+  well copied and still be wrong for the game. - A neon/esports reference (dark panels, hot accents) was copied
+  faithfully for a bright stud-style pet/egg game: "great job copying it, but this UI doesn't match our game or
+  its theme at all."
 - **Stud is the default, not universal.** When a game is declared "not stud" (scroll RPG, sleek shooter), no
   stud plates or textures anywhere, lobby included.
 - **"AI-looking UI" = flat beige rounded rectangles, one font, no depth, no motion.** Fix with a themed palette,

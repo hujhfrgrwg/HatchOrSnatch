@@ -4,7 +4,7 @@ updated: 2026-10-15
 ---
 # UI redesign (neon style)
 
-Hunter asked on 15 Oct 2026 for a premium UI that matches two reference images: a green "Season Pass" and a red "Settings" screen, both by a commissioned UI artist. The work follows `roblox-ui-maker`: HTML first, Hunter approves, then export to a real ScreenGui in Studio. **Status: round 1 shown and waiting for approval. Nothing has been changed in Studio.**
+Hunter asked on 15 Oct 2026 for a premium UI that matches two reference images: a green "Season Pass" and a red "Settings" screen, both by a commissioned UI artist. The work follows `roblox-ui-maker`: HTML first, Hunter approves, then export to a real ScreenGui in Studio. **Status: round 1 (neon) rejected on 15 Oct 2026: "great job copying it, but this UI doesn't match our game or its theme at all." The direction is open again; see `docs/ui/direction_board.jpg` (A bright stud recommended, B Huss Valley clean). Nothing has been changed in Studio.** The lesson is saved in the ui-maker LESSONS (check a reference against the game's world before building from it).
 
 ## Where things are
 | | |
