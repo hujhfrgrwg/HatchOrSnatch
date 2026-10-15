@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thumbnail Prompt Picker</title>
+<style>
+/* A static prompt picker: filter chips, then a grid of cards with copy buttons. No external assets. */
+:root{
+  --bg:#f1f2ee; --surface:#fcfcfa; --fg:#1b1e18; --muted:#5d6358; --line:#d6d9cf;
+  --accent:#2f5fd0; --accent-fg:#ffffff; --hi:#b07a00; --hi-bg:#fff3cf; --chip:#e4e7de;
+  --display:"Arial Black", "Helvetica Neue", system-ui, sans-serif;
+  --body:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121411; --surface:#1b1e19; --fg:#e8ebe3; --muted:#a2a99b; --line:#30352c;
+  --accent:#7aa2ff; --accent-fg:#0b1430; --hi:#f2c14e; --hi-bg:#3a3014; --chip:#262a22; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#121411; --surface:#1b1e19; --fg:#e8ebe3; --muted:#a2a99b; --line:#30352c;
+  --accent:#7aa2ff; --accent-fg:#0b1430; --hi:#f2c14e; --hi-bg:#3a3014; --chip:#262a22; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 var(--body)}
+.wrap{max-width:1180px; margin:0 auto; padding:28px 16px 64px}
+h1{font:900 clamp(26px,4vw,38px)/1.05 var(--display); margin:0 0 8px}
+header p{margin:0; color:var(--muted); max-width:64ch}
+.bar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:22px 0 18px}
+.chip{border:1px solid var(--line); background:var(--chip); color:var(--fg); font:600 13px var(--body); padding:7px 14px; border-radius:999px; cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+.chip:focus-visible,.btn:focus-visible,summary:focus-visible{outline:3px solid var(--hi); outline-offset:2px}
+.count{margin-left:auto; color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums}
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr)); gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:10px; min-width:0}
+.top{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.tag{font:700 11px var(--body); letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:6px; background:var(--hi-bg); color:var(--hi)}
+.id{font:700 12px var(--mono); color:var(--muted)}
+.card h2{font:800 19px/1.2 var(--body); margin:0}
+.sum{margin:0; color:var(--muted)}
+.overlay{font:900 13px var(--display); letter-spacing:.03em; align-self:flex-start; background:var(--fg); color:var(--surface); padding:4px 10px; border-radius:6px; overflow-wrap:anywhere}
+details{border-top:1px solid var(--line); padding-top:8px}
+summary{cursor:pointer; color:var(--muted); font-size:13px; font-weight:600}
+details p{margin:8px 0 0; font-size:13.5px; white-space:pre-wrap; overflow-wrap:anywhere}
+.actions{display:flex; gap:8px; margin-top:auto; flex-wrap:wrap}
+.btn{flex:1 1 140px; border:0; border-radius:10px; padding:11px 12px; font:700 14px var(--body); cursor:pointer; background:var(--accent); color:var(--accent-fg)}
+.btn.alt{background:var(--chip); color:var(--fg); border:1px solid var(--line)}
+.btn.done{background:var(--hi); color:#1a1405}
+.fallback{width:100%; min-height:120px; font:12px var(--mono); border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>/*TITLE*/</h1>
+    <p>"Copy full prompt" copies the thumbnail wrapper with this request already appended. Paste it into a one-shot generator. "Copy request" copies only the scene, for a chat where the wrapper is already loaded.</p>
+  </header>
+  <div class="bar" id="bar" role="group" aria-label="Filter prompts"></div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+/*DATA*/
+const grid = document.getElementById('grid'), bar = document.getElementById('bar');
+let filter = 'all';
+const esc = s => String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const groups = [...new Set(ITEMS.map(i => i.group).filter(Boolean))];
+bar.innerHTML = ['all', ...groups].map(g =>
+  `<button class="chip" data-f="${esc(g)}" aria-pressed="${g === 'all'}">${g === 'all' ? 'All' : esc(g)}</button>`
+).join('') + '<span class="count" id="count"></span>';
+
+function render() {
+  const list = ITEMS.filter(i => filter === 'all' || i.group === filter);
+  document.getElementById('count').textContent = list.length + ' prompts';
+  grid.innerHTML = list.map(i => `
+    <article class="card">
+      <div class="top"><span class="id">#${esc(i.id)}</span>${i.group ? `<span class="tag">${esc(i.group)}</span>` : ''}</div>
+      <h2>${esc(i.title)}</h2>
+      ${i.summary ? `<p class="sum">${esc(i.summary)}</p>` : ''}
+      ${i.text ? `<span class="overlay">${esc(i.text)}</span>` : ''}
+      <details><summary>Show request</summary><p>${esc(i.req)}</p></details>
+      <div class="actions">
+        <button class="btn" data-copy="full" data-id="${esc(i.id)}">Copy full prompt</button>
+        <button class="btn alt" data-copy="req" data-id="${esc(i.id)}">Copy request</button>
+      </div>
+    </article>`).join('');
+}
+
+bar.addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  filter = b.dataset.f;
+  bar.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === b));
+  render();
+});
+
+grid.addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  const it = ITEMS.find(i => i.id === b.dataset.id);
+  const text = b.dataset.copy === 'full' ? WRAPPER + '\n' + it.req : it.req;
+  const label = b.textContent;
+  const ok = () => { b.textContent = 'Copied'; b.classList.add('done'); setTimeout(() => { b.textContent = label; b.classList.remove('done'); }, 1400); };
+  // Fallback for file:// pages, iframes and browsers without clipboard permission:
+  // show a selected textarea so the user can press Ctrl/Cmd+C.
+  const fail = () => {
+    let ta = b.closest('.card').querySelector('.fallback');
+    if (!ta) { ta = document.createElement('textarea'); ta.className = 'fallback'; ta.readOnly = true; b.closest('.actions').after(ta); }
+    ta.value = text; ta.focus(); ta.select();
+    try { if (document.execCommand('copy')) return ok(); } catch (_) {}
+    b.textContent = 'Selected: press Ctrl/Cmd+C'; setTimeout(() => b.textContent = label, 2500);
+  };
+  try { navigator.clipboard.writeText(text).then(ok, fail); } catch (_) { fail(); }
+});
+render();
+</script>
+</body>
+</html>

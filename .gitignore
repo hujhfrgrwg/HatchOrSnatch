@@ -1,0 +1,5 @@
+Exports/
+Assets/PlaceExport/
+*.mp4
+*.zip
+__pycache__/
