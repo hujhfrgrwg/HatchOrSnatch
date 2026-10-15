@@ -1,0 +1,140 @@
+/* PRESET: candy (Evolve or Steal, round 2). Hunter picked the "Quests" candy reference (16 Oct 2026) and asked
+   for it adapted to the game: rounded friendly type (Fredoka; Roblox FredokaOne), glossy candy buttons, a
+   bright header band with halftone + light sweep + sparkle, rarity-coloured reward slots, dark wells.
+   Adapted to the bright stud lobby: lighter, warmer panel bodies, one accent per screen taken from the lobby
+   palette, a faint stud texture in header bands (same plastic as the world). Inspired by, not copied.
+   Load order: kit.css -> styles/candy.css. Textures: tex/ (ui-resources.com, tools/textures.json). */
+:root {
+  --ink: #1b0a2b;
+  --font: 'Fredoka', sans-serif; --font2: 'Fredoka', sans-serif;
+  --text-ol: #24083a; --stroke-k: .78; --drop-k: .85;
+  --text-fill: linear-gradient(#ffffff 58%, #f1e6ff);
+  --stud-op: 0;
+}
+body { font-family: var(--font); font-weight: 700; }
+.ot { letter-spacing: .2px; }
+.lite { -webkit-text-stroke: 0 !important; text-shadow: 0 2px 0 rgba(20,0,40,.35) !important; color: #fff; }
+.lite::after { display: none; }
+
+/* ---------- accents (one per screen): h* header band, fr frame, b* body, wl well rim, gl glow ---------- */
+.a-pink   { --h1:#ffd2f4; --h2:#ff5fd2; --h3:#c42ad6; --fr:#ff7ae0; --b1:#5a2a8e; --b2:#341462; --wl:#c98bff; --gl:rgba(255,90,220,.55); --tx:#ffd6f6; }
+.a-lime   { --h1:#f4ffc2; --h2:#a6f03a; --h3:#3fb52a; --fr:#b6f55a; --b1:#2f6a52; --b2:#163b3a; --wl:#9fe680; --gl:rgba(150,255,80,.5);  --tx:#dcffc0; }
+.a-sky    { --h1:#d8f6ff; --h2:#4cc9ff; --h3:#2b7ee8; --fr:#6fd6ff; --b1:#2f4f9a; --b2:#1a2a62; --wl:#8fd4ff; --gl:rgba(80,200,255,.5);  --tx:#d6f2ff; }
+.a-gold   { --h1:#fff4c4; --h2:#ffc83a; --h3:#ff8a1a; --fr:#ffd25a; --b1:#6a3a7a; --b2:#3e1a52; --wl:#ffd27a; --gl:rgba(255,200,60,.5);  --tx:#fff0c8; }
+.a-violet { --h1:#e8dcff; --h2:#9b7bff; --h3:#5b3ad8; --fr:#a98cff; --b1:#3e2a8a; --b2:#22145a; --wl:#b8a2ff; --gl:rgba(150,120,255,.5); --tx:#e6dcff; }
+.a-coral  { --h1:#ffe0d4; --h2:#ff7a6a; --h3:#e0304a; --fr:#ff8f7a; --b1:#6a2a5a; --b2:#3e1238; --wl:#ff9fa8; --gl:rgba(255,110,110,.5); --tx:#ffe0dc; }
+
+/* ---------- panel: ink outline + bright frame + header band + body ---------- */
+.cglow { position: absolute; border-radius: 34px; background: var(--gl); filter: blur(30px); opacity: .9; }
+.cp { position: absolute; border-radius: 22px; border: 6px solid var(--fr); overflow: hidden;
+  box-shadow: 0 0 0 5px var(--ink), 0 12px 0 5px rgba(20,0,40,.32);
+  background: linear-gradient(180deg, var(--b1), var(--b2)); }
+.cp > .body { position: absolute; left: 0; right: 0; bottom: 0; }
+.ch { position: absolute; left: 0; top: 0; right: 0; overflow: hidden; border-bottom: 5px solid var(--ink);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.55) 0, rgba(255,255,255,.12) 48%, rgba(255,255,255,0) 49%),
+    linear-gradient(100deg, var(--h1) 0%, var(--h2) 38%, var(--h3) 100%); }
+.ch::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 62%; background: #fff; opacity: .4;
+  -webkit-mask: url(../tex/halftone_fade.png) 0 0 / 100% 100%; transform: scaleX(-1); mix-blend-mode: soft-light; }
+.ch::after { content: ''; position: absolute; inset: 0; background: url(../tex/stud.png) 0 0 / 66px 66px; mix-blend-mode: overlay; opacity: .32; }
+.ch > .sweep { position: absolute; left: 16%; top: -40%; width: 120px; height: 200%; transform: rotate(28deg);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.75), rgba(255,255,255,0)); z-index: 1; }
+.ch > .lbl { position: absolute; inset: 0; display: flex; align-items: center; gap: 16px; padding: 0 34px; z-index: 3; }
+.ch .spk { position: absolute; z-index: 2; width: 120px; height: 120px; pointer-events: none; }
+
+/* close: glossy red-pink rounded square, text X */
+.cx { position: absolute; width: 84px; height: 84px; border-radius: 18px; border: 5px solid var(--ink); z-index: 6;
+  background: linear-gradient(180deg, rgba(255,255,255,.5) 0, rgba(255,255,255,.15) 46%, rgba(255,255,255,0) 47%), linear-gradient(#ff8aa6, #ff2a5c 55%, #c80a3e);
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.2), 0 6px 0 rgba(20,0,40,.4); display: flex; align-items: center; justify-content: center; }
+
+/* ---------- well (inner box) ---------- */
+.cw { position: absolute; border-radius: 16px; border: 3px solid var(--wl); background: rgba(14,2,32,.42);
+  box-shadow: inset 0 4px 0 rgba(0,0,0,.18); }
+.cw.solid { background: rgba(14,2,32,.62); }
+
+/* ---------- glossy candy button ---------- */
+.cb { position: absolute; border-radius: 14px; border: 4px solid var(--ink);
+  background: linear-gradient(180deg, rgba(255,255,255,.55) 0, rgba(255,255,255,.16) 45%, rgba(255,255,255,0) 46%), linear-gradient(var(--c1), var(--c2) 55%, var(--c3));
+  box-shadow: inset 0 -7px 0 rgba(0,0,0,.18), 0 6px 0 rgba(20,0,40,.42); }
+.cb > .lbl { position: absolute; left: 0; right: 0; top: 0; bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 1; }
+.cb.sm { border-radius: 11px; border-width: 3px; box-shadow: inset 0 -5px 0 rgba(0,0,0,.18), 0 4px 0 rgba(20,0,40,.42); }
+.cb.sm > .lbl { bottom: 4px; }
+.k-lime   { --c1:#f2ff8a; --c2:#9cec2e; --c3:#47b81a; }
+.k-pink   { --c1:#ffb2ea; --c2:#ff45bc; --c3:#d0148e; }
+.k-purple { --c1:#e6b2ff; --c2:#ae55ff; --c3:#7424d8; }
+.k-grey   { --c1:#d4d5de; --c2:#9798a6; --c3:#696a7a; }
+.k-blue   { --c1:#b2ecff; --c2:#38b0ff; --c3:#1a68dc; }
+.k-gold   { --c1:#fff4a8; --c2:#ffc826; --c3:#e88200; }
+.k-red    { --c1:#ffaab2; --c2:#ff4058; --c3:#c40c2c; }
+.k-orange { --c1:#ffd2a0; --c2:#ff8c2e; --c3:#e05200; }
+.k-teal   { --c1:#b8fff2; --c2:#2fe0c4; --c3:#119a8a; }
+.k-sky    { --c1:#d8f6ff; --c2:#6fd6ff; --c3:#2b9ee8; }
+.k-white  { --c1:#ffffff; --c2:#eef0f7; --c3:#c9ccdb; }
+.cb.off { filter: saturate(.08) brightness(.82); }
+
+/* ---------- rarity slot / item tile: dark well + rarity rim + sunburst ---------- */
+.cs { position: absolute; border-radius: 14px; border: 4px solid var(--r2); overflow: hidden;
+  box-shadow: 0 0 0 3px var(--ink), inset 0 0 22px color-mix(in srgb, var(--r2) 40%, transparent);
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--r2) 55%, transparent) 0, transparent 62%), linear-gradient(160deg, color-mix(in srgb, var(--r3) 70%, #1a0830), #12052a); }
+.cs::before { content: ''; position: absolute; left: 50%; top: 45%; width: 170%; height: 170%; transform: translate(-50%, -50%);
+  background: var(--r1); -webkit-mask: url(../tex/sunburst_d.png) center / contain no-repeat; opacity: .22; }
+.cs.fill { background: radial-gradient(circle at 50% 40%, var(--r1) 0, var(--r2) 45%, var(--r3) 100%); }
+.cs.fill::before { background: #fff; opacity: .3; }
+.cs > .art { position: absolute; inset: 0; }
+.cs.locked { --r1:#7c7f92; --r2:#4b4e60; --r3:#2a2c3a; }
+.cs.locked > .art { filter: brightness(0) opacity(.55); }
+.cs.sel { box-shadow: 0 0 0 3px var(--ink), 0 0 0 9px #fff, 0 0 30px 8px rgba(255,255,255,.6); }
+.r-common  { --r1:#f4fff0; --r2:#8fe07a; --r3:#3f8f3a; }    /* Basic egg green */
+.r-rare    { --r1:#e6fbff; --r2:#4fc8ff; --r3:#1e6fd0; }    /* Shiny egg sky */
+.r-epic    { --r1:#f0e2ff; --r2:#a66bff; --r3:#4e22b8; }    /* Cosmic egg violet */
+.r-crowned { --r1:#fff6c8; --r2:#ffc83a; --r3:#d07800; }    /* Golden egg, deferred tier */
+.r-pink    { --r1:#ffe2f6; --r2:#ff5fd2; --r3:#a0189a; }
+.r-orange  { --r1:#ffe8cc; --r2:#ff9a3a; --r3:#c04a00; }
+.r-red     { --r1:#ffe0e0; --r2:#ff5a5a; --r3:#b0102a; }
+.r-teal    { --r1:#e0fff8; --r2:#38e6c8; --r3:#0e8a7a; }
+.r-violet  { --r1:#ece4ff; --r2:#a58cff; --r3:#5a3ad0; }
+.r-gold    { --r1:#fff6c8; --r2:#ffc83a; --r3:#d07800; }
+.r-sky     { --r1:#e6fbff; --r2:#4fc8ff; --r3:#1e6fd0; }
+
+/* small ribbon tag ("Daily Quest") */
+.ctag { position: absolute; border-radius: 6px; border: 3px solid var(--ink); padding: 0 12px; display: flex; align-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,.4) 0, rgba(255,255,255,0) 50%), linear-gradient(var(--c1), var(--c2) 60%, var(--c3)); }
+
+/* ---------- bars ---------- */
+.cbar { position: absolute; border-radius: 14px; border: 4px solid var(--ink); background: linear-gradient(#1c0b33, #2c1650); overflow: hidden; }
+.cbar > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,.55) 0, rgba(255,255,255,.1) 45%, rgba(255,255,255,0) 46%), linear-gradient(var(--c1), var(--c2) 60%, var(--c3)); }
+
+/* ---------- HUD: candy pill, square button, wallet ---------- */
+.hp { position: absolute; border-radius: 20px; border: 4px solid var(--ink);
+  background: linear-gradient(180deg, rgba(255,255,255,.5) 0, rgba(255,255,255,.12) 46%, rgba(255,255,255,0) 47%), linear-gradient(var(--c1), var(--c2) 55%, var(--c3));
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.16), 0 6px 0 rgba(20,0,40,.4); }
+.hp > .lbl { position: absolute; inset: 0 0 4px 0; display: flex; align-items: center; gap: 10px; padding: 0 18px 0 92px; }
+.hb { position: absolute; border-radius: 26px; border: 4px solid var(--ink); overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,.5) 0, rgba(255,255,255,.12) 46%, rgba(255,255,255,0) 47%), linear-gradient(var(--c1), var(--c2) 55%, var(--c3));
+  box-shadow: inset 0 -7px 0 rgba(0,0,0,.18), 0 7px 0 rgba(20,0,40,.4); }
+.hb::after { content: ''; position: absolute; inset: 0; background: url(../tex/stud.png) 0 0 / 60px 60px; mix-blend-mode: overlay; opacity: .3; }
+.glass { position: absolute; border-radius: 20px; border: 4px solid var(--ink); background: linear-gradient(rgba(70,30,120,.86), rgba(42,14,82,.9));
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.16), 0 6px 0 rgba(20,0,40,.35); }
+.keycap { position: absolute; width: 56px; height: 56px; border: 4px solid var(--ink); border-radius: 12px;
+  background: linear-gradient(#ffffff, #e2e4ee 60%, #b6b9cc); box-shadow: 0 4px 0 var(--ink); display: flex; align-items: center; justify-content: center; }
+.pip { position: absolute; width: 30px; height: 30px; border-radius: 50%; border: 4px solid var(--ink); background: #2c1650; }
+.pip.on { background: radial-gradient(circle at 35% 30%, #fff 0 18%, var(--c2) 40%, var(--c3)); box-shadow: 0 0 12px var(--c2); }
+.vign { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 52%, rgba(20,0,40,.4)); pointer-events: none; }
+.badge { position: absolute; width: 44px; height: 44px; border-radius: 50%; border: 4px solid var(--ink);
+  background: radial-gradient(circle at 35% 30%, #fff 0 12%, #ff4a6e 40%, #c80a3e); display: flex; align-items: center; justify-content: center; z-index: 4; }
+.star { position: absolute; }
+.f-lime { --fg: linear-gradient(#ffffff 15%, #d8ff7a 55%, #8ee82a); }
+.f-pink { --fg: linear-gradient(#ffffff 15%, #ffc2ee 55%, #ff6fd0); }
+.f-sky  { --fg: linear-gradient(#ffffff 15%, #c8f0ff 55%, #5cc8ff); }
+.f-gold { --fg: linear-gradient(#ffffff 10%, #fff09a 50%, #ffc21c); }
+.f-violet { --fg: linear-gradient(#ffffff 15%, #e0d2ff 55%, #a58cff); }
+.f-common { --fg: linear-gradient(#ffffff 15%, #d4ffc8 55%, #8fe07a); }
+.f-rare { --fg: linear-gradient(#ffffff 15%, #c8f0ff 55%, #4fc8ff); }
+.f-epic { --fg: linear-gradient(#ffffff 15%, #e4d4ff 55%, #b48aff); }
+.f-red { --fg: linear-gradient(#ffffff 15%, #ffc8cc 55%, #ff5a6a); }
+.f-orange { --fg: linear-gradient(#ffffff 15%, #ffe0b8 55%, #ffa04a); }
+.f-teal { --fg: linear-gradient(#ffffff 15%, #c8fff4 55%, #38e6c8); }
+.f-dim { --fg: linear-gradient(#e6dcf4, #b8a8d0); }
+.r-lime    { --r1:#f4ffd8; --r2:#9cec2e; --r3:#3f9a1a; }
+.keycap .ot { font-family: 'Arial Black', Arial, sans-serif; font-weight: 900; }

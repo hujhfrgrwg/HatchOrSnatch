@@ -3,3 +3,4 @@ Assets/PlaceExport/
 *.mp4
 *.zip
 __pycache__/
+node_modules

@@ -3,3 +3,5 @@ shots/
 rbx/
 *.html
 node_modules
+icons_raw/
+icons_svg/

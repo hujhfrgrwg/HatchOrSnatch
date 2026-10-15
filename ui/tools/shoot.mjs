@@ -3,7 +3,7 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 const port = process.env.PORT || 8870;
-const pages = process.argv.slice(2).length ? process.argv.slice(2) : ['style','hud','hud_match','incubator','settings','compare'];
+const pages = process.argv.slice(2).length ? process.argv.slice(2) : fs.readdirSync('.').filter(f => f.endsWith('.html') && f !== 'index.html').map(f => f.slice(0, -5));
 fs.mkdirSync('shots', { recursive: true });
 const b = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 for (const p of pages) {

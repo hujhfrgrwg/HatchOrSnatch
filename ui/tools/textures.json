@@ -46,5 +46,33 @@
  "speedlines": {
   "url": "https://uiassets.commissiontoolz.xyz/images/effects/other/sparkes/kek/kek_speedlines_1.png",
   "card": "Speedline effect | Effects | Speedlines | Speedline by Kek"
+ },
+ "stud": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/textures/stud.png",
+  "card": "Stud texture | Textures | Stud (ui-resources.com)"
+ },
+ "sunburst_a": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/osky/OskySunburst.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "sunburst_b": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/quelly/quelly6.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "sunburst_c": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/sinister/sunburst1.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "sunburst_d": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/stuxfian/Stuxburst01.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "shine": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/stars/shine2.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "shine_b": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/stars/shine3.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
  }
 }

@@ -1,43 +1,50 @@
 ---
 tags: [design, ui]
-updated: 2026-10-15
+updated: 2026-10-16
 ---
-# UI redesign (neon style)
+# UI redesign
 
-Hunter asked on 15 Oct 2026 for a premium UI that matches two reference images: a green "Season Pass" and a red "Settings" screen, both by a commissioned UI artist. The work follows `roblox-ui-maker`: HTML first, Hunter approves, then export to a real ScreenGui in Studio. **Status: round 1 (neon) rejected on 15 Oct 2026: "great job copying it, but this UI doesn't match our game or its theme at all." The direction is open again; see `docs/ui/direction_board.jpg` (A bright stud recommended, B Huss Valley clean). Nothing has been changed in Studio.** The lesson is saved in the ui-maker LESSONS (check a reference against the game's world before building from it).
+Following `roblox-ui-maker`: the UI is designed in HTML first, Hunter approves it, and only then is it exported to a real ScreenGui in Studio. **Status: round 2 ("candy") is built and waiting for Hunter's review. Nothing has changed in Studio** (a temporary photo-booth GUI was used to shoot the pets, then removed).
 
-## Where things are
-| | |
+## History
+- **Round 1 (neon), 15 Oct: rejected.** Hunter: "great job copying it, but this UI doesn't match our game or its theme at all." The lesson went into the ui-maker LESSONS: check a reference against the game's own world before building from it. The source is kept as `ui/build_neon_round1.py`, with shots in `docs/ui/round1/`.
+- **Direction board, 15 Oct:** `docs/ui/direction_board.jpg`.
+- **Round 2 (candy), 16 Oct:** Hunter picked the pink/purple "Quests" reference (`ui/ref_candy.png`) and asked for everything, premium, with nice icons. Hunter's correction: use the real pets and eggs from `Workspace.FWP_PetShowroom`, not `PetModel`/`EggModel`.
+
+## Round 2: what's in it
+Overview: `docs/ui/round2/_overview.jpg`. Every page is in `docs/ui/round2/`.
+
+| Page | What it covers |
 |---|---|
-| Source | `ui/build.py` (all pages), `ui/styles/neon.css` (the style), `ui/kit.css` (skill base) |
-| Textures | ui-resources.com, fetched with `ui/tools/fetch_textures.py`. Sources and credits are in `ui/tools/textures.json`. The files themselves aren't committed |
-| Icons | **Placeholders** I drew in SVG (`ui/tools/icons_svg.py` → `icons/`). Keep the slugs when a licensed pack replaces them |
-| References | `ui/ref.png` (Season Pass), `ui/ref2.png` (Settings) |
-| Backgrounds | `ui/bg_lobby*.jpg`, cropped from a Studio capture of the Hatch or Snatch lobby |
-| Round 1 shots | `docs/ui/round1/` |
+| `style` | The reference vs our lobby, header accents, icons, eggs, buttons |
+| `hud` | Lobby: Quests and Incubator (with badges), first-pet goal pill, timer, Stats and Settings, rail (Shop, Pets, AFK, Hunt), Gems and Gold, equipped pet ability card |
+| `hud_match` | Match: role, crossing chip and timer, Runner and Catcher counts, clean-streak pips, egg level 1–4 and the piece it pays, ability cooldown, Dash, steal feed. Economy hidden (GDD 14) |
+| `hud_phone` | Bigger targets, thumbs kept clear |
+| `quests` | 2 daily quests with lobby art, progress, reward slots, Claim and Claim All, reset timer (QuestConfig) |
+| `incubator` | Pieces, first-pet path (Start → Match 1 → Match 2 → Hatch), 6 families, species ladder (Common/Rare/Epic, Crowned locked), recipes 2/3, 3/4, 5/6, free first choice |
+| `incubator_later` | After the first pet: collection progress per family, Random ×2 vs Choose ×3 |
+| `pets` | Collection grid (rarity frames, ★ mastery = showroom T1/T2/T3), preview, equip, favourite |
+| `shop`, `shop_gems` | Gold items (EconomyConfig + the GDD's 500-Gold emote) and Gem items (incl. GDD showcase / override / prestige), owned, unaffordable and selected states |
+| `shop_robux` | Robux Gem packs at GDD prices. **Not live**: stays hidden until you approve developer products |
+| `stats`, `settings` | Your record; real settings with ON/OFF and tabs |
+| `results` | Winner banner, podium with pets, top thief, Gold breakdown (GDD formula), Gems, piece, recipe progress |
+| `hatch` | The new-pet reveal |
+| `templates` | Match banners (Runner/Catcher/Safe/Caught/Stolen), toasts, confirm dialog |
+| `states` | Every button colour and state, rarity slots, mastery tiles, bars, tags, empty states |
 
-To run it: `cd ui && python3 tools/fetch_textures.py && python3 tools/icons_svg.py && node tools/render_icons.mjs && python3 build.py && python3 -m http.server 8870`, then open `/index.html`. `node tools/shoot.mjs` renders `shots/*.png`.
+## Data assumptions to confirm
+- **Families** are the 6 ability pools in `FWPPetData.Pools` (Double Dash, Invisibility, Decoy, Shield, Wall, Pet Tackle). The live code still has Decoy/Scout/Brake. Which set is current?
+- **Rarity per pet:** 1st pet in a pool = Common hatch, 2nd = Rare, 3rd = Epic, the rest = Crowned (deferred). **T2/T3** showroom variants are shown as ★★/★★★ mastery colourways.
+- **Egg per level:** L1 Basic, L2 Shiny, L3 Cosmic, L4 Golden (survivor). Piece icons are drawn to match those eggs.
+- Cooldowns and some text on the Pets page are placeholders (no config exists yet for the new abilities).
 
-## The style (inspired by, not a copy)
-- **Banner titles:** an angled ribbon with a notched tail. The face is a bright gradient with halftone dots and light streaks, and a sparkle sits at the tip. The text is heavy italic Montserrat with a black outline.
-- **Panels:** a dark body tinted with the screen's accent. It has a neon accent edge with a black outline, an outer glow, a grid texture, halftone dots in the corners, and an angled dark slab behind it with an accent edge.
-- **Buttons:** chamfered corners, a gradient face with a top shine and a scratched sheen, and a darker lip. Green means go, red/pink means close, silver means off or inactive.
-- **Tiles:** diagonal stripes and halftone, colour-coded by rarity (Common cream, Rare blue, Epic purple) or by family (Decoy gold, Scout cyan, Brake lime). Selected tiles get a white glow, and locked or empty ones go grey.
-- **One accent per screen:** Incubator lime, Settings red, Shop gold, Pets cyan, Quests purple, Stats gold.
-- **Close button:** a pink parallelogram with a text "X".
+## How it's made
+- Style: `ui/styles/candy.css`, with Fredoka (Roblox **FredokaOne**). One accent per screen: Quests pink, Incubator lime, Pets sky, Shop gold, Settings/Stats violet. A faint stud texture in header bands ties the UI to the world.
+- Pets and eggs: `ui/tools/photo_booth.luau` (temporary ViewportFrames on magenta in Studio) → `capture_screenshot` → `ui/tools/key_booth.py` (key out the magenta) → `ui/tools/outline.py` (shared ink edge and shadow). That gives 114 images: 29 pets × 3 colourways, 2 huge pets, 7 eggs.
+- Icons: 47 drawn for this game in `ui/tools/icons_svg.py` → `render_icons.mjs` → `outline.py`. To use ChatGPT-made icons instead, see `docs/ui/chatgpt_icon_prompt.md` (same slugs).
+- Textures: ui-resources.com (halftone, grid, scratch, stud, sunbursts, shines). Credits are in `ui/tools/textures.json`; the files are fetched by `tools/fetch_textures.py` and not committed.
+- Rebuild: `cd ui && python3 tools/fetch_textures.py && python3 tools/icons_svg.py && node tools/render_icons.mjs && python3 tools/outline.py && python3 build.py`, then serve and open `index.html`. `node tools/shoot.mjs` renders `shots/`.
 
-## Round 1 pages
-1. `style.html`: both references, then the kit in every accent and state.
-2. `hud.html`: the lobby HUD. Quests and Incubator pills, a first-pet goal pill, a compact LOBBY timer, Stats and Settings, a left rail (Shop, Pets, AFK, Hunt with ON/OFF chips), Gems and Gold, and the equipped-ability card.
-3. `hud_match.html`: the match HUD. Following GDD 14, the economy and menus hide. It shows the role tag, the crossing chip with the big timer, Runner and Catcher counts, clean-streak pips (the code's current match-end rule), the egg level with 4 pips and the tier it pays, the ability cooldown, a Dash chip and a steal feed.
-4. `incubator.html`: piece counts, a first-pet track in the Season Pass style, tier tabs showing counts against the recipe, three family cards (Decoy/Scout/Brake with their Common species and cooldowns), and a hatch box with the free first-pet choice. The random/choose costs come from EconomyConfig.
-5. `settings.html`: the real settings only (Reduce Effects, Show Hints, Volunteer To Hunt) with Game/Audio/Controls tabs.
-
-## Open questions for Hunter
-- Does round 1 match the look you want? It needs approval before more screens are built.
-- **Icon pack:** the placeholders work, but a licensed pack (RoClicks suggests Vector Icon Pack Pro) or an artist would lift the item art.
-- **Exporting to Roblox:** the big panel bodies become images, and Roblox caps images at 1024 px. Before import they need splitting into 9-slice pieces (a fixed corner and edge art with a native glow), or the panels stay fixed-size.
-- **Fonts:** Montserrat Italic needs a check in Studio (`FontFace` with `Enum.FontStyle.Italic`).
-
-## Next rounds
-Shop (Gold and Gem tabs, every item state), Pets (collection and equip), Quests, Stats, Results (podium, thief, your breakdown per GDD 14), toasts and the confirm dialog, the phone HUD, and a states sheet.
+## Before import (after approval)
+- Roblox caps images at 1024 px, so big panels need 9-slice header art plus native frames for the body.
+- Check FredokaOne in Studio, then run the exporter (`export.mjs` → `gen.py` → uploads → `bundle.py` → `import_rbxm`) and rewire `UIController` to the new templates, one screen at a time.
