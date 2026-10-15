@@ -522,7 +522,7 @@ def s_quests():
     d += btn(344, 382, 270, 76, 'purple', bl('TRACK', 30), name='Track')
     b += well(650, 112, 642, 520, d, name='Detail')
     right = row(icn('clock', 52), T('Resets in 06:42:10', 34, 's', name='ResetText'), gap=8)
-    return world('bg_lobby_blur.jpg', False) + dim() + panel('Quests', 'pink', 'Quests', 'quests', b, x0, y0, W, H, right)
+    return world('bg_lobby_blur.jpg', False) + dim() + panel('Quests', 'purple', 'Quests', 'quests', b, x0, y0, W, H, right)
 
 
 # ================================================================== Incubator (GDD 03, 09, 14)
@@ -712,7 +712,7 @@ def s_stats():
         inner = I(ic, 14, 22, 120) + at(146, 34, T(lab, 22, 'xs', 'f-dim')) + at(146, 66, T(val, 52, 'l', FILL.get(c, ''), name='Value'))
         b += box(x, y, 386, 176, inner, f'cs r-{c}', 'border-radius:16px', name=f'Stat{i + 1}')
     right = row(icn('crown', 48), T('Your record', 32, 's'), gap=6)
-    return world('bg_lobby_blur.jpg', False) + dim() + panel('Stats', 'violet', 'Stats', 'stats', b, x0, y0, W, H, right)
+    return world('bg_lobby_blur.jpg', False) + dim() + panel('Stats', 'coral', 'Stats', 'stats', b, x0, y0, W, H, right)
 
 
 # ================================================================== Settings (real settings only)
@@ -733,7 +733,7 @@ def s_settings():
     b += btn(26, 568, 360, 64, 'purple', bl('GAME', 28), name='TabGame')
     b += btn(414, 568, 360, 64, 'grey', bl('AUDIO', 28), name='TabAudio')
     b += btn(802, 568, 360, 64, 'grey', row(icn('controls', 36), bl('CONTROLS', 28)), name='TabControls')
-    return world('bg_lobby_blur.jpg', False) + dim() + panel('Settings', 'violet', 'Settings', 'settings', b, x0, y0, W, H)
+    return world('bg_lobby_blur.jpg', False) + dim() + panel('Settings', 'steel', 'Settings', 'settings', b, x0, y0, W, H)
 
 
 # ================================================================== Results (GDD 14 end-of-match breakdown)
@@ -807,11 +807,11 @@ def s_templates():
     out += toast(1000, 190, 'lime', 'check', 'Sparkle Trail bought!', 'Toast_good')
     out += toast(1000, 300, 'red', 'gold', 'Need 150 more Gold', 'Toast_error')
     out += toast(1000, 410, 'gold', 'piece_rare', '+1 Rare piece', 'Toast_reward')
-    cf = f"<div class='ch a-pink' style='height:84px'><div class='sweep'></div><div class='lbl'>{T('Are you sure?', 42, 'l', name='Title')}</div></div>"
+    cf = f"<div class='ch a-gold' style='height:84px'><div class='sweep'></div><div class='lbl'>{T('Are you sure?', 42, 'l', name='Title')}</div></div>"
     cf += at(380, 116, T('Buy Bolt Entrance for 1,400 Gold?', 30, 's', name='Body1'), w=740, align='center')
     cf += at(380, 160, T('Yours to keep. Looks only.', 22, 'xs', 'f-dim', name='Body2'), w=740, align='center')
     cf += btn(80, 214, 280, 80, 'lime', bl('BUY', 34, name='YesText'), name='BtnYes') + btn(400, 214, 280, 80, 'grey', bl('CANCEL', 34, name='NoText'), name='BtnNo')
-    out += grp('Confirm', f"<div class='cp a-pink' data-n='Card' style='left:1000px;top:560px;width:760px;height:330px'>{cf}</div>", 'TL')
+    out += grp('Confirm', f"<div class='cp a-gold' data-n='Card' style='left:1000px;top:560px;width:760px;height:330px'>{cf}</div>", 'TL')
     return out
 
 

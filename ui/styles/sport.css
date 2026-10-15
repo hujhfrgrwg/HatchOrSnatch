@@ -12,8 +12,16 @@ body, .ot { font-family: 'Fredoka', sans-serif; font-weight: 700; }
 .ot { letter-spacing: .2px; }
 
 /* one scheme for every screen (reference) */
-.a-pink, .a-lime, .a-sky, .a-gold, .a-violet, .a-coral {
-  --h1:#ff8ad0; --h2:#eb62b7; --h3:#8b30cc; --fr:#8d73c2; --gl:rgba(150,90,230,.45); }
+/* one accent per screen (Hunter, 16 Oct: "not crazy about every screen being pink"). Same banner structure as
+   the Units reference, colour by screen: --h1 light, --h2, --hm mid, --h3 deep, --fr panel rim, --gl glow */
+.a-purple { --h1:#c9a2ff; --h2:#9a5cff; --hm:#7a3ae8; --h3:#4a1fb8; --fr:#8a6ad8; --gl:rgba(130,90,240,.45); }
+.a-pink   { --h1:#ff8ad0; --h2:#eb62b7; --hm:#b247c4; --h3:#8b30cc; --fr:#8d73c2; --gl:rgba(150,90,230,.45); }
+.a-lime   { --h1:#d6ff6a; --h2:#7ee02e; --hm:#3fb52a; --h3:#1a7a3a; --fr:#5fbf4a; --gl:rgba(110,220,70,.38); }
+.a-sky    { --h1:#8ae6ff; --h2:#3ab8ff; --hm:#2a7ef0; --h3:#2a3ec8; --fr:#4a8ae0; --gl:rgba(60,150,255,.42); }
+.a-gold   { --h1:#ffe68a; --h2:#ffc23a; --hm:#ff8a1a; --h3:#d0480a; --fr:#e0a040; --gl:rgba(255,170,40,.38); }
+.a-coral  { --h1:#ff9a8a; --h2:#ff5a5a; --hm:#e02a4a; --h3:#a0103a; --fr:#d85a6a; --gl:rgba(240,70,90,.4); }
+.a-steel  { --h1:#dfe6f0; --h2:#a8b4c6; --hm:#7a8aa2; --h3:#4a5670; --fr:#8a96aa; --gl:rgba(150,170,200,.35); }
+.a-violet { --h1:#c9a2ff; --h2:#9a5cff; --hm:#7a3ae8; --h3:#4a1fb8; --fr:#8a6ad8; --gl:rgba(130,90,240,.45); }
 
 /* ---------- panel ---------- */
 .cglow { border-radius: 10px; filter: blur(22px); opacity: .8; }
@@ -32,7 +40,7 @@ body, .ot { font-family: 'Fredoka', sans-serif; font-weight: 700; }
 .sbn > .f { inset: 5px 6px 5px 5px; overflow: hidden;
   background:
     linear-gradient(180deg, rgba(255,255,255,.35) 0, rgba(255,255,255,.08) 38%, rgba(255,255,255,0) 40%),
-    linear-gradient(90deg, var(--h1) 0%, var(--h2) 22%, #b247c4 55%, var(--h3) 100%); }
+    linear-gradient(90deg, var(--h1) 0%, var(--h2) 22%, var(--hm) 55%, var(--h3) 100%); }
 .sbn > .f::before { content: ''; position: absolute; inset: 0; opacity: .38;
   background: radial-gradient(circle, #fff 1.6px, transparent 2px) 0 0 / 10px 10px;
   -webkit-mask-image: linear-gradient(90deg, #000 0 10%, transparent 26%, transparent 62%, #000 92%); }
@@ -51,7 +59,7 @@ body, .ot { font-family: 'Fredoka', sans-serif; font-weight: 700; }
 /* full-width header strips still used by small cards (results / confirm): same banner colours */
 .ch { background: linear-gradient(180deg, #242424, #1b1b1c); border-bottom: 3px solid #050506; }
 .ch::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 64%; transform: none; opacity: 1; -webkit-mask: none; mix-blend-mode: normal;
-  background: linear-gradient(180deg, rgba(255,255,255,.35) 0, rgba(255,255,255,.08) 38%, rgba(255,255,255,0) 40%), linear-gradient(90deg, var(--h1), var(--h2) 22%, #b247c4 55%, var(--h3));
+  background: linear-gradient(180deg, rgba(255,255,255,.35) 0, rgba(255,255,255,.08) 38%, rgba(255,255,255,0) 40%), linear-gradient(90deg, var(--h1), var(--h2) 22%, var(--hm) 55%, var(--h3));
   clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%); }
 .ch::after { content: ''; position: absolute; inset: 0 36% 0 0; opacity: .35; mix-blend-mode: normal;
   background: radial-gradient(circle, #fff 1.6px, transparent 2px) 0 0 / 10px 10px;
