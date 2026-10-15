@@ -153,3 +153,4 @@ img[src*='sunburst'] { opacity: .12 !important; }
 .f-pink { --fg: linear-gradient(#ff7ad8, #ff7ad8); } .f-red { --fg: linear-gradient(#ff5a5a, #ff5a5a); }
 .f-orange { --fg: linear-gradient(#ffa040, #ffa040); } .f-teal { --fg: linear-gradient(#4af0d0, #4af0d0); }
 .f-violet { --fg: linear-gradient(#b89aff, #b89aff); }
+.sbn .spk { display: none; }  /* sparkle removed: Hunter 16 Oct, sat on the icon */

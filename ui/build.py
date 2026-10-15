@@ -191,10 +191,17 @@ def panel_sport(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112,
             + (f"<div class='schip' data-n='HeaderInfo' style='right:118px;top:20px'>{right}</div>" if right else '') + "</div>")
     out += (f"<div class='sbn a-{acc}' data-n='Banner' style='left:{x - 18}px;top:{y - 50}px;width:{bw}px;height:132px'>"
             f"<div class='o'></div><div class='f'></div>"
-            f"<img class='spk' src='{ipath('sparkle')}'>"
             f"<div class='lbl'>{icn(icon, 96) if icon else ''}{T(title.upper(), title_size + 6, 'xl', name='Title')}</div></div>")
     out += closex(x + w - 64, y - 38)
     return grp(gname, out, 'C')
+
+
+def rays(cx, cy, d, op=.25):
+    """Light rays drawn in CSS, centred exactly on (cx, cy) with diameter d (no off-centre texture)."""
+    return (f"<div class='abs' style='left:{cx - d // 2}px;top:{cy - d // 2}px;width:{d}px;height:{d}px;opacity:{op};"
+            "background:repeating-conic-gradient(from 0deg, #fff 0deg 7deg, transparent 7deg 22.5deg);"
+            "-webkit-mask-image:radial-gradient(circle, #000 0%, rgba(0,0,0,.6) 35%, transparent 70%);"
+            "mask-image:radial-gradient(circle, #000 0%, rgba(0,0,0,.6) 35%, transparent 70%)'></div>")
 
 
 def world(img='bg_lobby.jpg', vign=True):
@@ -601,7 +608,7 @@ def s_settings():
 # ================================================================== Results (GDD 14 end-of-match breakdown)
 def s_results():
     out = world('bg_lobby_blur.jpg', False) + dim(.5)
-    hd = f"<img class='abs' src='tex/sunburst_b.png' style='left:610px;top:-230px;width:700px;height:700px;opacity:.35'>"
+    hd = rays(960, 92, 900, .22)   # centred exactly on the title (Hunter: the off-centre shine looked misplaced)
     hd += at(960, 26, T('RUNNERS WIN!', 104, 'xl', 'f-gold', name='TeamBanner'), w=1200, align='center')
     hd += at(960, 158, T('3 clean crossings in a row', 30, 's', 'f-dim', name='Reason'), w=900, align='center')
     out += grp('Banner', hd, 'T')
@@ -632,8 +639,7 @@ def s_results():
 # ================================================================== Hatch reveal
 def s_hatch():
     out = world('bg_lobby_blur.jpg', False) + dim(.6)
-    h = "<img class='abs' src='tex/sunburst_b.png' style='left:460px;top:40px;width:1000px;height:1000px;opacity:.55'>"
-    h += "<img class='abs' src='tex/shine.png' style='left:560px;top:150px;width:800px;height:800px;opacity:.7'>"
+    h = rays(960, 490, 1000, .3)    # centred on the pet
     h += at(960, 70, T('NEW PET!', 110, 'xl', 'f-gold', name='Title'), w=1000, align='center')
     h += I(pet_img('ShadesShark'), 700, 230, 520, name='Pet')
     h += at(960, 760, T('Shades Shark', 72, 'xl', name='PetName'), w=1000, align='center')

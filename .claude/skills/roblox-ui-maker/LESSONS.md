@@ -65,6 +65,9 @@ Format: **rule**, then why (what went wrong or what the developer said).
   screens) was "far too childish for our type of game" after round 1 neon was "not our theme".
 - **When remaking a reference, drop its decorative flourishes (shards, broken pieces, extra slashes) unless asked.** Keep the
   shapes that carry structure. - Hunter on the banner's tail shards: "completely unnecessary... look out of place".
+- **Centre bursts and shines exactly on what they frame; never place a texture by eye.** Texture sunbursts have off-centre
+  rays, and a corner sparkle on a title banner sat on the icon. Draw rays in CSS centred on the target, or leave them out.
+  - Hunter: "runners win isn't centered behind the shine"; banner sparkle "in the wrong place".
 - **Stud is the default, not universal.** When a game is declared "not stud" (scroll RPG, sleek shooter), no
   stud plates or textures anywhere, lobby included.
 - **"AI-looking UI" = flat beige rounded rectangles, one font, no depth, no motion.** Fix with a themed palette,
