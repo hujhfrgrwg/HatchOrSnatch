@@ -4,7 +4,7 @@ updated: 2026-10-16
 ---
 # UI redesign
 
-Following `roblox-ui-maker`: the UI is designed in HTML first, Hunter approves it, and only then is it exported to a real ScreenGui in Studio. **Status: round 2 ("candy") is built and waiting for Hunter's review. Nothing has changed in Studio** (a temporary photo-booth GUI was used to shoot the pets, then removed).
+Following `roblox-ui-maker`: the UI is designed in HTML first, Hunter approves it, and only then is it exported to a real ScreenGui in Studio. **Status (16 Oct): round 3 "sport" (`ui/styles/sport.css`, shots in `docs/ui/round3/`) is liked ("looks great so far"). Waiting on Hunter's ChatGPT icons, then Studio import. Nothing has changed in Studio** (a temporary photo-booth GUI was used to shoot the pets, then removed).
 
 ## History
 - **Round 1 (neon), 15 Oct: rejected.** Hunter: "great job copying it, but this UI doesn't match our game or its theme at all." The lesson went into the ui-maker LESSONS: check a reference against the game's own world before building from it. The source is kept as `ui/build_neon_round1.py`, with shots in `docs/ui/round1/`.

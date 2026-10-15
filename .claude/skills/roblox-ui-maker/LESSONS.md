@@ -460,3 +460,6 @@ Format: **rule**, then why (what went wrong or what the developer said).
   the approved kit with the reference's ORGANISATION copied 1:1, world-placed systems moved out of menus.
 - Presenting several flow options (phone + desktop shots, problems grid, comparison, recommendation) on one
   decision page before building the chosen flow.
+- (16 Oct, Evolve or Steal) "Looks great so far" for round 3: Units-reference skin (overlapping angled banner, charcoal body,
+  white outlined rounded text, tilted red X, rarity-rim tiles with corner notch, folder-tab section labels), ONE accent per
+  screen (not one colour everywhere), real model photos for pets/eggs, HUD on the competitor's layout (Huss Valley).
