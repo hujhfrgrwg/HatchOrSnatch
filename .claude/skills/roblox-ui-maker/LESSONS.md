@@ -68,6 +68,9 @@ Format: **rule**, then why (what went wrong or what the developer said).
 - **Centre bursts and shines exactly on what they frame; never place a texture by eye.** Texture sunbursts have off-centre
   rays, and a corner sparkle on a title banner sat on the icon. Draw rays in CSS centred on the target, or leave them out.
   - Hunter: "runners win isn't centered behind the shine"; banner sparkle "in the wrong place".
+- (Applied 16 Oct, Evolve or Steal) Hunter sent Huss Valley screenshots as the HUD LAYOUT reference while the Units concept stays
+  the STYLE: HUD rebuilt to Huss Valley positions (pills top-left, phase+headline top-centre, slim left rail, stacked currency
+  bottom-left, ability card + SPACE·DASH bar bottom-centre), in our tokens.
 - **Stud is the default, not universal.** When a game is declared "not stud" (scroll RPG, sleek shooter), no
   stud plates or textures anywhere, lobby included.
 - **"AI-looking UI" = flat beige rounded rectangles, one font, no depth, no motion.** Fix with a themed palette,

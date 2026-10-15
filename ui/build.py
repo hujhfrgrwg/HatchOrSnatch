@@ -131,8 +131,10 @@ def bl(text, size=34, fill='', name=None):
     return T(text, size, 's', fill, name=name)
 
 
-def well(x, y, w, h, inner='', name=None, solid=False, style=''):
-    return box(x, y, w, h, inner, 'cw' + (' solid' if solid else ''), style, name=name)
+def well(x, y, w, h, inner='', name=None, solid=False, style='', title=None, extra=''):
+    """Sub-box. title = the reference's folder tab ("Status") sitting on the top edge, white text."""
+    tab = (f"<div class='wtab' style='left:{x + 14}px;top:{y - 30}px'>{T(title, 22, 'xs')}{extra}</div>" if title else '')
+    return tab + box(x, y, w, h, inner, 'cw' + (' solid' if solid else ''), style, name=name)
 
 
 def slot(x, y, s, rarity, icon=None, count=None, label=None, cls='', name=None, art_pad=.14, label_size=None, inner_extra=''):
@@ -145,7 +147,7 @@ def slot(x, y, s, rarity, icon=None, count=None, label=None, cls='', name=None, 
     if label:
         inner += at(s // 2, s - int(s * .26), T(label, label_size or max(16, int(s * .15)), 'xs', FILL.get(rarity, '')), w=s + 20, align='center', name='Label')
     inner += inner_extra
-    return box(x, y, s, s, inner, f'cs r-{rarity} {cls}', name=name)
+    return box(x, y, s, s, inner, f'cs r-{rarity} {cls}' + (' lab' if label else ''), name=name)
 
 
 def stars(n, of=3, size=26):
@@ -222,7 +224,7 @@ def hpill(x, y, w, h, color, icon, label, name, opens=None, size=34, badge=False
     inner = f"<div class='hp k-{color}' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'><div class='lbl'>{T(label, size, 's', name='Label')}</div></div>"
     inner += I(icon, x - 14, y - 12, h + 24, name='Icon')
     if badge:
-        inner += box(x + w - 30, y - 14, 44, 44, T('!', 26, 'xs'), 'badge', name='Badge')
+        inner += box(x + w - 18, y - 20, 40, 40, T('!', 24, 'xs'), 'badge', name='Badge')
     return sub(name, inner, btn=True, opens=opens)
 
 
@@ -258,16 +260,17 @@ def ability_card(y=944, lobby=True, cd=None):
     out += at(x + 122, y + 12, row(icn(pool[2], 40), T(pool[1].upper(), 38, 's', name='AbilityName')), name='AbilityRow')
     sub_t = 'SHADES SHARK  ·  EQUIPPED' if lobby else ('READY!' if cd is None else f'RECHARGING  {cd}s')
     out += at(x + 124, y + 64, T(sub_t, 20, 'xs', 'f-orange' if cd is None else 'f-dim', name='Status'))
-    out += f"<div class='keycap' data-n='Key' style='left:{x + w - 82}px;top:{y + 26}px'>{T('Q', 32, 's')}</div>"
+    out += f"<div class='keycap' data-n='Key' style='left:{x + w - 82}px;top:{y + 26}px'>{T('Q', 30, 's', style='font-family:Montserrat;font-weight:900')}</div>"
     out += bar(x + 120, y + h - 20, w - 220, 14, 1 if cd is None else .42, 'orange', 'Cooldown')
     return grp('Ability', out, 'B')
 
 
 def lobby_status():
-    out = btn(880, 12, 160, 48, 'sky', T('LOBBY', 26, 's'), cls='sm', name='PhaseChip')
-    out += at(960, 68, T('NEXT MATCH IN', 28, 's', 'f-dim', name='Headline'), w=500, align='center')
-    out += at(960, 98, T('0:12', 92, 'xl', name='Timer'), w=500, align='center')
-    out += at(960, 202, T('4 / 4 players ready', 28, 's', 'f-lime', name='Subline'), w=600, align='center')
+    out = f"<div class='glass' style='left:810px;top:14px;width:300px;height:206px'></div>"   # readable over bright sky
+    out += btn(850, 0, 220, 44, 'purple', T('LOBBY', 24, 's'), cls='sm', name='PhaseChip')
+    out += at(960, 54, T('NEXT MATCH IN', 22, 'xs', 'f-dim', name='Headline'), w=300, align='center')
+    out += at(960, 78, T('0:12', 88, 'xl', name='Timer'), w=300, align='center')
+    out += at(960, 176, T('4 / 4 players ready', 24, 's', 'f-lime', name='Subline'), w=300, align='center')
     return grp('Status', out, 'T')
 
 
@@ -276,7 +279,7 @@ def goal_pill():
     out = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
     out += slot(x + 14, y + 12, 80, 'common', 'piece_common', name='GoalSlot', art_pad=.1)
     out += at(x + 108, y + 12, T('YOUR FIRST PET', 28, 's', name='GoalTitle'))
-    out += at(x + w - 20, y + 14, T('4 / 2', 26, 's', 'f-lime', name='GoalCount'), w=140, align='right')
+    out += at(x + w - 20, y + 14, T('2 / 2', 26, 's', 'f-lime', name='GoalCount'), w=140, align='right')
     out += bar(x + 108, y + 56, w - 128, 30, 1, 'lime', 'GoalBar')
     out += at(x + 108 + (w - 128) // 2, y + 57, T('READY TO HATCH!', 18, 'xs'), w=w - 128, align='center')
     return sub('GoalPill', out, btn=True, opens='Incubator')
@@ -295,11 +298,11 @@ def hud_groups():
     return grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('LeftRail', left, 'L') + lobby_status() + wallet() + ability_card()
 
 
-def s_hud():
+def s_hud_v1():
     return world() + topbar() + hud_groups()
 
 
-def s_hud_phone():
+def s_hud_phone_v1():
     """Landscape phone: canvas ~0.36x, so the rail and wallet grow; Roblox thumbstick/jump kept clear."""
     out = world() + topbar()
     tl = hpill(250, 22, 262, 84, 'pink', 'quests', 'QUESTS', 'QuestsButton', 'Quests', size=32, badge=True)
@@ -317,7 +320,7 @@ def s_hud_phone():
 
 
 # ================================================================== HUD (match): economy hidden (GDD 14)
-def s_hud_match():
+def s_hud_match_v1():
     out = world() + topbar()
     role = f"<div class='hp k-sky' style='left:250px;top:22px;width:360px;height:96px'><div class='lbl' style='padding-left:118px'>{col(T('RUNNER', 40, 'l', name='RoleText'), T('Reach the safe zone!', 20, 'xs', name='RoleHint'), gap=0, align='flex-start')}</div></div>"
     role += I('runner', 230, 8, 120, name='RoleIcon')
@@ -353,6 +356,134 @@ def s_hud_match():
     return out
 
 
+
+# ================================================================== HUD v2: Huss Valley LAYOUT (Hunter, 16 Oct), our style
+# Positions copied from the Huss Valley lobby/round screenshots (1920 design): small pills beside Roblox's
+# buttons (top-left), phase + one-line headline + subline (top-centre), two pills (top-right), a slim
+# vertical rail (left middle), currency plates stacked (bottom-left), ability card + "SPACE · DASH" with a
+# long dash bar (bottom-centre). Additions for our GDD: first-pet goal under the top-left pills (FTUE),
+# egg level replacing the wallet in a match (GDD 14), a compact steal feed (top-right, match only).
+def hv_pill(x, y, w, color, icon, label, name, opens=None, badge=False, h=58):
+    inner = f"<div class='hp k-{color}' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'><div class='lbl' style='padding-left:{h + 6}px'>{T(label, 26, 's', name='Label')}</div></div>"
+    inner += I(icon, x - 6, y - 8, h + 14, name='Icon')
+    if badge:
+        inner += box(x + w - 16, y - 14, 34, 34, T('!', 20, 'xs'), 'badge', name='Badge')
+    return sub(name, inner, btn=True, opens=opens)
+
+
+def hv_rail_btn(x, y, s, color, icon, label, name, opens=None, state=None, key=None):
+    inner = f"<div class='hb k-{color}' style='left:{x}px;top:{y}px;width:{s}px;height:{s}px'></div>"
+    inner += I(icon, x + int(s * .14), y + int(s * .04), int(s * .72), name='Icon')
+    inner += at(x + s // 2, y + s - 26, T(label, 19, 'xs', name='Label'), w=s + 20, align='center')
+    if state:
+        inner += btn(x + s - 30, y - 12, 54, 28, 'lime' if state == 'ON' else 'grey', T(state, 14, 'xs', name='StateText'), cls='sm', name='State')
+    if key:
+        inner += f"<div class='keycap' style='left:{x + s - 20}px;top:{y - 10}px;width:32px;height:32px;border-width:3px'>{T(key, 16, 'xs', style='font-family:Montserrat;font-weight:900')}</div>"
+    return sub(name, inner, btn=True, opens=opens)
+
+
+def hv_topcenter(phase, head, subline, extra=''):
+    out = at(960, 6, T(phase, 22, 'xs', name='Phase'), w=600, align='center')
+    out += at(960, 30, T(head, 50, 'l', name='Headline'), w=1200, align='center')
+    out += at(960, 98, subline, w=900, align='center', name='Subline')
+    return grp('Status', out + extra, 'T')
+
+
+def hv_plate(y, icon, value, label, fill, name):
+    out = f"<div class='glass' style='left:12px;top:{y}px;width:340px;height:84px'></div>"
+    out += I(icon, 20, y + 8, 68, name=f'{name}Icon')
+    out += at(100, y + 6, T(value, 46, 'l', fill, name=f'{name}Text'))
+    out += at(102, y + 58, T(label, 15, 'xs', 'f-dim'))
+    return out
+
+
+def hv_ability(lobby=True, cd=None):
+    pool = POOL['DoubleDash']
+    x, y, w, h = 740, 820, 440, 96
+    out = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
+    out += f"<div class='wtab' style='left:{x + 12}px;top:{y - 26}px;height:28px'>{T('ABILITY', 14, 'xs')}</div>"
+    out += box(x + 14, y + 16, 72, 72, I(pet_img('ShadesShark'), 2, 2, 68), '', 'border-radius:50%;border:3px solid #4ed45a;box-shadow:0 0 0 2px #050506;background:radial-gradient(#2a6a34,#0e1a12);overflow:hidden', name='PetDisc')
+    out += at(x + 100, y + 18, row(icn(pool[2], 30), T(pool[1].upper(), 28, 's', name='AbilityName'), gap=6))
+    st = 'EQUIPPED  ·  SHADES SHARK' if lobby else ('READY' if cd is None else f'RECHARGING  {cd}s')
+    out += at(x + 102, y + 56, T(st, 15, 'xs', 'f-orange' if cd is None else 'f-dim', name='Status'))
+    out += f"<div class='keycap' data-n='Key' style='left:{x + w - 64}px;top:{y + 22}px;width:48px;height:48px'>{T('Q', 26, 's', style='font-family:Arial,sans-serif;font-weight:900')}</div>"
+    out += bar(x + 100, y + h - 14, w - 180, 8, 1 if cd is None else .42, 'orange', 'Cooldown')
+    return grp('Ability', out, 'B')
+
+
+def hv_dash(left, right, frac=1):
+    out = at(960, 934, row(T('SPACE', 24, 's'), T('·', 24, 's', 'f-dim'), T('DASH', 24, 's'), gap=10), w=400, align='center')
+    out += at(630, 966, T(left, 15, 'xs', name='DashState'))
+    out += at(1290, 966, T(right, 15, 'xs', 'f-dim', name='DashHint'), w=500, align='right')
+    out += bar(630, 990, 660, 14, frac, 'sky', 'DashBar')
+    return grp('Dash', out, 'B')
+
+
+def hv_goal():
+    x, y, w, h = 228, 86, 460, 74
+    out = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
+    out += I('piece_common', x + 8, y + 6, 62, name='GoalIcon')
+    out += at(x + 80, y + 8, T('YOUR FIRST PET', 20, 'xs', name='GoalTitle'))
+    out += at(x + w - 14, y + 8, T('2 / 2', 20, 'xs', 'f-lime', name='GoalCount'), w=120, align='right')
+    out += bar(x + 80, y + 38, w - 96, 24, 1, 'lime', 'GoalBar') + at(x + 80 + (w - 96) // 2, y + 39, T('READY TO HATCH!', 15, 'xs'), w=w - 96, align='center')
+    return sub('GoalPill', out, btn=True, opens='Incubator')
+
+
+def s_hud():
+    out = world() + topbar()
+    tl = hv_pill(240, 12, 196, 'purple', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True)
+    tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True) + hv_goal()
+    tr = hv_pill(1468, 12, 196, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats') + hv_pill(1680, 12, 228, 'grey', 'settings', 'SETTINGS', 'SettingsButton', 'Settings')
+    rail = (hv_rail_btn(10, 330, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 440, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
+            + hv_rail_btn(10, 550, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF') + hv_rail_btn(10, 660, 96, 'red', 'hunt', 'HUNT', 'VolunteerToggle', state='ON'))
+    out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
+    out += hv_topcenter('LOBBY', 'Next match in 0:12', row(T('4 / 4 players ready', 22, 'xs', 'f-lime'), T('·', 22, 'xs', 'f-dim'), T('you start as a Runner', 22, 'xs'), gap=8))
+    out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems'), 'BL')
+    out += hv_ability() + hv_dash('DASH READY', 'Move, then turn + dash')
+    return out
+
+
+def s_hud_match():
+    out = world() + topbar()
+    pips = ''.join(f"<span class='pip k-lime{' on' if i == 0 else ''}' style='position:relative;display:inline-block;margin:0 8px'></span>" for i in range(3))
+    sub_l = row(T('Runner', 22, 'xs', 'f-sky', name='RoleText'), T('·', 22, 'xs', 'f-dim'), T('0:21', 22, 'xs', name='Timer'), T('·', 22, 'xs', 'f-dim'),
+                T('14 Runners', 22, 'xs', 'f-sky'), T('vs', 22, 'xs', 'f-dim'), T('4 Catchers', 22, 'xs', 'f-red'), gap=8)
+    streak = at(960, 138, row(T('CLEAN STREAK', 15, 'xs', 'f-dim'), f"<span style='display:inline-flex'>{pips}</span>", gap=8), w=400, align='center')
+    out += hv_topcenter('CROSSING 2', 'Cross to the opposite safe side!', sub_l, streak)
+    eg = f"<div class='glass' style='left:12px;top:878px;width:340px;height:178px'></div>"
+    eg += slot(26, 892, 112, 'rare', 'egg_shiny', name='EggSlot', art_pad=.1)
+    eg += at(152, 896, T('YOUR EGG', 16, 'xs', 'f-dim')) + at(152, 918, T('LEVEL 2', 44, 'l', 'f-rare', name='EggLevel'))
+    for i in range(4):
+        eg += f"<div class='pip k-sky{' on' if i < 2 else ''}' style='left:{158 + i * 38}px;top:984px'></div>"
+    eg += at(152, 1022, row(T('pays', 15, 'xs', 'f-dim'), icn('piece_rare', 24), T('Rare', 15, 'xs', 'f-rare', name='PaysText'), gap=4))
+    out += grp('Egg', eg, 'BL')
+    fd = ''
+    for i, (a, verb, b, ic, fill) in enumerate([('Kai', 'stole', "Mia's Lv 2 egg", 'steal', 'f-red'), ('Zoe', 'is safe with', 'Lv 3', 'safe', 'f-lime'), ('Ben', 'caught', 'Leo', 'catcher', 'f-red')]):
+        y = 84 + i * 50
+        fd += f"<div class='glass' style='left:1530px;top:{y}px;width:378px;height:42px;opacity:{1 - i * .2}'></div>" + I(ic, 1518, y - 4, 50)
+        fd += at(1572, y + 10, row(T(a, 18, 'xs'), T(verb, 18, 'xs', fill), T(b, 18, 'xs'), gap=6))
+    out += grp('Feed', fd, 'TR')
+    out += hv_ability(lobby=False, cd=8) + hv_dash('DASH ON COOLDOWN', 'Space to dash sideways or back', .55)
+    out += cap(560, 470, 'Match: only phase, headline, role/timer/teams, streak, egg level, ability and dash (GDD 14).')
+    return out
+
+
+def s_hud_phone():
+    """Landscape phone: same Huss Valley layout, bigger targets (>=124 design px), thumbs kept clear."""
+    out = world() + topbar()
+    tl = hv_pill(240, 12, 220, 'purple', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True, h=72)
+    tl += hv_pill(476, 12, 270, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True, h=72)
+    tr = hv_pill(1640, 12, 268, 'grey', 'settings', 'SETTINGS', 'SettingsButton', 'Settings', h=72)
+    rail = (hv_rail_btn(10, 250, 130, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop') + hv_rail_btn(10, 396, 130, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets')
+            + hv_rail_btn(10, 542, 130, 'red', 'hunt', 'HUNT', 'VolunteerToggle', state='ON'))
+    out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
+    out += hv_topcenter('LOBBY', 'Next match in 0:12', T('4 / 4 players ready', 26, 's', 'f-lime'))
+    out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems'), 'BL')
+    out += hv_ability()
+    out += "<div class='rbx' style='left:380px;top:640px;width:300px;height:300px'>Roblox thumbstick</div>"
+    out += "<div class='rbx' style='left:1640px;top:760px;width:220px;height:220px'>Roblox jump (= DASH)</div>"
+    return out
+
 # ================================================================== Quests (QuestConfig: 2 daily, UTC reset)
 QUESTS = [  # title, art, progress, target, gold reward, state
     ('Complete 3 crossings', 'art_boards', 2, 3, 25, 'active'),
@@ -368,7 +499,7 @@ def s_quests():
     for i, (title, art, p, t, g, st) in enumerate(QUESTS):
         y = 18 + i * 132
         card = f"<img src='{art}.jpg' style='position:absolute;inset:0;width:100%;height:100%;object-fit:cover'>"
-        card += "<div class='abs fill' style='background:linear-gradient(90deg,rgba(40,10,70,.85),rgba(40,10,70,.25))'></div>"
+        card += "<div class='abs fill' style='background:linear-gradient(90deg,rgba(14,10,22,.94) 0 45%,rgba(14,10,22,.6))'></div>"
         card += tag(14, 12, 'Daily Quest', 'blue', 18, 32)
         card += at(16, 52, T(title, 30, 's'))
         card += bar(16, 92, 300, 20, p / t, 'lime' if st == 'ready' else 'pink', 'Progress')
@@ -385,10 +516,10 @@ def s_quests():
     d += at(26, 130, T('Make it across to the safe zone as a Runner.', 24, 'xs', 'f-dim', name='QuestDesc'))
     d += at(26, 160, T('Each crossing that ends safe counts.', 24, 'xs', 'f-dim'))
     d += bar(24, 204, 470, 38, 2 / 3, 'pink', 'Progress') + at(260, 208, T('2 / 3', 26, 's'), w=470, align='center')
-    d += at(24, 256, T('REWARDS', 24, 'xs', 'f-pink'))
+
     rw = slot(18, 14, 132, 'gold', 'gold', 'x25', 'Gold', name='Reward1') + slot(166, 14, 132, 'common', 'piece_common', 'x1', 'Bonus', name='Reward2', cls='hid')
-    d += well(24, 290, 586, 162, rw, name='Rewards', solid=True)
-    d += btn(170, 470, 300, 70, 'pink', bl('TRACK QUEST', 30), name='Track')
+    d += well(24, 296, 300, 162, rw, name='Rewards', solid=True, title='Rewards')
+    d += btn(344, 382, 270, 76, 'purple', bl('TRACK', 30), name='Track')
     b += well(650, 112, 642, 520, d, name='Detail')
     right = row(icn('clock', 52), T('Resets in 06:42:10', 34, 's', name='ResetText'), gap=8)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Quests', 'pink', 'Quests', 'quests', b, x0, y0, W, H, right)
@@ -398,11 +529,11 @@ def s_quests():
 def s_incubator(first=True):
     x0, y0, W, H = 210, 104, 1500, 884
     b = ''
-    pc = at(22, 14, T('YOUR PIECES', 24, 'xs', 'f-lime'))
+    pc = ''
     for i, m in enumerate(['common', 'rare', 'epic']):
         n = PIECES[m]
-        pc += slot(22 + i * 132, 50, 118, m, 'piece_' + m, f'x{n}', TIER_NAME[m], cls='locked' if n == 0 else '', name=f'Piece_{m}', art_pad=.14)
-    b += well(26, 24, 434, 196, pc, name='Pieces')
+        pc += slot(22 + i * 132, 26, 118, m, 'piece_' + m, f'x{n}', TIER_NAME[m], cls='locked' if n == 0 else '', name=f'Piece_{m}', art_pad=.14)
+    b += well(26, 40, 434, 170, pc, name='Pieces', title='Your Pieces')
     b = incubator_top(b, first)
     b = incubator_rest(b, first)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Incubator', 'lime', 'Incubator', 'incubator', b, x0, y0, W, H)
@@ -410,46 +541,46 @@ def s_incubator(first=True):
 
 def incubator_top(b, first):
     if not first:  # after the first pet: collection progress per family replaces the first-pet path
-        tr = at(24, 14, T('YOUR COLLECTION', 24, 'xs', 'f-lime'))
+        tr = ''
         found = {'DoubleDash': 2, 'Invisibility': 1, 'Decoy': 1, 'Shield': 2, 'Wall': 1, 'PetTackle': 1}
         for i, (pid, title, ic, colr, blurb, pets) in enumerate(POOLS):
             cx = 22 + i * 160
-            tr += slot(cx, 52, 88, colr, ic, cls='fill', art_pad=.14)
-            tr += at(cx + 44, 146, T(f'{found[pid]} / {len(pets)}', 22, 's'), w=150, align='center')
-        b += well(476, 24, 998, 196, tr, name='Collection')
+            tr += slot(cx, 20, 88, colr, ic, cls='fill', art_pad=.14)
+            tr += at(cx + 44, 116, T(f'{found[pid]} / {len(pets)}', 22, 's'), w=150, align='center')
+        b += well(476, 40, 998, 170, tr, name='Collection', title='Your Collection')
     else:
         b += first_path()
     return b
 
 
 def first_path():
-    tr = at(24, 14, row(T('YOUR FIRST PET', 24, 'xs', 'f-lime'), T('free family choice!', 20, 'xs', 'f-gold'), gap=12))
-    tr += bar(80, 102, 820, 26, 1, 'lime', 'Track')
+    tr = ''
+    tr += bar(80, 64, 820, 26, 1, 'lime', 'Track')
     for i, (lab, ic) in enumerate([('Start', None), ('Match 1', 'piece_common'), ('Match 2', 'piece_common'), ('Hatch!', 'egg_basic')]):
         nx = 40 + i * 270
-        tr += slot(nx, 66, 100, 'gold' if i == 3 else 'common', ic, label=None, name=f'Step{i}', art_pad=.14,
-                   inner_extra='' if ic else at(50, 30, T('GO', 32, 's'), w=100, align='center'), cls='fill' if i == 0 else '')
-        tr += at(nx + 50, 172, T(lab, 22, 's', 'f-gold' if i == 3 else ''), w=200, align='center')
-    return well(476, 24, 998, 196, tr, name='FirstPet')
+        tr += slot(nx, 28, 100, 'gold' if i == 3 else 'common', ic, label=None, name=f'Step{i}', art_pad=.14,
+                   inner_extra='' if ic else I('check', 20, 18, 60), cls='fill' if i == 0 else '')
+        tr += at(nx + 50, 132, T(lab, 22, 's', 'f-gold' if i == 3 else ''), w=200, align='center')
+    return well(476, 40, 998, 170, tr, name='FirstPet', title='Your First Pet', extra=T('free family choice', 18, 'xs', 'f-gold', style='margin-left:12px'))
 
 
 def incubator_rest(b, first):
-    fp = at(22, 12, T('PICK A FAMILY', 24, 'xs', 'f-lime'))
+    fp = ''
     for i, (pid, title, ic, colr, blurb, pets) in enumerate(POOLS):
-        cx, cy = 22 + (i % 3) * 146, 50 + (i // 3) * 158
+        cx, cy = 22 + (i % 3) * 146, 22 + (i // 3) * 158
         fp += slot(cx, cy, 132, colr, ic, label=title, cls='fill sel' if pid == 'DoubleDash' else 'fill', name=f'Family_{pid}', art_pad=.18, label_size=17)
-    b += well(26, 236, 466, 380, fp, name='Families')
+    b += well(26, 262, 466, 340, fp, name='Families', title='Pick A Family')
     pool = POOL['DoubleDash']
-    lad = at(22, 12, row(icn(pool[2], 44), T(pool[1].upper(), 34, 's'), T(pool[4], 20, 'xs', 'f-dim'), gap=10))
+    lad = ''
     for i, pet in enumerate(pool[5][:3]):
         t = TIERS[i]
-        sx = 22 + i * 186
-        lad += slot(sx, 66, 172, t, pet_img(pet), name=f'Species_{t}', art_pad=.04)
-        lad += at(sx + 86, 246, T(P[pet], 22, 's'), w=200, align='center') + at(sx + 86, 276, T(TIER_NAME[t], 18, 'xs', FILL[t]), w=200, align='center')
-        lad += at(sx + 86, 304, row(icn('piece_' + t, 26), T(f'{RECIPES[t][0]} random · {RECIPES[t][1]} pick', 16, 'xs', 'f-dim'), gap=4), w=200, align='center')
-    lad += slot(22 + 3 * 186 + 6, 66, 120, 'crowned', pet_img(pool[5][3]), cls='locked', name='Species_crowned', art_pad=.06, inner_extra=I('lock', 36, 34, 48))
-    lad += at(22 + 3 * 186 + 66, 196, T('Crowned', 18, 'xs', 'f-gold'), w=140, align='center') + at(22 + 3 * 186 + 66, 220, T('coming later', 16, 'xs', 'f-dim'), w=140, align='center')
-    b += well(508, 236, 966, 380, lad, name='Ladder')
+        sx = 34 + i * 214
+        lad += slot(sx, 24, 172, t, pet_img(pet), name=f'Species_{t}', art_pad=.04)
+        lad += at(sx + 86, 206, T(P[pet], 22, 's'), w=200, align='center') + at(sx + 86, 236, T(TIER_NAME[t], 18, 'xs', FILL[t]), w=200, align='center')
+        lad += at(sx + 86, 266, row(icn('piece_' + t, 26), T(f'{RECIPES[t][0]} random · {RECIPES[t][1]} pick', 16, 'xs', 'f-dim'), gap=4), w=200, align='center')
+    lad += slot(34 + 3 * 214 + 26, 24, 150, 'crowned', pet_img(pool[5][3]), cls='locked', name='Species_crowned', art_pad=.06, inner_extra=I('lock', 45, 40, 60))
+    lad += at(34 + 3 * 214 + 101, 206, T('Crowned', 22, 's', 'f-gold'), w=180, align='center') + at(34 + 3 * 214 + 101, 236, T('coming later', 16, 'xs', 'f-dim'), w=140, align='center')
+    b += well(508, 262, 966, 340, lad, name='Ladder', title=f'{pool[1]}  ·  {pool[4]}', extra='')
     if first:
         hb = at(30, 22, row(icn('egg_basic', 70), col(T('HATCH YOUR FIRST PET', 32, 's'), T('Shades Shark  ·  Double Dash  ·  costs 2 Common pieces', 20, 'xs', 'f-dim'), gap=2, align='flex-start'), gap=14))
         hb += btn(1000, 18, 420, 86, 'lime', row(bl('HATCH', 38), icn('piece_common', 40), T('x2', 26, 's')), name='BtnHatch')
@@ -626,7 +757,7 @@ def s_results():
         y += at(40, 112 + i * 40, T(lab, 22, 'xs', 'f-dim')) + at(480, 106 + i * 40, row(T(f'+{amt}', 26, 's', 'f-gold'), icn('gold', 30), gap=4), w=200, align='right')
     y += "<div class='abs' style='left:36px;top:280px;width:444px;height:4px;background:rgba(255,255,255,.2)'></div>"
     y += at(40, 296, T('TOTAL', 26, 's')) + at(480, 288, row(T('+86', 40, 'l', 'f-gold', name='GoldTotal'), icn('gold', 44), gap=4), w=240, align='right')
-    y += slot(530, 112, 146, 'gold', 'gem', 'x4', 'Gems', name='GemsSlot')
+    y += slot(530, 112, 146, 'lime', 'gem', 'x4', 'Gems', name='GemsSlot')
     y += slot(530, 274, 146, 'epic', 'piece_epic', 'x1', 'Epic', name='PieceSlot')
     y += at(40, 352, row(icn('egg_cosmic', 54), col(T('Best egg: Level 3', 26, 's', 'f-epic'), T('pays 1 Epic piece', 18, 'xs', 'f-dim'), gap=0, align='flex-start'), gap=8))
     y += bar(40, 434, 440, 32, 1 / 5, 'purple', 'RecipeBar') + at(260, 437, T('Epic pieces 1 / 5', 18, 'xs'), w=440, align='center')

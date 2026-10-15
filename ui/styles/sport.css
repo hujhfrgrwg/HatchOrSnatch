@@ -154,3 +154,10 @@ img[src*='sunburst'] { opacity: .12 !important; }
 .f-orange { --fg: linear-gradient(#ffa040, #ffa040); } .f-teal { --fg: linear-gradient(#4af0d0, #4af0d0); }
 .f-violet { --fg: linear-gradient(#b89aff, #b89aff); }
 .sbn .spk { display: none; }  /* sparkle removed: Hunter 16 Oct, sat on the icon */
+
+/* round-3 review pass (16 Oct) */
+.wtab { position: absolute; height: 34px; padding: 0 14px; display: flex; align-items: center; z-index: 3;
+  border-radius: 5px 5px 0 0; border: 2px solid rgba(225,225,232,.75); border-bottom: 0; box-shadow: 0 -2px 0 2px #050506;
+  background: #1c1c1e; }
+.cs.lab { background: linear-gradient(160deg, color-mix(in srgb, var(--r2) 55%, #0c0c10) 0%, color-mix(in srgb, var(--r3) 60%, #0c0c10) 45%, #0e0e12 100%); }
+.cs.fill.lab { background: linear-gradient(160deg, var(--r2) 0%, var(--r3) 60%, color-mix(in srgb, var(--r3) 45%, #000) 100%); }
