@@ -167,25 +167,28 @@ end
 ----------------------------------------------------------------------------------------------- music
 local musicOn = true
 local state = "off"
-local current: Sound? = nil
 local index: { [string]: number } = {}
 local duckTween: Tween? = nil
 
-local function fadeOut(s: Sound)
-	local t = TweenService:Create(s, TweenInfo.new(FADE, Enum.EasingStyle.Sine), { Volume = 0 })
-	t.Completed:Once(function()
-		s:Stop()
-		s:Destroy()
+-- one player per state: leaving a state pauses its track (after a fade) and coming back resumes it, so a
+-- crossing -> tension -> crossing round trip continues the same song instead of shuffling every wave
+local players: { [string]: Sound } = {}
+local fades: { [Sound]: Tween } = {}
+
+local function fadeTo(s: Sound, volume: number, time: number, after: (() -> ())?)
+	if fades[s] then fades[s]:Cancel() end
+	local t = TweenService:Create(s, TweenInfo.new(time, Enum.EasingStyle.Sine), { Volume = volume })
+	fades[s] = t
+	t.Completed:Once(function(st)
+		if fades[s] == t then fades[s] = nil end
+		if st == Enum.PlaybackState.Completed and after then after() end
 	end)
 	t:Play()
 end
 
-local currentKind: string? = nil
-local currentGain = 1
-
-local function startTrack(kind: string, fade: number?)
+local function newTrack(kind: string): Sound?
 	local list = MUSIC[kind]
-	if not list or #list == 0 then return end
+	if not list or #list == 0 then return nil end
 	local i = (index[kind] or math.random(1, #list)) % #list + 1
 	index[kind] = i
 	local s = Instance.new("Sound")
@@ -193,31 +196,58 @@ local function startTrack(kind: string, fade: number?)
 	s.SoundId = "rbxassetid://" .. list[i][1]
 	s.Volume = 0
 	s.SoundGroup = musicGroup
+	s:SetAttribute("Gain", list[i][2])
 	s.Parent = SoundService
-	local old = current
-	current, currentKind, currentGain = s, kind, list[i][2]
-	if old then fadeOut(old) end
-	s:Play()
-	TweenService:Create(s, TweenInfo.new(fade or FADE, Enum.EasingStyle.Sine), { Volume = (MUSIC_VOLUME[state] or 0.3) * currentGain }):Play()
-	-- next track in the same playlist when this one ends (state may have moved on by then)
+	-- next song in the same playlist when this one ends
 	s.Ended:Once(function()
-		if current == s and state == kind then
-			startTrack(kind)
+		if players[kind] ~= s then return end
+		players[kind] = nil
+		s:Destroy()
+		if state == kind then
+			local n = newTrack(kind)
+			if n then
+				players[kind] = n
+				n:Play()
+				fadeTo(n, (MUSIC_VOLUME[kind] or 0.3) * (n:GetAttribute("Gain") or 1), FADE)
+			end
 		end
 	end)
+	return s
 end
 
 function Sound.setMusic(newState: string)
 	if newState == state then return end
+	local prev = state
 	state = newState
-	if newState == "off" or (MUSIC_VOLUME[newState] or 0) <= 0 then
-		-- off, or results (the sting plays over silence); the next state starts a fresh track
-		if current then fadeOut(current) current, currentKind = nil, nil end
-		return
+	-- park whatever was playing (paused, so it can resume later)
+	local old = players[prev]
+	if old then
+		fadeTo(old, 0, if newState == "tension" then 0.5 else FADE, function()
+			if state ~= prev then old:Pause() end
+		end)
 	end
-	if current and currentKind == newState then return end
-	-- into tension: a fast cut so the clock feels urgent; everything else crossfades
-	startTrack(newState, if newState == "tension" then 0.5 else FADE)
+	if newState == "off" or (MUSIC_VOLUME[newState] or 0) <= 0 then return end
+	local s = players[newState]
+	if not s then
+		s = newTrack(newState)
+		if not s then return end
+		players[newState] = s
+		s:Play()
+	elseif not s.IsPlaying then
+		s:Resume()
+	end
+	fadeTo(s, (MUSIC_VOLUME[newState] or 0.3) * (s:GetAttribute("Gain") or 1), if newState == "tension" then 0.5 else FADE)
+end
+
+-- a new match starts its playlists fresh (called between matches)
+function Sound.resetMatchMusic()
+	for _, k in ipairs({ "match", "tension" }) do
+		local s = players[k]
+		if s and state ~= k then
+			players[k] = nil
+			s:Destroy()
+		end
+	end
 end
 
 function Sound.setMusicEnabled(on: boolean)

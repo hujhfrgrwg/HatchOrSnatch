@@ -1030,13 +1030,14 @@ local function badges()
 end
 
 local tensionLatch = false
+local resultsShownAt = -math.huge
 local function updateHUD()
 	local m = inMatch()
 	-- music: lobby beds, crossing tracks, a tension track for the last 12 s of a crossing or the last two
 	-- runners (latched until the crossing ends, so it can't flicker), silence under the results sting
 	local music = "lobby"
-	if resultsOpen then
-		music = "results"
+	if resultsOpen and os.clock() - resultsShownAt < 9 then
+		music = "results" -- the win / lose sting plays over silence, then the lobby bed comes back
 	elseif m then
 		if state:GetAttribute("Phase") == "CROSSING" then
 			if phaseLeft() <= 12 or (state:GetAttribute("RunnersLeft") or 99) <= 2 then tensionLatch = true end
@@ -1046,6 +1047,7 @@ local function updateHUD()
 		music = if tensionLatch then "tension" else "match"
 	end
 	Sound.setMusic(music)
+	if music == "lobby" then Sound.resetMatchMusic() end
 	if S.HUD then S.HUD.Visible = not m end
 	if S.MatchHUD then S.MatchHUD.Visible = m end
 	if m then
@@ -1846,6 +1848,7 @@ end
 local function showResults(data: any)
 	local sc = S.Results
 	if not sc then return end
+	resultsShownAt = os.clock()
 	resultsData = data
 	-- banner
 	local runners = data.team == "RUNNERS"
