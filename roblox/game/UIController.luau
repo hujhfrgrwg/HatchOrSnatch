@@ -2060,7 +2060,9 @@ local function refreshShop()
 			if card and card:IsA("GuiObject") then
 				keep[card] = true
 				card.Visible = true
-				card.Position = UDim2.fromOffset(26 + (i - 1) * 384, 102)
+				-- the page already sits under the tabs (y 217); the row is centred on the 1528 px page width
+				local x0 = (1528 - (#items * 360 + (#items - 1) * 24)) // 2
+				card.Position = UDim2.fromOffset(x0 + (i - 1) * 384, 0)
 				fillCard(card, it)
 			end
 		end
