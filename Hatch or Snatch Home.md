@@ -21,6 +21,9 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 - **Uploads:** `tools\upload\upload_assets.py` (Open Cloud; key and creator from the environment). On the PC, Hunter's `ROBLOX_OPEN_CLOUD_API_KEY` works for the group (pass it as `HOS_ROBLOX_API_KEY` for the one process, group 228184582). Open Cloud returns Decal ids: resolve the Image id with `InsertService:LoadAsset(decalId)` before using it in a GUI.
 - **Skills and research:** [[RoClicks Index]].
 
+## Design
+- [[Emote Light Constructs]]: Destiny-style glowing props for emotes that mime one (Reaper's Ride scythe, Surfer board); samples awaiting Hunter.
+
 ## UI
 - [[Emote Crate Spin]]: emote crate opening animation (HTML in `UI/web/`, client script in `UI/roblox/`). In the place since 2026-10-16 as `StarterGui.EmoteCrateUI`, played by EmoteController.
 
