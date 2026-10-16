@@ -11,6 +11,7 @@ Built 16 Oct 2026 (HOS-PASS-001). Hunter asked for an XP system like Huss Valley
   - a LEVEL plate with an XP bar tops the bottom-left Level / Gold / Gems column (`HUD.Wallet.LevelPlate`; the rail moved up 60 px to make room);
   - after each match, a toast shows the XP earned, naming each pass bonus;
   - a LEVEL UP! reveal (the Reward screen) opens once the results close.
+- **Tested 16 Oct with 4 players** (a multiplayer Studio test; 4+ real players makes a saved match). In match 1, three active players got 40 XP and 25 Gold each, and one who never moved got nothing. In match 2, with VIP + 2x XP on Player2 and 2x XP on Player3, matches saved XP and level-ups paid out. Player3 reached Level 2 with 120 XP and Player4 reached Level 2 with 105 XP. Player2 earned nothing in match 2: they were caught standing still, so they weren't active (bonuses multiply the match XP, and 0 × 2.25 is 0).
 - **Profile:** `xp` holds total XP, and the player attribute `EOS_Level` holds the level.
 - A level changes nothing in a match.
 
@@ -23,5 +24,6 @@ Built 16 Oct 2026 (HOS-PASS-001). Hunter asked for an XP system like Huss Valley
 - **Stacking:** the bonuses add up. VIP alone pays 1.25x, 2x XP alone pays 2x, and both pay 2.25x (`PassService.boostXp`).
 - **Ownership:** `PassService` checks ownership on join and when a purchase finishes. It mirrors ownership to `EOS_VIP` / `EOS_XP2x`, which only the server sets.
 - **Shop:** the Shop has a **Passes** tab (seventh tab) with OWNED states. A purchase opens the Reward reveal.
+- **Product icons (16 Oct):** the 4 item products use their in-game art, and the 6 Gem packs use `gempack1`–`6`, set from `C:\HatchOrSnatch\ui\icons_ai`.
 - **Icons:** prompts are in `docs/ui/chatgpt_icon_prompt.md` (`pass_vip`, `pass_xp2x`). Until the art arrives, the runtime uses the crown and star icons. The Roblox pass icons are still the default.
 - **History:** the 2x pass was first built as 2x Gold, from the GDD's "2x Gold 199" line. Hunter changed it to 2x XP the same day.
