@@ -21,6 +21,7 @@ local Shared = EOS:WaitForChild("Shared")
 local EmoteConfig = require(Shared:WaitForChild("EmoteConfig"))
 local Net = require(Shared:WaitForChild("Net"))
 
+local EmoteFX = require(script.Parent.EmoteFX)
 local Sound = require(script.Parent.Sound)
 local UI = require(script.Parent.UIController)
 
@@ -209,6 +210,7 @@ local function watchCharacter(char: Model)
 	char:GetAttributeChangedSignal("EOS_Emote"):Connect(function()
 		setSong(char)
 	end)
+	EmoteFX.watch(char) -- light construct for emotes that mime a prop (HOS-EMOTE-FX-001)
 end
 
 local function watchPlayer(plr: Player)

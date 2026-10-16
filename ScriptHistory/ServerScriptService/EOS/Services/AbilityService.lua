@@ -34,6 +34,10 @@ local loadouts: { [Player]: Loadout } = {}
 -- request, on the flash (client CrowPet.INTRO must match). Looks only; the mechanics are shared.
 local INTRO: { [string]: number } = { Crow = 0.5 }
 
+-- every Decoy copy runs off at a random angle inside this cone (degrees) around your heading
+local DECOY_SPREAD = 145
+local decoyRng = Random.new()
+
 -- a pet's mutation level (1..3); pets have no level field yet, so 1 until they do
 local function petLevel(pet: any): number
 	local lv = tonumber(pet and (pet.level or pet.mutation)) or 1
@@ -163,15 +167,38 @@ local function decoy(plr: Player, dir: Vector3, duration: number, species: strin
 	h.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
 	h:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 	local flat = Vector3.new(dir.X, 0, dir.Z)
-	if flat.Magnitude < 0.1 then
+	local moving = Vector3.new(hrp.AssemblyLinearVelocity.X, 0, hrp.AssemblyLinearVelocity.Z)
+	if flat.Magnitude < 0.1 and moving.Magnitude > 4 then
+		flat = moving -- no stick input but still carrying speed (a slide, a lunge): go the way you're moving
+	elseif flat.Magnitude < 0.1 then
 		flat = Vector3.new(hrp.CFrame.LookVector.X, 0, hrp.CFrame.LookVector.Z)
 	end
 	flat = flat.Unit
-	clone:PivotTo(CFrame.lookAt(hrp.Position, hrp.Position + flat))
+	-- the copy picks its own heading inside a cone around yours, so Catchers can't call which way it goes
+	local half = math.rad(DECOY_SPREAD / 2)
+	flat = (CFrame.Angles(0, decoyRng:NextNumber(-half, half), 0) * flat).Unit
+	-- The server sees a running player a moment in the past, and the copy reaches their screen later
+	-- still: start it where they'll be by then (ping + interpolation), already at full speed, so it
+	-- doesn't appear behind them. A wall in the way stops the lead short of it.
+	local vel = Vector3.new(hrp.AssemblyLinearVelocity.X, 0, hrp.AssemblyLinearVelocity.Z)
+	-- measured in Studio: a new copy shows up on the owner's screen about 0.3 s behind the server
+	local lead = vel * math.clamp(plr:GetNetworkPing() + 0.3, 0.25, 0.6)
+	local start = hrp.Position
+	if lead.Magnitude > 0.05 then
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { char, runtimeFolder("Decoys") }
+		local hit = workspace:Raycast(hrp.Position, lead, params)
+		start = if hit
+			then hrp.Position + lead.Unit * math.max(0, (hit.Position - hrp.Position).Magnitude - 1.5)
+			else hrp.Position + lead
+	end
+	clone:PivotTo(CFrame.lookAt(start, start + flat))
 	clone.Parent = runtimeFolder("Decoys")
 	pcall(function()
 		root:SetNetworkOwner(nil)
 	end)
+	root.AssemblyLinearVelocity = flat * h.WalkSpeed -- already running when it appears
 	-- the same run clip the owner shows (published id; Studio-only clips can't play on the server)
 	local animator = h:FindFirstChildOfClass("Animator") or Instance.new("Animator", h)
 	local runId = AnimConfig.ids.Run
