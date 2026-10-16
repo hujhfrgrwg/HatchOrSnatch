@@ -4,7 +4,7 @@
 --   FOLLOW   the camera follows that player (Roblox's camera: right-drag orbits, scroll zooms)
 --   FREE CAM fly around the field: WASD, Q / E down / up, right-drag to look, Shift for speed
 --   EXIT     back to your character (also when the match ends or you're put into one)
--- Your character stands still while you watch (its controls are off, Space doesn't dash).
+-- Your character stands still while you watch (anchored in the lobby, Space doesn't dash).
 
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
@@ -69,9 +69,12 @@ end
 local function nameOf(m: Model): string
 	local plr = Players:GetPlayerFromCharacter(m)
 	if plr then return plr.DisplayName end
+	-- NPCs: the name their overhead tag shows on this client (a friend's name live, "Runner 4" in Studio)
+	local head = m:FindFirstChild("Head")
+	local tag = head and head:FindFirstChild("EOS_Tag")
+	local label = tag and tag:FindFirstChild("NameLabel", true)
+	if label and label:IsA("TextLabel") and label.Text ~= "" then return label.Text end
 	local hum = m:FindFirstChildOfClass("Humanoid")
-	local shown = m:GetAttribute("EOS_ShownName")
-	if type(shown) == "string" and shown ~= "" then return shown end
 	return if hum and hum.DisplayName ~= "" then hum.DisplayName else "Runner"
 end
 
@@ -86,18 +89,20 @@ local function infoOf(m: Model): string
 	return role
 end
 
+-- your character waits in the lobby: its root is anchored while you watch (the game has no PlayerModule
+-- to switch off; Movement drives the humanoid), and Space / jump are sunk so nothing dashes
+local anchored: BasePart? = nil
 local function controls(on: boolean)
-	local ok, pm = pcall(function()
-		return require(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"))
-	end)
-	if ok and pm then
-		local c = pm:GetControls()
-		if on then c:Enable() else c:Disable() end
-	end
 	if on then
+		if anchored and anchored.Parent then anchored.Anchored = false end
+		anchored = nil
 		ContextActionService:UnbindAction("EOS_SpectateSink")
 	else
-		-- above Movement's dash (High): Space / jump do nothing while you watch
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") and not root.Anchored then
+			root.Anchored = true
+			anchored = root
+		end
 		ContextActionService:BindActionAtPriority("EOS_SpectateSink", function()
 			return Enum.ContextActionResult.Sink
 		end, false, Enum.ContextActionPriority.High.Value + 10, Enum.KeyCode.Space, Enum.KeyCode.ButtonA)
