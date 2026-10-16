@@ -2478,12 +2478,16 @@ local function fit()
 	root.Size = UDim2.fromOffset(vp.X / s, vp.Y / s)
 	local fs = root:FindFirstChild("FitScale") :: UIScale
 	fs.Scale = s
-	-- Roblox's top bar keeps its point size while the HUD scales down (phones): push top-corner
-	-- groups below it. Their design offset is remembered in BaseY.
+	-- Roblox's top bar keeps its point size while the HUD scales down, so its buttons cover more of the design
+	-- width on smaller windows. A top-corner group slides sideways to clear them and stays in the top row
+	-- (Hunter, 16 Oct: Quests / Incubator belong beside the Roblox buttons, not under them), shrinking to
+	-- no less than 75% so it stops short of the top-centre status. Only when even that won't fit does it
+	-- drop below the bar. Design offsets are remembered in BaseX / BaseY.
 	local inset = GuiService.TopbarInset
 	local barH = if inset.Max.Y > 0 then inset.Max.Y / s + 8 else 0
 	local rw = vp.X / s
 	local leftEnd, rightStart = inset.Min.X / s, (if inset.Max.X > 0 then inset.Max.X else vp.X) / s
+	local CENTRE_HALF = 200 -- the top-centre status keeps this much either side of the middle
 	for _, sc in screens do
 		for _, g in sc:GetChildren() do
 			if g:IsA("GuiObject") and g.Position.Y.Scale == 0 then
@@ -2492,12 +2496,43 @@ local function fit()
 					base = g.Position.Y.Offset
 					g:SetAttribute("BaseY", base)
 				end
-				local x0 = g.Position.X.Scale * rw + g.Position.X.Offset - g.AnchorPoint.X * g.Size.X.Offset
-				local x1 = x0 + g.Size.X.Offset
-				local inCorner = x0 < leftEnd or x1 > rightStart
-				local y = base :: number
-				if inCorner and y < barH then y = barH end
-				g.Position = UDim2.new(g.Position.X.Scale, g.Position.X.Offset, 0, y)
+				local baseX = g:GetAttribute("BaseX") :: number?
+				if baseX == nil then
+					baseX = g.Position.X.Offset
+					g:SetAttribute("BaseX", baseX)
+				end
+				local w = g.Size.X.Offset
+				local x0 = g.Position.X.Scale * rw + (baseX :: number) - g.AnchorPoint.X * w
+				local x1 = x0 + w
+				local y, dx, k = base :: number, 0, 1
+				if y < barH and (x0 < leftEnd or x1 > rightStart) then
+					local room, need
+					if x0 < leftEnd then
+						room = (rw / 2 - CENTRE_HALF) - (leftEnd + 10) -- from the Roblox buttons to the centre
+						need = leftEnd + 10 - x0
+					else
+						room = (rightStart - 10) - (rw / 2 + CENTRE_HALF)
+						need = -(x1 - (rightStart - 10))
+					end
+					local sc0 = g:FindFirstChildOfClass("UIScale")
+					local canScale = sc0 == nil or sc0.Name == "InsetScale"
+					if w <= room then
+						dx = need
+					elseif canScale and room >= w * 0.75 then
+						k = room / w -- UIScale shrinks toward the AnchorPoint, so the cleared edge stays put
+						dx = need
+					else
+						y = barH
+					end
+				end
+				local is = g:FindFirstChild("InsetScale") :: UIScale?
+				if k < 1 and not is then
+					is = Instance.new("UIScale")
+					is.Name = "InsetScale"
+					is.Parent = g
+				end
+				if is then is.Scale = k end
+				g.Position = UDim2.new(g.Position.X.Scale, (baseX :: number) + dx, 0, y)
 			end
 		end
 	end
