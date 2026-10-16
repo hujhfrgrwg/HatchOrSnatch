@@ -961,6 +961,13 @@ local function railToggles()
 			if o then o.Visible = not on end
 			local slug = if on then t[2] else t[2] .. "_off"
 			if iconId(slug) ~= "" then setIcon(b, "Icon", slug) end
+			-- off also borrows AFK's grey plate, so Hunt greys out the same way (its red plate comes back when on)
+			local art = b:FindFirstChild("Plate") and b.Plate:FindFirstChild("Art")
+			local grey = rail:FindFirstChild("AFKToggle") and rail.AFKToggle:FindFirstChild("Plate") and rail.AFKToggle.Plate:FindFirstChild("Art")
+			if art and grey and art ~= grey and art:IsA("ImageLabel") then
+				if not art:GetAttribute("OnImage") then art:SetAttribute("OnImage", art.Image) end
+				art.Image = if on then art:GetAttribute("OnImage") else grey.Image
+			end
 		end
 	end
 end
