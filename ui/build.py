@@ -475,7 +475,7 @@ def s_hud():
     tr = hv_pill(1236, 12, 216, 'teal', 'servers', 'SERVERS', 'ServersButton', 'Servers') + tr
     # AFK / Hunt sit on a grey plate; the coloured PlateOn shows while they're on (16 Oct: Hunt is purple, not red)
     rail = (hv_rail_btn(10, 290, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 400, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
-            + hv_rail_btn(10, 510, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'Emotes', key='G')
+            + hv_rail_btn(10, 510, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'EmoteWheel', key='G')
             + hv_rail_btn(10, 620, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF', on_color='blue')
             + hv_rail_btn(10, 730, 96, 'grey', 'hunt', 'HUNT', 'VolunteerToggle', state='ON', on_color='purple'))
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
@@ -919,7 +919,8 @@ import json as _json
 _SONGS = {'snappy_skip': 'Clap Your Hands And Smile', 'idle_dance': 'Soul Dancefloor', 'shuffle': 'Cyber Gym', 'wavy_grooves': 'Explosive Groove',
           'moongazer': 'Moonwalk', 'cat_dance': 'The Jitters', 'skeleton': 'Trick or Treat', 'electro_shuffle': 'Commodore Love',
           'jumpstyle': 'Free to Rave', 'wibbly_wobbly': 'Dubstep Orange', 'marat': 'Eurodance', 'kpop_dance': 'I Cannot Get Enough',
-          'flexer': 'Night Sweats', 'rap_bounce': 'Brass Knuckles', 'e_dance': 'Accelerator'}
+          'flexer': 'Night Sweats', 'rap_bounce': 'Brass Knuckles', 'e_dance': 'Accelerator',
+          'idle_sit': 'Sunset Chill', 'anime_pose': 'Fight Of Utsusemi', 't_pose': 'Comical Tango', 'thumbs_up': 'Happy Song', 'loser_dance': 'Cartoony', 'trick_or_treat': 'Halloween Horrors Waltz', 'sunbath': 'Waikiki Beach', 'couch_nap': 'Music Box Lullaby', 'toilet_sit': 'Playful Promenade', 'dramatic_bow': 'To the Victor', 'candy_dance': 'Zambezi', 'neko_dance': 'Do My Best', 'beatbox': 'Take It Now', 'cossack_kick': 'Happy Balalaika', 'boogie_down': 'Discoball', 'orange_sway': 'Eurofax', 'company_dance': 'Retro Energy', 'surfer': 'Surf Rock', 'ice_cream_cart': 'Fun Polka', 'parrot_wiggle': 'Tropical Breeze', 'head_juggle': 'Circus And Clowns', 'zombie_dance': 'Halloween Funk', 'gambler_dance': 'Swing The Polka', 'breakdance': 'Into The Stratosphere', 'star_emote': 'Moved By Joy', 'coconut_launch': 'Bananas', 'dap_up': 'Ice Cold Drip', 'threaten': 'Darkness Distilled', 'lose_it': 'Cyber Generation', 'skeleton_grooves': 'Cosmic Lady', 'honored_one': 'Dream Of A Lifetime', 'shadow_emerge': 'Impending Doom', 'shadow_step': 'Dystopian Distortion', 'reapers_ride': 'Heavy Metal', 'floating_meditation': 'Meditation', 'blossom_break': 'Koto Chill'}
 # id, name, rarity, song: roblox/game/emote_catalog.json is the one list (EmoteConfig is generated from it too)
 EMOTES = [(e[0], e[1], 'crowned' if e[2] == 'legendary' else e[2], _SONGS.get(e[0], ''))
           for e in _json.load(open(os.path.join(HERE, '..', 'roblox', 'game', 'emote_catalog.json')))]

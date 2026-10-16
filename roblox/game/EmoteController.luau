@@ -846,6 +846,10 @@ local function wire(root: Instance)
 			end)
 		end
 	end
+	-- the rail's EMOTES button opens the wheel (like G; phones have no G key); the wheel's MY EMOTES opens the panel
+	local hud = root:FindFirstChild("HUD")
+	local eb = hud and hud:FindFirstChild("EmotesButton", true)
+	if eb then eb:SetAttribute("OpensVia", "EmoteWheel") end
 	local edim = scr and scr:FindFirstChild("Dim")
 	local ef = edim and edim:FindFirstChild("F")
 	if ef and ef:IsA("GuiObject") then
