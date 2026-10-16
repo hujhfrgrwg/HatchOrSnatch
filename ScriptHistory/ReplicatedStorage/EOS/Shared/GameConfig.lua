@@ -68,6 +68,7 @@ GameConfig.Capture = {
 	ARM_MAX_DOWN = math.rad(70),
 	-- caught = ragdoll: the Runner falls the way they were hit and STAYS on the floor for the rest of
 	-- the crossing (developer, Oct 15); they get up when it ends, as Catchers
+	RAGDOLL_SETTLE = 1.2, -- seconds of real fall, then the body locks in the pose it landed in (no physics while it lies there)
 	RAGDOLL_STAY_DOWN = true,
 	RAGDOLL_SECONDS = 2.5, -- only used if RAGDOLL_STAY_DOWN is false: time down before getting back up
 	RAGDOLL_PUSH = 30, -- studs/s away from the Catcher
