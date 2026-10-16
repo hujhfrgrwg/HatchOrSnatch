@@ -2293,6 +2293,19 @@ function UIC.init()
 		warn("[EOSUI] PlayerGui.EOSUI is missing: rebuild it (ServerStorage.EOSUIBuild.Builder.build())")
 		return
 	end
+	-- the old UI (EOS_HUD / EOS_Menus / EOS_Results / EOS_Overlay, UIBuilder) is retired: keep its PlayerGui
+	-- copies switched off so stale placeholders never draw over EOSUI (EmoteController still finds EOS_Menus)
+	for _, name in ipairs({ "EOS_HUD", "EOS_Menus", "EOS_Results", "EOS_Overlay" }) do
+		task.spawn(function()
+			local og = pg:WaitForChild(name, 15)
+			if og and og:IsA("ScreenGui") then
+				og.Enabled = false
+				og:GetPropertyChangedSignal("Enabled"):Connect(function()
+					if og.Enabled then og.Enabled = false end
+				end)
+			end
+		end)
+	end
 	UI = require(gui:WaitForChild("UI"))
 	assets = require(gui:WaitForChild("AssetIds"))
 	templates = ReplicatedStorage:WaitForChild(gui:GetAttribute("TemplatesFolder") or "EOSUITemplates", 10)
