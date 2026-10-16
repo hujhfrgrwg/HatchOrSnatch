@@ -10,7 +10,8 @@
 --   Sound.setMusic(state)               "lobby" | "match" | "results" | "off" (crossfades; idempotent)
 --   Sound.duck(level, seconds)          dip the music under a big moment (reveal, results sting)
 --   Sound.enabled / Sound.setMusicEnabled(on)   the Settings toggles
--- Volumes are per sound, set by ear against the music bed; the SFX and Music SoundGroups carry the toggles.
+-- Volumes and start offsets were measured in the place (16 Oct, AudioAnalyzer RMS): each sound skips its silent
+-- lead-in and is levelled to about the same loudness. The SFX and Music SoundGroups carry the Settings toggles.
 
 local ContentProvider = game:GetService("ContentProvider")
 local SoundService = game:GetService("SoundService")
@@ -22,41 +23,43 @@ Sound.enabled = true
 -- name = { id, volume, startAt (skips a silent lead-in), jitter (random pitch +/-) }
 local SFX: { [string]: { any } } = {
 	-- UI (Roblox UI pack + Pro Sound Effects foley)
-	click = { 15675032796, 0.5, 0, 0.04 }, -- Roblox_UI_Small_Click
-	open = { 15675024286, 0.35, 0, 0 }, -- Roblox_UI_Whoosh_01
-	close = { 15675012262, 0.3, 0, 0 }, -- Roblox_UI_Whoosh_04
-	toggle = { 9119717529, 0.5, 0, 0.03 }, -- Switch Click On Or Off Toggle Button 1
-	tab = { 15675037413, 0.4, 0, 0.03 }, -- Roblox_UI_Paper_Swipe
-	pop = { 15675055424, 0.35, 0, 0 }, -- Roblox_UI_Cute_Pop (toasts)
-	error = { 9120917438, 0.55, 0, 0 }, -- Wood Impacts Soft Impacts On Temple Blocks 1
-	reward = { 9113849492, 0.55, 0, 0 }, -- Coins Or Keys Jingle 6 (gold, claims)
-	purchase = { 9113728042, 0.5, 0, 0 }, -- Cash Register 1
+	click = { 15675032796, 3.0, 0, 0.04 }, -- Roblox_UI_Small_Click
+	open = { 15675024286, 0.52, 0.08, 0 }, -- Roblox_UI_Whoosh_01
+	close = { 15675012262, 0.56, 0, 0 }, -- Roblox_UI_Whoosh_04
+	toggle = { 9119717529, 0.63, 0, 0.03 }, -- Switch Click On Or Off Toggle Button 1
+	tab = { 15675037413, 0.75, 0, 0.03 }, -- Roblox_UI_Paper_Swipe
+	pop = { 15675055424, 0.36, 0, 0 }, -- Roblox_UI_Cute_Pop (toasts)
+	error = { 9120917438, 1.1, 0, 0 }, -- Wood Impacts Soft Impacts On Temple Blocks 1
+	reward = { 9113849492, 2.1, 0.08, 0 }, -- Coins Or Keys Jingle 6 (gold, claims)
+	purchase = { 9113728042, 0.41, 0.05, 0 }, -- Cash Register 1
 	-- match
-	tick = { 9120917813, 0.4, 0, 0 }, -- Wood Impacts Soft Impacts On Temple Blocks 6 (countdowns)
-	go = { 9118113825, 0.45, 0, 0 }, -- Referee Whistle 2 (crossing starts)
-	role = { 15675043410, 0.45, 0, 0 }, -- Roblox_UI_Tonal_Stinger (role reveal)
-	alert = { 15675085146, 0.5, 0, 0 }, -- Roblox_UI_Indicator (last one standing)
-	swing = { 9120704978, 0.45, 0, 0.06 }, -- Whooshes Fast Wipes Quick Airy Slices 3 (tag)
-	dash = { 9126229255, 0.4, 0, 0.05 }, -- Whoosh By Fast Airy Swooshing Whipping Thuds
-	caught = { 9113518281, 0.6, 0, 0 }, -- Body Hits Thuds 1 (you got caught)
-	capture = { 9113482967, 0.5, 0, 0.06 }, -- Body Grabs 8 (a steal; 3D for everyone else's)
-	evolve = { 9119447936, 0.45, 0, 0 }, -- Sparkle Bell Tree Wind Chimes 1 (safe / egg levels up)
+	tick = { 9120917813, 0.8, 0, 0 }, -- Wood Impacts Soft Impacts On Temple Blocks 6 (countdowns)
+	go = { 9118113825, 0.74, 0.08, 0 }, -- Referee Whistle 2 (crossing starts)
+	role = { 15675043410, 0.5, 0, 0 }, -- Roblox_UI_Tonal_Stinger (role reveal)
+	alert = { 15675085146, 0.83, 0, 0 }, -- Roblox_UI_Indicator (last one standing)
+	swing = { 9120704978, 1.7, 0.05, 0.06 }, -- Whooshes Fast Wipes Quick Airy Slices 3 (tag)
+	dash = { 9126229255, 0.27, 0, 0.05 }, -- Whoosh By Fast Airy Swooshing Whipping Thuds
+	caught = { 9113518281, 0.88, 0, 0 }, -- Body Hits Thuds 1 (you got caught)
+	capture = { 9113482967, 0.67, 0, 0.06 }, -- Body Grabs 8 (a steal; 3D for everyone else's)
+	evolve = { 9119447936, 3.75, 0.55, 0 }, -- Sparkle Bell Tree Wind Chimes 1 (safe / egg levels up)
 	-- pets and hatching
-	crack = { 9113958649, 0.6, 0, 0.05 }, -- Crack Egg Crunchy 2 (egg shaking)
-	reveal = { 9119448154, 0.5, 0, 0 }, -- Sparkle Bell Tree Wind Chimes 2 (new pet)
-	applause = { 9113138088, 0.35, 0, 0 }, -- Applause Tight 2
-	poof = { 9116406610, 0.55, 0, 0.04 }, -- Magic Poofs Thumpy Wheezy Exhale 1 (Decoy)
-	ping = { 9116224467, 0.4, 0, 0 }, -- Large Metal Triangle Single Ringing Hits 12 (Scout)
-	ability = { 9116402581, 0.45, 0, 0.04 }, -- Magic Movement Airy Whips Swooshes 61 (other abilities)
+	crack = { 9113958649, 0.93, 0.18, 0.05 }, -- Crack Egg Crunchy 2 (egg shaking)
+	reveal = { 9119448154, 2.1, 1.8, 0 }, -- Sparkle Bell Tree Wind Chimes 2 (new pet)
+	applause = { 9113138088, 1.1, 0.07, 0 }, -- Applause Tight 2
+	poof = { 9116406610, 0.88, 0, 0.04 }, -- Magic Poofs Thumpy Wheezy Exhale 1 (Decoy)
+	ping = { 9116224467, 0.69, 0, 0 }, -- Large Metal Triangle Single Ringing Hits 12 (Scout)
+	ability = { 9116402581, 0.69, 0.28, 0.04 }, -- Magic Movement Airy Whips Swooshes 61 (other abilities)
 	-- results
 	win = { 1845466651, 0.5, 0, 0 }, -- APM: Celebration Fanfare (Fanfares And Salutes)
-	lose = { 9119198473, 0.5, 0, 0 }, -- Slide Whistle 7
+	lose = { 9119198473, 0.48, 0.3, 0 }, -- Slide Whistle 7
 }
 
 -- APM Music (Roblox's licensed library). Each state is a playlist; tracks crossfade end to end.
+-- Empty until Hunter picks tracks: he rejected the first picks (16 Oct: Paradise Falls, Tender Tropical
+-- House, Really Fast, Funky (A)). With no tracks the system stays silent.
 local MUSIC: { [string]: { number } } = {
-	lobby = { 1837879082, 1836105293 }, -- Paradise Falls (Tropical Afterparty), Tender Tropical House
-	match = { 1846911135, 1840434670 }, -- Really Fast (Hard Driving: Sports & Action), Funky (A) (Ultimate Action)
+	lobby = {},
+	match = {},
 }
 local MUSIC_VOLUME = { lobby = 0.32, match = 0.3, results = 0.16 }
 local FADE = 1.6
@@ -141,6 +144,7 @@ function Sound.playAt(name: string, position: Vector3, volume: number?)
 	local j = def[4] or 0
 	s.PlaybackSpeed = 1 + (if j > 0 then (math.random() * 2 - 1) * j else 0)
 	s.Parent = att
+	if (def[3] or 0) > 0 then s.TimePosition = def[3] end
 	s.Ended:Once(function() att:Destroy() end)
 	s:Play()
 	task.delay(8, function()
@@ -166,7 +170,7 @@ end
 
 local function startTrack(kind: string)
 	local list = MUSIC[kind]
-	if not list then return end
+	if not list or #list == 0 then return end
 	local i = (index[kind] or math.random(1, #list)) % #list + 1
 	index[kind] = i
 	local s = Instance.new("Sound")
