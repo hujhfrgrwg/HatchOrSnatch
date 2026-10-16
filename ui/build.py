@@ -604,7 +604,7 @@ def incubator_top(b, first):
             live = WAVE[pid] == 1
             tr += slot(cx, 20, 82, colr, ic, cls='fill' if live else 'fill soon', art_pad=.14, name=f'Fam_{pid}',
                        inner_extra='' if live else I('lock', 52, 4, 26))
-            tr += at(cx + 41, 112, T(f'{found.get(pid, 0)} / {len(pets)}' if live else f'wave {WAVE[pid]}', 20 if live else 17, 's' if live else 'xs', '' if live else 'f-dim'), w=100, align='center')
+            tr += at(cx + 41, 112, T(f'{found.get(pid, 0)} / {len(pets)}' if live else f'wave {WAVE[pid]}', 20 if live else 17, 's' if live else 'xs', '' if live else 'f-dim', name=f'FamCount_{pid}'), w=100, align='center')
         coll = well(476, 40, 998, 170, tr, name='Collection', title='Your Collection')
         b += sub('CollectionWrap', coll, hid=True) if EXPORT_STATES else coll
     else:

@@ -27,6 +27,8 @@ local actionEvent = Instance.new("BindableEvent")
 UI.Action = actionEvent.Event
 local pageEvent = Instance.new("BindableEvent")
 UI.PageChanged = pageEvent.Event
+local openedEvt = Instance.new("BindableEvent")
+UI.Opened = openedEvt
 
 local gui: ScreenGui
 local root: Frame
@@ -46,7 +48,7 @@ local PRESS = TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.Ou
 local SPRING = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 
 -- HUD groups that stay visible while a panel is open (everything else on HUD screens hides)
-UI.keepWithPanel = { Currencies = true }
+UI.keepWithPanel = {}
 
 ---------------------------------------------------------------- sounds
 -- Fill with audio the game's owner can use (probe first: audio from another creator plays as
@@ -127,34 +129,180 @@ function UI.countTo(key: string, target: number, scope: Instance, label: string,
 end
 
 ---------------------------------------------------------------- screens
-local function popIn(frame: GuiObject)
-	for _, g in frame:GetChildren() do
-		if g:IsA("GuiObject") then
-			local s = g:FindFirstChild("PopScale") :: UIScale?
-			if not s then
-				local ns = Instance.new("UIScale")
-				ns.Name = "PopScale"
-				ns.Parent = g
-				s = ns
+-- Premium open: the scrim fades in, the panel group pops from 0.86 with a Back ease, its banner slides
+-- in from the left a beat later, the close X spins in last. Rest positions live in "RestPos" attributes.
+-- Roblox applies only ONE UIScale per object: reuse whatever UIScale is there (Builder's BigText,
+-- juicy's JuiceScale) and remember its resting value in "Base" so tweens return to it.
+local function scaleOf(g: GuiObject, name: string): UIScale
+	local s = g:FindFirstChild(name) :: UIScale?
+	if not s then
+		for _, c in g:GetChildren() do
+			if c:IsA("UIScale") then
+				s = c
+				break
 			end
-			local ps = s :: UIScale
-			ps.Scale = 0.4
-			TweenService:Create(ps, OPEN, { Scale = 1 }):Play()
 		end
 	end
+	if s then
+		if s:GetAttribute("Base") == nil then s:SetAttribute("Base", s.Scale) end
+	else
+		local ns = Instance.new("UIScale")
+		ns.Name = name
+		ns:SetAttribute("Base", 1)
+		ns.Parent = g
+		s = ns
+	end
+	return s :: UIScale
+end
+local function base(s: UIScale): number
+	return (s:GetAttribute("Base") :: number?) or 1
+end
+local function rest(g: GuiObject): UDim2
+	local r = g:GetAttribute("RestPos") :: UDim2?
+	if not r then
+		g:SetAttribute("RestPos", g.Position)
+		r = g.Position
+	end
+	return r :: UDim2
+end
+local function fadeDim(frame: GuiObject, on: boolean)
+	local d = frame:FindFirstChild("Dim")
+	local f = d and d:FindFirstChild("F") :: Frame?
+	if not f then return end
+	local base = f:GetAttribute("BaseT") :: number?
+	if base == nil then
+		base = f.BackgroundTransparency
+		f:SetAttribute("BaseT", base)
+	end
+	if on then
+		f.BackgroundTransparency = 1
+		TweenService:Create(f, FADE, { BackgroundTransparency = base }):Play()
+	else
+		TweenService:Create(f, CLOSE, { BackgroundTransparency = 1 }):Play()
+	end
+end
+local function popIn(frame: GuiObject)
+	fadeDim(frame, true)
+	for _, g in frame:GetChildren() do
+		if g:IsA("GuiObject") and g.Name ~= "Dim" then
+			local ps = scaleOf(g, "PopScale")
+			ps.Scale = 0.86 * base(ps)
+			TweenService:Create(ps, OPEN, { Scale = base(ps) }):Play()
+			local banner = g:FindFirstChild("Banner") :: GuiObject?
+			if banner and banner:IsA("GuiObject") then
+				local at = rest(banner)
+				banner.Position = at - UDim2.fromOffset(90, 0)
+				TweenService:Create(banner, TweenInfo.new(0.42, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, 0.06),
+					{ Position = at }):Play()
+			end
+			local x = g:FindFirstChild("CloseButton") :: GuiObject?
+			if x and x:IsA("GuiObject") then
+				local xs = scaleOf(x, "SpinScale")
+				xs.Scale = 0
+				local rot = x:GetAttribute("RestRot") :: number?
+				if rot == nil then
+					rot = x.Rotation
+					x:SetAttribute("RestRot", rot)
+				end
+				x.Rotation = (rot :: number) - 120
+				local ti = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out, 0, false, 0.14)
+				TweenService:Create(xs, ti, { Scale = base(xs) }):Play()
+				TweenService:Create(x, ti, { Rotation = rot }):Play()
+			end
+		end
+	end
+	openedEvt:Fire(frame.Name)
 end
 local function popOut(frame: GuiObject, done: () -> ())
+	fadeDim(frame, false)
 	local last: Tween? = nil
 	for _, g in frame:GetChildren() do
-		local s = g:FindFirstChild("PopScale") :: UIScale?
+		local s = if g:IsA("GuiObject") and g.Name ~= "Dim" then scaleOf(g, "PopScale") else nil
 		if s then
-			local t = TweenService:Create(s, CLOSE, { Scale = 0 })
+			local t = TweenService:Create(s, CLOSE, { Scale = 0.82 * base(s) })
 			t:Play()
 			last = t
 		end
 	end
 	if last then last.Completed:Once(done) else done() end
 end
+
+---------------------------------------------------------------- motion helpers (used by game code)
+-- quick scale punch on any GuiObject (badge, wallet, ability card)
+function UI.pulse(g: GuiObject, amount: number?)
+	local s = scaleOf(g, "PulseScale")
+	s.Scale = base(s) * (1 + (amount or 0.12))
+	TweenService:Create(s, TweenInfo.new(0.45, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), { Scale = base(s) }):Play()
+end
+-- pop a thing in from nothing (reveals, toasts, podium)
+function UI.popFrom(g: GuiObject, from: number?, delay: number?)
+	local s = scaleOf(g, "PulseScale")
+	s.Scale = base(s) * (from or 0)
+	TweenService:Create(s, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out, 0, false, delay or 0), { Scale = base(s) }):Play()
+end
+-- slide a thing in from an offset to its rest position
+function UI.slideIn(g: GuiObject, dx: number, dy: number, delay: number?, time: number?)
+	local at = rest(g)
+	g.Position = at + UDim2.fromOffset(dx, dy)
+	TweenService:Create(g, TweenInfo.new(time or 0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, delay or 0), { Position = at }):Play()
+end
+-- left/right shake (refused action, egg about to hatch)
+function UI.shake(g: GuiObject, mag: number?, dur: number?)
+	local at = rest(g)
+	local m, t0 = mag or 8, os.clock()
+	local c: RBXScriptConnection
+	c = RunService.RenderStepped:Connect(function()
+		local t = os.clock() - t0
+		if t > (dur or 0.35) or not g.Parent then
+			g.Position = at
+			c:Disconnect()
+			return
+		end
+		local k = 1 - t / (dur or 0.35)
+		g.Position = at + UDim2.fromOffset(math.sin(t * 60) * m * k, 0)
+	end)
+end
+-- slow continuous spin (light rays) while the object is on screen; one loop per object
+local spinning: { [GuiObject]: number } = {}
+function UI.spin(g: GuiObject, degPerSec: number)
+	if spinning[g] then spinning[g] = degPerSec return end
+	spinning[g] = degPerSec
+	local c: RBXScriptConnection
+	c = RunService.RenderStepped:Connect(function(dt)
+		if not g.Parent then
+			spinning[g] = nil
+			c:Disconnect()
+			return
+		end
+		if g.Visible and g:FindFirstAncestorWhichIsA("ScreenGui") and (g:FindFirstAncestorWhichIsA("ScreenGui") :: ScreenGui).Enabled then
+			g.Rotation = (g.Rotation + (spinning[g] or 0) * dt) % 360
+		end
+	end)
+end
+-- gentle breathing scale loop (ready badges, claimable buttons); stop with UI.breathe(g, false)
+local breathing: { [GuiObject]: Tween } = {}
+function UI.breathe(g: GuiObject, on: boolean)
+	local cur = breathing[g]
+	if on and cur then return end
+	if cur then
+		cur:Cancel()
+		breathing[g] = nil
+		local bs = scaleOf(g, "BreatheScale")
+		bs.Scale = base(bs)
+	end
+	if on then
+		local s = scaleOf(g, "BreatheScale")
+		s.Scale = base(s)
+		local t = TweenService:Create(s, TweenInfo.new(0.7, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = base(s) * 1.08 })
+		breathing[g] = t
+		t:Play()
+	end
+end
+-- re-capture a moved element's rest position (call after code positions something)
+function UI.setRest(g: GuiObject)
+	g:SetAttribute("RestPos", g.Position)
+end
+
 local function setDim(alpha: number)
 	if alpha > 0 then
 		dim.Visible = true
@@ -264,6 +412,7 @@ function UI.juicy(b: GuiButton)
 	b:SetAttribute("JuiceRest", b.Position)
 	local sc = Instance.new("UIScale")
 	sc.Name = "JuiceScale"
+	sc:SetAttribute("Base", 1)
 	sc.Parent = b
 	local hovered, held = false, false
 	local lift = if b.Name == "CloseButton" then 1.12 else 1.06
