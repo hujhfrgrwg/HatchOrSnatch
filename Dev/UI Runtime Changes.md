@@ -25,7 +25,7 @@ What the new UI controller changes at runtime, so the built GUI in Studio (`Star
 
 ## Motion
 - **Panels:** `UI.luau` handles the pop, dim fade, banner slide and close-button spin. On top of that, the controller cascades the panel's wells and buttons in reading order, 35 ms apart. Frames rise 22 px; buttons scale in so their hover springs keep their rest. The cascade is off with Reduce Effects, and on Results and Hatch, which have their own motion.
-- **Rail toggles grey out when off.** AFK and Hunt show their full-colour icon when on and a greyed copy when off (`afk_off`, `hunt_off`, made by `ui/tools/icon_variants.py`). When off, Hunt also takes AFK's grey plate, so both buttons grey out the same way; its red plate returns when on. Each toggle uses one drawing: the `afk_on` play moon is uploaded but unused (Hunter's pick, 16 Oct).
+- **Rail toggles grey out when off.** AFK and Hunt show their full-colour icon on a coloured `PlateOn` when on (AFK blue, Hunt purple) and a greyed copy (`afk_off`, `hunt_off`, made by `ui/tools/icon_variants.py`) on the grey plate when off. Hunt shows only in private servers. Each toggle uses one drawing: the `afk_on` play moon is uploaded but unused (Hunter's pick, 16 Oct).
 - **Selection:** rings tween to the new tile (0.22 s Quint). Tiles pulse when you pick them. Refused actions shake.
 - **Toasts:** they slide in, merge repeats and show a time bar. In the lobby they stack top right. With a panel open they move to the top centre, clear of its close button. In a match only forced toasts show, at the top centre.
 - **Hatch:** egg shake, then the reveal pops in with sparkles breathing.
@@ -33,5 +33,5 @@ What the new UI controller changes at runtime, so the built GUI in Studio (`Star
 
 ## Not done yet
 - All 371 images are live (16 Oct). They're uploaded to Hunter's account (Open Use), and their decal ids were resolved to image ids in Studio (`Assets/UI/resolved_image_ids.txt`). That includes `close_clean.png`, the 12 soft panel glows and Hunter's real `safe`, `catcher`, `runner`, `hunt` and `afk` icons.
-- Emotes: the new UI has no emotes panel yet. Opening it shows a toast, and EmoteController still uses the hidden old `EOS_Menus`.
+- Emotes, Servers and Spectate are built (16 Oct): see [[Emotes Servers Spectate]].
 - The game code still launches 3 families (Decoy, Scout, Brake) and the voxel pet species. The UI reads `LAUNCH_FAMILIES` at runtime, so more families light up as the game adds them.
