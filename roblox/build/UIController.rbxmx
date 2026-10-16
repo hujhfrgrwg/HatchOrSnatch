@@ -407,9 +407,11 @@ end
 
 local function layoutToasts()
 	local inm = inMatch()
+	-- a panel's close button sits top right: with a panel open, toasts stack top centre instead
+	local panel = UI and UI.current() ~= nil
 	for i, t in ipairs(toasts) do
-		local y = if inm then 176 + (i - 1) * 96 else 96 + (i - 1) * 96
-		local x = if inm then 960 - 325 else root.Size.X.Offset - 670
+		local y = if inm then 176 + (i - 1) * 96 elseif panel then 18 + (i - 1) * 96 else 96 + (i - 1) * 96
+		local x = if inm or panel then root.Size.X.Offset / 2 - 325 else root.Size.X.Offset - 670
 		TweenService:Create(t, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(x, y) }):Play()
 		t:SetAttribute("RestPos", UDim2.fromOffset(x, y))
 	end
@@ -1087,6 +1089,7 @@ local function refreshQuests()
 				local ready = not q.claimed and (q.progress or 0) >= (q.target or 1)
 				setText(card, "QuestName", q.title or "Quest")
 				setText(card, "ProgressText", ("%d / %d"):format(math.min(q.progress or 0, q.target or 1), q.target or 1))
+				setColor(card, "ProgressText", if ready or q.claimed then Color3.fromRGB(150, 240, 60) else Color3.new(1, 1, 1))
 				setBar(card:FindFirstChild("Progress"), (q.progress or 0) / (q.target or 1))
 				local claim = card:FindFirstChild("Claim")
 				if claim then
@@ -1902,6 +1905,40 @@ local function refreshOne(name: string)
 	elseif name == "Settings" then refreshSettings() end
 end
 
+-- panel entrance: the panel's wells and buttons arrive in reading order, a beat apart, on top of
+-- UI's own pop (frames rise into place, buttons scale in so their hover springs keep their rest)
+local SKIP_CASCADE = { Art = true, ShadowRing = true, SelRing = true, Glow = true, GlowMono = true, Rays = true }
+local function cascade(name: string)
+	if settings.reduceEffects or name == "Results" or name == "Hatch" then return end
+	local sc = S[name]
+	if not sc then return end
+	local items = {}
+	for _, top in sc:GetChildren() do
+		local panel = top:IsA("GuiObject") and top.Name ~= "Dim" and top:FindFirstChild("Panel")
+		if panel then
+			for _, g in panel:GetChildren() do
+				if g:IsA("GuiObject") and g.Visible and not SKIP_CASCADE[g.Name] and not g.Name:match("Sel$") then
+					table.insert(items, g)
+				end
+			end
+		end
+	end
+	table.sort(items, function(a, b)
+		local ay, by = a.AbsolutePosition.Y, b.AbsolutePosition.Y
+		if math.abs(ay - by) > 24 then return ay < by end
+		return a.AbsolutePosition.X < b.AbsolutePosition.X
+	end)
+	for i, g in ipairs(items) do
+		local delay = 0.06 + math.min(i - 1, 12) * 0.035
+		if g:IsA("GuiButton") then
+			UI.popFrom(g, 0.7, delay)
+		else
+			UI.slideIn(g, 0, 22, delay, 0.45)
+			UI.popFrom(g, 0.94, delay)
+		end
+	end
+end
+
 function UIC.open(name: string)
 	if name == "Emotes" then
 		UIC.toast("Emotes are moving to the new menu soon", "info")
@@ -2386,7 +2423,9 @@ function UIC.init()
 	gui.Enabled = true
 	UI.PageChanged:Connect(function(name)
 		if name ~= "Results" then resultsOpen = false end
+		layoutToasts()
 	end)
+	UI.Opened:Connect(cascade)
 	wireButtons()
 	connectEvents()
 	applySettings()
