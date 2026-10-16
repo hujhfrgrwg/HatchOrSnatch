@@ -475,7 +475,7 @@ def s_hud():
     tr = hv_pill(1236, 12, 216, 'teal', 'servers', 'SERVERS', 'ServersButton', 'Servers') + tr
     # AFK / Hunt sit on a grey plate; the coloured PlateOn shows while they're on (16 Oct: Hunt is purple, not red)
     rail = (hv_rail_btn(10, 290, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 400, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
-            + hv_rail_btn(10, 510, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'Emotes', key='G')
+            + hv_rail_btn(10, 510, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'EmoteWheel', key='G')
             + hv_rail_btn(10, 620, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF', on_color='blue')
             + hv_rail_btn(10, 730, 96, 'grey', 'hunt', 'HUNT', 'VolunteerToggle', state='ON', on_color='purple'))
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')

@@ -26,7 +26,7 @@ Three lobby systems were added on 16 Oct, modelled on Huss Valley's server list,
 - **Emotes panel:**
   - My Emotes shows a card per owned emote with a live preview of your avatar, plus PLAY and EQUIP buttons. YOUR WHEEL has 6 slots: pick a slot, then EQUIP.
   - The Emote Crate tab has the odds board for all 51, OPEN for 250 Gems, a reel, then the reveal.
-- **Emote wheel (G):** your six emotes sit around a centre disc. Clicking a slot or pressing 1-6 plays it; there are also STOP, MY EMOTES and GET EMOTES. It's lobby only.
+- **Emote wheel (G or the EMOTES rail button):** your six emotes sit around a centre disc. Clicking a slot or pressing 1-6 plays it; there are also STOP, MY EMOTES and GET EMOTES. It's lobby only.
 - **The wheel is saved:** `profile.emoteWheel`, set through `RequestEmoteWheel` and cleaned by `EmoteConfig.cleanWheel`. A new crate win fills the first empty slot. Older saves fill with the first six emotes owned.
 
 ## Servers (HOS-SERVERS-001)
