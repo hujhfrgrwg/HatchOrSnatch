@@ -19,7 +19,8 @@
         "Status",
         "Wallet",
         "Ability",
-        "Dash"
+        "Dash",
+        "Watch"
       ],
       "visible": true,
       "hud": true
@@ -105,6 +106,40 @@
         "Dim",
         "Reveal"
       ]
+    },
+    {
+      "name": "Emotes",
+      "page": "emotes",
+      "groups": [
+        "Dim",
+        "Emotes"
+      ]
+    },
+    {
+      "name": "EmoteWheel",
+      "page": "emote_wheel",
+      "groups": [
+        "Dim",
+        "Wheel"
+      ]
+    },
+    {
+      "name": "Servers",
+      "page": "servers",
+      "groups": [
+        "Dim",
+        "Servers"
+      ]
+    },
+    {
+      "name": "Spectate",
+      "page": "spectate",
+      "groups": [
+        "Bar",
+        "Hint"
+      ],
+      "visible": false,
+      "hud": true
     }
   ],
   "templates": [

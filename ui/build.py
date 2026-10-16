@@ -404,8 +404,11 @@ def hv_pill(x, y, w, color, icon, label, name, opens=None, badge=False, h=58):
     return sub(name, inner, btn=True, opens=opens)
 
 
-def hv_rail_btn(x, y, s, color, icon, label, name, opens=None, state=None, key=None):
+def hv_rail_btn(x, y, s, color, icon, label, name, opens=None, state=None, key=None, on_color=None):
     inner = f"<div class='hb k-{color}' style='left:{x}px;top:{y}px;width:{s}px;height:{s}px'></div>"
+    if on_color:   # toggles: the coloured plate (PlateOn) the runtime shows while the toggle is on
+        on = state == 'ON'
+        inner += f"<div class='hb k-{on_color}{'' if on else ' hid'}' data-n='PlateOn' style='left:{x}px;top:{y}px;width:{s}px;height:{s}px'></div>"
     inner += I(icon, x + int(s * .14), y + int(s * .04), int(s * .72), name='Icon')
     inner += at(x + s // 2, y + s - 26, T(label, 19, 'xs', name='Label'), w=s + 20, align='center')
     if state:  # both states exported; runtime shows one (StateOn / StateOff)
@@ -469,10 +472,15 @@ def s_hud():
     tl = hv_pill(240, 12, 196, 'purple', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True)
     tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True) + hv_goal()
     tr = hv_pill(1468, 12, 196, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats') + hv_pill(1680, 12, 228, 'grey', 'settings', 'SETTINGS', 'SettingsButton', 'Settings')
-    rail = (hv_rail_btn(10, 330, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 440, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
-            + hv_rail_btn(10, 550, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF') + hv_rail_btn(10, 660, 96, 'red', 'hunt', 'HUNT', 'VolunteerToggle', state='ON'))
+    tr = hv_pill(1236, 12, 216, 'teal', 'servers', 'SERVERS', 'ServersButton', 'Servers') + tr
+    # AFK / Hunt sit on a grey plate; the coloured PlateOn shows while they're on (16 Oct: Hunt is purple, not red)
+    rail = (hv_rail_btn(10, 290, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 400, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
+            + hv_rail_btn(10, 510, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'Emotes', key='G')
+            + hv_rail_btn(10, 620, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF', on_color='blue')
+            + hv_rail_btn(10, 730, 96, 'grey', 'hunt', 'HUNT', 'VolunteerToggle', state='ON', on_color='purple'))
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
     out += hv_topcenter('LOBBY', 'Next match in 0:12', T('4 / 4 players ready  ·  you start as a Runner', 22, 'xs', name='SublineText'))
+    out += grp('Watch', hv_pill(860, 140, 200, 'pink', 'spectate', 'SPECTATE', 'SpectateButton'), 'T')   # shown while a match runs
     out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems'), 'BL')
     out += hv_ability() + hv_dash('DASH READY', 'Move, then turn + dash')
     return out
@@ -905,6 +913,221 @@ def s_ui_colour():
     return out
 
 
+
+# ================================================================== Emotes (EmoteConfig: crate + My Emotes + wheel), 16 Oct
+import json as _json
+_SONGS = {'snappy_skip': 'Clap Your Hands And Smile', 'idle_dance': 'Soul Dancefloor', 'shuffle': 'Cyber Gym', 'wavy_grooves': 'Explosive Groove',
+          'moongazer': 'Moonwalk', 'cat_dance': 'The Jitters', 'skeleton': 'Trick or Treat', 'electro_shuffle': 'Commodore Love',
+          'jumpstyle': 'Free to Rave', 'wibbly_wobbly': 'Dubstep Orange', 'marat': 'Eurodance', 'kpop_dance': 'I Cannot Get Enough',
+          'flexer': 'Night Sweats', 'rap_bounce': 'Brass Knuckles', 'e_dance': 'Accelerator'}
+# id, name, rarity, song: roblox/game/emote_catalog.json is the one list (EmoteConfig is generated from it too)
+EMOTES = [(e[0], e[1], 'crowned' if e[2] == 'legendary' else e[2], _SONGS.get(e[0], ''))
+          for e in _json.load(open(os.path.join(HERE, '..', 'roblox', 'game', 'emote_catalog.json')))]
+EMO_ODDS = {'common': '2.88%', 'rare': '2%', 'epic': '1.25%', 'crowned': '1%'}
+EMO_RNAME = {'common': 'COMMON', 'rare': 'RARE', 'epic': 'EPIC', 'crowned': 'LEGENDARY'}
+EMO_OWNED = ['idle_dance', 'shuffle', 'skeleton', 'jumpstyle', 'kpop_dance']
+
+
+def emo_view(x, y, w, h, name='View'):
+    """Where the runtime drops a ViewportFrame with your avatar doing the emote (the export can't make one)."""
+    return box(x, y, w, h, I('emote', (w - min(w, h) * 7 // 10) // 2, (h - min(w, h) * 7 // 10) // 2, min(w, h) * 7 // 10, name='Placeholder'),
+               '', 'border-radius:10px;background:radial-gradient(#3a3550,#16141e);box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)', name=name)
+
+
+def emo_card(x, y, e, w=250, h=276, on_wheel=False, name=None):
+    eid, nm, r, song = e
+    inner = emo_view(12, 12, w - 24, 128)
+    inner += at(w // 2, 146, T(nm, 24, 's', name='EmoteName'), w=w, align='center')
+    inner += at(w // 2, 178, T(EMO_RNAME[r], 16, 'xs', FILL.get(r, ''), name='Rarity'), w=w, align='center')
+    inner += at(w // 2, 200, row(icn('music', 18, name='Note'), T(song or 'no song', 14, 'xs', 'f-dim', name='Song'), gap=4), w=w, align='center')
+    bw = (w - 36) // 2
+    inner += btn(12, h - 60, bw, 48, 'lime', bl('PLAY', 22), cls='sm', name='BtnPlay')
+    inner += btn(24 + bw, h - 60, bw, 48, 'sky', bl('EQUIP', 22), cls='sm' + (' hid' if on_wheel else ''), name='BtnEquip')
+    inner += btn(24 + bw, h - 60, bw, 48, 'grey', row(icn('check', 20), bl('ON', 20)), cls='sm' + ('' if on_wheel else ' hid'), name='BtnOnWheel')
+    return box(x, y, w, h, inner, f'cs r-{r}', 'border-radius:16px', name=name or f'Mine_{eid}')
+
+
+def emo_odds_card(x, y, e, owned=False, glow=False, name=None):
+    eid, nm, r, song = e
+    w, h = 200, 184
+    inner = emo_view(10, 10, w - 20, 100)
+    inner += at(w // 2, 116, T(nm, 19, 's', name='EmoteName'), w=w, align='center')
+    inner += at(w // 2, 144, T(f'{EMO_RNAME[r]}  ·  {EMO_ODDS[r]}', 14, 'xs', FILL.get(r, ''), name='Rarity'), w=w, align='center')
+    inner += tag(w - 92, 6, 'OWNED', 'lime', 13, 26, name='Owned').replace("class='ctag", "class='ctag" + ('' if owned else ' hid'), 1)
+    inner += f"<div class='abs{'' if glow else ' hid'}' data-n='Glow' style='left:-6px;top:-6px;width:{w + 12}px;height:{h + 12}px;border-radius:20px;box-shadow:0 0 0 5px #fff,0 0 26px 6px rgba(255,255,255,.7)'></div>"
+    return box(x, y, w, h, inner, f'cs r-{r}', 'border-radius:16px', name=name or f'Odds_{eid}')
+
+
+def wheel_slots(cx, cy, rad, names, w=232, h=92, sel=None):
+    import math
+    out = ''
+    for i in range(6):
+        a = math.radians(-90 + i * 60)
+        x, y = int(cx + rad * math.cos(a) - w / 2), int(cy + rad * math.sin(a) - h / 2)
+        nm = names[i] if i < len(names) else None
+        e = next((q for q in EMOTES if q[1] == nm), None)
+        r = e[2] if e else 'locked'
+        inner = at(14, 10, T(str(i + 1), 18, 'xs', 'f-dim', name='Num'))
+        inner += at(w // 2, 20 if e else 30, T(nm or 'EMPTY', 24 if e else 20, 's' if e else 'xs', '' if e else 'f-dim', name='EmoteName'), w=w, align='center')
+        inner += at(w // 2, 54, T(EMO_RNAME[r] if e else 'equip in My Emotes', 14, 'xs', FILL.get(r, 'f-dim'), name='Rarity'), w=w, align='center')
+        out += sub(f'Slot{i + 1}', box(x, y, w, h, inner, f'cs r-{r}' + ('' if e else ' locked'), 'border-radius:14px', name='Tile')
+                   + (selring(x, y, w, h, 'SlotSel', 14) if sel == i else ''), btn=True)
+    return out
+
+
+def s_emotes(tab='mine'):
+    x0, y0, W, H = 220, 150, 1480, 820
+    b = dual(26, 22, 300, 64, 'pink', row(icn('emote', 40), bl('My Emotes', 28)), 'TabMine', tab == 'mine')
+    b += dual(340, 22, 300, 64, 'purple', row(icn('gift', 40), bl('Emote Crate', 28)), 'TabCrate', tab == 'crate')
+    b += at(1430, 40, row(T('Emote wheel:', 20, 'xs', 'f-dim'), f"<span class='keycap' style='position:relative;display:inline-flex;width:38px;height:38px;border-width:3px'>{T('G', 20, 'xs', style='font-family:Montserrat;font-weight:900')}</span>", gap=8), w=500, align='right', name='WheelHint')
+    # --- My Emotes: owned cards + your wheel
+    mine = [e for e in EMOTES if e[0] in EMO_OWNED]
+    g = ''
+    for i, e in enumerate(mine[:8]):
+        g += emo_card(18 + (i % 4) * 262, 16 + (i // 4) * 288, e, on_wheel=i < 4)
+    if EXPORT_STATES:
+        for r in ('common', 'rare', 'epic', 'crowned'):
+            g += sub(f'Proto_{r}', emo_card(18, 16, next(q for q in EMOTES if q[2] == r), name='Card'), hid=True)
+    pg = well(26, 100, 1074, 596, g, name='Grid', style='overflow:hidden')
+    wl = at(170, 14, T('YOUR WHEEL', 26, 's'), w=330, align='center')
+    wl += at(170, 50, T('Pick a slot, then EQUIP an emote', 16, 'xs', 'f-dim', name='WheelTip'), w=330, align='center')
+    names = [e[1] for e in mine[:4]]
+    for i in range(6):
+        e = next((q for q in EMOTES if i < len(names) and q[1] == names[i]), None)
+        r = e[2] if e else 'locked'
+        y = 86 + i * 82
+        inner = at(14, 22, T(str(i + 1), 22, 's', 'f-dim', name='Num')) + at(48, 12, T(e[1] if e else 'Empty', 22, 's' if e else 'xs', '' if e else 'f-dim', name='EmoteName'))
+        inner += at(48, 42, T(EMO_RNAME[r] if e else 'pick an emote', 14, 'xs', FILL.get(r, 'f-dim'), name='Rarity'))
+        inner += btn(240, 16, 44, 40, 'grey', T('X', 20, 's'), cls='sm' + ('' if e else ' hid'), name='BtnClear')
+        wl += sub(f'WSlot{i + 1}', box(22, y, 296, 72, inner, f'cs r-{r}' + ('' if e else ' locked'), 'border-radius:12px', name='Tile'), btn=True)
+    wl += selring(22, 86 + 4 * 82, 296, 72, 'WSlotSel', 12)
+    pg += well(1116, 100, 340, 596, wl, name='Wheel')
+    if EXPORT_STATES:
+        pg += sub('EmptyState', well(26, 100, 1074, 596, at(537, 170, col(icn('emote', 130), T('No emotes yet', 40, 'l'), T('Open an Emote Crate to win one', 24, 'xs', 'f-dim'), gap=8), w=1000, align='center')
+                                      + btn(387, 440, 300, 76, 'purple', bl('OPEN A CRATE', 28), name='GoCrate'), name='EmptyWell'), hid=True)
+    b += sub('MinePage', pg, hid=tab != 'mine')
+    # --- Emote Crate: odds board + open
+    og = ''
+    show = [e for e in EMOTES if e[2] == 'common'][:4] + [e for e in EMOTES if e[2] == 'rare'][:4] + [e for e in EMOTES if e[2] == 'epic'][:4] + [e for e in EMOTES if e[2] == 'crowned'][:3]
+    for i, e in enumerate(show):   # runtime clones all of them (Proto_<rarity>) into a scrolling list
+        og += emo_odds_card(18 + (i % 5) * 210, 16 + (i // 5) * 194, e, owned=e[0] in EMO_OWNED, glow=(i == 6 and tab == 'crate'))
+    if EXPORT_STATES:
+        for r in ('common', 'rare', 'epic', 'crowned'):
+            og += sub(f'Proto_{r}', emo_odds_card(18, 16, next(q for q in EMOTES if q[2] == r), name='Card'), hid=True)
+    cp = well(26, 100, 1074, 596, og, name='OddsGrid', style='overflow:hidden')
+    d = I('gift', 70, 20, 200, name='CrateIcon')
+    d += at(170, 228, T('EMOTE CRATE', 34, 'l'), w=330, align='center')
+    d += at(170, 272, T(f'One of {len(EMOTES)} emotes per crate', 18, 'xs', 'f-dim', name='CrateSub'), w=330, align='center')
+    for i, r in enumerate(['common', 'rare', 'epic', 'crowned']):
+        d += at(60, 306 + i * 30, T(EMO_RNAME[r], 17, 'xs', FILL.get(r, ''))) + at(280, 306 + i * 30, T(EMO_ODDS[r] + ' each', 17, 'xs', 'f-dim'), w=200, align='right')
+    d += at(170, 430, T('A duplicate refunds Gems', 16, 'xs', 'f-dim'), w=330, align='center')
+    for nm, col_, on in (('BtnOpen', 'lime', True), ('BtnPoor', 'grey', False), ('BtnRolling', 'grey', False)):
+        lab = row(icn('gem', 44), bl('250', 34, name='Price')) if nm != 'BtnRolling' else bl('OPENING...', 30)
+        if on or EXPORT_STATES:
+            d += btn(30, 462, 280, 78, col_, lab, name=nm, cls='' if on else 'hid')
+    d += at(170, 552, row(T('You have', 18, 'xs', 'f-dim'), icn('gem', 26), T('312', 20, 'xs', 'f-lime', name='HaveText'), gap=6), w=330, align='center')
+    cp += well(1116, 100, 340, 596, d, name='Detail')
+    b += sub('CratePage', cp, hid=tab != 'crate')
+    # --- reveal (after a crate)
+    if EXPORT_STATES or tab == 'reveal':
+        e = EMOTES[11]
+        rv = rays(740, 330, 640, .22)
+        rv += at(740, 6, T('NEW EMOTE!', 66, 'xl', 'f-gold', name='Title'), w=1200, align='center')
+        rv += at(740, 86, T('ADDED TO MY EMOTES', 24, 's', name='Sub'), w=900, align='center')
+        rv += box(560, 130, 360, 380, emo_view(18, 18, 324, 250) + at(180, 280, T(e[1], 34, 'l', name='EmoteName'), w=360, align='center')
+                  + at(180, 324, T(EMO_RNAME[e[2]], 20, 's', FILL.get(e[2], ''), name='Rarity'), w=360, align='center')
+                  + at(180, 352, T('Song: ' + e[3], 16, 'xs', 'f-dim', name='Song'), w=360, align='center'), f'cs r-{e[2]}', 'border-radius:20px', name='Card')
+        rv += btn(470, 540, 260, 76, 'lime', bl('PLAY NOW', 30), name='PlayNow') + btn(750, 540, 260, 76, 'grey', bl('DONE', 30), name='Done')
+        b += sub('Reveal', rv, hid=tab != 'reveal')
+    right = row(icn('gem', 48), T('312', 34, 's', 'f-lime', name='GemsText'), gap=8)
+    return world('bg_lobby_blur.jpg', False) + dim() + panel('Emotes', 'pink', 'Emotes', 'emote', b, x0, y0, W, H, right)
+
+
+def s_emote_wheel():
+    """G opens it anywhere in the lobby (Huss Valley's wheel): six of your emotes around a centre disc."""
+    cx, cy = 960, 500
+    w = f"<div class='abs' style='left:{cx - 330}px;top:{cy - 330}px;width:660px;height:660px;border-radius:50%;background:radial-gradient(rgba(20,18,28,.86) 58%,rgba(20,18,28,.5) 72%,transparent 73%);box-shadow:0 0 0 3px rgba(255,255,255,.12)'></div>"
+    w += at(330, 70, T('EMOTES', 60, 'xl', name='Title'))
+    w += at(334, 152, T('Pick one  ·  move to stop', 22, 'xs', 'f-dim', name='Tip'))
+    w += wheel_slots(cx, cy, 250, ['Idle Dance', 'Shuffle', 'Skeleton', 'Jumpstyle', 'K-Pop Dance'], sel=1)
+    disc = (f"<div class='abs' style='left:{cx - 118}px;top:{cy - 118}px;width:236px;height:236px;border-radius:50%;background:radial-gradient(#3b3550,#18161f);"
+            f"box-shadow:0 0 0 4px #050506,0 0 0 7px rgba(255,255,255,.18)'></div>")
+    disc += at(cx, cy - 92, T('SELECTED', 15, 'xs', 'f-dim'), w=220, align='center')
+    disc += at(cx, cy - 66, T('Shuffle', 30, 'l', name='SelName'), w=230, align='center')
+    disc += at(cx, cy - 26, T('COMMON  ·  Cyber Gym', 14, 'xs', 'f-common', name='SelInfo'), w=230, align='center')
+    disc += btn(cx - 92, cy + 14, 184, 52, 'pink', bl('MY EMOTES', 20), cls='sm', name='BtnMine', opens='Emotes')
+    disc += btn(cx - 92, cy + 72, 184, 40, 'grey', bl('STOP', 18), cls='sm', name='BtnStop')
+    w += disc
+    w += btn(cx - 140, cy + 350, 280, 70, 'lime', row(icn('gift', 40), bl('GET EMOTES', 26)), name='BtnGet')
+    w += closex(cx + 300, cy - 330)
+    return world() + dim(.3) + grp('Wheel', w, 'C')
+
+
+# ================================================================== Servers (Huss Valley "find your people"), 16 Oct
+SERVERS = [  # region, players, max, status, ping, you
+    ('United States', 14, 18, 'Match in progress', 38, True), ('United States', 17, 18, 'Starting', 41, False),
+    ('Brazil', 9, 18, 'Match in progress', 132, False), ('Germany', 18, 18, 'Match in progress', 96, False),
+    ('Singapore', 6, 18, 'In lobby', 210, False)]
+
+
+def server_row(x, y, sv, w=994, name=None):
+    reg, n, mx, st, ping, you = sv
+    inner = at(24, 14, T(('YOUR SERVER  ·  ' if you else '') + reg, 28, 's', 'f-lime' if you else '', name='Region'))
+    inner += at(26, 54, T(f'{n} / {mx} players  ·  {st}', 18, 'xs', 'f-dim', name='Detail'))
+    inner += at(w - 210, 32, T(f'{ping} ms avg', 18, 'xs', 'f-lime' if ping < 80 else ('f-gold' if ping < 150 else 'f-red'), name='Ping'), w=180, align='right')
+    for nm, col_, lab, on in (('BtnJoin', 'lime', 'JOIN', not you and n < mx), ('BtnFull', 'grey', 'FULL', not you and n >= mx), ('BtnHere', 'grey', 'HERE', you)):
+        if on or EXPORT_STATES:
+            inner += btn(w - 176, 18, 150, 60, col_, bl(lab, 26), cls='sm' + ('' if on else ' hid'), name=nm)
+    return box(x, y, w - 36, 96, inner, 'cs ' + ('r-lime' if you else 'r-steel'), 'border-radius:14px', name=name)
+
+
+def s_servers():
+    x0, y0, W, H = 290, 130, 1340, 860
+    b = at(30, 36, T('SORT:', 20, 'xs', 'f-dim'))
+    b += dual(100, 22, 200, 56, 'teal', bl('PLAYERS', 22), 'SortPlayers', True, cls='sm')
+    b += dual(312, 22, 200, 56, 'teal', bl('PING', 22), 'SortPing', False, cls='sm')
+    b += at(536, 38, T('12 SERVERS', 22, 'xs', 'f-dim', name='CountText'))
+    b += btn(1110, 22, 200, 56, 'lime', row(icn('refresh', 30), bl('REFRESH', 22)), cls='sm', name='BtnRefresh')
+    cs = ''
+    for i, (c, on) in enumerate([('All countries', True), ('United States', False), ('Brazil', False), ('Germany', False), ('Singapore', False), ('Australia', False), ('Japan', False)]):
+        cs += dual(14, 14 + i * 72, 232, 60, 'teal', bl(c, 19), f'Country{i + 1}', on, cls='sm')
+    if EXPORT_STATES:
+        cs += sub('ProtoCountry', dual(14, 14, 232, 60, 'teal', bl('Country', 19), 'Btn', False, cls='sm'), hid=True)
+    b += well(26, 100, 260, 560, cs, name='Countries', style='overflow:hidden')
+    ls = ''
+    for i, sv in enumerate(SERVERS):
+        ls += server_row(18, 14 + i * 108, sv, name='YourRow' if sv[5] else f'Row{i}')
+    if EXPORT_STATES:
+        ls += sub('ProtoRow', server_row(18, 14, SERVERS[1], name='Card'), hid=True)
+    b += well(300, 100, 1014, 560, ls, name='List', style='overflow:hidden')
+    b += btn(300, 676, 180, 56, 'grey', bl('PREV', 22), cls='sm', name='BtnPrev')
+    b += at(807, 690, T('PAGE 1 / 2', 22, 's', name='PageText'), w=300, align='center')
+    b += btn(1134, 676, 180, 56, 'teal', bl('NEXT', 22), cls='sm', name='BtnNext')
+    b += at(30, 680, T('Your ping is live. Other pings', 15, 'xs', 'f-dim', name='Note1'))
+    b += at(30, 702, T('are player averages, updated', 15, 'xs', 'f-dim', name='Note2'))
+    b += at(30, 724, T('about every 20 s.', 15, 'xs', 'f-dim', name='Note3'))
+    right = row(icn('servers', 46), T('YOUR PING', 18, 'xs', 'f-dim'), T('38 ms', 30, 's', 'f-lime', name='PingText'), gap=8)
+    return world('bg_lobby_blur.jpg', False) + dim() + panel('Servers', 'teal', 'Servers', 'servers', b, x0, y0, W, H, right)
+
+
+# ================================================================== Spectate (watch the match from the lobby), 16 Oct
+def s_spectate(mode='follow'):
+    out = world()
+    x, y, w, h = 560, 926, 800, 118
+    bar_ = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
+    bar_ += f"<div class='wtab' style='left:{x + 12}px;top:{y - 26}px;height:28px'>{T('SPECTATING', 14, 'xs', name='ModeTab')}</div>"
+    bar_ += at(x + 24, y + 18, T('Dommyle' if mode == 'follow' else 'Explore the field', 34, 'l', name='TargetName'))
+    bar_ += at(x + 26, y + 70, T('Runner  ·  Level 2 egg' if mode == 'follow' else 'Free cam  ·  WASD to fly', 17, 'xs', 'f-dim', name='TargetInfo'))
+    bar_ += btn(x + 330, y + 30, 60, 60, 'grey', bl('<', 32), cls='sm', name='BtnPrev')
+    bar_ += btn(x + 398, y + 30, 60, 60, 'grey', bl('>', 32), cls='sm', name='BtnNext')
+    bar_ += dual(x + 470, y + 14, 150, 42, 'lime', bl('FOLLOW', 18), 'TabFollow', mode == 'follow', cls='sm')
+    bar_ += dual(x + 470, y + 62, 150, 42, 'sky', bl('FREE CAM', 18), 'TabFree', mode == 'free', cls='sm')
+    bar_ += btn(x + 632, y + 24, 152, 70, 'red', bl('EXIT', 28), name='BtnExit')
+    out += grp('Bar', bar_, 'B')
+    hint = at(960, 880, T('Right-drag: orbit  ·  Scroll: zoom  ·  < >: next player' if mode == 'follow' else 'WASD: fly  ·  Q / E: down / up  ·  Right-drag: look  ·  Shift: fast', 18, 'xs', name='HintText'), w=1000, align='center')
+    out += grp('Hint', hint, 'B')
+    return out
+
 # ================================================================== Results (GDD 14 end-of-match breakdown)
 def s_results():
     out = world('bg_lobby_blur.jpg', False) + dim(.5)
@@ -1100,6 +1323,13 @@ SCREENS = [  # (file, title, description, fn, height)
     ('stats.html', 'Stats', 'Your record', s_stats, 1080),
     ('settings.html', 'Settings', 'Real settings, toggles, UI colour, tabs', s_settings, 1080),
     ('ui_colour.html', 'UI colour', 'The UI Colour setting and the same screen in four choices', s_ui_colour, 1280),
+    ('emotes.html', 'Emotes', 'My Emotes, your wheel, the Emote Crate', s_emotes, 1080),
+    ('emotes_crate.html', 'Emotes (crate)', 'Odds board and open', lambda: s_emotes('crate'), 1080),
+    ('emotes_reveal.html', 'Emotes (new emote)', 'After a crate', lambda: s_emotes('reveal'), 1080),
+    ('emote_wheel.html', 'Emote wheel', 'G in the lobby: six emotes, stop, My Emotes', s_emote_wheel, 1080),
+    ('servers.html', 'Servers', 'Find your people: regions, sort, join', s_servers, 1080),
+    ('spectate.html', 'Spectate', 'Watch the match from the lobby', s_spectate, 1080),
+    ('spectate_free.html', 'Spectate (free cam)', 'Fly around the field', lambda: s_spectate('free'), 1080),
     ('results.html', 'Results', 'Winner, podium, top thief, your rewards', s_results, 1080),
     ('hatch.html', 'Hatch reveal', 'New pet moment', s_hatch, 1080),
     ('templates.html', 'Banners + toasts + confirm', 'Runtime templates', s_templates, 1120),

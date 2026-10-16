@@ -575,6 +575,30 @@ def info():
 ICONS['plus'] = plus()
 ICONS['info'] = info()
 
+
+# ------------------------------------------------------------------ social (16 Oct): server list + spectate stand-ins
+def globe():
+    a, A = ramp('#a8fff0', '#22d3b8', '#0a8a86')
+    return svg([A],
+               f"<circle cx='64' cy='64' r='54' fill='url(#{a})'/>"
+               f"<ellipse cx='64' cy='64' rx='22' ry='54' fill='none' stroke='{INK}' stroke-width='5' opacity='.55'/>"
+               f"<path d='M10 64 H118 M18 36 H110 M18 92 H110 M64 10 V118' stroke='{INK}' stroke-width='5' opacity='.55' fill='none'/>"
+               + glint('M26 40 q10 -22 34 -28 q-22 12 -28 34z', .8))
+
+
+def eye():
+    a, A = ramp('#ffffff', '#e4ecf6', '#a9b7c8')
+    b, B = rg([(0, '#9ff3ff'), (.6, '#2fa8ff'), (1, '#1456c8')], .4, .35, .7)
+    return svg([A, B],
+               f"<path d='M6 64 Q64 2 122 64 Q64 126 6 64Z' fill='url(#{a})'/>"
+               f"<circle cx='64' cy='64' r='30' fill='url(#{b})'/>"
+               f"<circle cx='64' cy='64' r='13' fill='{INK}'/>"
+               f"<circle cx='54' cy='54' r='7' fill='#fff'/>")
+
+
+ICONS['servers'] = globe()
+ICONS['spectate'] = eye()
+
 if __name__ == '__main__':
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'icons_svg')
     os.makedirs(out, exist_ok=True)

@@ -40,6 +40,9 @@ for path, e in ids.items():
 ALIAS = {'art:a0f5b258ae1': 'art:a9256f992b1', 'art:a176585b5fb': 'art:a0d93acb115', 'art:af3958efa26': 'art:acc69c05fca',
          'art:a6f725533cd': 'art:close_clean',
          'art:a1fd854d283': 'art:ac081d42ddf'}  # Pets' third-row '?' tile, clipped by the shorter grid: the grid clips it in Roblox
+# 16 Oct HUD re-export (rail moved for EMOTES, AFK/Hunt PlateOn): unchanged plates re-rastered with noise only
+ALIAS.update({'art:a44fcb00958': 'art:a0b0f9e2708', 'art:a46abfa3166': 'art:a2d9b128fd7', 'art:a4db5d5bd82': 'art:aa173afb64e',
+              'art:a51fa6df66f': 'art:ab7923ee3bf', 'art:ac7816d084f': 'art:aba4de3c332'})
 # panel glows were clipped where the blur still had alpha 44 (a hard edge): the *s versions fade to 0 (16 Oct)
 for _k in ['ab90101a166', 'a64b9af467b', 'ada0c7f70ae', 'a3cfae0ce49', 'affdb20b15c', 'ae84f76b26a', 'a0e7996f923', 'a477426a820', 'a609fe22cc6', 'ac7cef1fd33', 'a68fad07684', 'a879fd92992']:
     ALIAS['art:' + _k] = 'art:' + _k + 's'
