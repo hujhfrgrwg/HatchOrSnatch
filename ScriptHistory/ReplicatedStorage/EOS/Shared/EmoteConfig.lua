@@ -30,7 +30,7 @@ EmoteConfig.DUPE_REFUND = { common = 10, rare = 20, epic = 40, legendary = 75 }
 
 -- Robux openings: hidden until each has a developer product id (nothing pretends an OFF system works)
 EmoteConfig.ROBUX = {
-	{ key = "x1", count = 1, robux = 149, productId = nil :: number? },
+	{ key = "x1", count = 1, robux = 149, productId = 3718903413 :: number? },
 	{ key = "x3", count = 3, robux = 499, productId = nil :: number? },
 	{ key = "x10", count = 10, robux = 1399, productId = nil :: number? },
 }

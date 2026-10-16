@@ -154,9 +154,9 @@ EconomyConfig.SHOP = {
 	{ id = "case_frost", name = "Frost Egg Case", wallet = "gold", price = 900, kind = "case", desc = "An icy shell around the egg you carry. Yours to keep.", color = Color3.fromRGB(170, 230, 255) },
 	{ id = "entrance_bolt", name = "Bolt Entrance", wallet = "gold", price = 1400, kind = "entrance", desc = "Arrive in the lobby with a lightning strike. Yours to keep.", color = Color3.fromRGB(150, 200, 255) },
 	{ id = "case_sunset", name = "Sunset Egg Case", wallet = "gold", price = 2400, kind = "case", desc = "This week's Gold colorway. Yours to keep.", color = Color3.fromRGB(255, 160, 96) },
-	{ id = "trailp_rainbow", name = "Rainbow Trail", wallet = "gems", price = 150, kind = "trailPerm", desc = "A rainbow trail on your egg in every match.", color = Color3.fromRGB(255, 120, 220), robux = 79, productId = nil },
-	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "Your pet's ability effects turn gold. Same timing and size.", color = Color3.fromRGB(255, 210, 58), robux = 119, productId = nil },
-	{ id = "hatch_royal", name = "Royal Hatching", wallet = "gems", price = 350, kind = "hatchFx", desc = "A bigger hatching ceremony at the incubator.", color = Color3.fromRGB(200, 150, 255), robux = 159, productId = nil },
+	{ id = "trailp_rainbow", name = "Rainbow Trail", wallet = "gems", price = 150, kind = "trailPerm", desc = "A rainbow trail on your egg in every match.", color = Color3.fromRGB(255, 120, 220), robux = 79, productId = 3718903405 },
+	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "Your pet's ability effects turn gold. Same timing and size.", color = Color3.fromRGB(255, 210, 58), robux = 119, productId = 3718903406 },
+	{ id = "hatch_royal", name = "Royal Hatching", wallet = "gems", price = 350, kind = "hatchFx", desc = "A bigger hatching ceremony at the incubator.", color = Color3.fromRGB(200, 150, 255), robux = 159, productId = 3718903407 },
 } :: { ShopItem }
 
 local byId: { [string]: ShopItem } = {}
