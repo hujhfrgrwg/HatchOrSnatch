@@ -30,6 +30,13 @@ The on-screen opening for an emote crate: the crate wobbles and bursts, a reel o
 - `cancelAgain()`: stop waiting for an Open again the server refused.
 - `groupRays`: the export split the rays SVG into 16 white `Shape` pieces under Reveal; init gathers them into one `Rays` holder (1096 x 1096, centred on the glow) so the reveal spins them and tints them the rarity colour.
 
+## Mobile pass (2026-10-16, Hunter: "fix what you think needs to be fixed for mobile")
+- **Fit to screen (was broken everywhere but 1920x1080):** nothing scaled `EmoteCrateUI.Root` (the game's UIController only fits EOSUI, and the kit's `UI.init` isn't used), so on a phone the opening sat at design size, mostly off screen. `fitScreen()` in EmoteCrateSpin now sizes Root + FitScale to the viewport like the kit does and follows rotation / window changes.
+- **Phone boost:** on small screens CrateStage, Reel and Reveal get a `PhoneScale` UIScale so CLAIM / OPEN AGAIN reach 48 px tall (were 36), capped so the reveal card still fits the height: 1.33 on 844x390, 1.38 on 667x375, 1.0 on PC and tablets.
+- **Top bar:** CrateTitle moves below Roblox's top bar (TopbarInset); on phones it hides while the bigger reveal card is up (the card would reach it).
+- **Long emote names:** 26 of the 51 names were wider than the tile's name label (up to 274 px against 173) and spilled over the next tile. Tile names now shrink to fit (measured once per name, min 12).
+- Checked: sweep at 844x390 and 667x375 with those values: no TAP_SMALL; card 56-373 px of 390; title 61-96 px under the reel at 113-277 px; tiles 91 px wide. The 2-4 px TEXT_NOFIT on CLAIM / the skip hint is harmless (centred, non-wrapping labels draw a hair past their box).
+
 ## Verified (edit mode, 2026-10-16)
 - 0 empty images in the gui and templates; probed ids are Images owned by the group.
 - Every name EmoteCrateSpin looks up exists (after groupRays).
@@ -76,6 +83,6 @@ EmoteCrateOpened.OnClientEvent:Connect(function(r) Spin.play(r) end)
 ## Open items
 - **Style:** stud preset. Needs a screenshot of the current game UI as `UI/web/ref.png` to match it.
 - **Stud texture:** `stud.png` is a stand-in; drop in the ui-resources.com Stud texture.
-- **Phone tap size:** Claim / Open again are 36 px tall on a landscape phone; make the reveal buttons taller in `build.py` (>= 124 design px) and re-export if Hunter agrees.
+- **Phone look:** the mobile pass is checked by numbers only; Hunter should open a crate on a phone (or Studio's device emulator) to judge it.
 - **Emote pictures:** emotes have no images, so every reel tile shows the same `emote_slot` icon with the name and rarity colour. Per-emote pictures would need art (or a rendered pose per emote).
 - **Sounds:** borrowed from the game's existing set (see Hookup); Hunter may want crate-specific recordings.

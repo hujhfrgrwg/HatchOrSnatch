@@ -21,6 +21,7 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
+local TextService = game:GetService("TextService")
 local Workspace = game:GetService("Workspace")
 
 local EmoteCrateSpin = {}
@@ -73,6 +74,9 @@ export type Options = {
 
 local opts: Options = nil :: any
 local screen: GuiObject = nil :: any
+local root: GuiObject? = nil -- the gui's Root (design size, FitScale inside)
+local boost = 1 -- phone boost on the reel / crate / reveal (see fitScreen)
+local nameSizes: { [string]: number } = {} -- emote name -> tile TextSize that fits (cached)
 local queue: { Result } = {}
 local busy = false
 local skipping = false
@@ -199,6 +203,30 @@ local function tileTemplate(rarity: string): GuiObject?
 	return t :: any
 end
 
+-- the tile's name label is ~173 design px wide; half the emote names are wider at the design size, so a
+-- long name gets a smaller TextSize (measured once per name) instead of spilling over the next tile
+local function fitName(t: Instance, name: string)
+	local lbl = find(t, "EmoteName")
+	if not (lbl and lbl:IsA("TextLabel")) then return end
+	local key = name .. "@" .. lbl.TextSize .. "@" .. lbl.Size.X.Offset
+	local size = nameSizes[key]
+	if not size then
+		size = lbl.TextSize
+		local params = Instance.new("GetTextBoundsParams")
+		params.Text = name
+		params.Font = lbl.FontFace
+		params.Size = lbl.TextSize
+		params.Width = 10000
+		local ok, b = pcall(TextService.GetTextBoundsAsync, TextService, params)
+		local room = lbl.Size.X.Offset - 6
+		if ok and b.X > room and room > 0 then size = math.max(12, math.floor(lbl.TextSize * room / b.X)) end
+		nameSizes[key] = size
+	end
+	for _, d in t:GetDescendants() do
+		if (d.Name == "EmoteName" or d.Name == "EmoteNameShadow") and d:IsA("TextLabel") then (d :: TextLabel).TextSize = size end
+	end
+end
+
 local function makeTile(e: Emote): GuiObject?
 	local tpl = tileTemplate(e.rarity)
 	if not tpl then return nil end
@@ -206,6 +234,7 @@ local function makeTile(e: Emote): GuiObject?
 	t.Visible = true
 	t.AnchorPoint = Vector2.zero
 	setText(t, "EmoteName", e.name)
+	fitName(t, e.name)
 	local icon = find(t, "Icon")
 	if icon and e.image then (icon :: ImageLabel).Image = e.image end
 	show(find(t, "Shade"), false)
@@ -473,6 +502,7 @@ local function reveal(r: Result)
 			rays.Rotation = (rays.Rotation + dt * 15) % 360
 		end)
 	end
+	if boost > 1 then show(find(screen, "CrateTitle"), false) end -- phones: the bigger card reaches the title
 	show(rev, true)
 	if card then
 		local s = scaleOf(card)
@@ -482,8 +512,44 @@ local function reveal(r: Result)
 	cue("reveal")
 end
 
+-- Fit the design-size Root to the screen (the game's own UI controller only fits EOSUI). Phones: the
+-- opening owns the whole screen, so the crate, reel and reveal grow until the reveal buttons are ~48 px
+-- tall (the reveal card still fits the height); the title moves below Roblox's top bar.
+local BOOSTED = { "CrateStage", "Reel", "Reveal" }
+local function fitScreen()
+	local cam = Workspace.CurrentCamera
+	local r = root
+	if not cam or not r then return end
+	local vp = cam.ViewportSize
+	if vp.X < 2 or vp.Y < 2 then return end
+	local s = math.min(vp.X / design.w, vp.Y / design.h)
+	r.Size = UDim2.fromOffset(vp.X / s, vp.Y / s)
+	local fs = r:FindFirstChild("FitScale") :: UIScale?
+	if fs then fs.Scale = s end
+	boost = math.clamp(48 / (design.btnH * s), 1, math.max(1, (vp.Y - 8) / (design.cardSpan * s)))
+	for _, n in BOOSTED do
+		local g = screen:FindFirstChild(n)
+		if g then
+			local u = g:FindFirstChild("PhoneScale") :: UIScale?
+			if not u then
+				u = Instance.new("UIScale")
+				u.Name = "PhoneScale"
+				u.Parent = g
+			end
+			(u :: UIScale).Scale = boost
+		end
+	end
+	local title = screen:FindFirstChild("CrateTitle") :: GuiObject?
+	if title then
+		local inset = GuiService.TopbarInset
+		local bar = if inset.Max.Y > 0 then inset.Max.Y / s + 8 else 0
+		title.Position = UDim2.new(title.Position.X.Scale, title.Position.X.Offset, 0, math.max(design.titleY, bar))
+	end
+end
+
 local function openScreen()
 	opts.gui.Enabled = true
+	fitScreen()
 	show(screen, true)
 	hideAll()
 	local cam = Workspace.CurrentCamera
@@ -521,6 +587,7 @@ local function runQueue()
 		skipping = false
 		choice = nil
 		hideAll()
+		show(find(screen, "CrateTitle"), true)
 		setText(find(screen, "CrateTitle") or screen, "Title", r.crateName or "Emote Crate")
 		crateStage(r)
 		local glow, tiles, landing = spinReel(r)
@@ -590,6 +657,18 @@ end
 function EmoteCrateSpin.init(o: Options)
 	opts = o
 	screen = (o.gui:FindFirstChild("EmoteCrate", true) or o.gui) :: any
+	root = o.gui:FindFirstChild("Root") :: GuiObject?
+	design.w = if root and root.Size.X.Offset > 0 then root.Size.X.Offset else 1920
+	design.h = if root and root.Size.Y.Offset > 0 then root.Size.Y.Offset else 1080
+	local titleG = screen:FindFirstChild("CrateTitle") :: GuiObject?
+	design.titleY = if titleG then titleG.Position.Y.Offset else 0
+	local claimB = find(screen, "BtnClaim") :: GuiObject?
+	design.btnH = if claimB and claimB.Size.Y.Offset > 0 then claimB.Size.Y.Offset else 100
+	-- the reveal card's reach from the screen centre, doubled (card 258..918 in the 1096 Reveal = 370 below)
+	local revG, cardG = find(screen, "Reveal") :: GuiObject?, find(screen, "Card") :: GuiObject?
+	design.cardSpan = if revG and cardG
+		then 2 * math.max(revG.Size.Y.Offset / 2 - cardG.Position.Y.Offset, cardG.Position.Y.Offset + cardG.Size.Y.Offset - revG.Size.Y.Offset / 2)
+		else 740
 	-- remember the exported layout the runtime moves around
 	local track = find(screen, "Track") :: GuiObject
 	local sampleTile = track and (track:FindFirstChild("Prize") or track:FindFirstChildWhichIsA("Frame")) :: GuiObject
@@ -625,6 +704,17 @@ function EmoteCrateSpin.init(o: Options)
 			if rev and rev.Visible then choice = "claim" end
 		end
 	end)
+	-- keep the fit when the window or phone rotates
+	local camConn: RBXScriptConnection? = nil
+	local function watchCam()
+		if camConn then camConn:Disconnect() end
+		local cam = Workspace.CurrentCamera
+		if cam then camConn = cam:GetPropertyChangedSignal("ViewportSize"):Connect(fitScreen) end
+		fitScreen()
+	end
+	Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCam)
+	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(fitScreen)
+	watchCam()
 	GuiService.MenuOpened:Connect(function()
 		local rev = find(screen, "Reveal") :: GuiObject
 		if busy and rev and rev.Visible then choice = "claim" end
