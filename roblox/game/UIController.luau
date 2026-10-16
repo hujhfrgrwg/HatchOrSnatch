@@ -2421,7 +2421,7 @@ function UIC.init()
 		if name ~= "Results" then resultsOpen = false end
 		layoutToasts()
 	end)
-	UI.Opened:Connect(cascade)
+	UI.Opened.Event:Connect(cascade)
 	wireButtons()
 	connectEvents()
 	applySettings()
