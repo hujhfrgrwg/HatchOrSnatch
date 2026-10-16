@@ -25,7 +25,7 @@ Evolve or Steal is an 8–16 player infection chase. Runners carry eggs that lev
 | Owner | *(group or Hunter's account; not checked)* |
 
 ## Setup
-- **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
+- **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1). How-to for someone else: [[Cloud Session to Roblox Studio]] (docs/handoff).
 - **Uploads:** `tools\upload\upload_assets.py` (Open Cloud; key and creator from the environment).
 - **Skills and research:** [[RoClicks Index]].
 
