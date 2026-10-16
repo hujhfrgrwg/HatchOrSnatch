@@ -25,7 +25,7 @@ What the new UI controller changes at runtime, so the built GUI in Studio (`Star
 
 ## Motion
 - **Panels:** `UI.luau` handles the pop, dim fade, banner slide and close-button spin. On top of that, the controller cascades the panel's wells and buttons in reading order, 35 ms apart. Frames rise 22 px; buttons scale in so their hover springs keep their rest. The cascade is off with Reduce Effects, and on Results and Hatch, which have their own motion.
-- **Rail toggles swap icons.** AFK and Hunt show a greyed copy when off (`afk_off`, `hunt_off`, made by `ui/tools/icon_variants.py`). When on, Hunt shows its red crosshair and AFK shows `afk_on`, the play moon (the pause moon until `afk_on` is uploaded). Until the off copies have ids, the controller keeps the full-colour icon.
+- **The AFK toggle swaps icons.** Off shows the pause moon (`afk`) and on shows the play moon (`afk_on`). Hunt keeps its red crosshair in both states, and the ON/OFF pill shows which. The greyed `afk_off`/`hunt_off` copies are uploaded but unused: Hunter found greyed icons odd (16 Oct).
 - **Selection:** rings tween to the new tile (0.22 s Quint). Tiles pulse when you pick them. Refused actions shake.
 - **Toasts:** they slide in, merge repeats and show a time bar. In the lobby they stack top right. With a panel open they move to the top centre, clear of its close button. In a match only forced toasts show, at the top centre.
 - **Hatch:** egg shake, then the reveal pops in with sparkles breathing.
