@@ -31,6 +31,9 @@ local GOLD = Color3.fromRGB(255, 210, 58)
 
 function Pets.family(): string?
 	local f = player:GetAttribute("EOS_PetFamily")
+	if RunService:IsStudio() and type(player:GetAttribute("EOS_TestPet")) == "string" then
+		f = player:GetAttribute("EOS_TestPetFamily") or "Decoy" -- Studio pet test (CrowPet.speciesOf)
+	end
 	return if type(f) == "string" and f ~= "" then f else nil
 end
 
@@ -65,8 +68,13 @@ function Pets.use()
 	end
 	local def = EconomyConfig.FAMILIES[fam]
 	-- predicted: the server answers with the real cooldown (AbilityState)
-	Pets.cooldown = def.cooldown
-	Pets.readyAt = os.clock() + def.cooldown
+	local cd = def.cooldown
+	local testCd = if RunService:IsStudio() then workspace:GetAttribute("EOS_TestCooldown") else nil
+	if type(testCd) == "number" and testCd > 0 then
+		cd = testCd -- Studio pet test (AbilityService.studioTest)
+	end
+	Pets.cooldown = cd
+	Pets.readyAt = os.clock() + cd
 	if fam == "Brake" then
 		Movement.brake(def.duration)
 	end

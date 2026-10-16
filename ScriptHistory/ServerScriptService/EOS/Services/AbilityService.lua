@@ -40,6 +40,21 @@ local function petLevel(pet: any): number
 	return math.clamp(math.floor(lv), 1, 3)
 end
 
+-- Studio pet test, set on Workspace (live servers ignore it): EOS_TestPet = species ("Crow"),
+-- EOS_TestPetLevel = 1..3 (or 0 = cycle 1 > 2 > 3, one level per use), EOS_TestCooldown = seconds.
+-- Copied onto each player as they join (EOS_TestPet / EOS_TestPetLevel player attributes).
+local function studioTest(): (string?, number, number?)
+	if not RunService:IsStudio() then
+		return nil, 1, nil
+	end
+	local sp = workspace:GetAttribute("EOS_TestPet")
+	local lv = workspace:GetAttribute("EOS_TestPetLevel")
+	local cd = workspace:GetAttribute("EOS_TestCooldown")
+	return (if type(sp) == "string" and sp ~= "" then sp else nil),
+		(if type(lv) == "number" then math.clamp(math.floor(lv), 0, 3) else 1),
+		(if type(cd) == "number" and cd > 0 then cd else nil)
+end
+
 local function runtimeFolder(name: string): Folder
 	local rt = workspace:FindFirstChild("EOS_Runtime")
 	if not rt then
@@ -288,7 +303,21 @@ local function onRequest(plr: Player, moveDir: any)
 		return refuse("COOLDOWN", lo.readyAt - now)
 	end
 	local def = EconomyConfig.FAMILIES[lo.family]
-	lo.readyAt = now + def.cooldown
+	local testPet, testLevel, testCooldown = studioTest()
+	local cooldown = testCooldown or def.cooldown
+	lo.readyAt = now + cooldown
+	if testPet and plr:GetAttribute("EOS_TestPet") == lo.species then
+		-- Studio pet test: this use plays the level the player's crow shows; cycle mode moves it on
+		lo.level = petLevel({ level = plr:GetAttribute("EOS_TestPetLevel") })
+		if testLevel == 0 then
+			local nextLevel = lo.level % 3 + 1
+			task.delay((INTRO[lo.species] or 0) + def.duration + 0.2, function()
+				if plr.Parent then
+					plr:SetAttribute("EOS_TestPetLevel", nextLevel)
+				end
+			end)
+		end
+	end
 	local c = plr.Character
 	local r = c and c:FindFirstChild("HumanoidRootPart") :: BasePart?
 	if lo.family == "Decoy" then
@@ -307,7 +336,7 @@ local function onRequest(plr: Player, moveDir: any)
 	elseif lo.family == "Scout" then
 		scout(plr, role, def.duration)
 	end
-	Net.event("AbilityState"):FireClient(plr, { ok = true, family = lo.family, readyIn = def.cooldown })
+	Net.event("AbilityState"):FireClient(plr, { ok = true, family = lo.family, readyIn = cooldown })
 	Net.event("AbilityFx"):FireAllClients({
 		userId = plr.UserId,
 		family = lo.family,
@@ -327,6 +356,19 @@ function AbilityService.init()
 	Players.PlayerRemoving:Connect(function(plr)
 		onMatchEnd(plr)
 	end)
+	if RunService:IsStudio() then
+		local function tag(plr: Player)
+			local sp, lv = studioTest()
+			if sp then
+				plr:SetAttribute("EOS_TestPet", sp)
+				plr:SetAttribute("EOS_TestPetLevel", math.max(lv, 1))
+			end
+		end
+		Players.PlayerAdded:Connect(tag)
+		for _, plr in ipairs(Players:GetPlayers()) do
+			tag(plr)
+		end
+	end
 end
 
 return AbilityService

@@ -64,6 +64,13 @@ local function place(plr: Player)
 	plr:SetAttribute(ATTRIBUTE, true)
 	plr:SetAttribute("EOS_InMatch", true) -- the match camera, head look and Catcher controls
 	CharacterService.applyRole(plr, "CATCHER")
+	-- pet tests (workspace EOS_TestPet) start on the pet lab baseplate instead
+	local lab = workspace:FindFirstChild("EOS_PetLab")
+	local labCenter = lab and lab:GetAttribute("Center")
+	if typeof(labCenter) == "Vector3" and plr:GetAttribute("EOS_TestPet") then
+		CharacterService.teleport(plr, labCenter + Vector3.new(0, 0.5, 22), labCenter + Vector3.new(0, 0.5, -30))
+		return
+	end
 	CharacterService.teleport(plr, CENTER + Vector3.new(0, 0, 20), CENTER)
 end
 

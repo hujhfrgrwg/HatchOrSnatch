@@ -181,14 +181,14 @@ function CrowPet.updateFollower(f: Follower, root: BasePart, dt: number)
 				f.mode = "air"
 			end
 		end
+		if f.mode == "air" and f.slowFor > 0.45 and gy ~= nil then
+			f.mode = "land"
+		end
 		local goal
-		if f.mode == "air" then
+		if f.mode == "air" or gy == nil then
 			goal = root.Position + right * 2.1 - look * 1.7 + Vector3.new(0, 1.5 + math.sin(f.t * 3) * 0.18, 0)
-			if f.slowFor > 0.45 and gy ~= nil then
-				f.mode = "land"
-			end
 		else
-			goal = Vector3.new(spot.X, gy :: number, spot.Z)
+			goal = Vector3.new(spot.X, gy, spot.Z)
 		end
 		local before = f.pos
 		local rate = if f.mode == "land" then 4.5 else 7
