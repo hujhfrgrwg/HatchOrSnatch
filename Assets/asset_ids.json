@@ -1,5 +1,7 @@
 {
- "Assets/UI/icons/ab_brake.png": {},
+ "Assets/UI/icons/ab_brake.png": {
+  "assetId": "88310316205726"
+ },
  "Assets/UI/icons/ab_dash.png": {
   "assetId": "109022905504250"
  },
@@ -9,11 +11,15 @@
  "Assets/UI/icons/ab_invis.png": {
   "assetId": "119904629884478"
  },
- "Assets/UI/icons/ab_scout.png": {},
+ "Assets/UI/icons/ab_scout.png": {
+  "assetId": "124471201574573"
+ },
  "Assets/UI/icons/ab_shield.png": {
   "assetId": "79477938049753"
  },
- "Assets/UI/icons/ab_spring.png": {},
+ "Assets/UI/icons/ab_spring.png": {
+  "assetId": "121472478129406"
+ },
  "Assets/UI/icons/ab_tackle.png": {
   "assetId": "107009874421558"
  },
@@ -32,9 +38,15 @@
  "Assets/UI/icons/burst.png": {
   "assetId": "115992214921605"
  },
- "Assets/UI/icons/case.png": {},
- "Assets/UI/icons/case_frost.png": {},
- "Assets/UI/icons/case_sunset.png": {},
+ "Assets/UI/icons/case.png": {
+  "assetId": "88020562018799"
+ },
+ "Assets/UI/icons/case_frost.png": {
+  "assetId": "125167883629163"
+ },
+ "Assets/UI/icons/case_sunset.png": {
+  "assetId": "112358893210852"
+ },
  "Assets/UI/icons/catcher.png": {
   "assetId": "109965623644457"
  },
@@ -77,7 +89,9 @@
  "Assets/UI/icons/emote.png": {
   "assetId": "70784731965884"
  },
- "Assets/UI/icons/entrance.png": {},
+ "Assets/UI/icons/entrance.png": {
+  "assetId": "128561314783908"
+ },
  "Assets/UI/icons/gem.png": {
   "assetId": "109014204025575"
  },
@@ -1088,5 +1102,11 @@
  },
  "Assets/UI/art/a879fd92992s.png": {
   "assetId": "132523310907507"
+ },
+ "Assets/UI/icons/afk_off.png": {
+  "assetId": "137096702811690"
+ },
+ "Assets/UI/icons/hunt_off.png": {
+  "assetId": "105094133123612"
  }
 }
