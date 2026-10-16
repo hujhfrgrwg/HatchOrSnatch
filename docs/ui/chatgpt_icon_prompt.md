@@ -73,19 +73,27 @@ Reply with ONE image per message, then wait for my next icon.
 - `refresh`: a circular arrow
 - `info`: an exclamation shield (do not use a letter)
 
-**Pet abilities (the six ability families)**
+**Pet abilities (the nine ability families, HOS-ABIL-001)**
 - `ab_dash`: double forward chevrons with speed trails (Double Dash)
 - `ab_invis`: a fading silhouette of a runner made of particles (Invisibility)
 - `ab_decoy`: a runner silhouette and a hologram copy offset behind it (Decoy)
 - `ab_shield`: a hexagon energy shield bubble (Shield)
 - `ab_wall`: a slab of stone bricks rising from the ground (Wall)
 - `ab_tackle`: a charging impact burst with a fist (Pet Tackle)
+- `ab_scout`: a green radar screen with a sweep beam and three red blips (Scout: see the 3 nearest rivals)
+- `ab_brake`: a sneaker skidding to a stop with sparks and skid marks, or a bold arrow cutting a hard 90-degree turn (Brake)
+- `ab_spring`: a chunky coil spring launching upward with a lime up-arrow (Spring)
 
 **Shop cosmetics**
 - `trail`: a comet streak
 - `burst`: an exploding firework
-- `case`: a crystal armour shell around an egg
-- `entrance`: a lightning strike hitting the ground
+- `case`: a crystal armour shell around an egg (an egg inside clear faceted crystal, NOT a chest)
+- `entrance`: a lightning bolt striking the ground with a shockwave ring (NOT a portal)
 - `abilityfx`: a spray can with coloured paint splash
 - `hatchfx`: an egg cracking open with light beams
 - `emote`: a hand making a victory sign (simple glove)
+
+## Still needed (16 Oct)
+- `ab_scout`, `ab_brake`, `ab_spring`: new families; drawn stand-ins are in use until these arrive.
+- `case` and `entrance`: regenerate; the first batch came back as a loot chest and a portal.
+- `safe`, `catcher`, `runner`, `hunt`, `afk`: already made, but they were pasted mid-task and never reached the repo. Send them as a zip.

@@ -84,6 +84,7 @@ def cap(x, y, text):
 
 # ================================================================== game data
 P = {  # FWPPetData display names
+    'SeagullScout': 'Seagull Scout',
     'ShadesShark': 'Shades Shark', 'SurferDog': 'Surfer Dog', 'ThunderWolf': 'Thunder Wolf', 'PhoenixGull': 'Phoenix Gull', 'FireDragon': 'Fire Dragon',
     'KoiSpirit': 'Koi Spirit', 'JellyWisp': 'Jelly Wisp', 'SaucerPilot': 'Saucer Pilot', 'VoidOverlord': 'Void Overlord',
     'GamerAxolotl': 'Gamer Axolotl', 'BanditRaccoon': 'Bandit Raccoon', 'NinjaPenguin': 'Ninja Penguin', 'LilAlien': "Lil' Alien", 'MiniMothership': 'Mini Mothership',
@@ -91,14 +92,25 @@ P = {  # FWPPetData display names
     'SandCrab': 'Sand Crab', 'RoboCrab': 'Robo Crab', 'ArmoredRex': 'Armored Rex', 'FrostYeti': 'Frost Yeti', 'LavaScorpion': 'Lava Scorpion', 'MechaInvader': 'Mecha Invader',
     'VikingWalrus': 'Viking Walrus', 'CozyLion': 'Cozy Lion', 'NarwhalCalf': 'Narwhal Calf', 'KrakenHatchling': 'Kraken Hatchling', 'LeviathanPup': 'Leviathan Pup',
 }
-POOLS = [  # id, title, icon, colour key, blurb, pets (common -> rarest)
+POOLS = [  # FWPPetData.Pools (HOS-ABIL-001): id, title, icon, colour key, blurb, pets (common -> rarest)
     ('DoubleDash', 'Double Dash', 'ab_dash', 'orange', 'Two quick dashes in a row', ['ShadesShark', 'SurferDog', 'ThunderWolf', 'PhoenixGull', 'FireDragon']),
-    ('Invisibility', 'Invisibility', 'ab_invis', 'sky', 'Fade out for a few seconds', ['KoiSpirit', 'JellyWisp', 'SaucerPilot', 'VoidOverlord']),
     ('Decoy', 'Decoy', 'ab_decoy', 'gold', 'A running copy of you', ['GamerAxolotl', 'BanditRaccoon', 'NinjaPenguin', 'LilAlien', 'MiniMothership']),
-    ('Shield', 'Shield', 'ab_shield', 'teal', 'A bubble that blocks one tag', ['PebbleFrog', 'PufferPup', 'HermitKnight', 'TreasureGolem']),
-    ('Wall', 'Wall', 'ab_wall', 'violet', 'Drop a wall behind you', ['SandCrab', 'RoboCrab', 'ArmoredRex', 'FrostYeti', 'LavaScorpion', 'MechaInvader']),
-    ('PetTackle', 'Pet Tackle', 'ab_tackle', 'red', 'Your pet bowls a Catcher over', ['VikingWalrus', 'CozyLion', 'NarwhalCalf', 'KrakenHatchling', 'LeviathanPup']),
+    ('Scout', 'Scout', 'ab_scout', 'lime', 'See the 3 nearest rivals', ['SeagullScout']),
+    ('Brake', 'Brake', 'ab_brake', 'pink', 'Stop dead and cut sharply', []),
+    ('Invisibility', 'Invisibility', 'ab_invis', 'sky', 'Fade out for a few seconds', ['KoiSpirit', 'JellyWisp', 'SaucerPilot', 'VoidOverlord']),
+    ('Wall', 'Wall', 'ab_wall', 'violet', 'Drop a wall in a lane', ['SandCrab', 'RoboCrab', 'ArmoredRex', 'FrostYeti', 'LavaScorpion', 'MechaInvader']),
+    ('Shield', 'Shield', 'ab_shield', 'teal', 'A bubble that blocks one hit', ['PebbleFrog', 'PufferPup', 'HermitKnight', 'TreasureGolem']),
+    ('Spring', 'Spring', 'ab_spring', 'rare', 'Leap forward', []),
+    ('PetTackle', 'Pet Tackle', 'ab_tackle', 'red', 'Your pet bowls someone over', ['VikingWalrus', 'CozyLion', 'NarwhalCalf', 'KrakenHatchling', 'LeviathanPup']),
 ]
+WAVE = {'DoubleDash': 1, 'Decoy': 1, 'Scout': 1, 'Brake': 2, 'Invisibility': 2, 'Wall': 2, 'Shield': 3, 'Spring': 3, 'PetTackle': 3}
+ROLES = {  # what the ability does as a Runner / as a Catcher (it stays with you when you're caught)
+    'DoubleDash': ('escape burst', 'close the gap'), 'Decoy': ('fake out chasers', 'fake out runners'),
+    'Scout': ('see the 3 nearest Catchers', 'see the 3 nearest Runners'), 'Brake': ('stop and cut', 'cut off a juke'),
+    'Invisibility': ('slip past', 'sneak up'), 'Wall': ('block the chaser', 'block the escape lane'),
+    'Shield': ('blocks one tag', 'to be decided'), 'Spring': ('leap ahead', 'leap onto a Runner'),
+    'PetTackle': ('knock a Catcher over', 'to be decided'),
+}
 POOL = {p[0]: p for p in POOLS}
 TIERS = ['common', 'rare', 'epic', 'crowned']
 TIER_NAME = {'common': 'Common', 'rare': 'Rare', 'epic': 'Epic', 'crowned': 'Crowned'}
@@ -183,9 +195,14 @@ def panel(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112, title
     return grp(gname, out, 'C')
 
 
+UI_COLOUR = [None]   # Settings > UI Colour: None = default (one accent per screen), else one accent for every panel
+UI_COLOURS = [(None, 'Default'), ('purple', 'Purple'), ('pink', 'Pink'), ('sky', 'Blue'), ('lime', 'Green'), ('gold', 'Gold'), ('coral', 'Red'), ('steel', 'Steel')]
+
+
 def panel_sport(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112, title_size=62):
     """Units-reference panel: the angled banner overlaps the panel top-left, a grey chip holds the
     header info at the top right, the tilted X sits on the corner."""
+    acc = UI_COLOUR[0] or acc
     bw = min(int(w * .52), 760)
     out = f"<div class='cglow a-{acc}' style='left:{x - 16}px;top:{y - 12}px;width:{w + 32}px;height:{h + 28}px'></div>"
     out += (f"<div class='cp a-{acc}' data-n='Panel' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'>"
@@ -542,11 +559,13 @@ def s_incubator(first=True):
 def incubator_top(b, first):
     if not first:  # after the first pet: collection progress per family replaces the first-pet path
         tr = ''
-        found = {'DoubleDash': 2, 'Invisibility': 1, 'Decoy': 1, 'Shield': 2, 'Wall': 1, 'PetTackle': 1}
+        found = {'DoubleDash': 2, 'Decoy': 1, 'Scout': 1}
         for i, (pid, title, ic, colr, blurb, pets) in enumerate(POOLS):
-            cx = 22 + i * 160
-            tr += slot(cx, 20, 88, colr, ic, cls='fill', art_pad=.14)
-            tr += at(cx + 44, 116, T(f'{found[pid]} / {len(pets)}', 22, 's'), w=150, align='center')
+            cx = 22 + i * 106
+            live = WAVE[pid] == 1
+            tr += slot(cx, 20, 82, colr, ic, cls='fill' if live else 'fill soon', art_pad=.14, name=f'Fam_{pid}',
+                       inner_extra='' if live else I('lock', 52, 4, 26))
+            tr += at(cx + 41, 112, T(f'{found.get(pid, 0)} / {len(pets)}' if live else f'wave {WAVE[pid]}', 20 if live else 17, 's' if live else 'xs', '' if live else 'f-dim'), w=100, align='center')
         b += well(476, 40, 998, 170, tr, name='Collection', title='Your Collection')
     else:
         b += first_path()
@@ -566,42 +585,53 @@ def first_path():
 
 def incubator_rest(b, first):
     fp = ''
-    for i, (pid, title, ic, colr, blurb, pets) in enumerate(POOLS):
-        cx, cy = 22 + (i % 3) * 146, 22 + (i // 3) * 158
-        fp += slot(cx, cy, 132, colr, ic, label=title, cls='fill sel' if pid == 'DoubleDash' else 'fill', name=f'Family_{pid}', art_pad=.18, label_size=17)
-    b += well(26, 262, 466, 340, fp, name='Families', title='Pick A Family')
+    for i, (pid, title, ic, colr, blurb, pets) in enumerate(POOLS):   # 3 x 3: wave 1 live, waves 2-3 "coming soon"
+        s = 106
+        cx, cy = 20 + (i % 3) * (s + 12), 22 + (i // 3) * (s + 10)
+        live = WAVE[pid] == 1
+        if live:
+            fp += slot(cx, cy, s, colr, ic, label=title, cls='fill sel' if pid == 'DoubleDash' else 'fill', name=f'Family_{pid}', art_pad=.2, label_size=15)
+        else:
+            fp += slot(cx, cy, s, colr, ic, label=title, cls='fill soon', name=f'Family_{pid}', art_pad=.2, label_size=15,
+                       inner_extra=I('lock', s - 34, 6, 28) + at(10, 8, T(f'W{WAVE[pid]}', 14, 'xs', 'f-dim')))
+    b += well(26, 262, 380, 372, fp, name='Families', title='Pick A Family', extra=T('more each wave', 16, 'xs', 'f-dim', style='margin-left:10px'))
     pool = POOL['DoubleDash']
     lad = ''
     for i, pet in enumerate(pool[5][:3]):
         t = TIERS[i]
-        sx = 34 + i * 214
+        sx = 48 + i * 246
         lad += slot(sx, 24, 172, t, pet_img(pet), name=f'Species_{t}', art_pad=.04)
-        lad += at(sx + 86, 206, T(P[pet], 22, 's'), w=200, align='center') + at(sx + 86, 236, T(TIER_NAME[t], 18, 'xs', FILL[t]), w=200, align='center')
-        lad += at(sx + 86, 266, row(icn('piece_' + t, 26), T(f'{RECIPES[t][0]} random · {RECIPES[t][1]} pick', 16, 'xs', 'f-dim'), gap=4), w=200, align='center')
-    lad += slot(34 + 3 * 214 + 26, 24, 150, 'crowned', pet_img(pool[5][3]), cls='locked', name='Species_crowned', art_pad=.06, inner_extra=I('lock', 45, 40, 60))
-    lad += at(34 + 3 * 214 + 101, 206, T('Crowned', 22, 's', 'f-gold'), w=180, align='center') + at(34 + 3 * 214 + 101, 236, T('coming later', 16, 'xs', 'f-dim'), w=140, align='center')
-    b += well(508, 262, 966, 340, lad, name='Ladder', title=f'{pool[1]}  ·  {pool[4]}', extra='')
+        lad += at(sx + 86, 206, T(P[pet], 22, 's'), w=220, align='center') + at(sx + 86, 236, T(TIER_NAME[t], 18, 'xs', FILL[t]), w=200, align='center')
+        lad += at(sx + 86, 266, row(icn('piece_' + t, 26), T(f'{RECIPES[t][0]} random · {RECIPES[t][1]} pick', 16, 'xs', 'f-dim'), gap=4), w=220, align='center')
+    cx = 48 + 3 * 246 + 26
+    lad += slot(cx, 24, 150, 'crowned', pet_img(pool[5][3]), cls='locked', name='Species_crowned', art_pad=.06, inner_extra=I('lock', 45, 40, 60))
+    lad += at(cx + 75, 206, T('Crowned', 22, 's', 'f-gold'), w=180, align='center') + at(cx + 75, 236, T('coming later', 16, 'xs', 'f-dim'), w=140, align='center')
+    run, cat = ROLES['DoubleDash']
+    lad += at(36, 306, row(T('AS RUNNER', 17, 'xs', 'f-sky'), T(run, 20, 's'), T('·', 20, 's', 'f-dim'), T('AS CATCHER', 17, 'xs', 'f-red'), T(cat, 20, 's'),
+                           T('·', 20, 's', 'f-dim'), T('you keep it when caught', 17, 'xs', 'f-dim'), gap=10), name='Roles')
+    b += well(422, 262, 1052, 372, lad, name='Ladder', title=f'{pool[1]}  ·  {pool[4]}', extra='')
     if first:
-        hb = at(30, 22, row(icn('egg_basic', 70), col(T('HATCH YOUR FIRST PET', 32, 's'), T('Shades Shark  ·  Double Dash  ·  costs 2 Common pieces', 20, 'xs', 'f-dim'), gap=2, align='flex-start'), gap=14))
-        hb += btn(1000, 18, 420, 86, 'lime', row(bl('HATCH', 38), icn('piece_common', 40), T('x2', 26, 's')), name='BtnHatch')
-        hb += tag(810, 40, 'FREE CHOICE', 'gold', 20, 40, name='FreeTag')
+        hb = at(30, 16, row(icn('egg_basic', 70), col(T('HATCH YOUR FIRST PET', 32, 's'), T('Shades Shark  ·  Double Dash  ·  costs 2 Common pieces', 20, 'xs', 'f-dim'), gap=2, align='flex-start'), gap=14))
+        hb += btn(1000, 12, 420, 86, 'lime', row(bl('HATCH', 38), icn('piece_common', 40), T('x2', 26, 's')), name='BtnHatch')
+        hb += tag(810, 34, 'FREE CHOICE', 'gold', 20, 40, name='FreeTag')
     else:
-        hb = btn(30, 18, 460, 86, 'grey', row(icn('dice', 44), bl('RANDOM FAMILY', 30), icn('piece_common', 34), T('x2', 24, 's')), name='BtnRandom')
-        hb += btn(520, 18, 520, 86, 'lime', row(icn('target', 44), bl('HATCH DOUBLE DASH', 30), icn('piece_common', 34), T('x3', 24, 's')), name='BtnFocus')
-    b += well(26, 632, 1448, 122, hb, name='HatchBar', solid=True)
+        hb = btn(30, 12, 460, 86, 'grey', row(icn('dice', 44), bl('RANDOM FAMILY', 30), icn('piece_common', 34), T('x2', 24, 's')), name='BtnRandom')
+        hb += btn(520, 12, 520, 86, 'lime', row(icn('target', 44), bl('HATCH DOUBLE DASH', 30), icn('piece_common', 34), T('x3', 24, 's')), name='BtnFocus')
+    b += well(26, 650, 1448, 110, hb, name='HatchBar', solid=True)
     return b
 
 
 # ================================================================== Pets (inventory + preview, equip)
-OWNED = [('DoubleDash', 'ShadesShark', 3, True), ('DoubleDash', 'SurferDog', 1, False), ('Decoy', 'GamerAxolotl', 2, False), ('Shield', 'PebbleFrog', 1, False),
-         ('Wall', 'SandCrab', 1, False), ('Invisibility', 'KoiSpirit', 1, False), ('PetTackle', 'VikingWalrus', 1, False), ('Shield', 'PufferPup', 1, False)]
+OWNED = [('DoubleDash', 'ShadesShark', 3, True), ('DoubleDash', 'SurferDog', 1, False), ('Decoy', 'GamerAxolotl', 2, False), ('Scout', 'SeagullScout', 1, False),
+         ('Decoy', 'BanditRaccoon', 1, False), ('DoubleDash', 'ThunderWolf', 1, False)]
+LAUNCH_PETS = sum(len(p[5]) for p in POOLS if WAVE[p[0]] == 1)   # wave 1 families only (11)
 
 
 def s_pets():
     x0, y0, W, H = 250, 160, 1420, 800
     b = ''
-    for i, (lab, active) in enumerate([('All  8', True), ('Double Dash', False), ('Decoy', False), ('Shield', False), ('More...', False)]):
-        b += btn(26 + i * 162, 22, 150, 54, 'purple' if active else 'grey', bl(lab, 20), cls='sm', name=f'Filter{i}')
+    for i, (lab, active) in enumerate([(f'All  {len(OWNED)}', True), ('Double Dash', False), ('Decoy', False), ('Scout', False)]):
+        b += btn(26 + i * 200, 22, 186, 54, 'purple' if active else 'grey', bl(lab, 20), cls='sm', name=f'Filter{i}')
     g = ''
     for i, (pid, pet, st, eq) in enumerate(OWNED):
         tier = tier_of(pid, pet)
@@ -610,7 +640,7 @@ def s_pets():
         if eq:
             extra += tag(66, 8, 'EQUIPPED', 'lime', 14, 28)
         g += slot(gx, gy, 182, tier, pet_img(pet, st), cls='sel' if i == 0 else '', name=f'Pet{i + 1}', art_pad=.05, inner_extra=extra)
-    for j in range(8, 12):
+    for j in range(len(OWNED), LAUNCH_PETS):
         gx, gy = 18 + (j % 4) * 196, 18 + (j // 4) * 210
         g += slot(gx, gy, 182, 'locked', None, cls='locked', name=f'Empty{j}', inner_extra=at(91, 64, T('?', 56, 'l', 'f-dim'), w=180, align='center'))
     b += well(26, 92, 820, 590, g, name='Grid', style='overflow:hidden')
@@ -621,7 +651,7 @@ def s_pets():
     pv += btn(30, 540, 330, 70, 'lime', row(icn('check', 36), bl('EQUIPPED', 28)), name='BtnEquip')
     pv += btn(376, 540, 130, 70, 'pink', icn('star', 40), name='BtnFavourite')
     b += well(862, 22, 532, 660, pv, name='Preview')
-    right = row(icn('pets', 50), T('8 / 29 found', 32, 's', name='CountText'), gap=6)
+    right = row(icn('pets', 50), T(f'{len(OWNED)} / {LAUNCH_PETS} found', 32, 's', name='CountText'), gap=6)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Pets', 'sky', 'Pets', 'pets', b, x0, y0, W, H, right)
 
 
@@ -722,18 +752,57 @@ SETTINGS = [('sound', 'Sound Effects', 'Hits, steals, crossings and UI clicks.',
             ('hunt', 'Volunteer To Hunt', 'Start matches as a Catcher when there is room.', False)]
 
 
+def swatches(x, y, sel=None, size=54, gap=12, labels=False):
+    """UI Colour picker: Default (split chip = each screen keeps its own colour) + one swatch per accent."""
+    out = ''
+    for i, (acc, lab) in enumerate(UI_COLOURS):
+        sx = x + i * (size + gap)
+        cls = 'sw' + (f' a-{acc}' if acc else ' sw-def') + (' on' if acc == sel else '')
+        out += f"<div class='{cls}' data-n='Swatch_{lab}' data-btn=1 style='left:{sx}px;top:{y}px;width:{size}px;height:{size}px'></div>"
+        if acc == sel:
+            out += I('check', sx + size - 26, y - 12, 38)
+        if labels:
+            out += at(sx + size // 2, y + size + 8, T(lab, 17, 'xs', '' if acc == sel else 'f-dim'), w=size + gap, align='center')
+    return out
+
+
 def s_settings():
-    x0, y0, W, H = 360, 170, 1200, 760
+    x0, y0, W, H = 360, 120, 1200, 850
     b = ''
-    for i, (ic, title, desc, on) in enumerate(SETTINGS):
-        y = 24 + i * 134
-        inner = I(ic, 14, 12, 96) + at(128, 18, T(title, 36, 's', name='Title')) + at(130, 66, T(desc, 21, 'xs', 'f-dim', name='Desc'))
-        inner += btn(860, 22, 236, 72, 'lime' if on else 'grey', bl('ON' if on else 'OFF', 32, name='ToggleText'), name='Toggle')
-        b += well(26, y, 1136, 118, inner, name=f'Row{i + 1}')
-    b += btn(26, 568, 360, 64, 'purple', bl('GAME', 28), name='TabGame')
-    b += btn(414, 568, 360, 64, 'grey', bl('AUDIO', 28), name='TabAudio')
-    b += btn(802, 568, 360, 64, 'grey', row(icn('controls', 36), bl('CONTROLS', 28)), name='TabControls')
+    rows = SETTINGS + [('abilityfx', 'UI Colour', 'Colour of every menu panel. Looks only.', None)]
+    for i, (ic, title, desc, on) in enumerate(rows):
+        y = 24 + i * 124
+        inner = I(ic, 16, 10, 90) + at(128, 14, T(title, 34, 's', name='Title')) + at(130, 60, T(desc, 20, 'xs', 'f-dim', name='Desc'))
+        if on is None:
+            inner += swatches(604, 26, None, 54, 10)
+        else:
+            inner += btn(860, 20, 236, 70, 'lime' if on else 'grey', bl('ON' if on else 'OFF', 32, name='ToggleText'), name='Toggle')
+        b += well(26, y, 1136, 110, inner, name=f'Row{i + 1}')
+    ty = 24 + len(rows) * 124 + 6
+    b += btn(26, ty, 360, 64, 'purple', bl('GAME', 28), name='TabGame')
+    b += btn(414, ty, 360, 64, 'grey', bl('AUDIO', 28), name='TabAudio')
+    b += btn(802, ty, 360, 64, 'grey', row(icn('controls', 36), bl('CONTROLS', 28)), name='TabControls')
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Settings', 'steel', 'Settings', 'settings', b, x0, y0, W, H)
+
+
+def s_ui_colour():
+    """Design board for the UI Colour setting: the picker, then the same screen in four choices."""
+    out = "<div class='abs fill' style='background:#101014'></div>"
+    out += at(40, 26, T('UI COLOUR SETTING', 52, 'xl'))
+    out += at(44, 132, T('Settings > Game > UI Colour.  Default keeps one colour per screen; any other choice recolours every panel.  Saved per player, looks only.', 22, 'xs', 'f-dim'))
+    out += swatches(640, 26, 'pink', 58, 10, labels=True)
+    picks = [(None, 'Default (Quests is purple)'), ('pink', 'Pink'), ('sky', 'Blue'), ('steel', 'Steel')]
+    sc = .47
+    for i, (acc, lab) in enumerate(picks):
+        UI_COLOUR[0] = acc
+        body = s_quests()
+        UI_COLOUR[0] = None
+        tx, ty = 40 + (i % 2) * 930, 186 + (i // 2) * 540
+        out += (f"<div class='abs' style='left:{tx}px;top:{ty}px;width:{int(1920 * sc)}px;height:{int(1080 * sc)}px;overflow:hidden;border-radius:10px;"
+                f"box-shadow:0 0 0 3px #050506,0 0 0 5px rgba(255,255,255,.25)'>"
+                f"<div class='abs' style='left:0;top:0;width:1920px;height:1080px;transform:scale({sc});transform-origin:0 0'>{body}</div></div>")
+        out += at(tx + 6, ty + int(1080 * sc) + 6, T(lab, 22, 's'))
+    return out
 
 
 # ================================================================== Results (GDD 14 end-of-match breakdown)
@@ -856,9 +925,9 @@ def s_style():
         x, y = 40 + (i % 3) * 620, 650 + (i // 3) * 130
         out += (f"<div class='cp a-{acc}' style='left:{x}px;top:{y}px;width:580px;height:100px'><div class='ch' style='height:100px;border-bottom:0'><div class='sweep'></div>"
                 f"<div class='lbl'>{icn(ic, 76)}{T(t, 52, 'l')}</div></div></div>")
-    out += cap(40, 930, '4. Icons (drawn for this game, one finish) + egg pieces matched to the eggs')
+    out += cap(40, 930, '4. Icons (ChatGPT set, drawn stand-ins where missing), egg pieces and the nine ability families in wave order')
     for i, ic in enumerate(['gold', 'gem', 'piece_common', 'piece_rare', 'piece_epic', 'piece_crowned', 'quests', 'incubator', 'pets', 'shop', 'stats', 'settings',
-                            'runner', 'catcher', 'safe', 'steal', 'ab_dash', 'ab_invis', 'ab_decoy', 'ab_shield', 'ab_wall', 'ab_tackle', 'trophy', 'crown']):
+                            'runner', 'catcher', 'safe'] + [p[2] for p in POOLS]):   # + the nine ability families in wave order
         out += I(ic, 40 + (i % 12) * 152, 980 + (i // 12) * 150, 130)
     out += cap(40, 1290, '5. Eggs: Level 1 Basic, 2 Shiny, 3 Cosmic, 4 Golden (survivor)')
     for i, e in enumerate(['basic', 'shiny', 'cosmic', 'golden']):
@@ -923,7 +992,8 @@ SCREENS = [  # (file, title, description, fn, height)
     ('shop_gems.html', 'Shop (Gems)', 'Premium cosmetics for Gems', lambda: s_shop('gems'), 1080),
     ('shop_robux.html', 'Shop (Robux Gem packs, later)', 'Hidden until approved', s_shop_robux, 1080),
     ('stats.html', 'Stats', 'Your record', s_stats, 1080),
-    ('settings.html', 'Settings', 'Real settings, toggles, tabs', s_settings, 1080),
+    ('settings.html', 'Settings', 'Real settings, toggles, UI colour, tabs', s_settings, 1080),
+    ('ui_colour.html', 'UI colour', 'The UI Colour setting and the same screen in four choices', s_ui_colour, 1280),
     ('results.html', 'Results', 'Winner, podium, top thief, your rewards', s_results, 1080),
     ('hatch.html', 'Hatch reveal', 'New pet moment', s_hatch, 1080),
     ('templates.html', 'Banners + toasts + confirm', 'Runtime templates', s_templates, 1080),

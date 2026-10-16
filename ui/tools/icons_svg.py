@@ -458,6 +458,44 @@ def tackle():
                     + glint('M30 40 q10 -12 26 -12 q-16 6 -22 18z'))
 
 
+def scout():  # radar: see the 3 nearest rivals
+    a, A = ramp('#c8ffd8', '#3edc82', '#14894a')
+    b, B = rg([(0, '#1f6a4a'), (.75, '#0c3a2a'), (1, '#062418')], .45, .4, .7)
+    c, C = lg([(0, 'rgba(150,255,190,.85)'), (1, 'rgba(150,255,190,0)')], 0, 0, 1, 1)
+    blips = ''.join(f"<circle cx='{x}' cy='{y}' r='7' fill='#ff4a4a'/><circle cx='{x - 2}' cy='{y - 2}' r='2.5' fill='#fff' opacity='.9'/>"
+                    for x, y in ((84, 40), (94, 78), (44, 88)))
+    return svg([A, B, C], f"<circle cx='64' cy='64' r='58' fill='url(#{a})'/><circle cx='64' cy='64' r='47' fill='url(#{b})'/>"
+                          f"<circle cx='64' cy='64' r='32' fill='none' stroke='#3edc82' stroke-width='3' opacity='.55'/>"
+                          f"<circle cx='64' cy='64' r='16' fill='none' stroke='#3edc82' stroke-width='3' opacity='.55'/>"
+                          f"<path d='M64 17 V111 M17 64 H111' stroke='#3edc82' stroke-width='2.5' opacity='.4'/>"
+                          f"<path d='M64 64 L64 17 A47 47 0 0 1 104 40 Z' fill='url(#{c})'/>"
+                          f"<path d='M64 64 L64 17' stroke='#c8ffd8' stroke-width='4' stroke-linecap='round'/>"
+                          + blips + f"<circle cx='64' cy='64' r='6' fill='#c8ffd8'/>" + glint('M16 52 q6 -26 34 -36 q-22 14 -28 38z', .8))
+
+
+def brake():  # hard stop and sharp cut: arrow that skids into a right-angle turn
+    a, A = ramp('#fff3a0', '#ffd23a', '#e88a00')
+    skid = ''.join(f"<path d='M{x} 92 L{x - 6} 120' stroke='#3a2410' stroke-width='6' stroke-linecap='round' opacity='.75'/>" for x in (26, 40, 54))
+    return svg([A], skid +
+               f"<path d='M22 100 V56 Q22 38 40 38 H84 V18 L122 52 L84 86 V66 H50 V100 Z' fill='url(#{a})'/>"
+               f"<path d='M8 30 L18 36 M10 50 L20 50 M14 16 L22 26' stroke='#ffd23a' stroke-width='5' stroke-linecap='round'/>"
+               + glint('M28 92 V58 Q28 44 42 44 H60 V48 H44 Q34 48 34 60 V92z', .75) + glint('M90 28 l18 18 -4 3 -14 -14z', .6))
+
+
+def spring():  # coil spring launching up
+    a, A = lg([(0, '#e8ffd0'), (.5, '#8aff4a'), (1, '#3aa018')], 0, 0, 1, 0)
+    b, B = ramp('#f0f4ff', '#b8c4dc', '#6a7898')
+    c, C = ramp('#e8ffd0', '#8aff4a', '#3aa018')
+    coil = ''.join(f"<ellipse cx='64' cy='{y}' rx='34' ry='9' fill='none' stroke='url(#{a})' stroke-width='9'/>" for y in (104, 90, 76, 62))
+    return svg([A, B, C], f"<rect x='22' y='108' width='84' height='12' rx='5' fill='url(#{b})'/>" + coil +
+               f"<rect x='22' y='46' width='84' height='12' rx='5' fill='url(#{b})'/>"
+               f"<path d='M64 4 L96 38 H76 V44 H52 V38 H32 Z' fill='url(#{c})'/>"
+               + glint('M40 34 L64 10 L68 14 L48 34z', .8) + glint('M28 48 h40 v3 h-40z', .7))
+
+
+ICONS['ab_scout'] = scout()
+ICONS['ab_brake'] = brake()
+ICONS['ab_spring'] = spring()
 ICONS['ab_dash'] = double_dash()
 ICONS['ab_invis'] = invisibility()
 ICONS['ab_decoy'] = decoy()

@@ -169,3 +169,14 @@ img[src*='sunburst'] { opacity: .12 !important; }
   background: #1c1c1e; }
 .cs.lab { background: linear-gradient(160deg, color-mix(in srgb, var(--r2) 55%, #0c0c10) 0%, color-mix(in srgb, var(--r3) 60%, #0c0c10) 45%, #0e0e12 100%); }
 .cs.fill.lab { background: linear-gradient(160deg, var(--r2) 0%, var(--r3) 60%, color-mix(in srgb, var(--r3) 45%, #000) 100%); }
+
+/* "coming soon" families (ability waves 2-3, HOS-ABIL-001): readable art, clearly not pickable yet */
+.cs.soon { --r1:#6a6a72; --r2:#4a4a52; --r3:#24242a; }
+.cs.soon > .art { filter: grayscale(1) brightness(.62) contrast(.9); }
+.cs.soon .lbl, .cs.soon [data-n='Label'] { opacity: .75; }
+
+/* UI Colour swatches (Settings > UI Colour) */
+.sw { position: absolute; border-radius: 5px; border: 3px solid #050506; box-shadow: 0 0 0 2px rgba(225,225,232,.35);
+  background: linear-gradient(160deg, var(--h1) 0%, var(--h2) 40%, var(--hm) 70%, var(--h3) 100%); }
+.sw.sw-def { background: conic-gradient(from 45deg, #9a5cff 0 25%, #7ee02e 0 50%, #ffc23a 0 75%, #3ab8ff 0); }
+.sw.on { box-shadow: 0 0 0 2px #050506, 0 0 0 6px #fff, 0 0 16px 3px rgba(255,255,255,.35); }

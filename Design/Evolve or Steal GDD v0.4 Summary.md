@@ -63,7 +63,8 @@ Evolve or Steal is an 8–16 player infection chase with no elimination. Runners
 ## Pets and abilities (GDD 13, Appendix B)
 - No starter pet. One equipped pet gives one ability. Pets are not just cosmetic.
 - Nine families: Dash, Decoy, Scout, Brake, Spring, Mist, Rebound, Drift, Tracker. **Launch with 3 polished abilities**, go to 6 after tests, and 9 only once both roles show fair use.
-- Species ladders (Common / Rare / Epic upgrade): Dash Sand Crab/Otter/Phoenix · Decoy Mouse/Parrot/Mirror Dragon · Scout Sparrow/Seagull/Celestial Owl · Brake Turtle/Hermit/Time Spirit · Spring Frog/Hare/Cloud Serpent · Mist Puffer/Jelly/Kraken · Rebound Gecko/Ram/Thunder Beast · Drift Minnow/Koi/Leviathan · Tracker Firefly/Bat/Ghost Wolf.
+  - **Superseded 15 Oct 2026 (Hunter):** the nine are now Double Dash, Decoy, Scout (wave 1, launch); Brake, Invisibility, Wall (wave 2); Shield, Spring, Pet Tackle (wave 3). Mist became Invisibility, Rebound became Shield, Drift and Tracker were dropped (they overlapped Brake and Scout), and Wall and Pet Tackle came from the pet showroom. See [[Evolve or Steal Decisions]].
+- Species ladders in the GDD (replaced by the showroom pets in `FWPPetData.Pools`): Dash Sand Crab/Otter/Phoenix · Decoy Mouse/Parrot/Mirror Dragon · Scout Sparrow/Seagull/Celestial Owl · Brake Turtle/Hermit/Time Spirit · Spring Frog/Hare/Cloud Serpent · Mist Puffer/Jelly/Kraken · Rebound Gecko/Ram/Thunder Beast · Drift Minnow/Koi/Leviathan · Tracker Firefly/Bat/Ghost Wolf.
 - Rarity stat boosts are a TEST only (0% by default). Ranked would normalise them.
 - Visibility: the owner sees a small local follower (under 20% of avatar height). Opponents only see a short summon and telegraph when the ability fires. The server owns effects and cooldowns.
 
