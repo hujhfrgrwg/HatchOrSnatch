@@ -294,6 +294,15 @@ Format: **rule**, then why (what went wrong or what the developer said).
 - **Roblox applies only ONE UIScale per object**: a second one (pop + pulse + fit) is ignored. Reuse a single
   UIScale and keep the fit scale in a `Base` attribute that every tween multiplies.
 
+- **Per-state shadows cover the visible state**: the exporter gives each state of a dual control its own DropShadow
+  just below it, and a hidden state's opaque shadow paints over the shown state. Tie each shadow's Visible to the
+  element one ZIndex above it.
+- **Rotated elements are clipped to their layout rect** in the raster, along with anything sticking out (corner tabs
+  became slivers on the close button). Render tilted plates whole, or keep decorations inside the box.
+- **Open Cloud "Decal" uploads return decal ids**: resolve each one in Studio with `InsertService:LoadAsset(id)`,
+  read `Decal.Texture` (354 in six execute_luau batches of 60, no failures).
+- **A clone of a juiced button arrives centre-anchored**: zero its AnchorPoint before placing it by top-left offsets.
+
 ## 11. Data truth (what the HUD shows)
 
 - **Preview/demo values only when the game client is absent.** A preview controller wrote "$30,500 / 125 gems"

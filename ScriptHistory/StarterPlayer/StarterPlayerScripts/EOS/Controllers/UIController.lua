@@ -629,8 +629,17 @@ local function applyUiColour()
 				local chk = row:FindFirstChild("SwatchCheck")
 				local chs = row:FindFirstChild("SwatchCheckShadow")
 				if sw and chk then
-					local p = UDim2.fromOffset(sw.Position.X.Offset + sw.Size.X.Offset - 26, sw.Position.Y.Offset - 12)
+					-- swatches are juiced buttons (centre-anchored), so place by their real top-left
+					local x, y = relPos(sw, row)
+					chk.AnchorPoint = Vector2.zero
+					local p = UDim2.fromOffset(x + sw.Size.X.Offset - 22, y - 10)
 					chk.Position = p
+					local top = 0
+					for _, c in row:GetChildren() do
+						if c:IsA("GuiObject") and c ~= chk and c ~= chs then top = math.max(top, c.ZIndex) end
+					end
+					chk.ZIndex = top + 2
+					if chs then chs.AnchorPoint = Vector2.zero; chs.ZIndex = top + 1 end
 					if chs then chs.Position = p + UDim2.fromOffset(0, 2) end
 					UI.popFrom(chk, 0.3)
 				end
@@ -1155,8 +1164,12 @@ local function refreshIncubator()
 		if tile then
 			local n = have(m)
 			setText(tile, "CountText", "x" .. n)
-			local ic = tile:FindFirstChild("Icon")
-			if ic and ic:IsA("ImageLabel") then ic.ImageTransparency = if n > 0 then 0 else 0.55 end
+			-- the design baked each tile lit or dark for its sample count: use the real icon, dark when empty
+			local art = find(find(tile, "Icon"), "Art")
+			if art and art:IsA("ImageLabel") then
+				art.Image = iconId("piece_" .. m)
+				art.ImageColor3 = if n > 0 then Color3.new(1, 1, 1) else Color3.fromRGB(40, 40, 46)
+			end
 		end
 	end
 	-- top: first-pet path or collection
@@ -1165,7 +1178,20 @@ local function refreshIncubator()
 	if coll then coll.Visible = not first end
 	if first then
 		local need = costFor("common", false)
-		setBar(find(fp, "Track"), math.min(haveFor("common"), need) / need)
+		local got = haveFor("common")
+		setBar(find(fp, "Track"), math.min(got, need) / need)
+		-- steps light up as the pieces arrive (one per match); the hatch step breathes when it's ready
+		for i = 1, 2 do
+			local st = fp:FindFirstChild("Step" .. i)
+			local lit = got >= math.ceil(need * i / 2)
+			if st then
+				local a, ic = st:FindFirstChild("Art"), st:FindFirstChild("Icon")
+				if a and a:IsA("ImageLabel") then a.ImageColor3 = if lit then Color3.new(1, 1, 1) else Color3.fromRGB(70, 70, 76) end
+				if ic and ic:IsA("ImageLabel") then ic.ImageTransparency = if lit then 0 else 0.6 end
+			end
+		end
+		local hs = fp:FindFirstChild("Step3")
+		if hs then UI.breathe(hs, got >= need) end
 	elseif coll then
 		for _, f in ipairs(ORDER) do
 			local n, tot = familyFound(f)
@@ -1288,8 +1314,21 @@ local function showReveal(t: any)
 	setIcon(sc, "AbilityIcon", familyIcon(pet.family))
 	setText(sc, "AbilityText", familyTitle(pet.family))
 	local equip = find(sc, "BtnEquip")
-	local isEquipped = profile and profile.equippedPet == pet.id
+	-- the server auto-equips a new pet when nothing is equipped, and HatchResult lands before that ProfileState
+	local eqd = profile and profile.equippedPet
+	local isEquipped = eqd == pet.id or eqd == nil or eqd == ""
 	if equip then equip.Visible = not isEquipped end
+	-- alone, NICE! moves to the middle of the pair (both are juiced: centre-anchored, rest in JuiceRest)
+	local nice = find(sc, "BtnClose")
+	if equip and nice and equip:IsA("GuiObject") and nice:IsA("GuiObject") then
+		if nice:GetAttribute("PairHome") == nil then
+			nice:SetAttribute("PairHome", nice.Position)
+			nice:SetAttribute("PairMid", nice.Position:Lerp(equip.Position, 0.5))
+		end
+		local at = (if isEquipped then nice:GetAttribute("PairMid") else nice:GetAttribute("PairHome")) :: UDim2
+		nice.Position = at
+		nice:SetAttribute("JuiceRest", at)
+	end
 	sc:SetAttribute("PetId", pet.id)
 	UI.open("Hatch", { keepHistory = true })
 	-- egg shake -> flash -> pet pop
@@ -1410,6 +1449,8 @@ local function refreshPets()
 	for _, f in ipairs(fams) do total += 3 end
 	local function place(tile: GuiObject, i: number)
 		local col, row = (i - 1) % 4, math.floor((i - 1) / 4)
+		-- a clone of a juiced prototype arrives centre-anchored: place by its top-left, juicy re-centres it
+		tile.AnchorPoint = Vector2.zero
 		tile.Position = UDim2.fromOffset(18 + col * 196, 18 + row * 210)
 	end
 	local eq = profile.equippedPet
@@ -1820,6 +1861,34 @@ local function showResults(data: any)
 					setText(line, "LineAmount", "+" .. p.amount)
 				end
 			end
+		end
+		-- no reward lines (practice match, or a match spent standing still): fill the gap instead of leaving it empty
+		local l1, l4 = find(sc, "Line1"), find(sc, "Line4")
+		if l1 and l4 and l1:IsA("GuiObject") and l4:IsA("GuiObject") and l1.Parent then
+			local none = l1.Parent:FindFirstChild("NoLines") :: TextLabel?
+			if not none then
+				local n = Instance.new("TextLabel")
+				n.Name = "NoLines"
+				n.BackgroundTransparency = 1
+				n.FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json")
+				n.TextColor3 = Color3.fromRGB(210, 210, 216)
+				n.TextSize = 30
+				n.ZIndex = l1.ZIndex + 1
+				local st = Instance.new("UIStroke")
+				st.Color = Color3.fromRGB(5, 5, 6)
+				st.Thickness = 2
+				st.Parent = n
+				local top = l1.Position.Y.Offset - l1.AnchorPoint.Y * l1.Size.Y.Offset
+				local bottom = l4.Position.Y.Offset + (1 - l4.AnchorPoint.Y) * l4.Size.Y.Offset
+				n.Position = UDim2.fromOffset(l1.Position.X.Offset - l1.AnchorPoint.X * l1.Size.X.Offset, top)
+				n.Size = UDim2.fromOffset(l1.Size.X.Offset, bottom - top)
+				n.Parent = l1.Parent
+				none = n
+			end
+			local nl = none :: TextLabel
+			nl.Text = if #parts == 0 then (if data.isTest then "Practice match: nothing to bank" else "No gold this match") else ""
+			nl.Visible = #parts == 0
+			if #parts == 0 then UI.popFrom(nl, 0.6, 0.3) end
 		end
 		UI.setText(sc, "GoldTotal", "+0")
 		UI.countTo("resultsGold", 0, sc, "GoldTotal", function(v) return "+" .. math.floor(v + 0.5) end)
@@ -2386,6 +2455,93 @@ function UIC.init()
 			end
 		end
 	end
+	-- each state of a two-state control (Live/Soon, On/Off, Buy/Poor...) and each card brings its own
+	-- DropShadow / ShadowRing, drawn just below it. A hidden element's shadow must hide too, or it covers
+	-- the visible state (black family tiles) or floats over another tab (lines across Controls)
+	for _, sh in root:GetDescendants() do
+		if sh:IsA("Frame") and (sh.Name == "DropShadow" or sh.Name == "ShadowRing") and sh.Parent then
+			local partner: GuiObject? = nil
+			for _, c in sh.Parent:GetChildren() do
+				if c ~= sh and c:IsA("GuiObject") and c.ZIndex == sh.ZIndex + 1 then partner = c end
+			end
+			if partner then
+				local p = partner :: GuiObject
+				sh.Visible = p.Visible
+				p:GetPropertyChangedSignal("Visible"):Connect(function() sh.Visible = p.Visible end)
+			end
+		end
+	end
+	-- close button: the export clipped the tilted box (and its corner tabs) to its layout rect. When the
+	-- clean re-render (art close_clean, no tabs) is uploaded, swap it in, centred where the old art was
+	local clean = assets and assets.art and assets.art["close_clean"]
+	if clean and clean ~= "" then
+		for _, x in root:GetDescendants() do
+			if x:IsA("GuiButton") and x.Name == "CloseButton" then
+				local art = x:FindFirstChild("Art")
+				if art and art:IsA("ImageLabel") then
+					local cx = art.Position.X.Offset + art.Size.X.Offset / 2
+					local cy = art.Position.Y.Offset + art.Size.Y.Offset / 2
+					art.Image = clean
+					art.Size = UDim2.fromOffset(106.5, 98.5)
+					art.Position = UDim2.fromOffset(cx - 53, cy - 51)
+				end
+			end
+		end
+	end
+	-- the ability card's pet disc was flattened to a tinted glow and lost its pet image: rebuild the round
+	-- slot (pet photo clipped to a circle, green rim, black outline) so abilityCard can fill PetIcon
+	for _, disc in root:GetDescendants() do
+		if disc:IsA("ImageLabel") and disc.Name == "PetDisc" and not disc:FindFirstChild("PetIcon") then
+			local dc = Instance.new("UICorner")
+			dc.CornerRadius = UDim.new(0.5, 0)
+			dc.Parent = disc
+			local rim = Instance.new("UIStroke")
+			rim.Color = Color3.fromRGB(78, 212, 90)
+			rim.Thickness = 3
+			rim.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			rim.Parent = disc
+			local outline = Instance.new("Frame")
+			outline.Name = "Outline"
+			outline.BackgroundTransparency = 1
+			outline.Size = UDim2.new(1, 10, 1, 10)
+			outline.Position = UDim2.fromOffset(-5, -5)
+			outline.ZIndex = disc.ZIndex
+			local oc = Instance.new("UICorner")
+			oc.CornerRadius = UDim.new(0.5, 0)
+			oc.Parent = outline
+			local ostroke = Instance.new("UIStroke")
+			ostroke.Color = Color3.fromRGB(5, 5, 6)
+			ostroke.Thickness = 2
+			ostroke.Parent = outline
+			outline.Parent = disc
+			local icon = Instance.new("ImageLabel")
+			icon.Name = "PetIcon"
+			icon.BackgroundTransparency = 1
+			icon.ScaleType = Enum.ScaleType.Crop
+			icon.Size = UDim2.new(1, -4, 1, -4)
+			icon.Position = UDim2.fromOffset(2, 2)
+			icon.ZIndex = disc.ZIndex
+			local ic = Instance.new("UICorner")
+			ic.CornerRadius = UDim.new(0.5, 0)
+			ic.Parent = icon
+			icon.Parent = disc
+		end
+	end
+	-- gamepad selection: a white rounded ring in the UI's style instead of Roblox's default blue box
+	local selRing = Instance.new("Frame")
+	selRing.Name = "EOS_SelectionRing"
+	selRing.BackgroundTransparency = 1
+	selRing.Size = UDim2.new(1, 8, 1, 8)
+	selRing.Position = UDim2.fromOffset(-4, -4)
+	local sc = Instance.new("UICorner")
+	sc.CornerRadius = UDim.new(0, 10)
+	sc.Parent = selRing
+	local ss = Instance.new("UIStroke")
+	ss.Color = Color3.new(1, 1, 1)
+	ss.Thickness = 3
+	ss.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	ss.Parent = selRing
+	pg.SelectionImageObject = selRing
 	-- tag the incubator ladder's folder-tab title (unnamed in the export) so refreshIncubator can rename it
 	if S.Incubator then
 		for _, d in S.Incubator:GetDescendants() do
