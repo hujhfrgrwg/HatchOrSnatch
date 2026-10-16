@@ -7,7 +7,7 @@ updated: 2026-10-16
 What the new UI controller changes at runtime, so the built GUI in Studio (`StarterGui.EOSUI`) doesn't look like a mistake when you open it. The source is `roblox/game/UIController.luau`; Studio runs it as `StarterPlayer.StarterPlayerScripts.EOS.Controllers.UIController`. How each button and remote is wired is in [[UI Wiring Map]].
 
 ## What the controller changes at join
-- **The old UI is switched off.** `EOS_HUD`, `EOS_Menus`, `EOS_Results` and `EOS_Overlay` (from UIBuilder) are still Enabled in StarterGui. The controller disables their PlayerGui copies and keeps them off. EmoteController still reads `EOS_Menus.Emotes.Panel`, so those guis stay in the place.
+- **The old UI is switched off.** `EOS_HUD`, `EOS_Menus`, `EOS_Results` and `EOS_Overlay` (from UIBuilder) are disabled in StarterGui since 16 Oct (HOS-UI-OLDOFF-001), so they no longer draw over the Studio viewport. The controller also keeps their PlayerGui copies off. EmoteController still reads `EOS_Menus.Emotes.Panel`, so those guis stay in the place. Re-running `ServerStorage.EOSBuild.UIBuilder` would recreate them Enabled, so don't.
 - **Page dims cover any screen shape.** Each page's dim is a 1920×1080 design rect. The controller stretches it past the edges so tall or wide screens never show a gap.
 - **There is an overlay layer.** `Root.Overlay` (ZIndex 40) holds toasts, banners and confirm boxes above every screen and shares the root's scale.
 - **Selection rings move with their stroke.** The exporter turns a ring's box-shadow into `ShadowRing` siblings. The controller folds them into the ring (`FamilySel`, `ItemSel`, `PetSel`, `SwatchSel`, `SelRing`) so the visible stroke follows the selection.
