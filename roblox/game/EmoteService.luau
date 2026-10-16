@@ -6,8 +6,10 @@
 --                              attribute EOS_Emote; every client plays that character's song near it.
 --  * RequestEmoteWheel(slots)  save the 6 emotes on your G wheel (owned only; a new win fills an empty slot)
 -- Emotes stop when a match starts. Robux openings stay hidden until they have product ids.
+-- Paid-random-item rules: where PolicyService restricts them, crates can't be opened (HOS-GEMS-001).
 
 local Players = game:GetService("Players")
+local PolicyService = game:GetService("PolicyService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
@@ -44,9 +46,31 @@ local CRATE_WORDS = {
 	UNKNOWN = "Can't open a crate right now",
 }
 
+-- Gems are buyable with Robux, so the crate is a paid random item: where Roblox's policy restricts those
+-- (some countries), the crate stays shut. Cached per player; a failed lookup counts as restricted.
+local restricted: { [Player]: boolean } = {}
+local function crateRestricted(plr: Player): boolean
+	if restricted[plr] == nil then
+		local ok, info = false, nil
+		for attempt = 1, 3 do
+			ok, info = pcall(function()
+				return PolicyService:GetPolicyInfoForPlayerAsync(plr)
+			end)
+			if ok then break end
+			task.wait(attempt)
+		end
+		restricted[plr] = not ok or (type(info) == "table" and info.ArePaidRandomItemsRestricted == true)
+	end
+	return restricted[plr]
+end
+
 local function onOpenCrate(plr: Player)
 	if not MatchService.limiter:allow(plr.UserId, "RequestOpenCrate", os.clock()) then
 		return
+	end
+	if crateRestricted(plr) then
+		Net.event("CrateResult"):FireClient(plr, { ok = false, reason = "RESTRICTED" })
+		return toast(plr, "Emote Crates aren't available where you play", "info")
 	end
 	if inMatch(plr) then
 		return toast(plr, "Open crates between matches", "info")
@@ -117,6 +141,9 @@ local function onWheel(plr: Player, slots: any)
 end
 
 function EmoteService.init()
+	Players.PlayerRemoving:Connect(function(plr)
+		restricted[plr] = nil
+	end)
 	Net.event("RequestOpenCrate").OnServerEvent:Connect(onOpenCrate)
 	Net.event("RequestEmote").OnServerEvent:Connect(onEmote)
 	Net.event("RequestEmoteWheel").OnServerEvent:Connect(onWheel)

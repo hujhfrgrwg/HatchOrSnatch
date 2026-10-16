@@ -17,6 +17,7 @@ local UserInputService = game:GetService("UserInputService")
 local EOS = ReplicatedStorage:WaitForChild("EOS")
 local Shared = EOS:WaitForChild("Shared")
 local GameConfig = require(Shared:WaitForChild("GameConfig"))
+local MarketplaceService = game:GetService("MarketplaceService")
 local TierConfig = require(Shared:WaitForChild("TierConfig"))
 local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
 local Layout = require(Shared:WaitForChild("Layout"))
@@ -93,6 +94,7 @@ local ACCENT_TINT = { -- UI Colour setting -> tint for the greyscale banner/glow
 }
 local SWATCH_KEY = { Default = "", Purple = "purple", Pink = "pink", Blue = "sky", Green = "lime", Gold = "gold", Red = "coral", Steel = "steel" }
 local PANELS = { "Quests", "Incubator", "Pets", "Shop", "Stats", "Settings" }
+local PURCHASES = (GameConfig.Features and GameConfig.Features.SHOP_PURCHASES) == true -- Robux Gem packs live
 local LOBBY_ONLY = { Incubator = true, Shop = true, Pets = true, Emotes = true, EmoteWheel = true }
 local SHOP_ICON = {
 	trail_spark = "trail", trail_ember = "trail_ember", burst_confetti = "burst", case_frost = "case_frost",
@@ -1673,6 +1675,7 @@ local function shopAction(it: any, st: string)
 		buyItem(it)
 	elseif st == "poor" then
 		local wallet = (profile and profile[it.wallet]) or 0
+		if it.wallet == "gems" and UIC.offerGems(it.price - wallet, it.name) then return end
 		UIC.toast(("Need %s more %s"):format(Format.full(it.price - wallet), if it.wallet == "gems" then "Gems" else "Gold"), "bad")
 		local hdr = find(S.Shop, "HeaderInfo")
 		if hdr then UI.shake(hdr, 7, 0.3) end
@@ -1707,6 +1710,38 @@ local function refreshShop()
 	if not sc or not profile then return end
 	setDual(find(sc, "TabGold"), shopTab == "gold")
 	setDual(find(sc, "TabGems"), shopTab == "gems")
+	setDual(find(sc, "TabGetGems"), shopTab == "getgems")
+	local tg = find(sc, "TabGetGems")
+	if tg and tg:IsA("GuiObject") then tg.Visible = PURCHASES end
+	-- Buy Gems: six Robux packs; the item grid and detail hide
+	local packs = find(sc, "GetGemsPage")
+	local buying = shopTab == "getgems" and PURCHASES
+	if packs and packs:IsA("GuiObject") then packs.Visible = buying end
+	for _, n in ipairs({ "Grid", "Detail" }) do
+		local w = find(sc, n)
+		if w and w:IsA("GuiObject") then w.Visible = not buying end
+	end
+	setText(sc, "GoldText", Format.full(profile.gold or 0))
+	setText(sc, "GemsText", Format.full(profile.gems or 0))
+	if buying then
+		for i, pack in ipairs(EconomyConfig.GEM_PACKS) do
+			local card = find(packs, "Pack" .. i)
+			if card and card:IsA("GuiObject") then
+				card.Visible = pack.productId ~= nil
+				setText(card, "Amount", Format.full(pack.gems))
+				setText(find(card, "BtnBuy"), "Price", Format.full(pack.robux))
+				local tagF = find(card, "Tag")
+				if tagF and tagF:IsA("GuiObject") then
+					tagF.Visible = pack.tag ~= nil
+					for _, l in tagF:GetDescendants() do
+						if pack.tag and l:IsA("TextLabel") then l.Text = pack.tag end
+					end
+				end
+				if iconId("gempack" .. i) ~= "" then setIcon(card, "Icon", "gempack" .. i) end
+			end
+		end
+		return
+	end
 	local grid = find(sc, "Grid") :: Frame?
 	if not grid then return end
 	local scroll = gridScroll(grid, "Scroll")
@@ -1802,8 +1837,6 @@ local function refreshShop()
 		d:SetAttribute("Item", it.id)
 		d:SetAttribute("State", st)
 	end
-	setText(sc, "GoldText", Format.full(profile.gold or 0))
-	setText(sc, "GemsText", Format.full(profile.gems or 0))
 end
 
 ----------------------------------------------------------------------------------------------- Stats + Settings
@@ -2189,6 +2222,51 @@ function UIC.juicy(b: GuiButton, fn: (() -> ())?)
 	if fn then b.Activated:Connect(fn) end
 end
 
+----------------------------------------------------------------------------------------------- Robux Gem packs (HOS-GEMS-001)
+-- Roblox's purchase window; PurchaseService grants the Gems from the receipt (never from anything sent here)
+function UIC.buyGems(pack: any)
+	if not PURCHASES or not pack or not pack.productId then return end
+	Sound.play("click")
+	pcall(function()
+		MarketplaceService:PromptProductPurchase(player, pack.productId)
+	end)
+end
+
+-- the Shop on its Buy Gems tab
+function UIC.openGemShop()
+	if not PURCHASES then return end
+	shopTab = "getgems"
+	selItem = nil
+	if UI.current() == "Shop" then
+		refreshShop()
+	else
+		UIC.open("Shop")
+	end
+end
+
+-- not enough Gems for something: offer the smallest pack that covers it (true = offered)
+function UIC.offerGems(need: number, forWhat: string?): boolean
+	if not PURCHASES or need <= 0 then return false end
+	local pick = nil -- packs run small to big: the first that covers it, else the biggest
+	for _, pack in ipairs(EconomyConfig.GEM_PACKS) do
+		if pack.productId then
+			pick = pack
+			if pack.gems >= need then break end
+		end
+	end
+	if not pick then return false end
+	UIC.confirm({
+		title = "Not enough Gems",
+		body1 = ("You need %s more Gems%s."):format(Format.full(need), if forWhat then " for " .. forWhat else ""),
+		body2 = ("Get %s Gems for %s Robux?"):format(Format.full(pick.gems), Format.full(pick.robux)),
+		yes = "GET GEMS",
+		no = "NOT NOW",
+	}, function()
+		UIC.buyGems(pick)
+	end)
+	return true
+end
+
 ----------------------------------------------------------------------------------------------- wiring
 local function wireButtons()
 	-- generic Opens buttons (pills, rail) go through UIC.open so lobby-only rules apply
@@ -2202,6 +2280,14 @@ local function wireButtons()
 				if to then UIC.open(to) end
 			end)
 		end
+	end
+	-- Gems "+" (bottom left): the Shop's Buy Gems tab
+	local wal = hudGroup("HUD", "Wallet")
+	local plus = wal and wal:FindFirstChild("GemsPlus")
+	if plus and plus:IsA("GuiObject") then
+		plus.Visible = PURCHASES
+		plus:SetAttribute("OpensVia", nil)
+		onClick(plus, function() UIC.openGemShop() end)
 	end
 	-- SPECTATE pill (HUD.Watch)
 	local watch = hudGroup("HUD", "Watch")
@@ -2333,6 +2419,12 @@ local function wireButtons()
 	if shop then
 		onClick(find(shop, "TabGold"), function() shopTab = "gold"; selItem = nil; refreshShop() end)
 		onClick(find(shop, "TabGems"), function() shopTab = "gems"; selItem = nil; refreshShop() end)
+		onClick(find(shop, "TabGetGems"), function() shopTab = "getgems"; selItem = nil; refreshShop() end)
+		local packs = find(shop, "GetGemsPage")
+		for i, pack in ipairs(EconomyConfig.GEM_PACKS) do
+			local card = find(packs, "Pack" .. i)
+			onClick(card and find(card, "BtnBuy"), function() UIC.buyGems(pack) end)
+		end
 		local d = find(shop, "Detail")
 		if d then
 			for s, nm in pairs(STATE_BTN) do
@@ -2408,7 +2500,7 @@ local function connectEvents()
 	end)
 	Net.event("OpenScreen").OnClientEvent:Connect(function(t)
 		if type(t) ~= "table" or not table.find(PANELS, t.name) then return end
-		if t.name == "Shop" and (t.tab == "gold" or t.tab == "gems") then
+		if t.name == "Shop" and (t.tab == "gold" or t.tab == "gems" or (t.tab == "getgems" and PURCHASES)) then
 			shopTab = t.tab
 			selItem = nil
 			if UI.current() == "Shop" then

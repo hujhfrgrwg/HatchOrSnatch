@@ -9,6 +9,7 @@
 
 local KeyframeSequenceProvider = game:GetService("KeyframeSequenceProvider")
 local Players = game:GetService("Players")
+local PolicyService = game:GetService("PolicyService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -36,6 +37,7 @@ local pendingResult: any = nil
 local mineSig = ""
 local oddsCards: { [string]: GuiObject } = {}
 local wheelSent = false
+local crateBlocked = false -- paid random items restricted for this player (PolicyService)
 
 local lazyOddsRef: () -> () = function() end -- set once lazyOdds exists (setTab is defined first)
 local PROTO = { common = "common", rare = "rare", epic = "epic", legendary = "crowned" }
@@ -595,11 +597,12 @@ local function refreshCrate()
 	local gems = if profile then profile.gems or 0 else 0
 	setText(panel, "GemsText", tostring(gems))
 	setText(panel, "HaveText", tostring(gems))
-	setText(panel, "CrateSub", ("One of %d emotes per crate"):format(#EmoteConfig.LIST))
+	if not crateBlocked then setText(panel, "CrateSub", ("One of %d emotes per crate"):format(#EmoteConfig.LIST)) end
 	local can = gems >= EmoteConfig.CRATE_GEMS
-	show(find(panel, "BtnOpen"), can and not rolling)
-	show(find(panel, "BtnPoor"), not can and not rolling)
+	show(find(panel, "BtnOpen"), can and not rolling and not crateBlocked)
+	show(find(panel, "BtnPoor"), not can and not rolling and not crateBlocked)
 	show(find(panel, "BtnRolling"), rolling)
+	if crateBlocked then setText(panel, "CrateSub", "Not available where you play") end
 	for _, n in ipairs({ "BtnOpen", "BtnPoor" }) do setText(find(panel, n), "Price", tostring(EmoteConfig.CRATE_GEMS)) end
 	local page = find(panel, "CratePage")
 	local grid = page and page:FindFirstChild("OddsGrid")
@@ -829,6 +832,8 @@ local function wire(root: Instance)
 		onClick(find(panel, "GoCrate"), function() setTab("crate"); EmoteController.refresh() end)
 		onClick(find(panel, "BtnOpen"), openCrate)
 		onClick(find(panel, "BtnPoor"), function()
+			local gems = if profile then profile.gems or 0 else 0
+			if UI.offerGems and UI.offerGems(EmoteConfig.CRATE_GEMS - gems, "an Emote Crate") then return end
 			UI.toast(("Not enough Gems: a crate is %d"):format(EmoteConfig.CRATE_GEMS), "warn")
 		end)
 		onClick(find(panel, "Done"), function() revealShown(false); EmoteController.refresh() end)
@@ -919,6 +924,18 @@ local function wire(root: Instance)
 end
 
 function EmoteController.init()
+	task.spawn(function()
+		local ok, info = false, nil
+		for attempt = 1, 3 do
+			ok, info = pcall(function()
+				return PolicyService:GetPolicyInfoForPlayerAsync(player)
+			end)
+			if ok then break end
+			task.wait(attempt)
+		end
+		crateBlocked = not ok or (type(info) == "table" and info.ArePaidRandomItemsRestricted == true)
+		if crateBlocked then EmoteController.refresh() end
+	end)
 	local gui = player:WaitForChild("PlayerGui"):WaitForChild("EOSUI", 30)
 	local root = gui and gui:WaitForChild("Root", 10)
 	if root then wire(root) end

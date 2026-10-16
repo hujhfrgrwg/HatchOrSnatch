@@ -1,0 +1,184 @@
+--!strict
+-- EconomyConfig: GDD v0.4 economy, in one place (shared so the UI shows the same numbers the
+-- server uses). PLAYTEST STARTING VALUES from the GDD tables; tune from telemetry, not by feel.
+--
+--  * Gold: earn-only soft currency for low-stakes and recurring expression (never buys power)
+--  * Gems: earnable now; purchasable with Robux later (GEM_PACKS stay hidden until the developer
+--    approves real developer products); buys durable premium cosmetics only
+--  * Egg pieces: one primary piece per eligible match (Common / Rare / Epic; Crowned deferred),
+--    crafted into pets at the incubator. A pet grants one ability family in matches.
+
+local EconomyConfig = {}
+
+-- ===== per-match earnings (GDD 08) =====
+-- Gold = min(90, 25 active + 12 x successful crossings + 10 x credited first theft + 15 x final victory)
+EconomyConfig.GOLD = { CAP = 90, ACTIVE = 25, PER_CROSSING = 12, FIRST_THEFT = 10, VICTORY = 15 }
+-- Gems = min(5, 1 active + 1 first crossing + 1 second crossing + 1 final victory + 1 credited first theft)
+EconomyConfig.GEMS = { CAP = 5, ACTIVE = 1, FIRST_CROSSING = 1, SECOND_CROSSING = 1, VICTORY = 1, FIRST_THEFT = 1 }
+
+export type MatchOutcome = {
+	active: boolean, -- eligible (moved / crossed / tagged): no AFK presence rewards
+	crossings: number,
+	captures: number, -- credited captures (the first one counts once)
+	win: boolean,
+}
+
+-- Returns gold, plus a breakdown for the results card
+function EconomyConfig.goldFor(o: MatchOutcome): (number, { { label: string, amount: number } })
+	local G = EconomyConfig.GOLD
+	local parts = {}
+	local total = 0
+	local function add(label: string, amount: number)
+		if amount > 0 then
+			table.insert(parts, { label = label, amount = amount })
+			total += amount
+		end
+	end
+	if o.active then
+		add("PLAYED", G.ACTIVE)
+	end
+	add("CROSSINGS", G.PER_CROSSING * math.max(0, o.crossings))
+	add("FIRST STEAL", if o.captures > 0 then G.FIRST_THEFT else 0)
+	add("VICTORY", if o.win then G.VICTORY else 0)
+	return math.min(G.CAP, total), parts
+end
+
+function EconomyConfig.gemsFor(o: MatchOutcome): number
+	local M = EconomyConfig.GEMS
+	local n = 0
+	if o.active then
+		n += M.ACTIVE
+	end
+	if o.crossings >= 1 then
+		n += M.FIRST_CROSSING
+	end
+	if o.crossings >= 2 then
+		n += M.SECOND_CROSSING
+	end
+	if o.win then
+		n += M.VICTORY
+	end
+	if o.captures > 0 then
+		n += M.FIRST_THEFT
+	end
+	return math.min(M.CAP, n)
+end
+
+-- ===== egg pieces (GDD 03) =====
+EconomyConfig.MATERIALS = { "common", "rare", "epic" } -- low -> high; "crowned" is deferred
+EconomyConfig.MATERIAL_INFO = {
+	common = { name = "Common", color = Color3.fromRGB(226, 220, 204), text = Color3.fromRGB(240, 234, 218) },
+	rare = { name = "Rare", color = Color3.fromRGB(92, 176, 255), text = Color3.fromRGB(122, 196, 255) },
+	epic = { name = "Epic", color = Color3.fromRGB(184, 112, 255), text = Color3.fromRGB(206, 150, 255) },
+}
+-- highest egg level secured this match -> the one piece earned (Level 4 = Epic at launch)
+EconomyConfig.MATERIAL_FOR_TIER = { [1] = "common", [2] = "rare", [3] = "epic", [4] = "epic" }
+-- pieces per hatch: random family / chosen family ("focus" = one extra piece of the same tier)
+EconomyConfig.RECIPES = {
+	common = { base = 2, focus = 3 },
+	rare = { base = 3, focus = 4 },
+	epic = { base = 5, focus = 6 },
+}
+-- the first Common pet: base recipe (2 pieces) AND a free family choice
+
+function EconomyConfig.materialForTier(tier: number): string
+	return EconomyConfig.MATERIAL_FOR_TIER[math.clamp(math.floor(tier), 1, 4)]
+end
+
+function EconomyConfig.materialIndex(m: string): number?
+	return table.find(EconomyConfig.MATERIALS, m)
+end
+
+-- ===== pets and ability families (GDD 13, appendix B) =====
+-- One equipped pet = one ability. Rarity is visual at launch (casual rarity stats are a TEST: 0%).
+EconomyConfig.LAUNCH_FAMILIES = { "Decoy", "Scout", "Brake" }
+EconomyConfig.FAMILIES = {
+	Decoy = {
+		ability = "DECOY",
+		short = "A running copy of you",
+		desc = "Sends a copy of you running ahead for 3 seconds. Catchers chasing it lose you.",
+		species = { common = "Mouse", rare = "Parrot", epic = "Mirror Dragon" },
+		color = Color3.fromRGB(255, 196, 92),
+		cooldown = 20,
+		duration = 3,
+	},
+	Scout = {
+		ability = "SCOUT",
+		short = "See the nearest opponents",
+		desc = "Pings the 3 nearest opponents through walls for 4 seconds.",
+		species = { common = "Sparrow", rare = "Seagull", epic = "Celestial Owl" },
+		color = Color3.fromRGB(110, 214, 255),
+		cooldown = 18,
+		duration = 4,
+	},
+	Brake = {
+		ability = "BRAKE",
+		short = "Stop dead and cut",
+		desc = "Kills your momentum and lets you cut a new way at full speed, no build-up.",
+		species = { common = "Turtle", rare = "Hermit Crab", epic = "Time Spirit" },
+		color = Color3.fromRGB(120, 236, 140),
+		cooldown = 10,
+		duration = 0.7,
+	},
+}
+
+function EconomyConfig.speciesFor(family: string, rarity: string): string
+	local f = EconomyConfig.FAMILIES[family]
+	return f and f.species[rarity] or "Pet"
+end
+
+-- ===== shops (GDD 04 / 05, appendix C) =====
+-- Only things that work today are listed (no fake prices). kind:
+--   "trail" = consumable, worn by your egg for your next match
+--   "burst" = consumable, used from the shop in the lobby
+--   "case"  = permanent egg case look (pick one in the shop)
+--   "entrance" = permanent lobby spawn effect
+--   "trailPerm" = permanent egg trail (premium)
+--   "abilityFx" = permanent ability colour pack (same hitboxes and timings)
+--   "hatchFx" = permanent hatching ceremony
+export type ShopItem = {
+	id: string,
+	name: string,
+	wallet: string, -- "gold" | "gems"
+	price: number,
+	kind: string,
+	desc: string,
+	color: Color3,
+}
+EconomyConfig.SHOP = {
+	{ id = "trail_spark", name = "Sparkle Trail", wallet = "gold", price = 40, kind = "trail", desc = "Your egg leaves sparkles. One match.", color = Color3.fromRGB(255, 236, 140) },
+	{ id = "trail_ember", name = "Ember Trail", wallet = "gold", price = 60, kind = "trail", desc = "Your egg leaves embers. One match.", color = Color3.fromRGB(255, 132, 64) },
+	{ id = "burst_confetti", name = "Confetti Burst", wallet = "gold", price = 75, kind = "burst", desc = "Pop confetti over your head in the lobby.", color = Color3.fromRGB(255, 120, 200) },
+	{ id = "case_frost", name = "Frost Egg Case", wallet = "gold", price = 900, kind = "case", desc = "An icy shell around the egg you carry. Yours to keep.", color = Color3.fromRGB(170, 230, 255) },
+	{ id = "entrance_bolt", name = "Bolt Entrance", wallet = "gold", price = 1400, kind = "entrance", desc = "Arrive in the lobby with a lightning strike. Yours to keep.", color = Color3.fromRGB(150, 200, 255) },
+	{ id = "case_sunset", name = "Sunset Egg Case", wallet = "gold", price = 2400, kind = "case", desc = "This week's Gold colorway. Yours to keep.", color = Color3.fromRGB(255, 160, 96) },
+	{ id = "trailp_rainbow", name = "Rainbow Trail", wallet = "gems", price = 150, kind = "trailPerm", desc = "A rainbow trail on your egg in every match.", color = Color3.fromRGB(255, 120, 220) },
+	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "Your pet's ability effects turn gold. Same timing and size.", color = Color3.fromRGB(255, 210, 58) },
+	{ id = "hatch_royal", name = "Royal Hatching", wallet = "gems", price = 350, kind = "hatchFx", desc = "A bigger hatching ceremony at the incubator.", color = Color3.fromRGB(200, 150, 255) },
+} :: { ShopItem }
+
+local byId: { [string]: ShopItem } = {}
+for _, it in ipairs(EconomyConfig.SHOP) do
+	byId[it.id] = it
+end
+
+function EconomyConfig.item(id: string): ShopItem?
+	return byId[id]
+end
+
+function EconomyConfig.isConsumable(item: ShopItem): boolean
+	return item.kind == "trail" or item.kind == "burst"
+end
+
+-- Robux Gem packs (GDD 06). Hidden until real developer products exist and the developer approves:
+-- fill productId to show a pack. Purchased Gems are granted by ProcessReceipt only.
+EconomyConfig.GEM_PACKS = {
+	{ gems = 100, robux = 49, productId = nil },
+	{ gems = 225, robux = 99, productId = nil },
+	{ gems = 500, robux = 199, productId = nil },
+	{ gems = 1100, robux = 399, productId = nil },
+	{ gems = 2400, robux = 799, productId = nil },
+	{ gems = 5000, robux = 1499, productId = nil },
+}
+
+return EconomyConfig

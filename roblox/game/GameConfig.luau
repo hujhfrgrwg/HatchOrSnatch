@@ -257,7 +257,7 @@ GameConfig.Features = {
 	PETS = true,
 	HATCHING = true,
 	COSMETICS = true,
-	SHOP_PURCHASES = false, -- Robux Gem packs (EconomyConfig.GEM_PACKS have no product ids)
+	SHOP_PURCHASES = true, -- Robux Gem packs: live developer products since 16 Oct (HOS-GEMS-001, EconomyConfig.GEM_PACKS)
 	PRACTICE_BOT = true,
 	SERVER_CONTACT_SCAN = true,
 }

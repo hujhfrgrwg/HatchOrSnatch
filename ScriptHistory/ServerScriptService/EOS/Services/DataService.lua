@@ -247,6 +247,36 @@ function DataService.update(plr: Player, label: string, fn: (any) -> ()): boolea
 	return true
 end
 
+-- Like update, but waits until the change is in the store (Robux receipts: Roblox must only hear
+-- "granted" once the Gems are saved). fn must be ledger-guarded: a retried receipt re-runs it.
+-- Returns true when saved (or in a no-save session such as practice), false on timeout / lock loss.
+function DataService.commit(plr: Player, label: string, fn: (any) -> (), timeout: number?): boolean
+	local s = sessions[plr]
+	if not s or not s.loaded then
+		return false
+	end
+	fn(s.profile)
+	if s.noSave then
+		pushProfile(plr)
+		return true
+	end
+	local op = { label = label, fn = fn }
+	table.insert(s.queue, op)
+	pushProfile(plr)
+	local t0 = os.clock()
+	while os.clock() - t0 < (timeout or 15) do
+		flush(s)
+		if not table.find(s.queue, op) then
+			return true
+		end
+		if s.noSave then
+			return false
+		end
+		task.wait(0.5)
+	end
+	return false
+end
+
 function DataService.get(plr: Player): any?
 	local s = sessions[plr]
 	return if s and s.loaded then s.profile else nil
