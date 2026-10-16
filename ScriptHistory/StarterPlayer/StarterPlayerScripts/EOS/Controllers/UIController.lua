@@ -431,7 +431,8 @@ local function layoutToasts()
 	-- a panel's close button sits top right: with a panel open, toasts stack top centre instead
 	local panel = UI and UI.current() ~= nil
 	for i, t in ipairs(toasts) do
-		local y = if inm then 176 + (i - 1) * 96 elseif panel then 18 + (i - 1) * 96 else 96 + (i - 1) * 96
+		-- lobby: under the top-right goal box (y 86-160) since it moved there (16 Oct)
+		local y = if inm then 176 + (i - 1) * 96 elseif panel then 18 + (i - 1) * 96 else 178 + (i - 1) * 96
 		local x = if inm or panel then root.Size.X.Offset / 2 - 325 else root.Size.X.Offset - 670
 		TweenService:Create(t, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(x, y) }):Play()
 		t:SetAttribute("RestPos", UDim2.fromOffset(x, y))
@@ -1001,7 +1002,7 @@ local function claimable(): number
 end
 
 local function goalPill()
-	local tl = hudGroup("HUD", "TopLeft")
+	local tl = hudGroup("HUD", "Goal") -- its own top-right group since 16 Oct
 	local pill = tl and tl:FindFirstChild("GoalPill")
 	if not pill or not profile then return end
 	local pets = profile.pets or {}
@@ -2735,7 +2736,7 @@ local function wireButtons()
 				goalPill()
 				if trackedQuest then
 					UIC.toast("Tracking: " .. (item.title or "quest"), "info")
-					local tl = hudGroup("HUD", "TopLeft")
+					local tl = hudGroup("HUD", "Goal")
 					local pill2 = tl and tl:FindFirstChild("GoalPill")
 					if pill2 then UI.pulse(pill2, 0.1) end
 				end
