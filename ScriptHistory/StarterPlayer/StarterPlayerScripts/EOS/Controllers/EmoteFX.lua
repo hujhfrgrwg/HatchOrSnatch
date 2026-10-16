@@ -9,6 +9,10 @@
 --    module plays that joint's keyframes from the clip (ReplicatedStorage.EOS_Emotes) in time with the
 --    character's playing track, so the prop moves like the original even if the Animator never picks up a
 --    joint added mid-dance (if it does, it writes the same pose). Everything else is welded and stays still.
+--  * Follow = "Feet" (the surfboard): no weld; every frame the construct is placed between the character's
+--    soles, lengthwise along the feet and upright with the torso, so it stays underfoot whatever the dance does.
+--  * Follow = "Hips" (the scythe): every frame the construct rides at the hips (bottom of the Torso) with the
+--    root part's orientation, offset by C0, so it bobs with the rider but stays level.
 --  * The construct itself lives in Workspace.EOS_EmoteFXLive (never inside the character: hitboxes,
 --    outlines and ragdolls only see the joint), non-collidable, massless, unqueryable.
 --  * Build-in: pieces light up bottom to top over ~0.45 s with a sparkle burst; fade out in 0.25 s.
@@ -43,7 +47,8 @@ local function jointTrack(id: string, joint: string): Track?
 		for _, kf in seq:GetChildren() do
 			if kf:IsA("Keyframe") then
 				for _, p in kf:GetDescendants() do
-					if p:IsA("Pose") and p.Name == joint then table.insert(frames, { t = kf.Time, pose = p }) break end
+					-- weight-0 poses are placeholders the Animator skips (the joint interpolates across them)
+					if p:IsA("Pose") and p.Name == joint and p.Weight > 0 then table.insert(frames, { t = kf.Time, pose = p }) break end
 				end
 			end
 		end
@@ -83,6 +88,28 @@ local function sample(tr: Track, t: number): CFrame
 		end
 	end
 	return tr.cfs[n]
+end
+
+-- between the soles: long axis (Z) along the feet, up from the torso, top at sole height
+local function betweenFeet(char: Model): CFrame?
+	local l, r, torso = char:FindFirstChild("Left Leg"), char:FindFirstChild("Right Leg"), char:FindFirstChild("Torso")
+	if not (l and r and torso and l:IsA("BasePart") and r:IsA("BasePart") and torso:IsA("BasePart")) then return nil end
+	local a = l.CFrame * Vector3.new(0, -1, 0)
+	local b = r.CFrame * Vector3.new(0, -1, 0)
+	local along = b - a
+	if along.Magnitude < 0.05 then along = torso.CFrame.RightVector end
+	local up = torso.CFrame.UpVector
+	up = (up - along.Unit * up:Dot(along.Unit))
+	if up.Magnitude < 0.05 then up = Vector3.yAxis end
+	local mid = (a + b) / 2 - up.Unit * 0.12
+	return CFrame.lookAt(mid, mid + along.Unit, up.Unit)
+end
+
+-- at the hips, with the root's orientation; C0 is the offset in that frame
+local function atHips(char: Model, c0: CFrame): CFrame?
+	local torso, hrp = char:FindFirstChild("Torso"), char:FindFirstChild("HumanoidRootPart")
+	if not (torso and hrp and torso:IsA("BasePart") and hrp:IsA("BasePart")) then return nil end
+	return CFrame.new(torso.CFrame * Vector3.new(0, -1, 0)) * hrp.CFrame.Rotation * c0
 end
 
 -- the character's playing emote track (matched by length), for its TimePosition
@@ -193,8 +220,14 @@ local function spawnFor(char: Model, id: string)
 	end
 	-- weld to the body: a Motor6D in the character when the clip animates the prop's joint
 	local jointName = tpl:GetAttribute("Joint")
+	local follow = tpl:GetAttribute("Follow")
 	local joint: Instance
-	if type(jointName) == "string" and jointName ~= "" then
+	if follow == "Feet" or follow == "Hips" then
+		root.Anchored = true -- moved every frame below; the pieces stay welded to it
+		local cf = if follow == "Feet" then betweenFeet(char) else atHips(char, c0)
+		if cf then model:PivotTo(cf) end
+		joint = root
+	elseif type(jointName) == "string" and jointName ~= "" then
 		local m6 = Instance.new("Motor6D")
 		m6.Name = jointName
 		m6.Part0 = part0
@@ -213,8 +246,15 @@ local function spawnFor(char: Model, id: string)
 	end
 	model.Name = id .. "_" .. char.Name
 	model.Parent = liveFolder()
-	local entry: Live = { id = id, model = model, joint = if joint.Parent == part0 then joint else nil, alive = true }
+	local entry: Live = { id = id, model = model, joint = if joint ~= root and joint.Parent == part0 then joint else nil, alive = true }
 	live[char] = entry
+	if follow == "Feet" or follow == "Hips" then
+		entry.drive = RunService.RenderStepped:Connect(function()
+			if not entry.alive then return end
+			local cf = if follow == "Feet" then betweenFeet(char) else atHips(char, c0 :: CFrame)
+			if cf then root.CFrame = cf end
+		end)
+	end
 	-- jointed props: play the joint's keyframes in step with the character's track (own clock as fallback)
 	local tr = if joint:IsA("Motor6D") then jointTrack(id, joint.Name) else nil
 	if tr then

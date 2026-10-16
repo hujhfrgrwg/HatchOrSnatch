@@ -62,8 +62,21 @@ In the place, wired into the game; edit-mode verified, **not playtested yet**.
 - Screenshots: `docs/emote-fx/emote_constructs_sheet_v2.jpg` and `<id>_construct_v2.jpg`.
 - Backup before editing EmoteController: `docs/backups/HOS-EMOTE-FX-001_2026-10-16/pre_edit_EmoteController.rbxm`.
 
+## Refit to real playback (2026-10-16, Hunter: "toilet sit is glitching out a bit")
+- Cause: the clips are full of **weight-0 placeholder poses** (Toilet Sit 1,304, Blossom Break 630, Couch Nap 318, ...). Roblox's Animator ignores them and interpolates across; my first fits and the first videos read raw keyframes, so the dummy popped to standing and several props were fitted to poses players never see. Verified with the real Animator (`Animator:StepAnimations` in edit mode): Toilet Sit's torso holds a steady 0.65-stud offset, no pops. The emote itself never glitched in game.
+- EmoteFX's clip-joint reader now skips weight-0 poses too (same as the Animator).
+- Refits from real playback:
+  - **Toilet Sit:** toilet moved +0.4 x, +0.7 z under the real seated hips (they were sinking into the tank).
+  - **Ice Cream Cart:** the dance holds the hands at the mouth, it never pushes: a held cone + scoops at the face, the cart parked beside.
+  - **Coconut Launch:** the dancer is upside down (head at the floor, feet up): rebuilt as an upright cannon they dive into head-first, with a lit fuse.
+  - **Sunbath:** lounger lowered 0.35 (hips were under the seat).
+  - **Surfer:** the body rides ~2.5 studs up and back: the board now follows the feet every frame (`Follow = "Feet"`: centred between the soles, along the feet, upright with the torso).
+  - **Reaper's Ride:** the torso rocks ~50 deg and the rider faces sideways: the scythe now rides under the hips every frame, kept level and pointing where the rider faces (`Follow = "Hips"`), instead of seesawing through the body.
+- New template attribute `Follow` ("Feet" | "Hips") handled by EmoteFX; the clip-joint path stays for future props.
+- Known: Blossom Break's own clip sinks the body ~2 studs into the ground (only the head and an arm stay above); Gambler Dance rolls the dice on the floor so they dip into it; both are the clips, not the props.
+
 ## Video previews (2026-10-16)
-`docs/emote-fx/video/`: one clip per emote and `emote_constructs_all.mp4` (all 13, labelled, ~1.6 min). Recorded from Studio's viewport in edit mode: a dummy plays each emote's real clip (keyframes with their easing) while its construct builds in, follows the body / hand / joint for 6 s and fades out, the same way `Controllers.EmoteFX` does in game.
+`docs/emote-fx/video/`: one clip per emote and `emote_constructs_all.mp4` (all 13, labelled, ~1.6 min). Recorded from Studio's viewport in edit mode: a dummy is driven by Roblox's own Animator playing each emote's clip (`Animator:StepAnimations`, poses baked into the joints each frame) while its construct builds in, follows the body / hand / joint for 6 s and fades out, the same way `Controllers.EmoteFX` does in game.
 
 ## Needs Hunter's playtest
 - Do each emote in the lobby: build-in, fade-out on stop / moving, a second player seeing it.
