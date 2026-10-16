@@ -560,7 +560,74 @@ function ProfileLogic.openEmoteCrate(p: any, emoteId: string, emoteConfig: any):
 	return true, { emote = emoteId, dupe = dupe, refund = refund }
 end
 
--- Robux Gem packs: grant exactly once per receipt id (ProcessReceipt). Returns (granted, reason).
+-- Robux receipts share one bounded exact-once ledger (Gem packs, items, crates). true = new receipt (now recorded).
+local function takeReceipt(p: any, receiptId: string, ledgerSize: number): boolean
+	if type(p.receipts) ~= "table" then
+		p.receipts = {}
+	end
+	for _, r in ipairs(p.receipts) do
+		if r == receiptId then
+			return false
+		end
+	end
+	table.insert(p.receipts, receiptId)
+	while #p.receipts > ledgerSize do
+		table.remove(p.receipts, 1)
+	end
+	return true
+end
+
+-- A shop item bought outright with Robux (its own developer product, HOS-GEMS-001). Already owned (a keep-forever
+-- item bought twice) = its Gem price is credited instead, so the Robux is never wasted. Returns (granted, reason).
+function ProfileLogic.grantItemPurchase(p: any, receiptId: string, itemId: string, econ: any, ledgerSize: number): (boolean, string?)
+	local item = econ.item(itemId)
+	if type(receiptId) ~= "string" or receiptId == "" or not item then
+		return false, "BAD_RECEIPT"
+	end
+	if not takeReceipt(p, receiptId, ledgerSize) then
+		return false, "DUPLICATE"
+	end
+	if econ.isConsumable(item) then
+		p.cosmetics.consumables[itemId] = (p.cosmetics.consumables[itemId] or 0) + 1
+		if item.kind == "trail" then
+			p.cosmetics.trailNext = itemId
+		end
+	elseif p.cosmetics.owned[itemId] then
+		p.gems += if item.wallet == "gems" then item.price else 0
+		return true, "OWNED_REFUNDED"
+	else
+		p.cosmetics.owned[itemId] = true
+		if item.kind == "case" then
+			p.cosmetics.case = itemId
+		end
+	end
+	return true, nil
+end
+
+-- An Emote Crate opened with Robux: the emote is rolled by the caller (like openEmoteCrate, minus the Gems).
+-- Returns (granted, resultOrReason); result = { emote, dupe, refund }.
+function ProfileLogic.grantCratePurchase(p: any, receiptId: string, emoteId: string, emoteConfig: any, ledgerSize: number): (boolean, any)
+	local e = emoteConfig.get(emoteId)
+	if type(receiptId) ~= "string" or receiptId == "" or not e then
+		return false, "BAD_RECEIPT"
+	end
+	if not takeReceipt(p, receiptId, ledgerSize) then
+		return false, "DUPLICATE"
+	end
+	if type(p.emotes) ~= "table" then
+		p.emotes = {}
+	end
+	local dupe = p.emotes[emoteId] == true
+	local refund = 0
+	if dupe then
+		refund = emoteConfig.DUPE_REFUND[e.rarity] or 0
+		p.gems += refund
+	else
+		p.emotes[emoteId] = true
+	end
+	return true, { emote = emoteId, dupe = dupe, refund = refund }
+end
+
 -- The G wheel: slots cleaned by EmoteConfig.cleanWheel (owned, no duplicates, 6 entries)
 function ProfileLogic.setEmoteWheel(p: any, slots: any, emoteConfig: any): boolean
 	p.emoteWheel = emoteConfig.cleanWheel(slots, p.emotes)
@@ -585,6 +652,7 @@ function ProfileLogic.wheelAdd(p: any, emoteId: string, emoteConfig: any)
 	p.emoteWheel = w
 end
 
+-- Robux Gem packs: grant exactly once per receipt id (ProcessReceipt). Returns (granted, reason).
 function ProfileLogic.grantPurchasedGems(p: any, receiptId: string, gems: number, ledgerSize: number): (boolean, string?)
 	if type(receiptId) ~= "string" or receiptId == "" or type(gems) ~= "number" or gems <= 0 then
 		return false, "BAD_RECEIPT"

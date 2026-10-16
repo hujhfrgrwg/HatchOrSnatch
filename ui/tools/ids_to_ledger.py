@@ -43,6 +43,8 @@ ALIAS = {'art:a0f5b258ae1': 'art:a9256f992b1', 'art:a176585b5fb': 'art:a0d93acb1
 # 16 Oct HUD re-export (rail moved for EMOTES, AFK/Hunt PlateOn): unchanged plates re-rastered with noise only
 ALIAS.update({'art:a44fcb00958': 'art:a0b0f9e2708', 'art:a46abfa3166': 'art:a2d9b128fd7', 'art:a4db5d5bd82': 'art:aa173afb64e',
               'art:a51fa6df66f': 'art:ab7923ee3bf', 'art:ac7816d084f': 'art:aba4de3c332'})
+# 16 Oct shop redesign re-export: unchanged pieces re-rastered with noise only
+ALIAS.update({'art:a46e7e8a1b2': 'art:a49068d1c82', 'art:a4f15535b14': 'art:a2adb665ce7', 'art:a9befeebff7': 'art:afd43ca2e53', 'art:a0da812400b': 'art:a2ce5b17993', 'art:aef29d2dd07': 'art:ad65a6e2fbc'})
 # panel glows were clipped where the blur still had alpha 44 (a hard edge): the *s versions fade to 0 (16 Oct)
 for _k in ['ab90101a166', 'a64b9af467b', 'ada0c7f70ae', 'a3cfae0ce49', 'affdb20b15c', 'ae84f76b26a', 'a0e7996f923', 'a477426a820', 'a609fe22cc6', 'ac7cef1fd33', 'a68fad07684', 'a879fd92992']:
     ALIAS['art:' + _k] = 'art:' + _k + 's'

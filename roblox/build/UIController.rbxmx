@@ -21,6 +21,7 @@ local UserInputService = game:GetService("UserInputService")
 local EOS = ReplicatedStorage:WaitForChild("EOS")
 local Shared = EOS:WaitForChild("Shared")
 local GameConfig = require(Shared:WaitForChild("GameConfig"))
+local MarketplaceService = game:GetService("MarketplaceService")
 local TierConfig = require(Shared:WaitForChild("TierConfig"))
 local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
 local Layout = require(Shared:WaitForChild("Layout"))
@@ -55,7 +56,7 @@ local templates: Folder
 local profile: any = nil
 local settings = { sfx = true, music = true, reduceEffects = false, showHints = true, uiColour = "" }
 local settingsInit = false
-local shopTab = "gold"
+local shopTab = "featured"
 local resultsData: any = nil
 local resultsOpen = false
 local trackedQuest: string? = nil
@@ -97,6 +98,7 @@ local ACCENT_TINT = { -- UI Colour setting -> tint for the greyscale banner/glow
 }
 local SWATCH_KEY = { Default = "", Purple = "purple", Pink = "pink", Blue = "sky", Green = "lime", Gold = "gold", Red = "coral", Steel = "steel" }
 local PANELS = { "Quests", "Incubator", "Pets", "Shop", "Stats", "Settings" }
+local PURCHASES = (GameConfig.Features and GameConfig.Features.SHOP_PURCHASES) == true -- Robux Gem packs live
 local LOBBY_ONLY = { Incubator = true, Shop = true, Pets = true, Emotes = true, EmoteWheel = true }
 local SHOP_ICON = {
 	trail_spark = "trail", trail_ember = "trail_ember", burst_confetti = "burst", case_frost = "case_frost",
@@ -1677,6 +1679,7 @@ local function shopAction(it: any, st: string)
 		buyItem(it)
 	elseif st == "poor" then
 		local wallet = (profile and profile[it.wallet]) or 0
+		if it.wallet == "gems" and UIC.offerGems(it.price - wallet, it.name) then return end
 		UIC.toast(("Need %s more %s"):format(Format.full(it.price - wallet), if it.wallet == "gems" then "Gems" else "Gold"), "bad")
 		local hdr = find(S.Shop, "HeaderInfo")
 		if hdr then UI.shake(hdr, 7, 0.3) end
@@ -1706,108 +1709,234 @@ buyItem = function(it: any)
 	end
 end
 
+-- Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems.
+-- Gold items cost Gold; Gem items show a Gem price and (once its product exists) a Robux price.
+local SHOP_TABS = { featured = "TabFeatured", trails = "TabTrails", cases = "TabEggCases", effects = "TabEffects", emotes = "TabEmotes", gems = "TabGems" }
+local TAG_WORDS = { trail = "ONE MATCH", burst = "LOBBY, ONCE" } -- everything else keeps forever
+local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CASE", burst = "LOBBY EFFECT", entrance = "ENTRANCE", abilityFx = "ABILITY FX", hatchFx = "HATCH FX" }
+
+local function tagText(frame: Instance?, text: string)
+	if not frame then return end
+	for _, l in frame:GetDescendants() do
+		if l:IsA("TextLabel") then l.Text = text end
+	end
+end
+
+-- a centre-anchored (juiced) button keeps its left edge when it is resized
+local function widen(b: Instance?, w: number)
+	if not b or not b:IsA("GuiObject") then return end
+	if b:GetAttribute("FullW") == w then return end
+	local left = b.Position.X.Offset - b.Size.X.Offset * b.AnchorPoint.X
+	b.Size = UDim2.new(b.Size.X.Scale, w, b.Size.Y.Scale, b.Size.Y.Offset)
+	b.Position = UDim2.new(b.Position.X.Scale, left + w * b.AnchorPoint.X, b.Position.Y.Scale, b.Position.Y.Offset)
+	if b:GetAttribute("JuiceRest") then b:SetAttribute("JuiceRest", b.Position) end
+	b:SetAttribute("FullW", w)
+	for _, c in b:GetDescendants() do
+		if c:IsA("ImageLabel") and c.Name == "Art" then c.Size = UDim2.new(1, 0, c.Size.Y.Scale, c.Size.Y.Offset) end
+	end
+end
+
+local function canRobux(it: any): boolean
+	return PURCHASES and it.productId ~= nil
+end
+
+local function promptItem(it: any)
+	if not canRobux(it) then return end
+	Sound.play("click")
+	pcall(function()
+		MarketplaceService:PromptProductPurchase(player, it.productId)
+	end)
+end
+
+-- short on Gems: the item's Robux price if it has one, else the smallest Gem pack that covers it
+local function poorItem(it: any)
+	local wallet = (profile and profile[it.wallet]) or 0
+	if it.wallet == "gems" and canRobux(it) then
+		UIC.confirm({
+			title = "Not enough Gems",
+			body1 = ("You need %s more Gems for %s."):format(Format.full(it.price - wallet), it.name),
+			body2 = ("Get it now for %s Robux?"):format(Format.full(it.robux)),
+			yes = "BUY",
+			no = "NOT NOW",
+		}, function() promptItem(it) end)
+		return
+	end
+	if it.wallet == "gems" and UIC.offerGems(it.price - wallet, it.name) then return end
+	UIC.toast(("Need %s more %s"):format(Format.full(it.price - wallet), if it.wallet == "gems" then "Gems" else "Gold"), "bad")
+	local hdr = find(S.Shop, "HeaderInfo")
+	if hdr then UI.shake(hdr, 7, 0.3) end
+end
+
+-- the price / state buttons of a card or featured card, for item `it`
+local function fillButtons(scope: Instance, it: any)
+	local st = itemState(it)
+	local buying = st == "ok" or st == "poor"
+	local price, poor, rob = find(scope, "BtnPrice"), find(scope, "BtnPoor"), find(scope, "BtnRobux")
+	if price and not price:GetAttribute("HalfW") then
+		price:SetAttribute("HalfW", (price :: GuiObject).Size.X.Offset)
+		if rob then
+			local r = rob :: GuiObject
+			local full = (r.Position.X.Offset + r.Size.X.Offset * (1 - r.AnchorPoint.X)) - ((price :: GuiObject).Position.X.Offset - (price :: GuiObject).Size.X.Offset * (price :: GuiObject).AnchorPoint.X)
+			price:SetAttribute("FullSpan", full)
+		end
+	end
+	local robux = canRobux(it)
+	local w = if robux or not price then (price and price:GetAttribute("HalfW")) else (price:GetAttribute("FullSpan") or price:GetAttribute("HalfW"))
+	if w then
+		widen(price, w)
+		widen(poor, w)
+	end
+	if price then (price :: GuiObject).Visible = buying and st == "ok" end
+	if poor then (poor :: GuiObject).Visible = buying and st == "poor" end
+	if rob then (rob :: GuiObject).Visible = buying and robux end
+	for _, b in { price, poor } do
+		if b then setText(b, "Price", Format.full(it.price)) end
+	end
+	if rob and robux then setText(rob, "RobuxPrice", Format.full(it.robux)) end
+	for s2, nm in pairs({ owned = "BtnOwned", wear = "BtnWear", takeoff = "BtnTakeOff", use = "BtnUse" }) do
+		local b = find(scope, nm)
+		if b and b:IsA("GuiObject") then b.Visible = st == s2 end
+	end
+	if st == "use" then
+		local c = (profile and profile.cosmetics and profile.cosmetics.consumables) or {}
+		setText(find(scope, "BtnUse"), "UseCount", "x" .. (c[it.id] or 0))
+	end
+	local have = (profile and profile[it.wallet]) or 0
+	setText(scope, "Have", if st == "owned" or st == "wear" or st == "takeoff" then "Yours to keep" else ("You have %s %s"):format(Format.full(have), if it.wallet == "gems" then "Gems" else "Gold"))
+end
+
+local function wireButtons_(scope: Instance, it: any)
+	if scope:GetAttribute("Wired") == it.id then return end
+	scope:SetAttribute("Wired", it.id)
+	for _, b in scope:GetDescendants() do
+		if b:IsA("GuiButton") and b:GetAttribute("Button") then UI.juicy(b) end
+	end
+	local itr = it
+	onClick(find(scope, "BtnPrice"), function() buyItem(itr) end)
+	onClick(find(scope, "BtnPoor"), function() poorItem(itr) end)
+	onClick(find(scope, "BtnRobux"), function() promptItem(itr) end)
+	onClick(find(scope, "BtnWear"), function() shopAction(itr, "wear") end)
+	onClick(find(scope, "BtnTakeOff"), function() shopAction(itr, "takeoff") end)
+	onClick(find(scope, "BtnUse"), function() shopAction(itr, "use") end)
+end
+
+-- seconds to the next Monday 00:00 UTC (the weekly colourway changes then)
+local function weeklyLeft(): number
+	local now = os.time()
+	local wd = tonumber(os.date("!%w", now)) or 0 -- 0 = Sunday
+	local secs = (tonumber(os.date("!%H", now)) or 0) * 3600 + (tonumber(os.date("!%M", now)) or 0) * 60 + (tonumber(os.date("!%S", now)) or 0)
+	local days = (8 - wd) % 7
+	if days == 0 then days = 7 end
+	return days * 86400 - secs
+end
+
+local function fillCard(card: Instance, it: any)
+	setIcon(card, "Icon", SHOP_ICON[it.id] or "gift")
+	setText(card, "ItemName", it.name)
+	setText(card, "Sub", SUB_WORDS[it.kind] or "")
+	local l1, l2 = splitTwo(it.desc or "", 30)
+	setText(card, "Desc", l1)
+	setText(card, "Desc2", l2)
+	tagText(find(card, "KindTag"), if it.id == EconomyConfig.FEATURED.weekly then "THIS WEEK'S COLOUR" else (TAG_WORDS[it.kind] or "KEEP FOREVER"))
+	fillButtons(card, it)
+	wireButtons_(card, it)
+end
+
 local function refreshShop()
 	local sc = S.Shop
 	if not sc or not profile then return end
-	setDual(find(sc, "TabGold"), shopTab == "gold")
-	setDual(find(sc, "TabGems"), shopTab == "gems")
-	local grid = find(sc, "Grid") :: Frame?
-	if not grid then return end
-	local scroll = gridScroll(grid, "Scroll")
-	local protoGold = grid:FindFirstChild("Item_SparkleTrail")
-	local protoGemsHolder = grid:FindFirstChild("ProtoGems")
-	local protoGems = protoGemsHolder and protoGemsHolder:FindFirstChild("Item_RainbowTrail", true)
-	for _, c in grid:GetChildren() do
-		if c:IsA("GuiObject") and c.Name:match("^Item_") or c.Name == "ProtoGems" then
-			c.Visible = false
-		end
+	if shopTab == "gold" then shopTab = "featured" end -- old tab names (lobby stalls)
+	if shopTab == "getgems" then shopTab = "gems" end
+	if not SHOP_TABS[shopTab] or (shopTab == "gems" and not PURCHASES) then shopTab = "featured" end
+	for key, nm in pairs(SHOP_TABS) do
+		local t = find(sc, nm)
+		setDual(t, shopTab == key)
+		if key == "gems" and t and t:IsA("GuiObject") then t.Visible = PURCHASES end
 	end
-	local ring = grid:FindFirstChild("ItemSel") or scroll:FindFirstChild("ItemSel")
-	if ring and ring.Parent ~= scroll then ring.Parent = scroll end
-	for _, c in scroll:GetChildren() do
-		if c:GetAttribute("Runtime") then c:Destroy() end
-	end
-	local items = {}
-	for _, it in ipairs(EconomyConfig.SHOP) do
-		if it.wallet == shopTab then table.insert(items, it) end
-	end
-	if not selItem or not EconomyConfig.item(selItem) or EconomyConfig.item(selItem).wallet ~= shopTab then
-		selItem = items[1] and items[1].id
-	end
-	local proto = if shopTab == "gems" then protoGems else protoGold
-	local selCard
-	for i, it in ipairs(items) do
-		if proto then
-			local card = proto:Clone()
-			card:SetAttribute("Runtime", true)
-			card.Name = "Card_" .. it.id
-			card.Visible = true
-			card.Position = UDim2.fromOffset(18 + ((i - 1) % 4) * 262, 16 + math.floor((i - 1) / 4) * 290)
-			setIcon(card, "Icon", SHOP_ICON[it.id] or "gift")
-			setText(card, "ItemName", it.name)
-			local st = itemState(it)
-			local kind = KIND_WORDS[it.kind] or ""
-			local cons = profile.cosmetics and profile.cosmetics.consumables and profile.cosmetics.consumables[it.id] or 0
-			if EconomyConfig.isConsumable(it) and cons > 0 then kind = ("%s  ·  have %d"):format(kind, cons) end
-			if st == "poor" then
-				kind = "need more " .. (if it.wallet == "gems" then "Gems" else "Gold")
-				setColor(card, "Kind", Color3.fromRGB(255, 90, 90))
-			else
-				setColor(card, "Kind", Color3.fromRGB(210, 210, 216))
-			end
-			setText(card, "Kind", kind)
-			setButtons(card, it, st)
-			card.Parent = scroll
-			for _, b in card:GetDescendants() do
-				if b:IsA("GuiButton") and b:GetAttribute("Button") then UI.juicy(b) end
-			end
-			local itr = it
-			for s, nm in pairs(STATE_BTN) do
-				local b = card:FindFirstChild(nm)
-				if b then
-					onClick(b, function()
-						selItem = itr.id
-						refreshShop()
-						shopAction(itr, s)
-					end)
-				end
-			end
-			hitArea(card, function()
-				selItem = itr.id
-				Sound.play("click")
-				refreshShop()
-			end)
-			if it.id == selItem then selCard = card end
-		end
-	end
-	scroll.CanvasSize = UDim2.fromOffset(0, 16 + math.ceil(#items / 4) * 290)
-	if ring then
-		ring.ZIndex = 5
-		moveRing(ring, selCard, 4)
-	end
-	-- detail
-	local d = find(sc, "Detail")
-	local it = selItem and EconomyConfig.item(selItem)
-	if d and it then
-		local a, b = d:FindFirstChild("PreviewSlot"), d:FindFirstChild("PreviewSlotAlt")
-		local useAlt = it.wallet == "gems"
-		if a then a.Visible = not useAlt end
-		if b then b.Visible = useAlt end
-		setIcon(d, "Icon", SHOP_ICON[it.id] or "gift")
-		setText(d, "ItemName", it.name)
-		setText(d, "Kind", KIND_WORDS[it.kind] or "")
-		local l1, l2 = splitTwo(it.desc or "", 34)
-		setText(d, "Desc", l1)
-		setText(d, "Desc2", if l2 ~= "" then l2 else "Looks only, no gameplay edge.")
-		local st = itemState(it)
-		setButtons(d, it, st)
-		setIcon(d, "HaveIcon", if it.wallet == "gems" then "gem" else "gold")
-		setText(d, "HaveText", Format.full((profile and profile[it.wallet]) or 0))
-		d:SetAttribute("Item", it.id)
-		d:SetAttribute("State", st)
+	local pages = { PageFeatured = shopTab == "featured", PageItems = shopTab == "trails" or shopTab == "cases" or shopTab == "effects",
+		PageEmotes = shopTab == "emotes", GetGemsPage = shopTab == "gems" }
+	for nm, on in pairs(pages) do
+		local pg = find(sc, nm)
+		if pg and pg:IsA("GuiObject") then pg.Visible = on end
 	end
 	setText(sc, "GoldText", Format.full(profile.gold or 0))
 	setText(sc, "GemsText", Format.full(profile.gems or 0))
+	if shopTab == "featured" then
+		for slot, key in pairs({ FeatA = "weekly", FeatB = "spotlight" }) do
+			local card = find(sc, slot)
+			local it = EconomyConfig.item(EconomyConfig.FEATURED[key])
+			if card and it then
+				setText(card, "Title", string.upper(it.name))
+				setText(card, "Tagline", it.desc or "")
+				setIcon(card, "Icon", SHOP_ICON[it.id] or "gift")
+				if key == "weekly" then
+					local left = weeklyLeft()
+					tagText(find(card, "FeatTag"), ("THIS WEEK'S COLOURWAY  ·  NEW IN %dD %dH"):format(left // 86400, (left % 86400) // 3600))
+				end
+				fillButtons(card, it)
+				wireButtons_(card, it)
+			end
+		end
+	elseif pages.PageItems then
+		local page = find(sc, "PageItems")
+		if not page then return end
+		local protoG = find(find(page, "ProtoGold"), "Card")
+		local protoM = find(find(page, "ProtoGems"), "Card")
+		for _, n in { "ProtoGold", "ProtoGems" } do
+			local h = page:FindFirstChild(n)
+			if h and h:IsA("GuiObject") then h.Visible = false end
+		end
+		local items = {}
+		for _, it in ipairs(EconomyConfig.SHOP) do
+			if EconomyConfig.TAB_OF_KIND[it.kind] == shopTab then table.insert(items, it) end
+		end
+		local keep = {}
+		for i, it in ipairs(items) do
+			local nm = "Card_" .. it.id
+			local card = page:FindFirstChild(nm)
+			local proto = if it.wallet == "gems" then protoM else protoG
+			if not card and proto then
+				card = proto:Clone()
+				card.Name = nm
+				card:SetAttribute("Runtime", true)
+				card:SetAttribute("Wired", nil)
+				card.Parent = page
+			end
+			if card and card:IsA("GuiObject") then
+				keep[card] = true
+				card.Visible = true
+				card.Position = UDim2.fromOffset(26 + (i - 1) * 384, 102)
+				fillCard(card, it)
+			end
+		end
+		for _, c in page:GetChildren() do
+			if c:GetAttribute("Runtime") and not keep[c] then c.Visible = false end
+		end
+	elseif shopTab == "emotes" then
+		local gems = profile.gems or 0
+		setText(sc, "CrateSub", ("One of %d emotes per crate  ·  every chance shown inside"):format(UIC.emoteCount or 51))
+		local rb = find(sc, "BtnCrateRobux")
+		if rb and rb:IsA("GuiObject") then rb.Visible = PURCHASES and UIC.crateProduct ~= nil and not UIC.crateBlocked end
+		local gb = find(sc, "BtnCrateGems")
+		if gb and gb:IsA("GuiObject") then gb.Visible = not UIC.crateBlocked end
+		setText(sc, "CrateGemsLabel", Format.full(gems))
+	elseif shopTab == "gems" then
+		local packs = find(sc, "GetGemsPage")
+		for i, pack in ipairs(EconomyConfig.GEM_PACKS) do
+			local card = find(packs, "Pack" .. i)
+			if card and card:IsA("GuiObject") then
+				card.Visible = pack.productId ~= nil
+				setText(card, "Amount", Format.full(pack.gems))
+				setText(find(card, "BtnBuy"), "Price", Format.full(pack.robux))
+				local tagF = find(card, "Tag")
+				if tagF and tagF:IsA("GuiObject") then
+					tagF.Visible = pack.tag ~= nil
+					if pack.tag then tagText(tagF, pack.tag) end
+				end
+				if iconId("gempack" .. i) ~= "" then setIcon(card, "Icon", "gempack" .. i) end
+			end
+		end
+	end
 end
 
 ----------------------------------------------------------------------------------------------- Stats + Settings
@@ -2193,6 +2322,64 @@ function UIC.juicy(b: GuiButton, fn: (() -> ())?)
 	if fn then b.Activated:Connect(fn) end
 end
 
+----------------------------------------------------------------------------------------------- Robux Gem packs (HOS-GEMS-001)
+-- Roblox's purchase window; PurchaseService grants the Gems from the receipt (never from anything sent here)
+function UIC.buyGems(pack: any)
+	if not PURCHASES or not pack or not pack.productId then return end
+	Sound.play("click")
+	pcall(function()
+		MarketplaceService:PromptProductPurchase(player, pack.productId)
+	end)
+end
+
+-- the Shop on its Gems tab
+function UIC.openGemShop()
+	if not PURCHASES then return end
+	shopTab = "gems"
+	selItem = nil
+	if UI.current() == "Shop" then
+		refreshShop()
+	else
+		UIC.open("Shop")
+	end
+end
+
+-- an Emote Crate opened with Robux (EmoteController fills crateProduct / crateBlocked / showEmoteCrate)
+UIC.crateProduct = nil :: number?
+UIC.crateBlocked = false
+UIC.emoteCount = 51
+UIC.showEmoteCrate = nil :: (() -> ())?
+function UIC.buyCrate()
+	if not PURCHASES or not UIC.crateProduct or UIC.crateBlocked then return end
+	Sound.play("click")
+	pcall(function()
+		MarketplaceService:PromptProductPurchase(player, UIC.crateProduct)
+	end)
+end
+
+-- not enough Gems for something: offer the smallest pack that covers it (true = offered)
+function UIC.offerGems(need: number, forWhat: string?): boolean
+	if not PURCHASES or need <= 0 then return false end
+	local pick = nil -- packs run small to big: the first that covers it, else the biggest
+	for _, pack in ipairs(EconomyConfig.GEM_PACKS) do
+		if pack.productId then
+			pick = pack
+			if pack.gems >= need then break end
+		end
+	end
+	if not pick then return false end
+	UIC.confirm({
+		title = "Not enough Gems",
+		body1 = ("You need %s more Gems%s."):format(Format.full(need), if forWhat then " for " .. forWhat else ""),
+		body2 = ("Get %s Gems for %s Robux?"):format(Format.full(pick.gems), Format.full(pick.robux)),
+		yes = "GET GEMS",
+		no = "NOT NOW",
+	}, function()
+		UIC.buyGems(pick)
+	end)
+	return true
+end
+
 ----------------------------------------------------------------------------------------------- wiring
 local function wireButtons()
 	-- generic Opens buttons (pills, rail) go through UIC.open so lobby-only rules apply
@@ -2206,6 +2393,14 @@ local function wireButtons()
 				if to then UIC.open(to) end
 			end)
 		end
+	end
+	-- Gems "+" (bottom left): the Shop's Buy Gems tab
+	local wal = hudGroup("HUD", "Wallet")
+	local plus = wal and wal:FindFirstChild("GemsPlus")
+	if plus and plus:IsA("GuiObject") then
+		plus.Visible = PURCHASES
+		plus:SetAttribute("OpensVia", nil)
+		onClick(plus, function() UIC.openGemShop() end)
 	end
 	-- SPECTATE pill (HUD.Watch)
 	local watch = hudGroup("HUD", "Watch")
@@ -2332,20 +2527,33 @@ local function wireButtons()
 		local fav = find(pets, "BtnFavourite")
 		if fav then fav.Visible = false end
 	end
-	-- Shop
+	-- Shop: six tabs by what you buy
 	local shop = S.Shop
 	if shop then
-		onClick(find(shop, "TabGold"), function() shopTab = "gold"; selItem = nil; refreshShop() end)
-		onClick(find(shop, "TabGems"), function() shopTab = "gems"; selItem = nil; refreshShop() end)
-		local d = find(shop, "Detail")
-		if d then
-			for s, nm in pairs(STATE_BTN) do
-				onClick(d:FindFirstChild(nm), function()
-					local it = selItem and EconomyConfig.item(selItem)
-					if it then shopAction(it, s) end
-				end)
-			end
+		for key, nm in pairs(SHOP_TABS) do
+			onClick(find(shop, nm), function() shopTab = key; refreshShop() end)
 		end
+		local packs = find(shop, "GetGemsPage")
+		for i, pack in ipairs(EconomyConfig.GEM_PACKS) do
+			local card = find(packs, "Pack" .. i)
+			onClick(card and find(card, "BtnBuy"), function() UIC.buyGems(pack) end)
+		end
+		onClick(find(shop, "BtnCrateGems"), function()
+			local need = 250 - ((profile and profile.gems) or 0)
+			if need > 0 then
+				if UIC.crateProduct and PURCHASES and not UIC.crateBlocked then
+					UIC.confirm({ title = "Not enough Gems", body1 = ("You need %s more Gems for an Emote Crate."):format(Format.full(need)),
+						body2 = "Open one now for 149 Robux?", yes = "OPEN", no = "NOT NOW" }, function() UIC.buyCrate() end)
+				elseif not UIC.offerGems(need, "an Emote Crate") then
+					UIC.toast(("Need %s more Gems"):format(Format.full(need)), "bad")
+				end
+				return
+			end
+			if UIC.showEmoteCrate then UIC.showEmoteCrate() end
+		end)
+		onClick(find(shop, "BtnCrateRobux"), function() UIC.buyCrate() end)
+		onClick(find(shop, "BtnSeeEmotes"), function() if UIC.showEmoteCrate then UIC.showEmoteCrate() end end)
+	end
 	end
 	-- Settings
 	local st = S.Settings
@@ -2412,7 +2620,7 @@ local function connectEvents()
 	end)
 	Net.event("OpenScreen").OnClientEvent:Connect(function(t)
 		if type(t) ~= "table" or not table.find(PANELS, t.name) then return end
-		if t.name == "Shop" and (t.tab == "gold" or t.tab == "gems") then
+		if t.name == "Shop" and type(t.tab) == "string" then -- lobby stalls: "gold" -> Featured, "gems" -> Gems
 			shopTab = t.tab
 			selItem = nil
 			if UI.current() == "Shop" then

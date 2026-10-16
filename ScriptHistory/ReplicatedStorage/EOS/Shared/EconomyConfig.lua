@@ -144,6 +144,8 @@ export type ShopItem = {
 	kind: string,
 	desc: string,
 	color: Color3,
+	robux: number?, -- Gem items: the Robux price when bought outright
+	productId: number?, -- its developer product (nil = Gems only)
 }
 EconomyConfig.SHOP = {
 	{ id = "trail_spark", name = "Sparkle Trail", wallet = "gold", price = 40, kind = "trail", desc = "Your egg leaves sparkles. One match.", color = Color3.fromRGB(255, 236, 140) },
@@ -152,9 +154,9 @@ EconomyConfig.SHOP = {
 	{ id = "case_frost", name = "Frost Egg Case", wallet = "gold", price = 900, kind = "case", desc = "An icy shell around the egg you carry. Yours to keep.", color = Color3.fromRGB(170, 230, 255) },
 	{ id = "entrance_bolt", name = "Bolt Entrance", wallet = "gold", price = 1400, kind = "entrance", desc = "Arrive in the lobby with a lightning strike. Yours to keep.", color = Color3.fromRGB(150, 200, 255) },
 	{ id = "case_sunset", name = "Sunset Egg Case", wallet = "gold", price = 2400, kind = "case", desc = "This week's Gold colorway. Yours to keep.", color = Color3.fromRGB(255, 160, 96) },
-	{ id = "trailp_rainbow", name = "Rainbow Trail", wallet = "gems", price = 150, kind = "trailPerm", desc = "A rainbow trail on your egg in every match.", color = Color3.fromRGB(255, 120, 220) },
-	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "Your pet's ability effects turn gold. Same timing and size.", color = Color3.fromRGB(255, 210, 58) },
-	{ id = "hatch_royal", name = "Royal Hatching", wallet = "gems", price = 350, kind = "hatchFx", desc = "A bigger hatching ceremony at the incubator.", color = Color3.fromRGB(200, 150, 255) },
+	{ id = "trailp_rainbow", name = "Rainbow Trail", wallet = "gems", price = 150, kind = "trailPerm", desc = "A rainbow trail on your egg in every match.", color = Color3.fromRGB(255, 120, 220), robux = 79, productId = nil },
+	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "Your pet's ability effects turn gold. Same timing and size.", color = Color3.fromRGB(255, 210, 58), robux = 119, productId = nil },
+	{ id = "hatch_royal", name = "Royal Hatching", wallet = "gems", price = 350, kind = "hatchFx", desc = "A bigger hatching ceremony at the incubator.", color = Color3.fromRGB(200, 150, 255), robux = 159, productId = nil },
 } :: { ShopItem }
 
 local byId: { [string]: ShopItem } = {}
@@ -169,6 +171,17 @@ end
 function EconomyConfig.isConsumable(item: ShopItem): boolean
 	return item.kind == "trail" or item.kind == "burst"
 end
+
+-- Shop tabs (16 Oct, by what you buy): which tab each kind of item sits on, and the Featured pair.
+-- Gem items may also have robux + productId: bought outright with Robux (PurchaseService); no productId = Gems only.
+EconomyConfig.TAB_OF_KIND = {
+	trail = "trails", trailPerm = "trails", case = "cases",
+	burst = "effects", entrance = "effects", abilityFx = "effects", hatchFx = "effects",
+}
+EconomyConfig.FEATURED = {
+	weekly = "case_sunset", -- this week's colourway (the card counts down to Monday 00:00 UTC)
+	spotlight = "hatch_royal",
+}
 
 -- Robux Gem packs (GDD 06): live developer products since 16 Oct (HOS-GEMS-001). A pack without a
 -- productId is hidden. Purchased Gems are granted only by PurchaseService's ProcessReceipt, once per receipt.
