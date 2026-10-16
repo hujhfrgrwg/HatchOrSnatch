@@ -15,6 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
+local ContentProvider = game:GetService("ContentProvider")
 local UserInputService = game:GetService("UserInputService")
 
 local EOS = ReplicatedStorage:WaitForChild("EOS")
@@ -2008,6 +2009,49 @@ local function cascade(name: string)
 	end
 end
 
+-- images stream in on first use, so a panel opened cold drew piece by piece. Everything preloads at join;
+-- a panel opened before that finishes waits (at most 0.6 s) for its own images first
+local warmed: { [string]: boolean } = {}
+local function warm(name: string)
+	if warmed[name] or not S[name] then return end
+	warmed[name] = true
+	local list = {}
+	for _, d in S[name]:GetDescendants() do
+		if (d:IsA("ImageLabel") or d:IsA("ImageButton")) and d.Image ~= "" then table.insert(list, d.Image) end
+	end
+	local done = false
+	task.spawn(function()
+		pcall(function() ContentProvider:PreloadAsync(list) end)
+		done = true
+	end)
+	local t0 = os.clock()
+	while not done and os.clock() - t0 < 0.6 do task.wait() end
+end
+local function preloadAll()
+	task.spawn(function()
+		-- what's on screen first, then every panel, then every icon/art the controller may swap in
+		local order = { "HUD", "MatchHUD" }
+		for n in pairs(S) do
+			if n ~= "HUD" and n ~= "MatchHUD" then table.insert(order, n) end
+		end
+		for _, n in ipairs(order) do
+			local list = {}
+			for _, d in S[n]:GetDescendants() do
+				if (d:IsA("ImageLabel") or d:IsA("ImageButton")) and d.Image ~= "" then table.insert(list, d.Image) end
+			end
+			pcall(function() ContentProvider:PreloadAsync(list) end)
+			warmed[n] = true
+		end
+		local rest = {}
+		for _, group in ipairs({ assets.icons or {}, assets.art or {} }) do
+			for _, id in pairs(group) do
+				if id ~= "" then table.insert(rest, id) end
+			end
+		end
+		pcall(function() ContentProvider:PreloadAsync(rest) end)
+	end)
+end
+
 function UIC.open(name: string)
 	if name == "Emotes" then
 		UIC.toast("Emotes are moving to the new menu soon", "info")
@@ -2022,6 +2066,7 @@ function UIC.open(name: string)
 		UI.close()
 		return
 	end
+	warm(name)
 	refreshOne(name)
 	UI.open(name)
 	Sound.play("open")
@@ -2531,6 +2576,22 @@ function UIC.init()
 			icon.Parent = disc
 		end
 	end
+	-- rail toggles: the design hung the ON/OFF pill off the plate's corner, half over the world. Tuck it onto the
+	-- plate's top-right corner like the B / P key badges (both states are juiced: centre-anchored, rest in JuiceRest)
+	for _, t in root:GetDescendants() do
+		local on, off, plate = t:FindFirstChild("StateOn"), t:FindFirstChild("StateOff"), t:FindFirstChild("Plate")
+		if on and off and plate and plate:IsA("GuiObject") then
+			local right = plate.Position.X.Offset + plate.Size.X.Offset
+			local top = plate.Position.Y.Offset
+			for _, pill in ipairs({ on, off }) do
+				if pill:IsA("GuiObject") then
+					pill.AnchorPoint = Vector2.new(0.5, 0.5)
+					pill.Position = UDim2.fromOffset(right - pill.Size.X.Offset / 2 + 2, top + 2)
+					pill:SetAttribute("JuiceRest", pill.Position)
+				end
+			end
+		end
+	end
 	-- gamepad selection: a white rounded ring in the UI's style instead of Roblox's default blue box
 	local selRing = Instance.new("Frame")
 	selRing.Name = "EOS_SelectionRing"
@@ -2582,6 +2643,7 @@ function UIC.init()
 		layoutToasts()
 	end)
 	UI.Opened.Event:Connect(cascade)
+	preloadAll()
 	wireButtons()
 	connectEvents()
 	applySettings()
