@@ -64,8 +64,11 @@ local function processOther(info: any, plr: Player): Enum.ProductPurchaseDecisio
 			return Enum.ProductPurchaseDecision.NotProcessedYet
 		end
 		if granted then
-			Net.event("ShopResult"):FireClient(plr, { ok = true, itemId = item.id, robux = true })
-			Net.event("Toast"):FireClient(plr, { text = if why == "OWNED_REFUNDED" then ("You already had %s: +%d Gems"):format(item.name, item.price) else ("%s is yours!"):format(item.name), kind = "reward" })
+			-- a new item gets the client's Reward reveal; an item already owned refunds its Gems with a toast
+			Net.event("ShopResult"):FireClient(plr, { ok = true, itemId = item.id, robux = true, refunded = why == "OWNED_REFUNDED" })
+			if why == "OWNED_REFUNDED" then
+				Net.event("Toast"):FireClient(plr, { text = ("You already had %s: +%d Gems"):format(item.name, item.price), kind = "reward" })
+			end
 			Analytics.log("CosmeticUsed", { userId = plr.UserId, reason = "robux_item", itemId = item.id, robux = info.CurrencySpent, purchaseId = receipt })
 		end
 		return Enum.ProductPurchaseDecision.PurchaseGranted
@@ -118,7 +121,7 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	if granted then
-		Net.event("Toast"):FireClient(plr, { text = ("+%d Gems! Thanks for your support"):format(pack.gems), kind = "reward" })
+		Net.event("ShopResult"):FireClient(plr, { ok = true, gems = pack.gems }) -- the client's Reward reveal
 		Analytics.log("GemsSource", { userId = plr.UserId, amount = pack.gems, reason = "robux_pack", robux = info.CurrencySpent, productId = info.ProductId, purchaseId = receipt })
 	end
 	return Enum.ProductPurchaseDecision.PurchaseGranted
