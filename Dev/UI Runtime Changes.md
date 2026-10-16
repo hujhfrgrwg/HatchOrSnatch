@@ -31,6 +31,6 @@ What the new UI controller changes at runtime, so the built GUI in Studio (`Star
 - **Results:** rays spin and the podium slides up in turn. Gold counts up.
 
 ## Not done yet
-- All 354 images are live (16 Oct): uploaded to Hunter's account (Open Use), decal ids resolved to image ids in Studio (`Assets/UI/resolved_image_ids.txt`). `close_clean.png` is queued in the upload list.
+- All 354 images are live (16 Oct): uploaded to Hunter's account (Open Use), decal ids resolved to image ids in Studio (`Assets/UI/resolved_image_ids.txt`). `close_clean.png` is uploaded. Queued for the next `upload_ui.ps1` run: the 12 soft panel glows (`<key>s.png`), plus Hunter's real `safe`, `catcher`, `runner`, `hunt` and `afk` icons, which replace the drawn stand-ins under the same names. Their old ids were cleared from `Assets/asset_ids.json` so they upload again.
 - Emotes: the new UI has no emotes panel yet. Opening it shows a toast, and EmoteController still uses the hidden old `EOS_Menus`.
 - The game code still launches 3 families (Decoy, Scout, Brake) and the voxel pet species. The UI reads `LAUNCH_FAMILIES` at runtime, so more families light up as the game adds them.

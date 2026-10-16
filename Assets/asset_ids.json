@@ -32,9 +32,7 @@
  "Assets/UI/icons/abilityfx_gold.png": {
   "assetId": "127132909595936"
  },
- "Assets/UI/icons/afk.png": {
-  "assetId": "86655576769501"
- },
+ "Assets/UI/icons/afk.png": {},
  "Assets/UI/icons/burst.png": {
   "assetId": "115992214921605"
  },
@@ -47,9 +45,7 @@
  "Assets/UI/icons/case_sunset.png": {
   "assetId": "139262871063326"
  },
- "Assets/UI/icons/catcher.png": {
-  "assetId": "128918607445055"
- },
+ "Assets/UI/icons/catcher.png": {},
  "Assets/UI/icons/check.png": {
   "assetId": "128925161760256"
  },
@@ -104,9 +100,7 @@
  "Assets/UI/icons/hatchfx.png": {
   "assetId": "97389837491988"
  },
- "Assets/UI/icons/hunt.png": {
-  "assetId": "81010604595351"
- },
+ "Assets/UI/icons/hunt.png": {},
  "Assets/UI/icons/incubator.png": {
   "assetId": "101492074797523"
  },
@@ -464,12 +458,8 @@
  "Assets/UI/icons/robux.png": {
   "assetId": "123689301563222"
  },
- "Assets/UI/icons/runner.png": {
-  "assetId": "116064416652693"
- },
- "Assets/UI/icons/safe.png": {
-  "assetId": "118414694279634"
- },
+ "Assets/UI/icons/runner.png": {},
+ "Assets/UI/icons/safe.png": {},
  "Assets/UI/icons/settings.png": {
   "assetId": "81199671733710"
  },

@@ -96,4 +96,5 @@ Reply with ONE image per message, then wait for my next icon.
 ## Still needed (16 Oct)
 - `ab_scout`, `ab_brake`, `ab_spring`: new families; drawn stand-ins are in use until these arrive.
 - `case` and `entrance`: regenerate; the first batch came back as a loot chest and a portal.
-- `safe`, `catcher`, `runner`, `hunt`, `afk`: already made, but they were pasted mid-task and never reached the repo. Send them as a zip.
+
+`safe`, `catcher`, `runner`, `hunt` and `afk` arrived in Hunter's zip on 16 Oct. They're in `ui/icons_ai/` and `Assets/UI/icons/`, queued for upload.
