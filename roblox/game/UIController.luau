@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
+local TextService = game:GetService("TextService")
 local ContentProvider = game:GetService("ContentProvider")
 local UserInputService = game:GetService("UserInputService")
 
@@ -1844,11 +1845,36 @@ local function rewardGems(gems: number)
 	})
 end
 
+-- a tag pill takes new words and grows or shrinks to fit them (the export sized it for its sample text,
+-- so "THIS WEEK'S COLOUR" ran past a pill made for "ONE MATCH")
 local function tagText(frame: Instance?, text: string)
 	if not frame then return end
+	local label: TextLabel? = nil
 	for _, l in frame:GetDescendants() do
-		if l:IsA("TextLabel") then l.Text = text end
+		if l:IsA("TextLabel") then
+			l.Text = text
+			if not l.Name:match("Shadow$") then label = l end
+		end
 	end
+	if not label or not frame:IsA("GuiObject") then return end
+	local lb = label :: TextLabel
+	if frame:GetAttribute("TagText") == text then return end
+	frame:SetAttribute("TagText", text)
+	task.spawn(function()
+		local params = Instance.new("GetTextBoundsParams")
+		params.Text = text
+		params.Font = lb.FontFace
+		params.Size = lb.TextSize
+		params.Width = 4000
+		local ok, size = pcall(function() return TextService:GetTextBoundsAsync(params) end)
+		if not ok or frame:GetAttribute("TagText") ~= text then return end
+		local w = math.ceil(size.X) + 2
+		for _, l in frame:GetDescendants() do
+			if l:IsA("TextLabel") then l.Size = UDim2.new(l.Size.X.Scale, w, l.Size.Y.Scale, l.Size.Y.Offset) end
+		end
+		local f = frame :: GuiObject
+		f.Size = UDim2.new(f.Size.X.Scale, w + lb.Position.X.Offset * 2, f.Size.Y.Scale, f.Size.Y.Offset)
+	end)
 end
 
 -- a centre-anchored (juiced) button keeps its left edge when it is resized
