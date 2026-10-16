@@ -521,7 +521,8 @@ local function fit()
 	local CENTRE_HALF = 228 -- the top-centre status keeps this much either side of the middle (a gap on a 1366 laptop)
 	for _, sc in screens do
 		for _, g in sc:GetChildren() do
-			if g:IsA("GuiObject") and g.Position.Y.Scale == 0 then
+			-- full-screen layers (each panel's Dim, sized by scale) are never top-corner groups: they stay put
+			if g:IsA("GuiObject") and g.Position.Y.Scale == 0 and g.Size.X.Scale == 0 then
 				local base = g:GetAttribute("BaseY") :: number?
 				if base == nil then
 					base = g.Position.Y.Offset
