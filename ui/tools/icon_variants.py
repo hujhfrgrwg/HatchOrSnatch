@@ -14,8 +14,9 @@ AI = os.path.join(HERE, 'icons_ai')
 VARIANTS = {
     'trail_ember':    ('trail', 125, 1.1),
     'trail_rainbow':  ('trail', 'rainbow', 1.25),
-    'case_frost':     ('case', 110, .85),
-    'case_sunset':    ('case', -14, 1.15),
+    # the 16 Oct case is a blue crystal egg: frost is a paler ice cyan, sunset the gold colourway
+    'case_frost':     ('case', 8, .5),
+    'case_sunset':    ('case', ('set', 24), 1.25),
     'abilityfx_gold': ('abilityfx', ('set', 30), 1.15),
     # rail toggles: the full-colour icon shows ON, this greyed copy shows OFF (16 Oct)
     'afk_off':        ('afk', 'grey', .8),

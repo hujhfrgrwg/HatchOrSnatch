@@ -95,8 +95,6 @@ Reply with ONE image per message, then wait for my next icon.
 - `emote`: a hand making a victory sign (simple glove)
 
 ## Still needed (16 Oct)
-- `ab_scout`, `ab_brake`, `ab_spring`: new families; drawn stand-ins are in use until these arrive.
 - `afk_on`: the AFK button's on state (pause/play pair with `afk`).
-- `case` and `entrance`: regenerate; the first batch came back as a loot chest and a portal.
 
-`safe`, `catcher`, `runner`, `hunt` and `afk` arrived in Hunter's zip on 16 Oct. They're in `ui/icons_ai/` and `Assets/UI/icons/`, queued for upload.
+Hunter's second zip (16 Oct) brought `case`, `entrance`, `ab_scout`, `ab_brake` and `ab_spring`. `case_frost` and `case_sunset` are recoloured from the new `case` by `ui/tools/icon_variants.py`. The first zip brought `safe`, `catcher`, `runner`, `hunt` and `afk`.
