@@ -1483,6 +1483,12 @@ local function refreshPets()
 				local st = find(find(pv, "Stars"), "Star" .. s)
 				if st and st:IsA("ImageLabel") then st.ImageColor3 = if s <= stars then Color3.new(1, 1, 1) else Color3.fromRGB(70, 70, 76) end
 			end
+			local n = #selPet.ids
+			for _, d in pv:GetChildren() do
+				if d:IsA("TextLabel") and (d.Name == "T_Copies" or d.Name == "T_CopiesShadow") then
+					d.Text = ("%d %s"):format(n, if n == 1 then "copy" else "copies")
+				end
+			end
 			setIcon(pv, "AbilityIcon", familyIcon(selPet.family))
 			setText(pv, "AbilityName", familyAbility(selPet.family))
 			local ef = EconomyConfig.FAMILIES[selPet.family]
@@ -2326,6 +2332,23 @@ function UIC.init()
 	overlay.Size = UDim2.fromScale(1, 1)
 	overlay.ZIndex = 40
 	overlay.Parent = root
+	-- a selection ring's box-shadow exports as ShadowRing siblings that would stay behind when the
+	-- ring moves: fold them into the ring so they follow it (and its size) wherever moveRing sends it
+	for _, ring in root:GetDescendants() do
+		if ring:IsA("Frame") and (ring.Name:match("Sel$") or ring.Name == "SelRing") and ring.Parent then
+			local rp, rs = ring.Position, ring.Size
+			for _, sh in ring.Parent:GetChildren() do
+				if sh:IsA("Frame") and sh.Name == "ShadowRing" and sh.AnchorPoint == ring.AnchorPoint
+					and math.abs(sh.Position.X.Offset - rp.X.Offset) <= 12 and math.abs(sh.Position.Y.Offset - rp.Y.Offset) <= 12 then
+					sh.Position = UDim2.fromOffset(sh.Position.X.Offset - rp.X.Offset + rs.X.Offset * ring.AnchorPoint.X, sh.Position.Y.Offset - rp.Y.Offset + rs.Y.Offset * ring.AnchorPoint.Y)
+					sh.Size = UDim2.new(1, sh.Size.X.Offset - rs.X.Offset, 1, sh.Size.Y.Offset - rs.Y.Offset)
+					sh.AnchorPoint = Vector2.zero
+					sh.ZIndex = ring.ZIndex
+					sh.Parent = ring
+				end
+			end
+		end
+	end
 	-- tag the incubator ladder's folder-tab title (unnamed in the export) so refreshIncubator can rename it
 	if S.Incubator then
 		for _, d in S.Incubator:GetDescendants() do
