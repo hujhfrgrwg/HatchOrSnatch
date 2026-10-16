@@ -2558,6 +2558,8 @@ local function wireButtons()
 		plus.Visible = PURCHASES
 		plus:SetAttribute("OpensVia", nil)
 		onClick(plus, function() UIC.openGemShop() end)
+		-- the exported "+" is a button inside a button: the inner Btn sits on top and takes the click
+		onClick(plus:FindFirstChild("Btn"), function() UIC.openGemShop() end)
 	end
 	-- SPECTATE pill (HUD.Watch)
 	local watch = hudGroup("HUD", "Watch")
