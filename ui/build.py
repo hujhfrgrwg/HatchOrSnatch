@@ -481,7 +481,8 @@ def s_hud():
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
     out += hv_topcenter('LOBBY', 'Next match in 0:12', T('4 / 4 players ready  ·  you start as a Runner', 22, 'xs', name='SublineText'))
     out += grp('Watch', hv_pill(860, 140, 200, 'pink', 'spectate', 'SPECTATE', 'SpectateButton'), 'T')   # shown while a match runs
-    out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems'), 'BL')
+    plus = sub('GemsPlus', btn(286, 990, 54, 54, 'lime', T('+', 40, 'l'), cls='sm', name='Btn'), btn=True, opens='Shop')   # buy Gems (16 Oct)
+    out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems') + plus, 'BL')
     out += hv_ability() + hv_dash('DASH READY', 'Move, then turn + dash')
     return out
 
@@ -775,39 +776,139 @@ def shop_buttons(x, y, w, h, wal, price, st, cls, ts):
     return out
 
 
-def s_shop(tab='gold'):
-    x0, y0, W, H = 220, 150, 1480, 820
-    b = dual(26, 22, 260, 64, 'gold', row(icn('gold', 40), bl('Gold', 30)), 'TabGold', tab == 'gold')
-    b += dual(300, 22, 260, 64, 'lime', row(icn('gem', 40), bl('Gems', 30)), 'TabGems', tab == 'gems')
-    b += btn(574, 22, 300, 64, 'grey', row(icn('robux', 40), bl('Get Gems', 30)), name='TabGetGems', hid=True)
-    items = SHOP if tab == 'gold' else [
-        ('trail_rainbow', 'Rainbow Trail', 'gems', '150', 'Keep forever', 'A rainbow trail on your egg.', 'ok'),
-        ('abilityfx_gold', 'Gold Ability FX', 'gems', '250', 'Keep forever', 'Same timing and size.', 'poor'),
-        ('hatchfx', 'Royal Hatching', 'gems', '350', 'Keep forever', 'A bigger hatching ceremony.', 'poor'),
-        ('crown', 'Showcase Slot', 'gems', '450', 'Keep forever', 'Show off one more pet in the lobby.', 'poor'),
-        ('abilityfx', 'Themed Override', 'gems', '700', 'Keep forever', 'A themed look for your ability.', 'poor'),
-        ('trophy', 'Prestige Set', 'gems', '1,500', 'Keep forever', 'Trail, case and entrance set.', 'poor')]
+GEM_PACKS = [(100, 49, ''), (225, 99, ''), (500, 199, 'POPULAR'), (1100, 399, ''), (2400, 799, ''), (5000, 1499, 'BEST VALUE')]   # EconomyConfig.GEM_PACKS
+
+
+def shop_right():
+    return row(icn('gold', 48), T('1,250', 34, 's', 'f-gold', name='GoldText'), icn('gem', 48), T('12', 34, 's', 'f-lime', name='GemsText'), gap=8)
+
+
+def gem_packs(hid=False):
+    """Buy Gems (16 Oct): six Robux developer products. Pack art grows with the pack (gempack1..6 when the ChatGPT
+    icons arrive; the gem icon until then). Runtime fills amount, price and the tag from EconomyConfig.GEM_PACKS."""
     g = ''
-    for i, it in enumerate(items[:8]):
-        g += shop_card(18 + (i % 4) * 262, 16 + (i // 4) * 290, it)
-    if EXPORT_STATES:   # a hidden Gems card so runtime clones the right rim for the other tab
-        g += sub('ProtoGems', shop_card(18, 16, ('trail_rainbow', 'Rainbow Trail', 'gems', '150', 'Keep forever', '', 'ok')), hid=True)
-    si = 4 if tab == 'gold' else 0
-    g += selring(18 + (si % 4) * 262, 16 + (si // 4) * 290, 250, 278, 'ItemSel', 16)
-    b += well(26, 100, 1074, 596, g, name='Grid')
-    sel = items[4] if tab == 'gold' else items[0]
-    d = slot(60, 20, 220, 'gold' if tab == 'gold' else 'lime', sel[0], name='PreviewSlot', art_pad=.12, cls='fill')
+    for i, (gems, rbx, tag_) in enumerate(GEM_PACKS):
+        x, y = 18 + (i % 3) * 506, 16 + (i // 3) * 296
+        sz = 118 + i * 14
+        inner = I('gem', 30, (230 - sz) // 2 + 4, sz, name='Icon')
+        inner += at(464, 44, T(f'{gems:,}', 60, 'l', 'f-lime', name='Amount'), w=280, align='right')
+        inner += at(464, 114, T('GEMS', 26, 's', 'f-dim'), w=200, align='right')
+        inner += tag(310, 12, tag_ or 'POPULAR', 'pink' if tag_ != 'BEST VALUE' else 'gold', 18, 34, name='Tag').replace("class='ctag", "class='ctag" + ('' if tag_ else ' hid'), 1)
+        inner += btn(30, 194, 432, 70, 'purple', row(icn('robux', 40), bl(f'{rbx:,}', 34, name='Price')), name='BtnBuy')
+        g += box(x, y, 492, 282, inner, 'cs r-lime', 'border-radius:16px', name=f'Pack{i + 1}')
+    page = well(26, 102, 1528, 606, g, name='Packs')
+    page += at(790, 724, T('Gems buy looks and Emote Crates, never pets or abilities.  Purchases go through Roblox.', 18, 'xs', 'f-dim'), w=1300, align='center')
+    return sub('GetGemsPage', page, hid=hid)
+
+
+SHOP_TABS = [('featured', 'Featured', 'star', 'gold'), ('trails', 'Trails', 'trail', 'gold'), ('cases', 'Egg Cases', 'case', 'gold'),
+             ('effects', 'Effects', 'burst', 'gold'), ('emotes', 'Emotes', 'emote', 'gold'), ('gems', 'Gems', 'gem', 'lime')]
+# Shop by what you buy (16 Oct, Huss Valley's organisation): id, name, wallet, price, robux, kind label, sub, desc 1, desc 2, icon
+SHOP_ITEMS = {
+    'trails': [('trail_spark', 'Sparkle Trail', 'gold', 40, None, 'ONE MATCH', 'EGG TRAIL', 'Your egg leaves sparkles.', 'Lasts one match.', 'trail'),
+               ('trail_ember', 'Ember Trail', 'gold', 60, None, 'ONE MATCH', 'EGG TRAIL', 'Your egg leaves embers.', 'Lasts one match.', 'trail_ember'),
+               ('trailp_rainbow', 'Rainbow Trail', 'gems', 150, 79, 'KEEP FOREVER', 'EGG TRAIL', 'A rainbow trail on your egg', 'in every match.', 'trail_rainbow')],
+    'cases': [('case_frost', 'Frost Egg Case', 'gold', 900, None, 'KEEP FOREVER', 'EGG CASE', 'An icy shell around', 'the egg you carry.', 'case_frost'),
+              ('case_sunset', 'Sunset Egg Case', 'gold', 2400, None, "THIS WEEK'S COLOUR", 'EGG CASE', "This week's Gold colourway.", 'Yours to keep.', 'case_sunset')],
+    'effects': [('burst_confetti', 'Confetti Burst', 'gold', 75, None, 'LOBBY, ONCE', 'LOBBY EFFECT', 'Pop confetti over your head.', 'One use per buy.', 'burst'),
+                ('entrance_bolt', 'Bolt Entrance', 'gold', 1400, None, 'KEEP FOREVER', 'ENTRANCE', 'Arrive in the lobby with', 'a lightning strike.', 'entrance'),
+                ('fx_gold', 'Gold Ability Colors', 'gems', 250, 119, 'KEEP FOREVER', 'ABILITY FX', 'Your ability effects turn gold.', 'Same timing and size.', 'abilityfx_gold'),
+                ('hatch_royal', 'Royal Hatching', 'gems', 350, 159, 'KEEP FOREVER', 'HATCH FX', 'A bigger hatching ceremony', 'at the incubator.', 'hatchfx')],
+}
+
+
+def price_btns(x, y, w, h, wallet, price, robux, ts=28):
+    """Currency button (BtnPrice, or grey BtnPoor), plus a purple Robux button (BtnRobux) for Gem items."""
+    cur = 'gem' if wallet == 'gems' else 'gold'
+    col_ = 'lime' if wallet == 'gems' else 'gold'
+    half = (w - 12) // 2 if robux else w
+    out = btn(x, y, half, h, col_, row(icn(cur, int(h * .62)), bl(f'{price:,}', ts, name='Price')), name='BtnPrice')
     if EXPORT_STATES:
-        d += slot(60, 20, 220, 'lime' if tab == 'gold' else 'gold', sel[0], name='PreviewSlotAlt', art_pad=.12, cls='fill hid')
-    d += at(170, 258, T(sel[1], 34, 'l', name='ItemName'), w=330, align='center')
-    d += at(170, 304, T(sel[4], 20, 'xs', 'f-gold', name='Kind'), w=330, align='center')
-    d += at(170, 336, T(sel[5], 20, 'xs', 'f-dim', name='Desc'), w=330, align='center')
-    d += at(170, 366, T('Looks only, no gameplay edge.', 17, 'xs', 'f-dim', name='Desc2'), w=330, align='center')
-    d += shop_buttons(30, 420, 280, 80, sel[2], sel[3], 'ok', '', 34)
-    d += at(170, 520, row(T('You have', 18, 'xs', 'f-dim'), icn('gold' if tab == 'gold' else 'gem', 26, name='HaveIcon'), T('1,250' if tab == 'gold' else '12', 20, 'xs', 'f-gold' if tab == 'gold' else 'f-lime', name='HaveText'), gap=6), w=330, align='center')
-    b += well(1116, 100, 340, 596, d, name='Detail')
-    right = row(icn('gold', 48), T('1,250', 34, 's', 'f-gold', name='GoldText'), icn('gem', 48), T('12', 34, 's', 'f-lime', name='GemsText'), gap=8)
-    return world('bg_lobby_blur.jpg', False) + dim() + panel('Shop', 'gold', 'Shop', 'shop', b, x0, y0, W, H, right)
+        out += btn(x, y, half, h, 'grey', row(icn(cur, int(h * .62)), bl(f'{price:,}', ts, name='Price')), name='BtnPoor', cls='hid')
+    if robux:
+        out += btn(x + half + 12, y, half, h, 'purple', row(icn('robux', int(h * .58)), bl(f'{robux:,}', ts, name='RobuxPrice')), name='BtnRobux')
+    return out
+
+
+def state_btns(x, y, w, h, st=None, ts=26):
+    out = ''
+    for nm, col_, lab in (('BtnOwned', 'grey', row(icn('check', int(h * .55)), bl('OWNED', ts))), ('BtnWear', 'sky', bl('WEAR', ts)),
+                          ('BtnTakeOff', 'grey', bl('TAKE OFF', ts)), ('BtnUse', 'gold', row(bl('USE', ts), T('x1', ts - 4, 's', name='UseCount')))):
+        if EXPORT_STATES or st == nm:
+            out += btn(x, y, w, h, col_, lab, name=nm, cls='' if st == nm else 'hid')
+    return out
+
+
+def item_card(x, y, it, name=None, st=None):
+    iid, nm, wal, price, rbx, kind, sub_, d1, d2, icon = it
+    w, h = 360, 588
+    inner = tag(16, 14, kind, 'gold' if wal == 'gold' else 'lime', 15, 30, name='KindTag')
+    inner += I(icon, 80, 56, 200, name='Icon')
+    inner += at(w // 2, 262, T(nm, 34, 'l', name='ItemName'), w=w, align='center')
+    inner += at(w // 2, 306, T(sub_, 17, 'xs', 'f-gold' if wal == 'gold' else 'f-lime', name='Sub'), w=w, align='center')
+    inner += at(w // 2, 342, T(d1, 18, 'xs', 'f-dim', name='Desc'), w=w - 20, align='center')
+    inner += at(w // 2, 368, T(d2, 18, 'xs', 'f-dim', name='Desc2'), w=w - 20, align='center')
+    inner += at(w // 2, 404, T('Looks only, no gameplay edge.', 15, 'xs', 'f-dim', name='Note'), w=w - 20, align='center')
+    inner += price_btns(18, 444, w - 36, 66, wal, price, rbx)
+    inner += state_btns(18, 444, w - 36, 66, st)
+    inner += at(w // 2, 528, T('', 16, 'xs', 'f-dim', name='Have'), w=w - 20, align='center')
+    return box(x, y, w, h, inner, 'cs ' + ('r-gold' if wal == 'gold' else 'r-lime'), 'border-radius:16px', name=name or f'Card_{iid}')
+
+
+def feature_card(x, y, it, title_tag, perks, name):
+    iid, nm, wal, price, rbx, kind, sub_, d1, d2, icon = it
+    w, h = 752, 620
+    acc = 'gold' if wal == 'gold' else 'lime'
+    inner = tag(20, 18, title_tag, 'pink', 17, 34, name='FeatTag')
+    inner += at(26, 66, T(nm.upper(), 52, 'xl', name='Title'))
+    inner += at(28, 132, T(f'{d1} {d2}', 20, 's', name='Tagline'))
+    for k, (pic, a, b_) in enumerate(perks):
+        yy = 178 + k * 92
+        inner += box(22, yy, 330, 80, I(pic, 10, 8, 62) + at(84, 12, T(a, 22, 's', name='PerkTitle')) + at(86, 44, T(b_, 15, 'xs', 'f-dim', name='PerkSub')),
+                     'cw solid', 'border-radius:10px', name=f'Perk{k + 1}')
+    inner += box(370, 178, 360, 264, I(icon, 70, 22, 220, name='Icon'), 'cw', 'border-radius:12px;background:radial-gradient(rgba(255,255,255,.18),rgba(0,0,0,.25))', name='ArtBox')
+    inner += price_btns(22, 470, 708, 84, wal, price, rbx, 36)
+    inner += state_btns(22, 470, 708, 84, None, 32)
+    inner += at(w // 2, 570, T('', 17, 'xs', 'f-dim', name='Have'), w=w - 40, align='center')
+    return box(x, y, w, h, inner, f'cs r-{acc}', 'border-radius:18px', name=name)
+
+
+def s_shop(tab='featured'):
+    """Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems. Gold items cost
+    Gold; Gem items show a Gem price and a Robux price. Short on Gems -> the Robux price is offered (or the Gems tab)."""
+    x0, y0, W, H = 170, 118, 1580, 892
+    b = ''
+    for i, (key, lab, ic, col_) in enumerate(SHOP_TABS):
+        b += dual(26 + i * 248, 20, 236, 62, col_, row(icn(ic, 38), bl(lab, 26)), 'Tab' + lab.replace(' ', ''), tab == key, cls='sm')
+    # Featured: this week's colourway + a spotlight item
+    feat = feature_card(26, 102, SHOP_ITEMS['cases'][1], "THIS WEEK'S COLOURWAY  ·  NEW IN 3D 4H",
+                        [('case', 'Keep forever', 'Wear it every match'), ('egg_golden', 'Gold colourway', 'Only this week'), ('check', 'Looks only', 'No gameplay edge')], 'FeatA')
+    feat += feature_card(800, 102, SHOP_ITEMS['effects'][3], 'SPOTLIGHT',
+                         [('hatchfx', 'Bigger ceremony', 'Light beams and fanfare'), ('incubator', 'Every hatch', 'At the incubator'), ('check', 'Looks only', 'No gameplay edge')], 'FeatB')
+    b += sub('PageFeatured', feat, hid=tab != 'featured')
+    # Category pages: the runtime fills Cards from EconomyConfig.SHOP (ProtoGold / ProtoGems)
+    if tab in ('trails', 'cases', 'effects'):
+        cards = ''.join(item_card(26 + i * 384, 102, it) for i, it in enumerate(SHOP_ITEMS[tab]))
+        b += sub('PageItems', cards)
+    elif EXPORT_STATES:
+        b += sub('PageItems', sub('ProtoGold', item_card(26, 102, SHOP_ITEMS['trails'][0], name='Card'), hid=True)
+                 + sub('ProtoGems', item_card(26, 102, SHOP_ITEMS['trails'][2], name='Card'), hid=True), hid=True)
+    # Emotes: the Emote Crate
+    if tab == 'emotes' or EXPORT_STATES:
+        cr = I('gift', 40, 40, 360, name='CrateArt')
+        cr += at(440, 46, T('EMOTE CRATE', 60, 'xl'))
+        cr += at(442, 124, T('One of 51 emotes per crate  ·  every chance shown inside', 20, 's', name='CrateSub'))
+        for k, (r, lab, odds) in enumerate([('common', 'COMMON', '2.88% each'), ('rare', 'RARE', '2% each'), ('epic', 'EPIC', '1.25% each'), ('crowned', 'LEGENDARY', '1% each')]):
+            cr += at(444 + (k % 2) * 330, 176 + (k // 2) * 40, row(T(lab, 22, 's', FILL.get(r, '')), T(odds, 20, 'xs', 'f-dim'), gap=12))
+        cr += at(444, 268, T('A duplicate refunds Gems.  Emotes you win go on your wheel (G).', 18, 'xs', 'f-dim'))
+        cr += btn(440, 316, 340, 84, 'lime', row(icn('gem', 50), bl('250', 36)), name='BtnCrateGems')
+        cr += btn(796, 316, 340, 84, 'purple', row(icn('robux', 46), bl('149', 36)), name='BtnCrateRobux')
+        cr += btn(440, 418, 696, 64, 'grey', bl('SEE ALL 51 EMOTES', 26), name='BtnSeeEmotes')
+        page = box(26, 102, 1528, 560, cr, 'cs r-pink', 'border-radius:18px', name='CrateCard')
+        b += sub('PageEmotes', page, hid=tab != 'emotes')
+    if tab == 'gems' or EXPORT_STATES:
+        b += gem_packs(hid=tab != 'gems')
+    return world('bg_lobby_blur.jpg', False) + dim() + panel('Shop', 'gold', 'Shop', 'shop', b, x0, y0, W, H, shop_right())
 
 
 def s_shop_robux():
@@ -1318,9 +1419,12 @@ SCREENS = [  # (file, title, description, fn, height)
     ('incubator.html', 'Incubator', 'Pieces, first-pet path, families, species ladder, hatch', s_incubator, 1080),
     ('incubator_later.html', 'Incubator (after first pet)', 'Random 2 vs choose 3', lambda: s_incubator(False), 1080),
     ('pets.html', 'Pets', 'Collection grid, mastery stars, preview, equip', s_pets, 1080),
-    ('shop.html', 'Shop (Gold)', 'Gold cosmetics: one-match and keep-forever', s_shop, 1080),
-    ('shop_gems.html', 'Shop (Gems)', 'Premium cosmetics for Gems', lambda: s_shop('gems'), 1080),
-    ('shop_robux.html', 'Shop (Robux Gem packs, later)', 'Hidden until approved', s_shop_robux, 1080),
+    ('shop.html', 'Shop (Featured)', "This week's colourway and a spotlight item", s_shop, 1080),
+    ('shop_trails.html', 'Shop (Trails)', 'Egg trails: one match (Gold) or forever (Gems or Robux)', lambda: s_shop('trails'), 1080),
+    ('shop_cases.html', 'Shop (Egg Cases)', 'Egg cases', lambda: s_shop('cases'), 1080),
+    ('shop_effects.html', 'Shop (Effects)', 'Confetti, entrance, ability colours, hatching', lambda: s_shop('effects'), 1080),
+    ('shop_emotes.html', 'Shop (Emotes)', 'The Emote Crate', lambda: s_shop('emotes'), 1080),
+    ('shop_getgems.html', 'Shop (Gems)', 'Six Robux Gem packs (developer products, live 16 Oct)', lambda: s_shop('gems'), 1080),
     ('stats.html', 'Stats', 'Your record', s_stats, 1080),
     ('settings.html', 'Settings', 'Real settings, toggles, UI colour, tabs', s_settings, 1080),
     ('ui_colour.html', 'UI colour', 'The UI Colour setting and the same screen in four choices', s_ui_colour, 1280),

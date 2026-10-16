@@ -103,3 +103,13 @@ Reply with ONE image per message, then wait for my next icon.
 `afk_on` (the play moon) arrived on 16 Oct; it's uploaded but unused (Hunter kept one drawing per toggle).
 
 Hunter's second zip (16 Oct) brought `case`, `entrance`, `ab_scout`, `ab_brake` and `ab_spring`. `case_frost` and `case_sunset` are recoloured from the new `case` by `ui/tools/icon_variants.py`. The first zip brought `safe`, `catcher`, `runner`, `hunt` and `afk`.
+
+## Gem pack art (Shop > Gems, 16 Oct)
+Six pack images for the six Robux Gem packs, small to big. Same style block as above, one per message. They must read as a set that clearly grows, so the 5,000 pack looks worth it. Save as `gempack1.png` … `gempack6.png`.
+
+- `gempack1` (100 Gems): a small handful of three sharp emerald-green faceted gems, slightly tilted, lying together.
+- `gempack2` (225 Gems): a small pile of about eight emerald-green faceted gems with a couple of sparkles.
+- `gempack3` (500 Gems): a sturdy dark-leather pouch with a gold drawstring, bursting open with emerald gems spilling out the top.
+- `gempack4` (1,100 Gems): a dark wooden bucket with metal bands, overflowing with emerald gems.
+- `gempack5` (2,400 Gems): an open steel-and-gold treasure chest packed with emerald gems, a few gems tumbling over the edge, a soft green glow from inside.
+- `gempack6` (5,000 Gems): a huge heaped mountain of emerald gems with a large chest behind it, gold trim, strong green glow and sparkles, the most impressive of the set.
