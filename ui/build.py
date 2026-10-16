@@ -468,7 +468,8 @@ def hv_dash(left, right, frac=1):
 
 
 def hv_goal():
-    x, y, w, h = 228, 86, 460, 74
+    # 16 Oct (Hunter): off the top-left (it hung under QUESTS) to the top-right, under SERVERS / STATS / SETTINGS
+    x, y, w, h = 1448, 86, 460, 74
     out = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
     out += I('piece_common', x + 8, y + 6, 62, name='GoalIcon')
     out += at(x + 80, y + 8, T('YOUR FIRST PET', 20, 'xs', name='GoalTitle'))
@@ -480,7 +481,7 @@ def hv_goal():
 def s_hud():
     out = world() + topbar()
     tl = hv_pill(240, 12, 196, 'purple', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True)
-    tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True) + hv_goal()
+    tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True)
     tr = hv_pill(1468, 12, 196, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats') + hv_pill(1680, 12, 228, 'grey', 'settings', 'SETTINGS', 'SettingsButton', 'Settings')
     tr = hv_pill(1236, 12, 216, 'teal', 'servers', 'SERVERS', 'ServersButton', 'Servers') + tr
     # AFK / Hunt sit on a grey plate; the coloured PlateOn shows while they're on (16 Oct: Hunt is purple, not red)
@@ -489,7 +490,7 @@ def s_hud():
             + hv_rail_btn(10, 450, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'EmoteWheel', key='G')
             + hv_rail_btn(10, 560, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF', on_color='blue')
             + hv_rail_btn(10, 670, 96, 'grey', 'hunt', 'HUNT', 'VolunteerToggle', state='ON', on_color='purple'))
-    out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
+    out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Goal', hv_goal(), 'TR') + grp('Rail', rail, 'L')
     out += hv_topcenter('LOBBY', 'Next match in 0:12', T('4 / 4 players ready  ·  you start as a Runner', 22, 'xs', name='SublineText'))
     out += grp('Watch', hv_pill(860, 140, 200, 'pink', 'spectate', 'SPECTATE', 'SpectateButton'), 'T')   # shown while a match runs
     plus = sub('GemsPlus', btn(286, 990, 54, 54, 'lime', T('+', 40, 'l'), cls='sm', name='Btn'), btn=True, opens='Shop')   # buy Gems (16 Oct)

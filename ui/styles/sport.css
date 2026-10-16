@@ -164,7 +164,9 @@ img[src*='sunburst'] { opacity: .12 !important; }
 .wtab { position: absolute; height: 34px; padding: 0 14px; display: flex; align-items: center; z-index: 3;
   border-radius: 5px 5px 0 0; border: 2px solid rgba(225,225,232,.75); border-bottom: 0; box-shadow: 0 -2px 0 2px #050506;
   background: #1c1c1e; }
-.cs.lab { background: linear-gradient(160deg, color-mix(in srgb, var(--r2) 55%, #0c0c10) 0%, color-mix(in srgb, var(--r3) 60%, #0c0c10) 45%, #0e0e12 100%); }
+/* 16 Oct: two layers (dots + tint) so the exporter bakes the tile as art; one color-mix gradient exported as flat black */
+.cs.lab { background: radial-gradient(circle, rgba(255,255,255,.10) 1.5px, transparent 1.9px) 0 0 / 8px 8px,
+  linear-gradient(160deg, color-mix(in srgb, var(--r2) 55%, #0c0c10) 0%, color-mix(in srgb, var(--r3) 60%, #0c0c10) 45%, #0e0e12 100%); }
 .cs.fill.lab { background: linear-gradient(160deg, var(--r2) 0%, var(--r3) 60%, color-mix(in srgb, var(--r3) 45%, #000) 100%); }
 
 /* "coming soon" families (ability waves 2-3, HOS-ABIL-001): readable art, clearly not pickable yet */

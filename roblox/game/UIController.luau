@@ -1001,7 +1001,7 @@ local function claimable(): number
 end
 
 local function goalPill()
-	local tl = hudGroup("HUD", "TopLeft")
+	local tl = hudGroup("HUD", "Goal") -- its own top-right group since 16 Oct
 	local pill = tl and tl:FindFirstChild("GoalPill")
 	if not pill or not profile then return end
 	local pets = profile.pets or {}
@@ -2735,7 +2735,7 @@ local function wireButtons()
 				goalPill()
 				if trackedQuest then
 					UIC.toast("Tracking: " .. (item.title or "quest"), "info")
-					local tl = hudGroup("HUD", "TopLeft")
+					local tl = hudGroup("HUD", "Goal")
 					local pill2 = tl and tl:FindFirstChild("GoalPill")
 					if pill2 then UI.pulse(pill2, 0.1) end
 				end

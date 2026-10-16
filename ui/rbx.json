@@ -15,6 +15,7 @@
       "groups": [
         "TopLeft",
         "TopRight",
+        "Goal",
         "Rail",
         "Status",
         "Wallet",
