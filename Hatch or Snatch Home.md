@@ -22,7 +22,7 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 - **Skills and research:** [[RoClicks Index]].
 
 ## Design
-- [[Emote Light Constructs]]: Destiny-style glowing props for emotes that mime one (Reaper's Ride scythe, Surfer board); samples awaiting Hunter.
+- [[Emote Light Constructs]]: Destiny-style glowing props for the 13 emotes that mime one (scythe, surfboard, toilet, cart, ...). In the place since 2026-10-16: templates `ReplicatedStorage.EOS_EmoteFX`, client `Controllers.EmoteFX`; playtest owed.
 
 ## UI
 - [[Emote Crate Spin]]: emote crate opening animation (HTML in `UI/web/`, client script in `UI/roblox/`). In the place since 2026-10-16 as `StarterGui.EmoteCrateUI`, played by EmoteController.

@@ -1,7 +1,7 @@
 ---
 tags: [design, emotes, vfx]
 updated: 2026-10-16
-ticket: HOS-EMOTE-FX-001 (prototypes built)
+ticket: HOS-EMOTE-FX-001 (built, needs a playtest)
 ---
 # Emote Light Constructs
 
@@ -49,8 +49,21 @@ Screenshots: `docs/emote-fx/emote_constructs_sheet_v1.jpg` (all 13) and one `<id
 
 Known limits: Sunbath stands up mid-clip, leaving the lounger empty for a moment; the Surfer's feet lift ~0.6 studs off the board on the hops; shapes are blocky by design (parts only, no meshes, nothing to upload).
 
-## Plan once the look is approved
-1. Store each construct as a model in `ReplicatedStorage.EOS_EmoteFX.<emoteId>` (root part named after the joint, `Part0` + `C0` attributes); `EmoteConfig` entries get `fx = true`.
-2. Client (EmoteController, where the emote clip and song already play for every character): when a character's `EOS_Emote` is set to an fx emote, clone the construct, Motor6D it to the body part, fade it in (~0.4 s shimmer); fade out and destroy when the emote stops or the player moves.
-3. Phones: particles capped, constructs skipped beyond ~120 studs.
-4. Then pick the next emotes from the lists above with Hunter.
+## Built (2026-10-16, Hunter: "Get them all done.")
+In the place, wired into the game; edit-mode verified, **not playtested yet**.
+
+- **Templates:** `ReplicatedStorage.EOS_EmoteFX.<emoteId>`, one model per emote (13). Attribute `Enabled` on the folder switches every construct off (`false`) without touching code. The prototype folder `ServerStorage.EmoteFXPrototypes` was removed (superseded).
+- **Look (v2):** see-through Neon fill (~0.6) with a bright **hard-light edge** (SelectionBox) on every block piece, a soft light, a few particles. Pink for blossoms / umbrella / parasol / towel, orange jack-o'-lantern, violet shadow pool, cyan for the rest. Rebuilt from v1: desk (glass top, 4 legs, laptop, mug), lounger (+ parasol), blossom tree (two-part trunk, branches, six blooms), dice (bigger, pips), bat (tapered with tape and cap), cannon (bands, breech, carriage, hubs), cart (lid, cone + scoop, umbrella top), toilet (flush handle, roll), pumpkin (face).
+- **Code:** `StarterPlayer.StarterPlayerScripts.EOS.Controllers.EmoteFX` (new, client). `EmoteController.watchCharacter` calls `EmoteFX.watch(char)` for every character (yours included), next to the song. Server untouched.
+  - A character's `EOS_Emote` set to an emote with a template -> the construct is cloned into `Workspace.EOS_EmoteFXLive` (never inside the character), welded to its body part and built in bottom-to-top over 0.45 s with a sparkle burst. Cleared or changed emote -> 0.25 s fade-out and cleanup; character removed or died -> cleared.
+  - Scythe and board: a Motor6D in the character named after the clip's joint, and EmoteFX plays that joint's keyframes from `ReplicatedStorage.EOS_Emotes` in time with the character's playing track (own clock as fallback), so they move with the dance even if the Animator doesn't pick up a joint added mid-dance.
+  - Skipped farther than 140 studs from the camera; touch devices get half the particles.
+- **Verified in edit mode** (harness on posed dummies, the real module): all 13 spawn, every piece fades in to its target, welds hold, scythe joint is removed on clear, swapping emotes replaces the construct, an emote with no template clears it, `Enabled = false` spawns nothing, distance cull skips far ones, the board's joint gets the clip's pose (2.24 studs lift at t = 0). Edit mode doesn't render Motor6D.Transform, so the moving scythe/board can only be judged in a playtest.
+- Screenshots: `docs/emote-fx/emote_constructs_sheet_v2.jpg` and `<id>_construct_v2.jpg`.
+- Backup before editing EmoteController: `docs/backups/HOS-EMOTE-FX-001_2026-10-16/pre_edit_EmoteController.rbxm`.
+
+## Needs Hunter's playtest
+- Do each emote in the lobby: build-in, fade-out on stop / moving, a second player seeing it.
+- Scythe and board actually following the dance (joint driven from the clip).
+- Sunbath stands up mid-clip (lounger stays put); Surfer's feet lift ~0.6 studs off the board on the hops.
+- Phone look and frame rate with several players emoting.
