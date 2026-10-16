@@ -36,8 +36,10 @@ def T(text, size, cls='', fill='', style='', name=None, tag='span'):
 
 
 def ipath(icon):
-    """icons_ai/<slug>.png (ChatGPT set, docs/ui/chatgpt_icon_prompt.md) wins over icons/<slug>.png."""
-    return f'icons_ai/{icon}.png' if os.path.exists(os.path.join(HERE, 'icons_ai', icon + '.png')) else f'icons/{icon}.png'
+    """set/icons/<slug>.png: the merged set (tools/merge_icons.py: ChatGPT icons_ai/ win over the drawn icons/).
+    The 'icons/<slug>.png' tail is what the Studio exporter keys icons on, so every icon, pet and egg uploads
+    once by slug and can be swapped at runtime."""
+    return f'set/icons/{icon}.png'
 
 
 def I(icon, x, y, w, h=None, name=None, extra='', cls='ic'):
