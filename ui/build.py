@@ -435,14 +435,13 @@ def hv_plate(y, icon, value, label, fill, name):
     return out
 
 
-def hv_level(x=228, y=170, w=460, h=64):
-    """Account level + XP bar under the goal pill (16 Oct, Hunter: an XP system like Huss Valley's).
-    Runtime: LevelText, XpBar.F, XpText; the plate moves up into the goal's place once the goal pill hides."""
-    out = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
-    out += I('star', x + 8, y + 6, 52, name='LevelIcon')
-    out += at(x + 70, y + 6, T('LEVEL 12', 22, 's', 'f-gold', name='LevelText'))
-    out += at(x + w - 14, y + 8, T('124 / 375 XP', 17, 'xs', 'f-dim', name='XpText'), w=200, align='right')
-    out += bar(x + 70, y + 36, w - 86, 16, .33, 'sky', 'XpBar')
+def hv_level(y=784):
+    """Account level + XP bar, the top plate of the bottom-left Level / Gold / Gems column (16 Oct, Hunter:
+    under the goal pill it read as misplaced). Runtime: LevelText, XpBar.F, XpText."""
+    out = f"<div class='glass' style='left:12px;top:{y}px;width:340px;height:84px'></div>"
+    out += I('star', 20, y + 8, 68, name='LevelIcon')
+    out += at(100, y + 8, T('LEVEL 12', 32, 'l', 'f-gold', name='LevelText'))
+    out += bar(102, y + 48, 236, 24, .33, 'sky', 'XpBar') + at(102 + 118, y + 50, T('124 / 375 XP', 15, 'xs', name='XpText'), w=236, align='center')
     return sub('LevelPlate', out)
 
 
@@ -481,19 +480,20 @@ def hv_goal():
 def s_hud():
     out = world() + topbar()
     tl = hv_pill(240, 12, 196, 'purple', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True)
-    tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True) + hv_goal() + hv_level()
+    tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True) + hv_goal()
     tr = hv_pill(1468, 12, 196, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats') + hv_pill(1680, 12, 228, 'grey', 'settings', 'SETTINGS', 'SettingsButton', 'Settings')
     tr = hv_pill(1236, 12, 216, 'teal', 'servers', 'SERVERS', 'ServersButton', 'Servers') + tr
     # AFK / Hunt sit on a grey plate; the coloured PlateOn shows while they're on (16 Oct: Hunt is purple, not red)
-    rail = (hv_rail_btn(10, 290, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 400, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
-            + hv_rail_btn(10, 510, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'EmoteWheel', key='G')
-            + hv_rail_btn(10, 620, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF', on_color='blue')
-            + hv_rail_btn(10, 730, 96, 'grey', 'hunt', 'HUNT', 'VolunteerToggle', state='ON', on_color='purple'))
+    # rail 60 px higher than first built (16 Oct) so the Level plate above Gold clears HUNT
+    rail = (hv_rail_btn(10, 230, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 340, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
+            + hv_rail_btn(10, 450, 96, 'pink', 'emote', 'EMOTES', 'EmotesButton', 'EmoteWheel', key='G')
+            + hv_rail_btn(10, 560, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF', on_color='blue')
+            + hv_rail_btn(10, 670, 96, 'grey', 'hunt', 'HUNT', 'VolunteerToggle', state='ON', on_color='purple'))
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
     out += hv_topcenter('LOBBY', 'Next match in 0:12', T('4 / 4 players ready  ·  you start as a Runner', 22, 'xs', name='SublineText'))
     out += grp('Watch', hv_pill(860, 140, 200, 'pink', 'spectate', 'SPECTATE', 'SpectateButton'), 'T')   # shown while a match runs
     plus = sub('GemsPlus', btn(286, 990, 54, 54, 'lime', T('+', 40, 'l'), cls='sm', name='Btn'), btn=True, opens='Shop')   # buy Gems (16 Oct)
-    out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems') + plus, 'BL')
+    out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems') + plus + hv_level(), 'BL')
     out += hv_ability() + hv_dash('DASH READY', 'Move, then turn + dash')
     return out
 

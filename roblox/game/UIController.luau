@@ -1044,10 +1044,10 @@ local function goalPill()
 	pill:SetAttribute("OpensVia", "Incubator")
 end
 
--- account level + XP bar under the goal pill (16 Oct: XP system)
+-- account level + XP bar: the top plate of the bottom-left Level / Gold / Gems column (16 Oct: XP system)
 local function levelPlate()
-	local tl = hudGroup("HUD", "TopLeft")
-	local lp = tl and tl:FindFirstChild("LevelPlate")
+	local wal = hudGroup("HUD", "Wallet")
+	local lp = wal and wal:FindFirstChild("LevelPlate")
 	if not lp or not profile then return end
 	local level, into, need = EconomyConfig.levelFor(profile.xp or 0)
 	setText(lp, "LevelText", "LEVEL " .. level)
