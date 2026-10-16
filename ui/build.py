@@ -435,6 +435,17 @@ def hv_plate(y, icon, value, label, fill, name):
     return out
 
 
+def hv_level(x=228, y=170, w=460, h=64):
+    """Account level + XP bar under the goal pill (16 Oct, Hunter: an XP system like Huss Valley's).
+    Runtime: LevelText, XpBar.F, XpText; the plate moves up into the goal's place once the goal pill hides."""
+    out = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
+    out += I('star', x + 8, y + 6, 52, name='LevelIcon')
+    out += at(x + 70, y + 6, T('LEVEL 12', 22, 's', 'f-gold', name='LevelText'))
+    out += at(x + w - 14, y + 8, T('124 / 375 XP', 17, 'xs', 'f-dim', name='XpText'), w=200, align='right')
+    out += bar(x + 70, y + 36, w - 86, 16, .33, 'sky', 'XpBar')
+    return sub('LevelPlate', out)
+
+
 def hv_ability(lobby=True, cd=None):
     pool = POOL['DoubleDash']
     x, y, w, h = 740, 820, 440, 96
@@ -470,7 +481,7 @@ def hv_goal():
 def s_hud():
     out = world() + topbar()
     tl = hv_pill(240, 12, 196, 'purple', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True)
-    tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True) + hv_goal()
+    tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True) + hv_goal() + hv_level()
     tr = hv_pill(1468, 12, 196, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats') + hv_pill(1680, 12, 228, 'grey', 'settings', 'SETTINGS', 'SettingsButton', 'Settings')
     tr = hv_pill(1236, 12, 216, 'teal', 'servers', 'SERVERS', 'ServersButton', 'Servers') + tr
     # AFK / Hunt sit on a grey plate; the coloured PlateOn shows while they're on (16 Oct: Hunt is purple, not red)
@@ -867,7 +878,9 @@ def feature_card(x, y, it, title_tag, perks, name):
         yy = 178 + k * 92
         inner += box(22, yy, 330, 80, I(pic, 10, 8, 62) + at(84, 12, T(a, 22, 's', name='PerkTitle')) + at(86, 44, T(b_, 15, 'xs', 'f-dim', name='PerkSub')),
                      'cw solid', 'border-radius:10px', name=f'Perk{k + 1}')
-    inner += box(370, 178, 360, 264, I(icon, 70, 22, 220, name='Icon'), 'cw', 'border-radius:12px;background:radial-gradient(rgba(255,255,255,.18),rgba(0,0,0,.25))', name='ArtBox')
+    # the glow box exports as one flat image, so the item art sits on top of it (inside, the exporter dropped it)
+    inner += box(370, 178, 360, 264, '', 'cw', 'border-radius:12px;background:radial-gradient(rgba(255,255,255,.18),rgba(0,0,0,.25))', name='ArtBox')
+    inner += I(icon, 440, 200, 220, name='Icon')
     inner += price_btns(22, 470, 708, 84, wal, price, rbx, 36)
     inner += state_btns(22, 470, 708, 84, None, 32)
     inner += at(w // 2, 570, T('', 17, 'xs', 'f-dim', name='Have'), w=w - 40, align='center')
@@ -884,7 +897,9 @@ def pass_card(x, y, nm, robux, title_tag, line, icon, acc, perks, name):
         yy = 178 + k * 92
         inner += box(22, yy, 330, 80, I(pic, 10, 8, 62) + at(84, 12, T(a, 22, 's', name='PerkTitle')) + at(86, 44, T(b_, 15, 'xs', 'f-dim', name='PerkSub')),
                      'cw solid', 'border-radius:10px', name=f'Perk{k + 1}')
-    inner += box(370, 178, 360, 264, I(icon, 70, 22, 220, name='Icon'), 'cw', 'border-radius:12px;background:radial-gradient(rgba(255,255,255,.18),rgba(0,0,0,.25))', name='ArtBox')
+    # the glow box exports as one flat image, so the item art sits on top of it (inside, the exporter dropped it)
+    inner += box(370, 178, 360, 264, '', 'cw', 'border-radius:12px;background:radial-gradient(rgba(255,255,255,.18),rgba(0,0,0,.25))', name='ArtBox')
+    inner += I(icon, 440, 200, 220, name='Icon')
     inner += btn(22, 470, 708, 84, 'purple', row(icn('robux', 52), bl(f'{robux:,}', 36, name='Price')), name='BtnBuy')
     if EXPORT_STATES:
         inner += btn(22, 470, 708, 84, 'grey', row(icn('check', 46), bl('OWNED', 32)), name='BtnOwned', cls='hid')
@@ -925,14 +940,14 @@ def s_shop(tab='featured'):
         cr += btn(440, 418, 696, 64, 'grey', bl('SEE ALL 51 EMOTES', 26), name='BtnSeeEmotes')
         page = box(26, 102, 1528, 560, cr, 'cs r-pink', 'border-radius:18px', name='CrateCard')
         b += sub('PageEmotes', page, hid=tab != 'emotes')
-    # Passes: VIP and 2x Gold (game passes, GDD v0.4 prices); the runtime fills price / OWNED from EconomyConfig.PASSES
+    # Passes: VIP and 2x XP (game passes; Hunter 16 Oct: VIP +25% XP stacking with 2x XP); the runtime fills price / OWNED from EconomyConfig.PASSES
     if tab == 'passes' or EXPORT_STATES:
-        pg = pass_card(26, 102, 'VIP', 499, 'FOREVER  ·  LOOKS ONLY', 'Stand out in every lobby and every match.', 'crown', 'gold',
-                       [('crown', 'VIP nameplate', 'A gold VIP over your head'), ('star', 'VIP chat tag', '[VIP] before your name'),
+        pg = pass_card(26, 102, 'VIP', 499, 'FOREVER', 'Stand out in every lobby and every match.', 'crown', 'gold',
+                       [('star', '+25% match XP', 'Stacks with 2x XP'), ('crown', 'VIP tag', 'Over your head and in chat'),
                         ('emote', 'Honored One emote', 'A legendary dance, yours')], 'PassVip')
-        pg += pass_card(800, 102, '2x Gold', 199, 'FOREVER', 'Every match pays double Gold.', 'gold', 'orange',
-                        [('gold', 'Double match Gold', 'Up to 180 a match'), ('shop', 'More looks, sooner', 'Gold buys trails, cases, effects'),
-                         ('check', 'Fair play', 'Gems and pieces unchanged')], 'PassGold2x')
+        pg += pass_card(800, 102, '2x XP', 199, 'FOREVER', 'Every match pays double XP.', 'star', 'sky',
+                        [('star', 'Double match XP', 'Level up twice as fast'), ('gift', 'Level-up rewards', 'Gold every level, Gems every 5th'),
+                         ('check', 'Fair play', 'Levels change nothing in a match')], 'PassXp2x')
         b += sub('PagePasses', pg, hid=tab != 'passes')
     if tab == 'gems' or EXPORT_STATES:
         b += gem_packs(hid=tab != 'gems')
@@ -1474,7 +1489,7 @@ SCREENS = [  # (file, title, description, fn, height)
     ('shop_cases.html', 'Shop (Egg Cases)', 'Egg cases', lambda: s_shop('cases'), 1080),
     ('shop_effects.html', 'Shop (Effects)', 'Confetti, entrance, ability colours, hatching', lambda: s_shop('effects'), 1080),
     ('shop_emotes.html', 'Shop (Emotes)', 'The Emote Crate', lambda: s_shop('emotes'), 1080),
-    ('shop_passes.html', 'Shop (Passes)', 'VIP and 2x Gold game passes', lambda: s_shop('passes'), 1080),
+    ('shop_passes.html', 'Shop (Passes)', 'VIP and 2x XP game passes', lambda: s_shop('passes'), 1080),
     ('shop_getgems.html', 'Shop (Gems)', 'Six Robux Gem packs (developer products, live 16 Oct)', lambda: s_shop('gems'), 1080),
     ('stats.html', 'Stats', 'Your record', s_stats, 1080),
     ('settings.html', 'Settings', 'Real settings, toggles, UI colour, tabs', s_settings, 1080),

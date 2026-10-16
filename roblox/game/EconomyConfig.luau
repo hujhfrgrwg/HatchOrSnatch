@@ -43,6 +43,43 @@ function EconomyConfig.goldFor(o: MatchOutcome): (number, { { label: string, amo
 	return math.min(G.CAP, total), parts
 end
 
+-- Account XP and level (16 Oct, Hunter). Every match pays XP; XP builds the account level on your nameplate
+-- ("Lv. 12"). Each level-up pays a little Gold, every 5th a few Gems. VIP (+25%) and 2x XP (+100%) add to match
+-- XP only. A level changes nothing in a match.
+EconomyConfig.XP = { ACTIVE = 40, PER_CROSSING = 20, FIRST_THEFT = 25, EXTRA_THEFT = 10, MAX_EXTRA_THEFTS = 3, VICTORY = 40 }
+EconomyConfig.LEVEL_REWARD = { gold = 50, gemsEvery = 5, gems = 10 }
+
+function EconomyConfig.xpFor(o: MatchOutcome): number
+	local X = EconomyConfig.XP
+	local n = 0
+	if o.active then
+		n += X.ACTIVE
+	end
+	n += X.PER_CROSSING * math.max(0, o.crossings)
+	if o.captures > 0 then
+		n += X.FIRST_THEFT + X.EXTRA_THEFT * math.min(X.MAX_EXTRA_THEFTS, o.captures - 1)
+	end
+	if o.win then
+		n += X.VICTORY
+	end
+	return n
+end
+
+-- XP to go from `level` to the next (100, 125, 150 ...: level 10 is about 15 matches)
+function EconomyConfig.xpToNext(level: number): number
+	return 100 + 25 * (math.max(1, level) - 1)
+end
+
+-- total XP -> level, XP into this level, XP this level needs
+function EconomyConfig.levelFor(xp: number): (number, number, number)
+	local level, rest = 1, math.max(0, math.floor(xp))
+	while level < 999 and rest >= EconomyConfig.xpToNext(level) do
+		rest -= EconomyConfig.xpToNext(level)
+		level += 1
+	end
+	return level, rest, EconomyConfig.xpToNext(level)
+end
+
 function EconomyConfig.gemsFor(o: MatchOutcome): number
 	local M = EconomyConfig.GEMS
 	local n = 0
@@ -184,12 +221,13 @@ EconomyConfig.FEATURED = {
 }
 
 -- Game passes (GDD v0.4 Robux catalogue, 16 Oct). PassService mirrors ownership to the player attribute.
--- VIP is looks only (nameplate + chat tag + one emote); 2x Gold doubles match Gold, never Gems or egg pieces.
+-- xpBonus is extra match XP (added, so VIP + 2x XP pays 2.25x). Never Gold, Gems, egg pieces or anything in a chase.
+-- VIP also gives the nameplate + chat tag + one emote (Hunter, 16 Oct: VIP +25% XP, stacking with the 2x XP pass).
 EconomyConfig.PASSES = {
-	{ key = "vip", passId = 2038202784, name = "VIP", robux = 499, attr = "EOS_VIP", icon = "pass_vip", emote = "honored_one",
-		desc = "A gold VIP tag over your head and in chat, plus the legendary Honored One emote." },
-	{ key = "gold2x", passId = 2040494361, name = "2x Gold", robux = 199, attr = "EOS_Gold2x", icon = "pass_gold2x",
-		desc = "Double the Gold from every match. Gems and egg pieces stay the same." },
+	{ key = "vip", passId = 2038202784, name = "VIP", robux = 499, attr = "EOS_VIP", icon = "pass_vip", emote = "honored_one", xpBonus = 0.25,
+		label = "VIP", desc = "+25% XP from every match (stacks with 2x XP), a gold VIP tag over your head and in chat, and the Honored One emote." },
+	{ key = "xp2x", passId = 2040494361, name = "2x XP", robux = 199, attr = "EOS_XP2x", icon = "pass_xp2x", xpBonus = 1,
+		label = "2X XP", desc = "Double the XP from every match, forever. Level up twice as fast." },
 }
 function EconomyConfig.pass(key: string): any?
 	for _, p in ipairs(EconomyConfig.PASSES) do

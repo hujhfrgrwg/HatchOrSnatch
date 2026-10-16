@@ -56,6 +56,7 @@ local settingsInit = false
 local shopTab = "featured"
 local resultsData: any = nil
 local resultsOpen = false
+local shownLevel: number? = nil -- the account level last shown (a rise opens LEVEL UP!)
 local trackedQuest: string? = nil
 local joinedAt = os.clock()
 
@@ -1043,6 +1044,17 @@ local function goalPill()
 	pill:SetAttribute("OpensVia", "Incubator")
 end
 
+-- account level + XP bar under the goal pill (16 Oct: XP system)
+local function levelPlate()
+	local tl = hudGroup("HUD", "TopLeft")
+	local lp = tl and tl:FindFirstChild("LevelPlate")
+	if not lp or not profile then return end
+	local level, into, need = EconomyConfig.levelFor(profile.xp or 0)
+	setText(lp, "LevelText", "LEVEL " .. level)
+	setText(lp, "XpText", ("%s / %s XP"):format(Format.full(into), Format.full(need)))
+	setBar(lp:FindFirstChild("XpBar"), into / need)
+end
+
 local function badges()
 	local tl = hudGroup("HUD", "TopLeft")
 	if not tl then return end
@@ -1098,6 +1110,7 @@ local function updateHUD()
 		lobbyStatus()
 		railToggles()
 		goalPill()
+		levelPlate()
 		badges()
 	end
 	abilityCard()
@@ -1828,12 +1841,36 @@ local function rewardItem(it: any)
 	UIC.showReward(r)
 end
 
--- a game pass: VIP or 2x Gold
+-- LEVEL UP!: waits for the results screen to close, then the reward reveal with the level-up pay
+local LEVEL_SKY = Color3.fromRGB(110, 200, 255)
+local function rewardLevelUp(from: number, to: number)
+	task.spawn(function()
+		local t0 = os.clock()
+		while (resultsOpen or UI.current() == "Results") and os.clock() - t0 < 30 do task.wait(0.5) end
+		local R = EconomyConfig.LEVEL_REWARD
+		local gold, gems = 0, 0
+		for L = from + 1, to do
+			gold += R.gold
+			if L % R.gemsEvery == 0 then gems += R.gems end
+		end
+		UIC.showReward({
+			icon = "star",
+			title = "LEVEL UP!",
+			titleColor = LEVEL_SKY,
+			name = "Level " .. to,
+			kind = ("+%s GOLD"):format(Format.full(gold)) .. (if gems > 0 then ("  ·  +%d GEMS"):format(gems) else ""),
+			kindColor = Color3.fromRGB(255, 210, 58),
+			sub = ("Keep playing to reach Level %d."):format(to + 1),
+		})
+	end)
+end
+
+-- a game pass: VIP or 2x XP
 local function rewardPass(key: string)
 	local pass = EconomyConfig.pass(key)
 	if not pass then return end
 	UIC.showReward({
-		icon = if iconId(pass.icon) ~= "" then pass.icon elseif key == "vip" then "crown" else "gold",
+		icon = if iconId(pass.icon) ~= "" then pass.icon elseif key == "vip" then "crown" else "star",
 		title = "UNLOCKED!",
 		name = pass.name,
 		kind = "GAME PASS  ·  FOREVER",
@@ -2011,7 +2048,7 @@ local function fillCard(card: Instance, it: any)
 	wireButtons_(card, it)
 end
 
-local PASS_CARDS = { vip = "PassVip", gold2x = "PassGold2x" }
+local PASS_CARDS = { vip = "PassVip", xp2x = "PassXp2x" }
 local function refreshShop()
 	local sc = S.Shop
 	if not sc or not profile then return end
@@ -2821,6 +2858,9 @@ end
 local function connectEvents()
 	Net.event("ProfileState").OnClientEvent:Connect(function(view)
 		if type(view) ~= "table" then return end
+		local lvl = (EconomyConfig.levelFor(tonumber(view.xp) or 0))
+		if profile and shownLevel and lvl > shownLevel then rewardLevelUp(shownLevel, lvl) end
+		shownLevel = lvl
 		profile = view
 		if not settingsInit and type(view.settings) == "table" then
 			settingsInit = true
@@ -2974,7 +3014,17 @@ local function connectEvents()
 		end
 	end)
 	Net.event("Results").OnClientEvent:Connect(function(data)
-		if type(data) == "table" then showResults(data) end
+		if type(data) == "table" then
+			showResults(data)
+			-- match XP, with the VIP / 2x XP pass shares named
+			local you = data.you
+			if type(you) == "table" and (tonumber(you.xp) or 0) > 0 then
+				local extra = {}
+				for _, l in ipairs(you.xpExtra or {}) do table.insert(extra, ("%s +%d"):format(l.label, l.amount)) end
+				local text = ("+%s XP"):format(Format.full(you.xp)) .. (if #extra > 0 then ("  (%s)"):format(table.concat(extra, "  ·  ")) else "")
+				task.delay(1.2, function() UIC.toast(text, "reward", true) end)
+			end
+		end
 	end)
 end
 

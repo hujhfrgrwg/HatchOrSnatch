@@ -37,6 +37,7 @@ function ProfileLogic.default(): any
 	return {
 		schemaVersion = ProfileLogic.SCHEMA_VERSION,
 		gold = 0,
+		xp = 0, -- account XP (EconomyConfig.levelFor -> the nameplate level)
 		gems = 0, -- spendable (earned + purchased); purchases are also tallied in stats + receipts
 		materials = materials,
 		pets = {}, -- { id, family, rarity, species, n } (n = hatch number, for ordering)
@@ -259,7 +260,7 @@ end
 
 -- Apply one match settlement exactly once. Returns (applied, summary).
 -- summary lists quest progress changes so the caller can log QuestProgressed.
-function ProfileLogic.applySettlement(p: any, s: any, ctx: { utcDate: string, questConfig: any, ledgerSize: number }): (boolean, any)
+function ProfileLogic.applySettlement(p: any, s: any, ctx: { utcDate: string, questConfig: any, ledgerSize: number, economy: any? }): (boolean, any)
 	if type(s) ~= "table" or type(s.key) ~= "string" then
 		return false, { reason = "BAD_SETTLEMENT" }
 	end
@@ -275,6 +276,28 @@ function ProfileLogic.applySettlement(p: any, s: any, ctx: { utcDate: string, qu
 	local gems = math.max(0, math.floor(num(s.gems, 0)))
 	p.gems += gems
 	p.stats.gemsEarned += gems
+
+	-- account XP; each level-up pays EconomyConfig.LEVEL_REWARD (ctx.economy), in this same exact-once settlement
+	local xp = math.max(0, math.floor(num(s.xp, 0)))
+	local levelUps = {}
+	if xp > 0 then
+		local econ = ctx.economy
+		local before = if econ then (econ.levelFor(num(p.xp, 0))) else 0
+		p.xp = num(p.xp, 0) + xp
+		if econ then
+			local after = (econ.levelFor(p.xp))
+			local R = econ.LEVEL_REWARD
+			for L = before + 1, after do
+				local g = R.gold
+				local gm = if L % R.gemsEvery == 0 then R.gems else 0
+				p.gold += g
+				p.stats.goldEarned += g
+				p.gems += gm
+				p.stats.gemsEarned += gm
+				table.insert(levelUps, { level = L, gold = g, gems = gm })
+			end
+		end
+	end
 
 	-- the match's one egg piece (at most one primary piece per match)
 	local material = s.material
@@ -323,7 +346,7 @@ function ProfileLogic.applySettlement(p: any, s: any, ctx: { utcDate: string, qu
 	while #p.awardedMatchIds > ctx.ledgerSize do
 		table.remove(p.awardedMatchIds, 1)
 	end
-	return true, { gold = gold, gems = gems, material = material, eggTier = egg, quests = questChanges }
+	return true, { gold = gold, gems = gems, xp = xp, levelUps = levelUps, material = material, eggTier = egg, quests = questChanges }
 end
 
 -- Claim a completed daily quest once (B11). Returns (ok, reason, reward).
@@ -711,6 +734,7 @@ function ProfileLogic.clientView(p: any, questConfig: any): any
 	return {
 		gold = p.gold,
 		gems = p.gems,
+		xp = num(p.xp, 0),
 		materials = deepCopy(p.materials),
 		pets = deepCopy(p.pets),
 		equippedPet = p.equippedPet,

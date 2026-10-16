@@ -4,8 +4,9 @@
 -- (EOS_VIP, EOS_Gold2x) that the client and other services read. Only the server sets these, and
 -- client-set attributes never replicate up, so the attribute is the source of truth here.
 -- Passes never touch eggs, pets or Gems (GDD v0.4):
---  * VIP: a gold VIP on the nameplate (CharacterService), a [VIP] chat tag (client) and one emote
---  * 2x Gold: match Gold doubled when it is settled (MatchService calls PassService.doubleGold)
+--  * VIP: +25% match XP, a gold VIP on the nameplate (CharacterService), a [VIP] chat tag (client), one emote
+--  * 2x XP: +100% match XP. Bonuses add up (both = 2.25x); MatchService calls PassService.boostXp when it
+--    settles a match (Hunter, 16 Oct)
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -28,13 +29,24 @@ function PassService.has(plr: Player, key: string): boolean
 	return pass ~= nil and plr:GetAttribute(pass.attr) == true
 end
 
--- 2x Gold: doubles a settlement's Gold in place. Returns the Gold added (0 when the player has no pass).
-function PassService.doubleGold(plr: Player, s: any): number
-	if type(s) ~= "table" or not PassService.has(plr, "gold2x") then return 0 end
-	local g = math.max(0, math.floor(tonumber(s.gold) or 0))
-	if g <= 0 then return 0 end
-	s.gold = g * 2
-	return g
+-- Pass XP bonuses on a match's base XP: each owned pass adds its xpBonus share of the base.
+-- Returns the total and one { label, amount } line per bonus (empty without a pass).
+function PassService.boostXp(plr: Player, base: number): (number, { { label: string, amount: number } })
+	local lines = {}
+	base = math.max(0, math.floor(base))
+	local total = base
+	if base <= 0 then return 0, lines end
+	for _, pass in ipairs(EconomyConfig.PASSES) do
+		local k = tonumber(pass.xpBonus) or 0
+		if k > 0 and plr:GetAttribute(pass.attr) == true then
+			local add = math.floor(base * k + 0.5)
+			if add > 0 then
+				table.insert(lines, { label = pass.label or pass.name, amount = add })
+				total += add
+			end
+		end
+	end
+	return total, lines
 end
 
 -- VIP's emote: added to the collection (and the G wheel) once the profile has loaded

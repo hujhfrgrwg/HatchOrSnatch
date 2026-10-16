@@ -225,6 +225,7 @@ return {
 		["a1633057ee2"] = "rbxassetid://124763046522045",
 		["a176585b5fb"] = "rbxassetid://74004590386218",
 		["a17682134dd"] = "rbxassetid://104623689836274",
+		["a19ddaac0b1"] = "rbxassetid://135804151648457",
 		["a19ef0d6a8d"] = "rbxassetid://126285607188690",
 		["a1ad61e1af7"] = "rbxassetid://75815938542000",
 		["a1aecde2f9c"] = "rbxassetid://110898097067475",

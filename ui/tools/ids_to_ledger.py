@@ -37,7 +37,8 @@ for path, e in ids.items():
     n += 1
 # re-exports that only re-raster an image (headless noise, mean diff < 0.1/255) reuse the uploaded id
 # instead of a new upload; a6f725533cd is the close button re-exported without its corner tabs (16 Oct)
-ALIAS = {'art:a0f5b258ae1': 'art:a9256f992b1', 'art:a176585b5fb': 'art:a0d93acb115', 'art:af3958efa26': 'art:acc69c05fca',
+ALIAS = {'art:a19ddaac0b1': 'art:a915ff598c9',  # 16 Oct pass export: item card WEAR button re-rastered (noise only)
+         'art:a0f5b258ae1': 'art:a9256f992b1', 'art:a176585b5fb': 'art:a0d93acb115', 'art:af3958efa26': 'art:acc69c05fca',
          'art:a6f725533cd': 'art:close_clean',
          'art:a1fd854d283': 'art:ac081d42ddf'}  # Pets' third-row '?' tile, clipped by the shorter grid: the grid clips it in Roblox
 # 16 Oct HUD re-export (rail moved for EMOTES, AFK/Hunt PlateOn): unchanged plates re-rastered with noise only

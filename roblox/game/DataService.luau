@@ -18,6 +18,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
 local GameConfig = require(Shared:WaitForChild("GameConfig"))
 local QuestConfig = require(Shared:WaitForChild("QuestConfig"))
+local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
 local Net = require(Shared:WaitForChild("Net"))
 local ProfileLogic = require(ServerScriptService.EOS.Core.ProfileLogic)
 local Analytics = require(script.Parent.Analytics)
@@ -116,7 +117,7 @@ local function keyFor(userId: number): string
 end
 
 local function utcCtx()
-	return { utcDate = ProfileLogic.utcDate(os.time()), questConfig = QuestConfig, ledgerSize = CFG.LEDGER_SIZE }
+	return { utcDate = ProfileLogic.utcDate(os.time()), questConfig = QuestConfig, ledgerSize = CFG.LEDGER_SIZE, economy = EconomyConfig }
 end
 DataService.utcCtx = utcCtx
 
@@ -149,6 +150,7 @@ local function pushProfile(plr: Player)
 			plr:SetAttribute("EOS_PetRarity", pet and pet.rarity or "")
 			plr:SetAttribute("EOS_Wins", p.stats.wins)
 			plr:SetAttribute("EOS_BestTier", p.stats.lifetimeBestTier)
+			plr:SetAttribute("EOS_Level", (EconomyConfig.levelFor(tonumber(p.xp) or 0))) -- account level (nameplate)
 			plr:SetAttribute("EOS_Captures", p.stats.captures)
 			plr:SetAttribute("EOS_PetsHatched", p.stats.petsHatched or 0)
 			Net.event("ProfileState"):FireClient(plr, ProfileLogic.clientView(p, QuestConfig))

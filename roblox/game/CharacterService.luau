@@ -215,12 +215,12 @@ function CharacterService.refreshTag(plr: Player)
 		status.TextColor3 = GREY
 		nameLabel.TextColor3 = GREY
 	else
-		local best = plr:GetAttribute("EOS_BestTier") or 1
+		local level = plr:GetAttribute("EOS_Level") or 1
 		local wins = plr:GetAttribute("EOS_Wins") or 0
 		local afk = plr:GetAttribute("EOS_AFK") == true
-		-- reference style: "Lv. 3  ·  4 wins  ·  AFK" (Lv = best egg level secured)
-		status.Text = ("Lv. %d  ·  %d %s%s"):format(best, wins, if wins == 1 then "win" else "wins", if afk then "  ·  AFK" else "")
-		status.TextColor3 = if afk then Color3.fromRGB(190, 190, 200) else TierConfig.get(best).text
+		-- reference style: "Lv. 12  ·  4 wins  ·  AFK" (Lv = account level from match XP, 16 Oct; was the best egg level)
+		status.Text = ("Lv. %d  ·  %d %s%s"):format(level, wins, if wins == 1 then "win" else "wins", if afk then "  ·  AFK" else "")
+		status.TextColor3 = if afk then Color3.fromRGB(190, 190, 200) else Color3.fromRGB(255, 226, 120)
 		nameLabel.TextColor3 = Color3.new(1, 1, 1)
 	end
 end
@@ -700,7 +700,7 @@ function CharacterService.init()
 		if plr.Character then
 			task.spawn(onChar, plr, plr.Character)
 		end
-		for _, attr in ipairs({ "EOS_AFK", "EOS_Wins", "EOS_BestTier", "EOS_VIP" }) do
+		for _, attr in ipairs({ "EOS_AFK", "EOS_Wins", "EOS_BestTier", "EOS_Level", "EOS_VIP" }) do
 			plr:GetAttributeChangedSignal(attr):Connect(function()
 				CharacterService.refreshTag(plr)
 			end)
