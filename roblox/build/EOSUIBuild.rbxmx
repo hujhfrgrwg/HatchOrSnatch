@@ -44,6 +44,7 @@ return {
 		["incubator"] = "rbxassetid://74582509862380",
 		["info"] = "rbxassetid://140075104471483",
 		["lock"] = "rbxassetid://93578022956827",
+		["music"] = "rbxassetid://89069864277464",
 		["pet_armored_rex_t1"] = "rbxassetid://132147695134999",
 		["pet_armored_rex_t2"] = "rbxassetid://102591614639013",
 		["pet_armored_rex_t3"] = "rbxassetid://127597449827341",
