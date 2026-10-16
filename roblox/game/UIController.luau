@@ -698,6 +698,16 @@ local function hideGroup(name: string, on: boolean)
 	end
 end
 
+-- MENU dropdown (16 Oct, Hunter: less clutter): Settings · Stats · Servers under one top-right button.
+-- MenuCatch is an invisible full-screen button under it: a click anywhere else closes the menu.
+local menuOpen = false
+local function setMenu(on: boolean)
+	menuOpen = on
+	hideGroup("MenuDrop", not on)
+	hideGroup("MenuCatch", not on)
+	hideGroup("Goal", on) -- the goal box sits where the dropdown opens
+end
+
 local function hudGroup(screen: string, name: string): Instance?
 	return S[screen] and S[screen]:FindFirstChild(name)
 end
@@ -2545,6 +2555,7 @@ end
 
 function UIC.open(name: string)
 	if not S[name] then return end
+	if menuOpen then setMenu(false) end
 	if LOBBY_ONLY[name] and inMatch() then
 		UIC.toast("That opens between matches", "info", true)
 		return
@@ -2667,6 +2678,31 @@ local function wireButtons()
 				if to then UIC.open(to) end
 			end)
 		end
+	end
+	-- MENU (top right): toggles the Settings · Stats · Servers dropdown
+	local hud = S.HUD
+	local drop = hudGroup("HUD", "MenuDrop")
+	if hud and drop and drop:IsA("GuiObject") then
+		drop.ZIndex = 40
+		local catch = Instance.new("TextButton")
+		catch.Name = "MenuCatch"
+		catch.Text = ""
+		catch.AutoButtonColor = false
+		catch.BackgroundTransparency = 1
+		catch.Size = UDim2.fromScale(1, 1)
+		catch.ZIndex = 39
+		catch.Parent = hud
+		catch.Activated:Connect(function() setMenu(false) end)
+		for _, nm in { "MenuSettings", "MenuStats", "MenuServers" } do
+			onClick(drop:FindFirstChild(nm), function() setMenu(false) end)
+		end
+		local tr = hudGroup("HUD", "TopRight")
+		onClick(tr and tr:FindFirstChild("SettingsButton"), function()
+			Sound.play(if menuOpen then "close" else "open")
+			setMenu(not menuOpen)
+			if menuOpen then UI.popFrom(drop, 0.85) end
+		end)
+		setMenu(false)
 	end
 	-- Gems "+" (bottom left): the Shop's Buy Gems tab
 	local wal = hudGroup("HUD", "Wallet")

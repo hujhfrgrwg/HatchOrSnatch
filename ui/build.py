@@ -478,12 +478,22 @@ def hv_goal():
     return sub('GoalPill', out, btn=True, opens='Incubator')
 
 
-def s_hud():
+def hv_menu():
+    """The MENU dropdown (16 Oct): Settings · Stats · Servers under the one top-right button. Runtime toggles it."""
+    out = f"<div class='glass' style='left:1668px;top:80px;width:252px;height:232px'></div>"
+    for i, (col_, ic, lab, nm, opens) in enumerate([('grey', 'settings', 'SETTINGS', 'MenuSettings', 'Settings'),
+                                                     ('blue', 'stats', 'STATS', 'MenuStats', 'Stats'),
+                                                     ('teal', 'servers', 'SERVERS', 'MenuServers', 'Servers')]):
+        out += hv_pill(1680, 98 + i * 70, 228, col_, ic, lab, nm, opens)
+    return out
+
+
+def s_hud(menu=False):
     out = world() + topbar()
     tl = hv_pill(240, 12, 196, 'purple', 'quests', 'QUESTS', 'QuestsButton', 'Quests', badge=True)
     tl += hv_pill(452, 12, 236, 'lime', 'incubator', 'INCUBATOR', 'IncubatorButton', 'Incubator', badge=True)
-    tr = hv_pill(1468, 12, 196, 'blue', 'stats', 'STATS', 'StatsButton', 'Stats') + hv_pill(1680, 12, 228, 'grey', 'settings', 'SETTINGS', 'SettingsButton', 'Settings')
-    tr = hv_pill(1236, 12, 216, 'teal', 'servers', 'SERVERS', 'ServersButton', 'Servers') + tr
+    # 16 Oct (Hunter, less clutter): SETTINGS, STATS and SERVERS live in the MENU dropdown (hv_menu); one button top-right
+    tr = hv_pill(1680, 12, 228, 'grey', 'settings', 'MENU', 'SettingsButton')
     # AFK / Hunt sit on a grey plate; the coloured PlateOn shows while they're on (16 Oct: Hunt is purple, not red)
     # rail 60 px higher than first built (16 Oct) so the Level plate above Gold clears HUNT
     rail = (hv_rail_btn(10, 230, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 340, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
@@ -491,6 +501,8 @@ def s_hud():
             + hv_rail_btn(10, 560, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF', on_color='blue')
             + hv_rail_btn(10, 670, 96, 'grey', 'hunt', 'HUNT', 'VolunteerToggle', state='ON', on_color='purple'))
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Goal', hv_goal(), 'TR') + grp('Rail', rail, 'L')
+    if EXPORT_STATES or menu:
+        out += grp('MenuDrop', hv_menu(), 'TR')
     out += hv_topcenter('LOBBY', 'Next match in 0:12', T('4 / 4 players ready  ·  you start as a Runner', 22, 'xs', name='SublineText'))
     out += grp('Watch', hv_pill(860, 140, 200, 'pink', 'spectate', 'SPECTATE', 'SpectateButton'), 'T')   # shown while a match runs
     plus = sub('GemsPlus', btn(286, 990, 54, 54, 'lime', T('+', 40, 'l'), cls='sm', name='Btn'), btn=True, opens='Shop')   # buy Gems (16 Oct)
@@ -1485,6 +1497,7 @@ def page(title, body, h=1080):
 
 SCREENS = [  # (file, title, description, fn, height)
     ('style.html', 'Style', 'Reference, lobby, accents, icons, eggs, buttons', s_style, 1580),
+    ('hud_menu.html', 'HUD (menu open)', 'MENU opens Settings · Stats · Servers', lambda: s_hud(True), 1080),
     ('hud.html', 'HUD (lobby)', 'Menus, first-pet goal, timer, wallet, equipped pet', s_hud, 1080),
     ('hud_match.html', 'HUD (match)', 'Role, crossing timer, teams, streak, egg level, ability, feed', s_hud_match, 1080),
     ('hud_phone.html', 'HUD (phone)', 'Bigger targets, thumbs kept clear', s_hud_phone, 1080),

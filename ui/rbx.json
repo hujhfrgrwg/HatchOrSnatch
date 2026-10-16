@@ -21,7 +21,8 @@
         "Wallet",
         "Ability",
         "Dash",
-        "Watch"
+        "Watch",
+        "MenuDrop"
       ],
       "visible": true,
       "hud": true
