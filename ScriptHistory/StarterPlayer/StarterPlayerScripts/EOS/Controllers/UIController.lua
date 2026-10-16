@@ -2550,7 +2550,6 @@ local function wireButtons()
 		onClick(find(shop, "BtnCrateRobux"), function() UIC.buyCrate() end)
 		onClick(find(shop, "BtnSeeEmotes"), function() if UIC.showEmoteCrate then UIC.showEmoteCrate() end end)
 	end
-	end
 	-- Settings
 	local st = S.Settings
 	if st then
