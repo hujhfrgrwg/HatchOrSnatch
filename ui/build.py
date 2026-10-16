@@ -23,6 +23,7 @@ FONTS = ("<link rel='preconnect' href='https://fonts.googleapis.com'>"
          "<link href='https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700"
          "&family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&display=block' rel='stylesheet'>")
 SKIN = os.environ.get('UI_SKIN', 'sport')   # round 3: styles/sport.css on top of candy.css ('' = round 2 candy)
+EXPORT_STATES = os.environ.get('UI_EXPORT') == '1'   # Studio export: every runtime state on the page (hidden ones too)
 
 
 # ================================================================== base helpers (roblox-ui-maker markers)
@@ -142,7 +143,7 @@ def btn(x, y, w, h, color, label, name=None, cls='', style='', hid=False, opens=
 
 
 def bl(text, size=34, fill='', name=None):
-    return T(text, size, 's', fill, name=name)
+    return T(text, size, 's', fill, name=name or 'Label')
 
 
 def well(x, y, w, h, inner='', name=None, solid=False, style='', title=None, extra=''):
@@ -157,18 +158,18 @@ def slot(x, y, s, rarity, icon=None, count=None, label=None, cls='', name=None, 
         p = int(s * art_pad)
         inner += f"<div class='art'>{I(icon, p, int(p * .7), s - 2 * p, name='Icon')}</div>"
     if count:
-        inner += at(s - 10, 6, T(count, max(18, int(s * .17)), 'xs'), w=s, align='right', name='Count')
+        inner += at(s - 10, 6, T(count, max(18, int(s * .17)), 'xs', name='CountText'), w=s, align='right', name='Count')
     if label:
-        inner += at(s // 2, s - int(s * .26), T(label, label_size or max(16, int(s * .15)), 'xs', FILL.get(rarity, '')), w=s + 20, align='center', name='Label')
+        inner += at(s // 2, s - int(s * .26), T(label, label_size or max(16, int(s * .15)), 'xs', FILL.get(rarity, ''), name='LabelText'), w=s + 20, align='center', name='Label')
     inner += inner_extra
     return box(x, y, s, s, inner, f'cs r-{rarity} {cls}' + (' lab' if label else ''), name=name)
 
 
-def stars(n, of=3, size=26):
+def stars(n, of=3, size=26, name=None):
     out = ''
     for i in range(of):
-        out += f"<img class='icn' src='{ipath('star')}' style='width:{size}px;height:{size}px;{'' if i < n else 'filter:grayscale(1) brightness(.45);opacity:.8'}'>"
-    return f"<span style='display:inline-flex;gap:2px'>{out}</span>"
+        out += f"<img class='icn' data-n='Star{i + 1}' src='{ipath('star')}' style='width:{size}px;height:{size}px;{'' if i < n else 'filter:brightness(.3)'}'>"
+    return f"<span{dn(name)} style='display:inline-flex;gap:2px'>{out}</span>"
 
 
 def tag(x, y, text, color='blue', size=20, h=36, name=None):
@@ -178,6 +179,18 @@ def tag(x, y, text, color='blue', size=20, h=36, name=None):
 def bar(x, y, w, h, frac, color='lime', name='Bar'):
     return (f"<div class='cbar k-{color}'{dn(name)} style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'>"
             f"<i data-n='F' style='width:{max(0, min(1, frac)) * 100:.1f}%'></i></div>")
+
+
+def selring(x, y, w, h, name='SelRing', r=6):
+    """The selection ring the runtime moves between tiles (one per grid)."""
+    return f"<div class='selring'{dn(name)} style='left:{x - 4}px;top:{y - 4}px;width:{w + 8}px;height:{h + 8}px;border-radius:{r}px'></div>"
+
+
+def dual(x, y, w, h, on_color, label, name, active, cls='', off_label=None, off_color='grey'):
+    """A tab/toggle exported in both states: <name>.On (coloured) and <name>.Off (grey); runtime shows one."""
+    on = btn(x, y, w, h, on_color, label, name='On', cls=cls + ('' if active else ' hid'))
+    off = btn(x, y, w, h, off_color, off_label if off_label is not None else label, name='Off', cls=cls + (' hid' if active else ''))
+    return sub(name, on + off, btn=True)
 
 
 def closex(x, y):
@@ -206,23 +219,24 @@ def panel_sport(gname, acc, title, icon, body, x, y, w, h, right='', head_h=112,
     header info at the top right, the tilted X sits on the corner."""
     acc = UI_COLOUR[0] or acc
     bw = min(int(w * .52), 760)
-    out = f"<div class='cglow a-{acc}' style='left:{x - 16}px;top:{y - 12}px;width:{w + 32}px;height:{h + 28}px'></div>"
+    out = f"<div class='cglow a-{acc}' data-n='Glow' style='left:{x - 16}px;top:{y - 12}px;width:{w + 32}px;height:{h + 28}px'></div>"
+    if EXPORT_STATES:   # greyscale glow, tinted at runtime by the UI Colour setting
+        out += f"<div class='cglow a-steel mono hid' data-n='GlowMono' style='left:{x - 16}px;top:{y - 12}px;width:{w + 32}px;height:{h + 28}px'></div>"
     out += (f"<div class='cp a-{acc}' data-n='Panel' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'>"
             f"<div class='body' style='top:{head_h}px'>{body}</div>"
             + (f"<div class='schip' data-n='HeaderInfo' style='right:118px;top:20px'>{right}</div>" if right else '') + "</div>")
     out += (f"<div class='sbn a-{acc}' data-n='Banner' style='left:{x - 18}px;top:{y - 50}px;width:{bw}px;height:132px'>"
-            f"<div class='o'></div><div class='f'></div>"
-            f"<div class='lbl'>{icn(icon, 96) if icon else ''}{T(title.upper(), title_size + 6, 'xl', name='Title')}</div></div>")
+            f"<div class='o' data-n='Edge'></div><div class='f' data-n='Fill'></div>"
+            + ("<div class='f mono hid' data-n='FillMono'></div>" if EXPORT_STATES else '')
+            + f"<div class='lbl'>{icn(icon, 96) if icon else ''}{T(title.upper(), title_size + 6, 'xl', name='Title')}</div></div>")
     out += closex(x + w - 64, y - 38)
     return grp(gname, out, 'C')
 
 
 def rays(cx, cy, d, op=.25):
-    """Light rays drawn in CSS, centred exactly on (cx, cy) with diameter d (no off-centre texture)."""
-    return (f"<div class='abs' style='left:{cx - d // 2}px;top:{cy - d // 2}px;width:{d}px;height:{d}px;opacity:{op};"
-            "background:repeating-conic-gradient(from 0deg, #fff 0deg 7deg, transparent 7deg 22.5deg);"
-            "-webkit-mask-image:radial-gradient(circle, #000 0%, rgba(0,0,0,.6) 35%, transparent 70%);"
-            "mask-image:radial-gradient(circle, #000 0%, rgba(0,0,0,.6) 35%, transparent 70%)'></div>")
+    """Light rays centred exactly on (cx, cy), diameter d: one white PNG (art/rays.png, tools in build.py history)
+    so Studio gets a single ImageLabel 'Rays' it can spin and tint."""
+    return f"<img class='rays' data-n='Rays' src='art/rays.png' style='position:absolute;left:{cx - d // 2}px;top:{cy - d // 2}px;width:{d}px;height:{d}px;opacity:{op}'>"
 
 
 def world(img='bg_lobby.jpg', vign=True):
@@ -394,10 +408,12 @@ def hv_rail_btn(x, y, s, color, icon, label, name, opens=None, state=None, key=N
     inner = f"<div class='hb k-{color}' style='left:{x}px;top:{y}px;width:{s}px;height:{s}px'></div>"
     inner += I(icon, x + int(s * .14), y + int(s * .04), int(s * .72), name='Icon')
     inner += at(x + s // 2, y + s - 26, T(label, 19, 'xs', name='Label'), w=s + 20, align='center')
-    if state:
-        inner += btn(x + s - 30, y - 12, 54, 28, 'lime' if state == 'ON' else 'grey', T(state, 14, 'xs', name='StateText'), cls='sm', name='State')
+    if state:  # both states exported; runtime shows one (StateOn / StateOff)
+        on = state == 'ON'
+        inner += btn(x + s - 30, y - 12, 54, 28, 'lime', T('ON', 14, 'xs', name='StateText'), cls='sm' + ('' if on else ' hid'), name='StateOn')
+        inner += btn(x + s - 30, y - 12, 54, 28, 'grey', T('OFF', 14, 'xs', name='StateText'), cls='sm' + (' hid' if on else ''), name='StateOff')
     if key:
-        inner += f"<div class='keycap' style='left:{x + s - 20}px;top:{y - 10}px;width:32px;height:32px;border-width:3px'>{T(key, 16, 'xs', style='font-family:Montserrat;font-weight:900')}</div>"
+        inner += f"<div class='keycap' style='left:{x + s - 20}px;top:{y - 10}px;width:32px;height:32px;border-width:3px'>{T(key, 16, 'xs', style='font-family:Montserrat;font-weight:900', name='KeyText')}</div>"
     return sub(name, inner, btn=True, opens=opens)
 
 
@@ -421,17 +437,17 @@ def hv_ability(lobby=True, cd=None):
     x, y, w, h = 740, 820, 440, 96
     out = f"<div class='glass' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'></div>"
     out += f"<div class='wtab' style='left:{x + 12}px;top:{y - 26}px;height:28px'>{T('ABILITY', 14, 'xs')}</div>"
-    out += box(x + 14, y + 16, 72, 72, I(pet_img('ShadesShark'), 2, 2, 68), '', 'border-radius:50%;border:3px solid #4ed45a;box-shadow:0 0 0 2px #050506;background:radial-gradient(#2a6a34,#0e1a12);overflow:hidden', name='PetDisc')
-    out += at(x + 100, y + 18, row(icn(pool[2], 30), T(pool[1].upper(), 28, 's', name='AbilityName'), gap=6))
+    out += box(x + 14, y + 16, 72, 72, I(pet_img('ShadesShark'), 2, 2, 68, name='PetIcon'), '', 'border-radius:50%;border:3px solid #4ed45a;box-shadow:0 0 0 2px #050506;background:radial-gradient(#2a6a34,#0e1a12);overflow:hidden', name='PetDisc')
+    out += at(x + 100, y + 18, row(icn(pool[2], 30, name='AbilityIcon'), T(pool[1].upper(), 28, 's', name='AbilityName'), gap=6))
     st = 'EQUIPPED  ·  SHADES SHARK' if lobby else ('READY' if cd is None else f'RECHARGING  {cd}s')
     out += at(x + 102, y + 56, T(st, 15, 'xs', 'f-orange' if cd is None else 'f-dim', name='Status'))
-    out += f"<div class='keycap' data-n='Key' style='left:{x + w - 64}px;top:{y + 22}px;width:48px;height:48px'>{T('Q', 26, 's', style='font-family:Arial,sans-serif;font-weight:900')}</div>"
+    out += f"<div class='keycap' data-n='Key' style='left:{x + w - 64}px;top:{y + 22}px;width:48px;height:48px'>{T('Q', 26, 's', style='font-family:Arial,sans-serif;font-weight:900', name='KeyText')}</div>"
     out += bar(x + 100, y + h - 14, w - 180, 8, 1 if cd is None else .42, 'orange', 'Cooldown')
     return grp('Ability', out, 'B')
 
 
 def hv_dash(left, right, frac=1):
-    out = at(960, 934, row(T('SPACE', 24, 's'), T('·', 24, 's', 'f-dim'), T('DASH', 24, 's'), gap=10), w=400, align='center')
+    out = at(960, 934, T('SPACE  ·  DASH', 24, 's', name='DashTitle'), w=400, align='center')
     out += at(630, 966, T(left, 15, 'xs', name='DashState'))
     out += at(1290, 966, T(right, 15, 'xs', 'f-dim', name='DashHint'), w=500, align='right')
     out += bar(630, 990, 660, 14, frac, 'sky', 'DashBar')
@@ -444,7 +460,7 @@ def hv_goal():
     out += I('piece_common', x + 8, y + 6, 62, name='GoalIcon')
     out += at(x + 80, y + 8, T('YOUR FIRST PET', 20, 'xs', name='GoalTitle'))
     out += at(x + w - 14, y + 8, T('2 / 2', 20, 'xs', 'f-lime', name='GoalCount'), w=120, align='right')
-    out += bar(x + 80, y + 38, w - 96, 24, 1, 'lime', 'GoalBar') + at(x + 80 + (w - 96) // 2, y + 39, T('READY TO HATCH!', 15, 'xs'), w=w - 96, align='center')
+    out += bar(x + 80, y + 38, w - 96, 24, 1, 'lime', 'GoalBar') + at(x + 80 + (w - 96) // 2, y + 39, T('READY TO HATCH!', 15, 'xs', name='GoalState'), w=w - 96, align='center')
     return sub('GoalPill', out, btn=True, opens='Incubator')
 
 
@@ -456,7 +472,7 @@ def s_hud():
     rail = (hv_rail_btn(10, 330, 96, 'gold', 'shop', 'SHOP', 'ShopButton', 'Shop', key='B') + hv_rail_btn(10, 440, 96, 'sky', 'pets', 'PETS', 'PetsButton', 'Pets', key='P')
             + hv_rail_btn(10, 550, 96, 'grey', 'afk', 'AFK', 'AFKToggle', state='OFF') + hv_rail_btn(10, 660, 96, 'red', 'hunt', 'HUNT', 'VolunteerToggle', state='ON'))
     out += grp('TopLeft', tl, 'TL') + grp('TopRight', tr, 'TR') + grp('Rail', rail, 'L')
-    out += hv_topcenter('LOBBY', 'Next match in 0:12', row(T('4 / 4 players ready', 22, 'xs', 'f-lime'), T('·', 22, 'xs', 'f-dim'), T('you start as a Runner', 22, 'xs'), gap=8))
+    out += hv_topcenter('LOBBY', 'Next match in 0:12', T('4 / 4 players ready  ·  you start as a Runner', 22, 'xs', name='SublineText'))
     out += grp('Wallet', hv_plate(878, 'gold', '1,250', 'GOLD', 'f-gold', 'Gold') + hv_plate(972, 'gem', '12', 'GEMS', 'f-lime', 'Gems'), 'BL')
     out += hv_ability() + hv_dash('DASH READY', 'Move, then turn + dash')
     return out
@@ -464,26 +480,43 @@ def s_hud():
 
 def s_hud_match():
     out = world() + topbar()
-    pips = ''.join(f"<span class='pip k-lime{' on' if i == 0 else ''}' style='position:relative;display:inline-block;margin:0 8px'></span>" for i in range(3))
-    sub_l = row(T('Runner', 22, 'xs', 'f-sky', name='RoleText'), T('·', 22, 'xs', 'f-dim'), T('0:21', 22, 'xs', name='Timer'), T('·', 22, 'xs', 'f-dim'),
-                T('14 Runners', 22, 'xs', 'f-sky'), T('vs', 22, 'xs', 'f-dim'), T('4 Catchers', 22, 'xs', 'f-red'), gap=8)
+    pips = ''.join(f"<span class='pip k-lime{' on' if i == 0 else ''}' data-n='StreakPip{i + 1}' style='position:relative;display:inline-block;margin:0 8px'></span>" for i in range(3))
+    sub_l = T('Runner  ·  0:21  ·  14 Runners vs 4 Catchers', 22, 'xs', name='SublineText')   # RichText colours at runtime
     streak = at(960, 138, row(T('CLEAN STREAK', 15, 'xs', 'f-dim'), f"<span style='display:inline-flex'>{pips}</span>", gap=8), w=400, align='center')
     out += hv_topcenter('CROSSING 2', 'Cross to the opposite safe side!', sub_l, streak)
     eg = f"<div class='glass' style='left:12px;top:878px;width:340px;height:178px'></div>"
     eg += slot(26, 892, 112, 'rare', 'egg_shiny', name='EggSlot', art_pad=.1)
-    eg += at(152, 896, T('YOUR EGG', 16, 'xs', 'f-dim')) + at(152, 918, T('LEVEL 2', 44, 'l', 'f-rare', name='EggLevel'))
+    eg += at(152, 896, T('YOUR EGG', 16, 'xs', 'f-dim', name='EggTitle')) + at(152, 918, T('LEVEL 2', 44, 'l', 'f-rare', name='EggLevel'))
     for i in range(4):
-        eg += f"<div class='pip k-sky{' on' if i < 2 else ''}' style='left:{158 + i * 38}px;top:984px'></div>"
-    eg += at(152, 1022, row(T('pays', 15, 'xs', 'f-dim'), icn('piece_rare', 24), T('Rare', 15, 'xs', 'f-rare', name='PaysText'), gap=4))
+        eg += f"<div class='pip k-sky{' on' if i < 2 else ''}' data-n='LevelPip{i + 1}' style='left:{158 + i * 38}px;top:984px'></div>"
+    eg += at(152, 1022, row(T('pays', 15, 'xs', 'f-dim'), icn('piece_rare', 24, name='PaysIcon'), T('Rare', 15, 'xs', 'f-rare', name='PaysText'), gap=4))
     out += grp('Egg', eg, 'BL')
     fd = ''
     for i, (a, verb, b, ic, fill) in enumerate([('Kai', 'stole', "Mia's Lv 2 egg", 'steal', 'f-red'), ('Zoe', 'is safe with', 'Lv 3', 'safe', 'f-lime'), ('Ben', 'caught', 'Leo', 'catcher', 'f-red')]):
         y = 84 + i * 50
-        fd += f"<div class='glass' style='left:1530px;top:{y}px;width:378px;height:42px;opacity:{1 - i * .2}'></div>" + I(ic, 1518, y - 4, 50)
-        fd += at(1572, y + 10, row(T(a, 18, 'xs'), T(verb, 18, 'xs', fill), T(b, 18, 'xs'), gap=6))
+        line = f"<div class='glass' style='left:1530px;top:{y}px;width:378px;height:42px'></div>" + I(ic, 1518, y - 4, 50, name='FeedIcon')
+        line += at(1572, y + 10, T(f'{a} {verb} {b}', 18, 'xs', name='FeedText'))   # RichText colours the verb at runtime
+        fd += sub(f'Feed{i + 1}', line)
     out += grp('Feed', fd, 'TR')
     out += hv_ability(lobby=False, cd=8) + hv_dash('DASH ON COOLDOWN', 'Space to dash sideways or back', .55)
+    if EXPORT_STATES:
+        out += grp('Touch', touch_buttons(), 'BR')
     out += cap(560, 470, 'Match: only phase, headline, role/timer/teams, streak, egg level, ability and dash (GDD 14).')
+    return out
+
+
+def touch_buttons():
+    """Round thumb buttons (touch only): TAG (Catchers), DASH (LUNGE for Catchers), ABILITY. Each has a
+    cooldown shade (Shade, sized by the runtime) and a seconds label."""
+    out = ''
+    for nm, x, y, d, col_, ic, lab in [('TouchTag', 1690, 640, 190, 'red', 'catcher', 'TAG'), ('TouchDash', 1520, 840, 150, 'sky', 'runner', 'DASH'),
+                                       ('TouchAbility', 1730, 860, 150, 'orange', 'ab_dash', 'ABILITY')]:
+        inner = f"<div class='hb k-{col_}' style='left:{x}px;top:{y}px;width:{d}px;height:{d}px;border-radius:50%'></div>"
+        inner += I(ic, x + int(d * .18), y + int(d * .1), int(d * .64), name='Icon')
+        inner += at(x + d // 2, y + d - int(d * .3), T(lab, int(d * .15), 's', name='Label'), w=d, align='center')
+        inner += f"<div class='abs hid' data-n='Shade' style='left:{x}px;top:{y}px;width:{d}px;height:{d}px;border-radius:50%;background:rgba(0,0,0,.55)'></div>"
+        inner += at(x + d // 2, y + d // 2 - int(d * .17), T('2', int(d * .26), 'l', name='Secs'), w=d, align='center').replace("class='abs", "class='abs hid", 1)
+        out += sub(nm, inner, btn=True)
     return out
 
 
@@ -512,20 +545,21 @@ QUESTS = [  # title, art, progress, target, gold reward, state
 
 def s_quests():
     x0, y0, W, H = 300, 170, 1320, 760
-    b = btn(28, 26, 300, 64, 'purple', bl('Today  [2]', 30), name='TabToday')
-    b += btn(344, 26, 300, 64, 'grey', bl('Done  [0]', 30), name='TabDone')
+    b = dual(28, 26, 300, 64, 'purple', bl('Today  [2]', 30), 'TabToday', True)
+    b += dual(344, 26, 300, 64, 'purple', bl('Done  [0]', 30), 'TabDone', False)
     lst = ''
     for i, (title, art, p, t, g, st) in enumerate(QUESTS):
         y = 18 + i * 132
         card = f"<img src='{art}.jpg' style='position:absolute;inset:0;width:100%;height:100%;object-fit:cover'>"
         card += "<div class='abs fill' style='background:linear-gradient(90deg,rgba(14,10,22,.94) 0 45%,rgba(14,10,22,.6))'></div>"
         card += tag(14, 12, 'Daily Quest', 'blue', 18, 32)
-        card += at(16, 52, T(title, 30, 's'))
+        card += at(16, 52, T(title, 30, 's', name='QuestName'))
         card += bar(16, 92, 300, 20, p / t, 'lime' if st == 'ready' else 'pink', 'Progress')
-        card += at(330, 88, T(f'{p} / {t}', 22, 'xs', 'f-lime' if st == 'ready' else ''))
-        if st == 'ready':
-            card += btn(430, 30, 116, 56, 'lime', bl('CLAIM', 24), cls='sm', name='Claim')
-        lst += box(18, y, 566, 120, card, 'cs r-pink' + (' sel' if i == 0 else ''), 'border-radius:14px', name=f'Quest{i + 1}')
+        card += at(330, 88, T(f'{p} / {t}', 22, 'xs', 'f-lime' if st == 'ready' else '', name='ProgressText'))
+        card += btn(430, 30, 116, 56, 'lime', bl('CLAIM', 24), cls='sm' + ('' if st == 'ready' else ' hid'), name='Claim')
+        card += sub('Done', at(440, 44, T('DONE', 22, 's', 'f-lime', name='DoneText')), hid=True)
+        lst += box(18, y, 566, 120, card, 'cs r-pink', 'border-radius:14px', name=f'Quest{i + 1}')
+    lst += selring(18, 18, 566, 120, r=14)
     lst += box(18, 18 + 2 * 132, 566, 110, at(283, 24, row(icn('clock', 54), col(T('New quests tomorrow', 26, 's'), T('2 fresh quests every day', 18, 'xs', 'f-dim'), gap=0, align='flex-start'), gap=14), w=560, align='center'),
                'cs locked', 'border-radius:14px', name='Tomorrow')
     lst += btn(150, 430, 300, 76, 'lime', bl('CLAIM ALL', 32), name='ClaimAll')
@@ -533,8 +567,8 @@ def s_quests():
     d = tag(24, 22, 'Daily Quest', 'blue', 20, 38)
     d += at(24, 74, T('Complete 3 crossings', 42, 'l', name='QuestTitle'))
     d += at(26, 130, T('Make it across to the safe zone as a Runner.', 24, 'xs', 'f-dim', name='QuestDesc'))
-    d += at(26, 160, T('Each crossing that ends safe counts.', 24, 'xs', 'f-dim'))
-    d += bar(24, 204, 470, 38, 2 / 3, 'pink', 'Progress') + at(260, 208, T('2 / 3', 26, 's'), w=470, align='center')
+    d += at(26, 160, T('Each crossing that ends safe counts.', 24, 'xs', 'f-dim', name='QuestDesc2'))
+    d += bar(24, 204, 470, 38, 2 / 3, 'pink', 'Progress') + at(260, 208, T('2 / 3', 26, 's', name='ProgressText'), w=470, align='center')
 
     rw = slot(18, 14, 132, 'gold', 'gold', 'x25', 'Gold', name='Reward1') + slot(166, 14, 132, 'common', 'piece_common', 'x1', 'Bonus', name='Reward2', cls='hid')
     d += well(24, 296, 300, 162, rw, name='Rewards', solid=True, title='Rewards')
@@ -559,6 +593,9 @@ def s_incubator(first=True):
 
 
 def incubator_top(b, first):
+    if EXPORT_STATES:  # Studio export: both top wells, runtime shows one
+        b += first_path()
+        first = False
     if not first:  # after the first pet: collection progress per family replaces the first-pet path
         tr = ''
         found = {'DoubleDash': 2, 'Decoy': 1, 'Scout': 1}
@@ -568,7 +605,8 @@ def incubator_top(b, first):
             tr += slot(cx, 20, 82, colr, ic, cls='fill' if live else 'fill soon', art_pad=.14, name=f'Fam_{pid}',
                        inner_extra='' if live else I('lock', 52, 4, 26))
             tr += at(cx + 41, 112, T(f'{found.get(pid, 0)} / {len(pets)}' if live else f'wave {WAVE[pid]}', 20 if live else 17, 's' if live else 'xs', '' if live else 'f-dim'), w=100, align='center')
-        b += well(476, 40, 998, 170, tr, name='Collection', title='Your Collection')
+        coll = well(476, 40, 998, 170, tr, name='Collection', title='Your Collection')
+        b += sub('CollectionWrap', coll, hid=True) if EXPORT_STATES else coll
     else:
         b += first_path()
     return b
@@ -591,27 +629,37 @@ def incubator_rest(b, first):
         s = 106
         cx, cy = 20 + (i % 3) * (s + 12), 22 + (i // 3) * (s + 10)
         live = WAVE[pid] == 1
-        if live:
-            fp += slot(cx, cy, s, colr, ic, label=title, cls='fill sel' if pid == 'DoubleDash' else 'fill', name=f'Family_{pid}', art_pad=.2, label_size=15)
+        livet = slot(0, 0, s, colr, ic, label=title, cls='fill', name='Live', art_pad=.2, label_size=15)
+        soont = slot(0, 0, s, colr, ic, label=title, cls='fill soon', name='Soon', art_pad=.2, label_size=15,
+                     inner_extra=I('lock', s - 34, 6, 28) + at(10, 8, T(f'W{WAVE[pid]}', 14, 'xs', 'f-dim', name='WaveText')))
+        if EXPORT_STATES:   # both looks; runtime picks from EconomyConfig.LAUNCH_FAMILIES
+            livet = livet.replace("class='cs", "class='cs" + ('' if live else ' hid'), 1)
+            soont = soont.replace("class='cs", "class='cs" + (' hid' if live else ''), 1)
+            fp += sub(f'Family_{pid}', f"<div class='abs' style='left:{cx}px;top:{cy}px;width:{s}px;height:{s}px'>{livet}{soont}</div>", btn=True)
         else:
-            fp += slot(cx, cy, s, colr, ic, label=title, cls='fill soon', name=f'Family_{pid}', art_pad=.2, label_size=15,
-                       inner_extra=I('lock', s - 34, 6, 28) + at(10, 8, T(f'W{WAVE[pid]}', 14, 'xs', 'f-dim')))
+            fp += f"<div class='abs' style='left:{cx}px;top:{cy}px;width:{s}px;height:{s}px'>{livet if live else soont}</div>"
+    fp += selring(20, 22, 106, 106, 'FamilySel')
     b += well(26, 262, 380, 372, fp, name='Families', title='Pick A Family', extra=T('more each wave', 16, 'xs', 'f-dim', style='margin-left:10px'))
     pool = POOL['DoubleDash']
     lad = ''
     for i, pet in enumerate(pool[5][:3]):
         t = TIERS[i]
         sx = 48 + i * 246
-        lad += slot(sx, 24, 172, t, pet_img(pet), name=f'Species_{t}', art_pad=.04)
-        lad += at(sx + 86, 206, T(P[pet], 22, 's'), w=220, align='center') + at(sx + 86, 236, T(TIER_NAME[t], 18, 'xs', FILL[t]), w=200, align='center')
-        lad += at(sx + 86, 266, row(icn('piece_' + t, 26), T(f'{RECIPES[t][0]} random · {RECIPES[t][1]} pick', 16, 'xs', 'f-dim'), gap=4), w=220, align='center')
+        sp = slot(sx, 24, 172, t, pet_img(pet), name='Tile', art_pad=.04)
+        sp += at(sx + 86, 206, T(P[pet], 22, 's', name='PetName'), w=220, align='center') + at(sx + 86, 236, T(TIER_NAME[t], 18, 'xs', FILL[t], name='TierText'), w=200, align='center')
+        sp += at(sx + 86, 266, row(icn('piece_' + t, 26, name='PieceIcon'), T(f'{RECIPES[t][0]} random · {RECIPES[t][1]} pick', 16, 'xs', 'f-dim', name='RecipeText'), gap=4), w=220, align='center')
+        lad += sub(f'Species_{t}', sp, btn=True)
+    lad += selring(48, 24, 172, 172, 'SpeciesSel')
     cx = 48 + 3 * 246 + 26
     lad += slot(cx, 24, 150, 'crowned', pet_img(pool[5][3]), cls='locked', name='Species_crowned', art_pad=.06, inner_extra=I('lock', 45, 40, 60))
     lad += at(cx + 75, 206, T('Crowned', 22, 's', 'f-gold'), w=180, align='center') + at(cx + 75, 236, T('coming later', 16, 'xs', 'f-dim'), w=140, align='center')
     run, cat = ROLES['DoubleDash']
-    lad += at(36, 306, row(T('AS RUNNER', 17, 'xs', 'f-sky'), T(run, 20, 's'), T('·', 20, 's', 'f-dim'), T('AS CATCHER', 17, 'xs', 'f-red'), T(cat, 20, 's'),
-                           T('·', 20, 's', 'f-dim'), T('you keep it when caught', 17, 'xs', 'f-dim'), gap=10), name='Roles')
+    lad += at(36, 306, T(f'AS RUNNER  {run}  ·  AS CATCHER  {cat}  ·  you keep it when caught', 19, 'xs', name='RolesText'), name='Roles')   # RichText at runtime
     b += well(422, 262, 1052, 372, lad, name='Ladder', title=f'{pool[1]}  ·  {pool[4]}', extra='')
+    if EXPORT_STATES:
+        hb = sub('HatchFirst', hatch_first()) + sub('HatchLater', hatch_later(), hid=True)
+        b += well(26, 650, 1448, 110, hb, name='HatchBar', solid=True)
+        return b
     if first:
         hb = at(30, 16, row(icn('egg_basic', 70), col(T('HATCH YOUR FIRST PET', 32, 's'), T('Shades Shark  ·  Double Dash  ·  costs 2 Common pieces', 20, 'xs', 'f-dim'), gap=2, align='flex-start'), gap=14))
         hb += btn(1000, 12, 420, 86, 'lime', row(bl('HATCH', 38), icn('piece_common', 40), T('x2', 26, 's')), name='BtnHatch')
@@ -621,6 +669,22 @@ def incubator_rest(b, first):
         hb += btn(520, 12, 520, 86, 'lime', row(icn('target', 44), bl('HATCH DOUBLE DASH', 30), icn('piece_common', 34), T('x3', 24, 's')), name='BtnFocus')
     b += well(26, 650, 1448, 110, hb, name='HatchBar', solid=True)
     return b
+
+
+def hatch_first():
+    hb = at(30, 16, row(icn('egg_basic', 70, name='HatchEgg'), col(T('HATCH YOUR FIRST PET', 32, 's', name='HatchTitle'), T('Shades Shark  ·  Double Dash  ·  costs 2 Common pieces', 20, 'xs', 'f-dim', name='HatchSub'), gap=2, align='flex-start'), gap=14))
+    hb += btn(1000, 12, 420, 86, 'lime', row(bl('HATCH', 38), icn('piece_common', 40, name='CostIcon'), T('x2', 26, 's', name='CostText')), name='BtnHatch')
+    hb += btn(1000, 12, 420, 86, 'grey', row(bl('HATCH', 38), icn('piece_common', 40, name='CostIcon'), T('x2', 26, 's', name='CostText')), name='BtnHatchPoor', cls='hid')
+    hb += tag(810, 34, 'FREE CHOICE', 'gold', 20, 40, name='FreeTag')
+    return hb
+
+
+def hatch_later():
+    hb = btn(30, 12, 460, 86, 'grey', row(icn('dice', 44), bl('RANDOM FAMILY', 30), icn('piece_common', 34, name='CostIcon'), T('x2', 24, 's', name='CostText')), name='BtnRandom')
+    hb += btn(520, 12, 560, 86, 'lime', row(icn('target', 44), bl('HATCH DOUBLE DASH', 30), icn('piece_common', 34, name='CostIcon'), T('x3', 24, 's', name='CostText')), name='BtnFocus')
+    hb += btn(520, 12, 560, 86, 'grey', row(icn('target', 44), bl('HATCH DOUBLE DASH', 30), icn('piece_common', 34, name='CostIcon'), T('x3', 24, 's', name='CostText')), name='BtnFocusPoor', cls='hid')
+    hb += at(1100, 34, T('2 / 3 Common pieces', 22, 's', 'f-dim', name='HaveText'))
+    return hb
 
 
 # ================================================================== Pets (inventory + preview, equip)
@@ -633,27 +697,34 @@ def s_pets():
     x0, y0, W, H = 250, 160, 1420, 800
     b = ''
     for i, (lab, active) in enumerate([(f'All  {len(OWNED)}', True), ('Double Dash', False), ('Decoy', False), ('Scout', False)]):
-        b += btn(26 + i * 200, 22, 186, 54, 'purple' if active else 'grey', bl(lab, 20), cls='sm', name=f'Filter{i}')
+        b += dual(26 + i * 200, 22, 186, 54, 'purple', bl(lab, 20), f'Filter{i}', active, cls='sm')
     g = ''
     for i, (pid, pet, st, eq) in enumerate(OWNED):
         tier = tier_of(pid, pet)
         gx, gy = 18 + (i % 4) * 196, 18 + (i // 4) * 210
-        extra = at(34, 150, stars(st, 3, 24))
-        if eq:
-            extra += tag(66, 8, 'EQUIPPED', 'lime', 14, 28)
-        g += slot(gx, gy, 182, tier, pet_img(pet, st), cls='sel' if i == 0 else '', name=f'Pet{i + 1}', art_pad=.05, inner_extra=extra)
+        extra = at(34, 150, stars(st, 3, 24), name='Stars')
+        extra += tag(66, 8, 'EQUIPPED', 'lime', 14, 28, name='EquippedTag').replace("class='ctag", "class='ctag" + ('' if eq else ' hid'), 1)
+        g += sub(f'Pet{i + 1}', slot(gx, gy, 182, tier, pet_img(pet, st), name='Tile', art_pad=.05, inner_extra=extra), btn=True)
+    if EXPORT_STATES:   # one hidden tile per rarity so runtime clones the right rim
+        for k, t in enumerate(['common', 'rare', 'epic']):
+            g += sub(f'Proto_{t}', slot(18, 18, 182, t, pet_img(POOL['DoubleDash'][5][k]), name='Tile', art_pad=.05,
+                                        inner_extra=at(34, 150, stars(1, 3, 24), name='Stars') + tag(66, 8, 'EQUIPPED', 'lime', 14, 28, name='EquippedTag').replace("class='ctag", "class='ctag hid", 1)), btn=True, hid=True)
+    g += selring(18, 18, 182, 182, 'PetSel')
     for j in range(len(OWNED), LAUNCH_PETS):
         gx, gy = 18 + (j % 4) * 196, 18 + (j // 4) * 210
-        g += slot(gx, gy, 182, 'locked', None, cls='locked', name=f'Empty{j}', inner_extra=at(91, 64, T('?', 56, 'l', 'f-dim'), w=180, align='center'))
+        g += slot(gx, gy, 182, 'locked', None, cls='locked', name=f'Empty{j}', inner_extra=at(91, 64, T('?', 56, 'l', 'f-dim', name='Q'), w=180, align='center'))
     b += well(26, 92, 820, 590, g, name='Grid', style='overflow:hidden')
     pv = slot(110, 18, 340, 'common', pet_img('ShadesShark', 3), name='PreviewSlot', art_pad=.06, cls='fill')
     pv += at(280, 372, T('Shades Shark', 44, 'l', name='PetName'), w=540, align='center')
-    pv += at(280, 428, row(T('Common', 22, 'xs', 'f-common'), stars(3, 3, 26), T('mastery', 18, 'xs', 'f-dim'), gap=10), w=540, align='center')
-    pv += at(30, 470, row(icn('ab_dash', 52), col(T('DOUBLE DASH', 26, 's'), T('Two quick dashes in a row  ·  cooldown 12s', 18, 'xs', 'f-dim'), gap=0, align='flex-start'), gap=10))
-    pv += btn(30, 540, 330, 70, 'lime', row(icn('check', 36), bl('EQUIPPED', 28)), name='BtnEquip')
-    pv += btn(376, 540, 130, 70, 'pink', icn('star', 40), name='BtnFavourite')
+    pv += at(280, 428, row(T('Common', 22, 'xs', 'f-common', name='RarityText'), stars(3, 3, 26, name='Stars'), T('copies', 18, 'xs', 'f-dim'), gap=10), w=540, align='center')
+    pv += at(30, 470, row(icn('ab_dash', 52, name='AbilityIcon'), col(T('DOUBLE DASH', 26, 's', name='AbilityName'), T('Two quick dashes in a row  ·  cooldown 12s', 18, 'xs', 'f-dim', name='AbilityDesc'), gap=0, align='flex-start'), gap=10))
+    pv += btn(30, 540, 476, 70, 'lime', row(icn('check', 36), bl('EQUIPPED', 28)), name='BtnEquipped')
+    pv += btn(30, 540, 476, 70, 'sky', bl('EQUIP', 28), name='BtnEquip', cls='hid' if EXPORT_STATES else 'hid')
     b += well(862, 22, 532, 660, pv, name='Preview')
     right = row(icn('pets', 50), T(f'{len(OWNED)} / {LAUNCH_PETS} found', 32, 's', name='CountText'), gap=6)
+    if EXPORT_STATES:
+        b += sub('EmptyState', well(26, 92, 820, 590, at(410, 200, col(icn('egg_basic', 120), T('No pets yet', 40, 'l'), T('Hatch one at the Incubator', 24, 'xs', 'f-dim'), gap=8), w=800, align='center')
+                                     + btn(260, 450, 300, 76, 'lime', bl('INCUBATOR', 30), name='GoIncubator', opens='Incubator'), name='EmptyWell'), hid=True)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Pets', 'sky', 'Pets', 'pets', b, x0, y0, W, H, right)
 
 
@@ -675,17 +746,31 @@ def shop_card(x, y, it, w=250, h=278, sel=False):
     inner = I(icon, (w - 132) // 2, 12, 132, name='Icon')
     inner += at(w // 2, 146, T(name, 24, 's', name='ItemName'), w=w + 10, align='center')
     inner += at(w // 2, 178, T(kind if st != 'poor' else 'need more ' + ('Gold' if wal == 'gold' else 'Gems'), 17, 'xs', 'f-dim' if st != 'poor' else 'f-red', name='Kind'), w=w, align='center')
-    if st == 'owned':
-        inner += btn(18, h - 68, w - 36, 54, 'grey', row(icn('check', 30), bl('OWNED', 24)), cls='sm', name='BtnOwned')
-    else:
-        inner += btn(18, h - 68, w - 36, 54, 'lime' if st == 'ok' else 'grey', row(icn(wal if wal != 'gems' else 'gem', 34), bl(price, 26, name='Price')), cls='sm', name='BtnBuy')
-    return box(x, y, w, h, inner, f'cs r-{r}' + (' sel' if sel else ''), 'border-radius:16px', name=f'Item_{name.replace(" ", "")}')
+    inner += shop_buttons(18, h - 68, w - 36, 54, wal, price, st, 'sm', 26)
+    return box(x, y, w, h, inner, f'cs r-{r}', 'border-radius:16px', name=f'Item_{name.replace(" ", "")}')
+
+
+def shop_buttons(x, y, w, h, wal, price, st, cls, ts):
+    """Every buy-button state, stacked; runtime shows one: BtnBuy (can afford), BtnPoor (can't), BtnOwned,
+    BtnWear / BtnTakeOff (cases), BtnUse (confetti you own)."""
+    cur = icn(wal if wal != 'gems' else 'gem', int(h * .62), name='CurrencyIcon')
+    states = [('BtnBuy', 'lime', row(cur, bl(price, ts, name='Price')), st == 'ok'),
+              ('BtnPoor', 'grey', row(cur, bl(price, ts, name='Price')), st == 'poor'),
+              ('BtnOwned', 'grey', row(icn('check', int(h * .55)), bl('OWNED', ts - 2)), st == 'owned'),
+              ('BtnWear', 'sky', bl('WEAR', ts), st == 'wear'),
+              ('BtnTakeOff', 'grey', bl('TAKE OFF', ts - 2), st == 'takeoff'),
+              ('BtnUse', 'gold', row(bl('USE', ts), T('x1', ts - 6, 's', name='UseCount')), st == 'use')]
+    out = ''
+    for nm, col_, lab, on in states:
+        if on or EXPORT_STATES:
+            out += btn(x, y, w, h, col_, lab, cls=cls + ('' if on else ' hid'), name=nm)
+    return out
 
 
 def s_shop(tab='gold'):
     x0, y0, W, H = 220, 150, 1480, 820
-    b = btn(26, 22, 260, 64, 'gold' if tab == 'gold' else 'grey', row(icn('gold', 40), bl('Gold', 30)), name='TabGold')
-    b += btn(300, 22, 260, 64, 'lime' if tab == 'gems' else 'grey', row(icn('gem', 40), bl('Gems', 30)), name='TabGems')
+    b = dual(26, 22, 260, 64, 'gold', row(icn('gold', 40), bl('Gold', 30)), 'TabGold', tab == 'gold')
+    b += dual(300, 22, 260, 64, 'lime', row(icn('gem', 40), bl('Gems', 30)), 'TabGems', tab == 'gems')
     b += btn(574, 22, 300, 64, 'grey', row(icn('robux', 40), bl('Get Gems', 30)), name='TabGetGems', hid=True)
     items = SHOP if tab == 'gold' else [
         ('trail_rainbow', 'Rainbow Trail', 'gems', '150', 'Keep forever', 'A rainbow trail on your egg.', 'ok'),
@@ -696,18 +781,24 @@ def s_shop(tab='gold'):
         ('trophy', 'Prestige Set', 'gems', '1,500', 'Keep forever', 'Trail, case and entrance set.', 'poor')]
     g = ''
     for i, it in enumerate(items[:8]):
-        g += shop_card(18 + (i % 4) * 262, 16 + (i // 4) * 290, it, sel=(i == 4) if tab == 'gold' else (i == 0))
+        g += shop_card(18 + (i % 4) * 262, 16 + (i // 4) * 290, it)
+    if EXPORT_STATES:   # a hidden Gems card so runtime clones the right rim for the other tab
+        g += sub('ProtoGems', shop_card(18, 16, ('trail_rainbow', 'Rainbow Trail', 'gems', '150', 'Keep forever', '', 'ok')), hid=True)
+    si = 4 if tab == 'gold' else 0
+    g += selring(18 + (si % 4) * 262, 16 + (si // 4) * 290, 250, 278, 'ItemSel', 16)
     b += well(26, 100, 1074, 596, g, name='Grid')
     sel = items[4] if tab == 'gold' else items[0]
     d = slot(60, 20, 220, 'gold' if tab == 'gold' else 'lime', sel[0], name='PreviewSlot', art_pad=.12, cls='fill')
+    if EXPORT_STATES:
+        d += slot(60, 20, 220, 'lime' if tab == 'gold' else 'gold', sel[0], name='PreviewSlotAlt', art_pad=.12, cls='fill hid')
     d += at(170, 258, T(sel[1], 34, 'l', name='ItemName'), w=330, align='center')
-    d += at(170, 304, T(sel[4], 20, 'xs', 'f-gold'), w=330, align='center')
+    d += at(170, 304, T(sel[4], 20, 'xs', 'f-gold', name='Kind'), w=330, align='center')
     d += at(170, 336, T(sel[5], 20, 'xs', 'f-dim', name='Desc'), w=330, align='center')
-    d += at(170, 366, T('Looks only, no gameplay edge.', 17, 'xs', 'f-dim'), w=330, align='center')
-    d += btn(30, 420, 280, 80, 'lime', row(icn('gold' if sel[2] == 'gold' else 'gem', 44), bl(sel[3], 34)), name='BtnBuy')
-    d += at(170, 520, row(T('You have', 18, 'xs', 'f-dim'), icn('gold' if tab == 'gold' else 'gem', 26), T('1,250' if tab == 'gold' else '12', 20, 'xs', 'f-gold' if tab == 'gold' else 'f-lime'), gap=6), w=330, align='center')
+    d += at(170, 366, T('Looks only, no gameplay edge.', 17, 'xs', 'f-dim', name='Desc2'), w=330, align='center')
+    d += shop_buttons(30, 420, 280, 80, sel[2], sel[3], 'ok', '', 34)
+    d += at(170, 520, row(T('You have', 18, 'xs', 'f-dim'), icn('gold' if tab == 'gold' else 'gem', 26, name='HaveIcon'), T('1,250' if tab == 'gold' else '12', 20, 'xs', 'f-gold' if tab == 'gold' else 'f-lime', name='HaveText'), gap=6), w=330, align='center')
     b += well(1116, 100, 340, 596, d, name='Detail')
-    right = row(icn('gold', 48), T('1,250', 34, 's', 'f-gold'), icn('gem', 48), T('12', 34, 's', 'f-lime'), gap=8)
+    right = row(icn('gold', 48), T('1,250', 34, 's', 'f-gold', name='GoldText'), icn('gem', 48), T('12', 34, 's', 'f-lime', name='GemsText'), gap=8)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Shop', 'gold', 'Shop', 'shop', b, x0, y0, W, H, right)
 
 
@@ -741,7 +832,7 @@ def s_stats():
     b = ''
     for i, (ic, lab, val, c) in enumerate(rows):
         x, y = 26 + (i % 3) * 402, 26 + (i // 3) * 196
-        inner = I(ic, 14, 22, 120) + at(146, 34, T(lab, 22, 'xs', 'f-dim')) + at(146, 66, T(val, 52, 'l', FILL.get(c, ''), name='Value'))
+        inner = I(ic, 14, 22, 120, name='Icon') + at(146, 34, T(lab, 22, 'xs', 'f-dim', name='Label')) + at(146, 66, T(val, 52, 'l', FILL.get(c, ''), name='Value'))
         b += box(x, y, 386, 176, inner, f'cs r-{c}', 'border-radius:16px', name=f'Stat{i + 1}')
     right = row(icn('crown', 48), T('Your record', 32, 's'), gap=6)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Stats', 'coral', 'Stats', 'stats', b, x0, y0, W, H, right)
@@ -759,10 +850,10 @@ def swatches(x, y, sel=None, size=54, gap=12, labels=False):
     out = ''
     for i, (acc, lab) in enumerate(UI_COLOURS):
         sx = x + i * (size + gap)
-        cls = 'sw' + (f' a-{acc}' if acc else ' sw-def') + (' on' if acc == sel else '')
+        cls = 'sw' + (f' a-{acc}' if acc else ' sw-def')
         out += f"<div class='{cls}' data-n='Swatch_{lab}' data-btn=1 style='left:{sx}px;top:{y}px;width:{size}px;height:{size}px'></div>"
         if acc == sel:
-            out += I('check', sx + size - 26, y - 12, 38)
+            out += selring(sx, y, size, size, 'SwatchSel', 7) + I('check', sx + size - 26, y - 12, 38, name='SwatchCheck')
         if labels:
             out += at(sx + size // 2, y + size + 8, T(lab, 17, 'xs', '' if acc == sel else 'f-dim'), w=size + gap, align='center')
     return out
@@ -778,12 +869,16 @@ def s_settings():
         if on is None:
             inner += swatches(604, 26, None, 54, 10)
         else:
-            inner += btn(860, 20, 236, 70, 'lime' if on else 'grey', bl('ON' if on else 'OFF', 32, name='ToggleText'), name='Toggle')
+            inner += dual(860, 20, 236, 70, 'lime', bl('ON', 32), 'Toggle', on, off_label=bl('OFF', 32))
         b += well(26, y, 1136, 110, inner, name=f'Row{i + 1}')
     ty = 24 + len(rows) * 124 + 6
-    b += btn(26, ty, 360, 64, 'purple', bl('GAME', 28), name='TabGame')
-    b += btn(414, ty, 360, 64, 'grey', bl('AUDIO', 28), name='TabAudio')
-    b += btn(802, ty, 360, 64, 'grey', row(icn('controls', 36), bl('CONTROLS', 28)), name='TabControls')
+    b += dual(26, ty, 554, 64, 'purple', bl('GAME', 28), 'TabGame', True)
+    b += dual(608, ty, 554, 64, 'purple', row(icn('controls', 36), bl('CONTROLS', 28)), 'TabControls', False)
+    ctl = ''
+    for i, (k, v) in enumerate([('RUN', 'WASD  /  left stick'), ('DASH', 'Space  /  A  (sideways or back)'), ('TAG', 'Click, E  /  R2 or X'),
+                                ('PET ABILITY', 'Q  /  Y'), ('CLOSE MENUS', 'Esc  /  B')]):
+        ctl += at(40, 30 + i * 98, T(k, 30, 's', 'f-gold', name=f'Key{i + 1}')) + at(420, 34 + i * 98, T(v, 28, 's', name=f'Does{i + 1}'))
+    b += sub('ControlsPage', well(26, 24, 1136, 600, ctl, name='ControlsList'), hid=True)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Settings', 'steel', 'Settings', 'settings', b, x0, y0, W, H)
 
 
@@ -813,26 +908,30 @@ def s_results():
     hd = rays(960, 92, 900, .22)   # centred exactly on the title (Hunter: the off-centre shine looked misplaced)
     hd += at(960, 26, T('RUNNERS WIN!', 104, 'xl', 'f-gold', name='TeamBanner'), w=1200, align='center')
     hd += at(960, 158, T('3 clean crossings in a row', 30, 's', 'f-dim', name='Reason'), w=900, align='center')
+    if EXPORT_STATES:
+        hd += at(960, 202, T('PRACTICE MATCH: REWARDS SAVE WITH 4+ REAL PLAYERS', 22, 'xs', 'f-orange', name='TestNote'), w=1000, align='center').replace("class='abs", "class='abs hid", 1)
     out += grp('Banner', hd, 'T')
     pod = ''
     for i, (nm, pet, lab, h, c, r) in enumerate([('Zoe', 'SurferDog', '2nd', 150, 'sky', 'rare'), ('You', 'ShadesShark', '1st', 200, 'gold', 'gold'), ('Kai', 'GamerAxolotl', '3rd', 110, 'orange', 'common')]):
         x = 150 + i * 200
         pod += slot(x, 770 - h - 176, 170, r, pet_img(pet, 3 if i == 1 else 1), name=f'Podium{i + 1}', art_pad=.05)
-        pod += btn(x, 770 - h, 170, h, c, col(T(lab, 40, 'l'), T(nm, 24, 's'), gap=0), name=f'Step{i + 1}')
+        pod += box(x, 770 - h, 170, h, f"<div class='lbl'>{col(T(lab, 40, 'l', name='Place'), T(nm, 24, 's', name='PlayerName'), gap=0)}</div>", f'cb k-{c}', name=f'Step{i + 1}')
     out += grp('Podium', pod, 'L')
     th = slot(26, 26, 130, 'red', 'steal', name='ThiefSlot', cls='fill')
-    th += at(178, 36, T('TOP THIEF', 22, 'xs', 'f-red')) + at(178, 66, T('Kai', 44, 'l', name='ThiefName')) + at(180, 122, T('stole 4 eggs', 22, 'xs', 'f-dim'))
+    th += at(178, 36, T('TOP THIEF', 22, 'xs', 'f-red')) + at(178, 66, T('Kai', 44, 'l', name='ThiefName')) + at(180, 122, T('stole 4 eggs', 22, 'xs', 'f-dim', name='ThiefCount'))
     out += grp('Thief', box(150, 820, 600, 184, th, 'glass', name='Thief'), 'BL')
     y = f"<div class='ch a-gold' style='height:84px'><div class='sweep'></div><div class='lbl'>{T('YOUR REWARDS', 40, 'l')}</div></div>"
     for i, (lab, amt) in enumerate([('PLAYED', 25), ('CROSSINGS  x3', 36), ('FIRST STEAL', 10), ('VICTORY', 15)]):
-        y += at(40, 112 + i * 40, T(lab, 22, 'xs', 'f-dim')) + at(480, 106 + i * 40, row(T(f'+{amt}', 26, 's', 'f-gold'), icn('gold', 30), gap=4), w=200, align='right')
+        y += sub(f'Line{i + 1}', at(40, 112 + i * 40, T(lab, 22, 'xs', 'f-dim', name='LineLabel')) + at(480, 106 + i * 40, row(T(f'+{amt}', 26, 's', 'f-gold', name='LineAmount'), icn('gold', 30), gap=4), w=200, align='right'))
     y += "<div class='abs' style='left:36px;top:280px;width:444px;height:4px;background:rgba(255,255,255,.2)'></div>"
     y += at(40, 296, T('TOTAL', 26, 's')) + at(480, 288, row(T('+86', 40, 'l', 'f-gold', name='GoldTotal'), icn('gold', 44), gap=4), w=240, align='right')
     y += slot(530, 112, 146, 'lime', 'gem', 'x4', 'Gems', name='GemsSlot')
     y += slot(530, 274, 146, 'epic', 'piece_epic', 'x1', 'Epic', name='PieceSlot')
-    y += at(40, 352, row(icn('egg_cosmic', 54), col(T('Best egg: Level 3', 26, 's', 'f-epic'), T('pays 1 Epic piece', 18, 'xs', 'f-dim'), gap=0, align='flex-start'), gap=8))
-    y += bar(40, 434, 440, 32, 1 / 5, 'purple', 'RecipeBar') + at(260, 437, T('Epic pieces 1 / 5', 18, 'xs'), w=440, align='center')
+    y += at(40, 352, row(icn('egg_cosmic', 54, name='BestEggIcon'), col(T('Best egg: Level 3', 26, 's', 'f-epic', name='BestEgg'), T('pays 1 Epic piece', 18, 'xs', 'f-dim', name='BestEggPays'), gap=0, align='flex-start'), gap=8))
+    y += bar(40, 434, 440, 32, 1 / 5, 'purple', 'RecipeBar') + at(260, 437, T('Epic pieces 1 / 5', 18, 'xs', name='RecipeText'), w=440, align='center')
     y += btn(510, 428, 186, 68, 'lime', bl('NEXT', 30), name='Continue')
+    if EXPORT_STATES:
+        y += at(360, 494, T('Move, cross or tag to earn rewards', 18, 'xs', 'f-orange', name='Ineligible'), w=700, align='center').replace("class='abs", "class='abs hid", 1)
     out += grp('You', f"<div class='cp a-gold' data-n='YouCard' style='left:1060px;top:280px;width:720px;height:530px'>{y}</div>", 'R')
     out += grp('NextMatch', at(1420, 846, T('Next match in 0:09', 30, 's', 'f-dim', name='NextText'), w=720, align='center'), 'BR')
     return out
@@ -845,17 +944,17 @@ def s_hatch():
     h += at(960, 70, T('NEW PET!', 110, 'xl', 'f-gold', name='Title'), w=1000, align='center')
     h += I(pet_img('ShadesShark'), 700, 230, 520, name='Pet')
     h += at(960, 760, T('Shades Shark', 72, 'xl', name='PetName'), w=1000, align='center')
-    h += at(960, 852, row(T('Common', 30, 's', 'f-common'), icn('ab_dash', 46), T('Double Dash', 30, 's', 'f-orange'), gap=12), w=1000, align='center')
+    h += at(960, 852, row(T('Common', 30, 's', 'f-common', name='RarityText'), icn('ab_dash', 46, name='AbilityIcon'), T('Double Dash', 30, 's', 'f-orange', name='AbilityText'), gap=12), w=1000, align='center')
     h += btn(700, 920, 250, 84, 'lime', bl('EQUIP', 36), name='BtnEquip') + btn(970, 920, 250, 84, 'purple', bl('NICE!', 36), name='BtnClose')
     for sx, sy, s in [(560, 300, 70), (1300, 260, 90), (1360, 560, 54), (520, 620, 60)]:
-        h += I('sparkle', sx, sy, s)
+        h += I('sparkle', sx, sy, s, name='Sparkle')
     return out + grp('Reveal', h, 'C')
 
 
 # ================================================================== match banners + runtime templates
 def banner_card(x, y, w, title, sub_txt, color, icon, name):
-    inner = f"<div class='hp k-{color}' style='left:0;top:0;width:{w}px;height:120px'><div class='lbl' style='padding-left:150px'>{col(T(title, 54, 'xl'), T(sub_txt, 24, 's'), gap=0, align='flex-start')}</div></div>"
-    inner += I(icon, -10, -26, 160)
+    inner = f"<div class='hp k-{color}' style='left:0;top:0;width:{w}px;height:120px'><div class='lbl' style='padding-left:150px'>{col(T(title, 54, 'xl', name='Title'), T(sub_txt, 24, 's', name='Sub'), gap=0, align='flex-start')}</div></div>"
+    inner += I(icon, -10, -26, 160, name='Icon')
     return box(x, y, w, 120, inner, name=name)
 
 
@@ -873,6 +972,8 @@ def s_templates():
     out += grp('Banner_Safe', banner_card(60, 380, 820, 'SAFE!', 'Your egg grew to Level 2', 'lime', 'egg_shiny', 'Banner'), 'TL')
     out += grp('Banner_Caught', banner_card(60, 530, 820, 'CAUGHT!', "You're a Catcher now. Go get them!", 'pink', 'catcher', 'Banner'), 'TL')
     out += grp('Banner_Stole', banner_card(60, 680, 820, 'STOLEN!', "You took Mia's Level 3 egg", 'gold', 'steal', 'Banner'), 'TL')
+    out += grp('Banner_Last', banner_card(60, 830, 820, 'LAST ONE STANDING!', 'Make it across alone to win it for the Runners', 'purple', 'crown', 'Banner'), 'TL')
+    out += grp('Banner_Slow', banner_card(60, 980, 820, 'TOO SLOW!', 'You missed the crossing: you hunt now', 'grey', 'clock', 'Banner'), 'TL')
     out += cap(1000, 24, 'Toasts: info / success / error / reward')
     out += toast(1000, 80, 'blue', 'info', 'Tip: hold Space to dash sideways', 'Toast_info')
     out += toast(1000, 190, 'lime', 'check', 'Sparkle Trail bought!', 'Toast_good')
@@ -998,7 +1099,7 @@ SCREENS = [  # (file, title, description, fn, height)
     ('ui_colour.html', 'UI colour', 'The UI Colour setting and the same screen in four choices', s_ui_colour, 1280),
     ('results.html', 'Results', 'Winner, podium, top thief, your rewards', s_results, 1080),
     ('hatch.html', 'Hatch reveal', 'New pet moment', s_hatch, 1080),
-    ('templates.html', 'Banners + toasts + confirm', 'Runtime templates', s_templates, 1080),
+    ('templates.html', 'Banners + toasts + confirm', 'Runtime templates', s_templates, 1120),
     ('states.html', 'All states', 'Every element in every state', s_states, 1080),
     ('compare.html', 'Before', 'Current lobby HUD', s_compare, 1080),
 ]

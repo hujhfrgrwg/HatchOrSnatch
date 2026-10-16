@@ -178,5 +178,13 @@ img[src*='sunburst'] { opacity: .12 !important; }
 /* UI Colour swatches (Settings > UI Colour) */
 .sw { position: absolute; border-radius: 5px; border: 3px solid #050506; box-shadow: 0 0 0 2px rgba(225,225,232,.35);
   background: linear-gradient(160deg, var(--h1) 0%, var(--h2) 40%, var(--hm) 70%, var(--h3) 100%); }
-.sw.sw-def { background: conic-gradient(from 45deg, #9a5cff 0 25%, #7ee02e 0 50%, #ffc23a 0 75%, #3ab8ff 0); }
-.sw.on { box-shadow: 0 0 0 2px #050506, 0 0 0 6px #fff, 0 0 16px 3px rgba(255,255,255,.35); }
+.sw.sw-def { background: linear-gradient(90deg, #9a5cff 0 50%, #7ee02e 50%) top / 100% 50% no-repeat, linear-gradient(90deg, #3ab8ff 0 50%, #ffc23a 50%) bottom / 100% 50% no-repeat; }
+
+
+/* runtime selection ring (moves between tiles at runtime; replaces the per-tile .sel class) */
+.selring { position: absolute; border-radius: 6px; pointer-events: none; z-index: 4;
+  box-shadow: 0 0 0 2px #050506, 0 0 0 6px #fff; }
+
+/* greyscale copies the UI Colour setting tints at runtime (ImageColor3) */
+.mono { filter: grayscale(1) brightness(1.25) contrast(1.05); }
+.sbn .f.mono { position: absolute; }

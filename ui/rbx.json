@@ -32,7 +32,8 @@
         "Egg",
         "Feed",
         "Ability",
-        "Dash"
+        "Dash",
+        "Touch"
       ],
       "visible": false,
       "hud": true
