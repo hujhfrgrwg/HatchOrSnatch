@@ -12,7 +12,7 @@ The emote pack (`ServerStorage["52+ Emotes (R15/R6)"]`) shipped animations only,
 
 | Emote | Prop joint in the clip | Part0 | Fitted C0 |
 |---|---|---|---|
-| Reaper's Ride (L) | `BézierCircle.003` (literal text, backslash and all) | Torso | `CFrame` stored on the sample model's `C0` attribute (scythe under the crotch, along the hands' line, blade in front) |
+| Reaper's Ride (L) | `BÃ©zierCircle.003` (literal text, backslash and all) | Torso | `CFrame` stored on the sample model's `C0` attribute (scythe under the crotch, along the hands' line, blade in front) |
 | Surfer (R) | `Surf` | HumanoidRootPart | `CFrame.new(0, -3.35, 0.1)` (fit over all 11 keyframes; feet on the deck in most frames, ~0.6 studs off on the hops) |
 
 Other clips with hand-grip joints (`Right Grip` / `Left Grip`, the item a hand holds): Toilet Sit, Company Dance, Gambler Dance, Threaten, Honored One, Shadow Emerge, Blossom Break. Emotes whose names imply a prop but have no joint: Ice Cream Cart, Couch Nap, Sunbath, Trick or Treat, Coconut Launch (the pack has a separate cannon animation). Skeleton and Lose It carry stray item poses (BloxyCola, Ghostburger, Hart).
@@ -61,6 +61,9 @@ In the place, wired into the game; edit-mode verified, **not playtested yet**.
 - **Verified in edit mode** (harness on posed dummies, the real module): all 13 spawn, every piece fades in to its target, welds hold, scythe joint is removed on clear, swapping emotes replaces the construct, an emote with no template clears it, `Enabled = false` spawns nothing, distance cull skips far ones, the board's joint gets the clip's pose (2.24 studs lift at t = 0). Edit mode doesn't render Motor6D.Transform, so the moving scythe/board can only be judged in a playtest.
 - Screenshots: `docs/emote-fx/emote_constructs_sheet_v2.jpg` and `<id>_construct_v2.jpg`.
 - Backup before editing EmoteController: `docs/backups/HOS-EMOTE-FX-001_2026-10-16/pre_edit_EmoteController.rbxm`.
+
+## Video previews (2026-10-16)
+`docs/emote-fx/video/`: one clip per emote and `emote_constructs_all.mp4` (all 13, labelled, ~1.6 min). Recorded from Studio's viewport in edit mode: a dummy plays each emote's real clip (keyframes with their easing) while its construct builds in, follows the body / hand / joint for 6 s and fades out, the same way `Controllers.EmoteFX` does in game.
 
 ## Needs Hunter's playtest
 - Do each emote in the lobby: build-in, fade-out on stop / moving, a second player seeing it.
