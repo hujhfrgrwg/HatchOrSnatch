@@ -1,6 +1,6 @@
 ---
 tags: [hub]
-updated: 2026-10-15
+updated: 2026-10-16
 ---
 # Hatch or Snatch Home
 
@@ -20,6 +20,9 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 - **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
 - **Uploads:** `tools\upload\upload_assets.py` (Open Cloud; key and creator from the environment).
 - **Skills and research:** [[RoClicks Index]].
+
+## UI
+- [[Emote Crate Spin]]: emote crate opening animation (HTML in `UI/web/`, client script in `UI/roblox/`).
 
 ## Folders
 | Folder | For |
