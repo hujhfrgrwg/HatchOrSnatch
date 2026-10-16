@@ -9,6 +9,8 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 ## The game
 *Not written yet.* The one-paragraph pitch, core loop and target players go here, then a `Hatch or Snatch Game Plan.md` and a `Hatch or Snatch Decisions.md` (one line per decision Hunter makes, with the date).
 
+- **Economy decisions (16 Oct 2026):** [[Economy Decisions]] in `Design/`, the final calls from the audit.
+
 - **Economy and design audit (16 Oct 2026):** [[Economy Audit 2026-10-16]] in `docs/economy-audit/`. Recommends the Snatch-back egg rule, exactly 3 crossings with 30 players, hour-sized hatch recipes and tighter Gold/Gems. The simulation that backs it is in `tools/sim/`.
 
 ## Studio place

@@ -40,19 +40,21 @@ The economy as specified has three serious problems, and all of them can be fixe
 **The single biggest risk isn't the economy.** It's whether the chase feels as good as Huss Valley's, and no simulation can tell you that. P0 stays "fun with the shop closed".
 
 ### Decisions at a glance
+Final as of 16 Oct: Hunter asked Claude to make the calls, so the former PROTOTYPE items are now settled. Reasons for each are in [[Economy Decisions]] (`Design/Economy Decisions.md`).
+
 | # | Decision | Verdict |
 |---|---|---|
-| 1 | Three fixed crossings, 30 players, 3 starting Catchers (1 per 10) | LOCK the structure; PROTOTYPE the Catcher count |
+| 1 | Three fixed crossings, 30 players, 3 starting Catchers (1 per 10) | LOCK (playtest check may move it to 2 or 4) |
 | 2 | Replace the place's "3 clean crossings in a row" end rule with exactly 3 crossings | REVISE (code) |
 | 3 | Eggs are won: survive all 3 crossings, or snatch one | LOCK |
 | 4 | **Snatch-back cap:** a Catcher who snatches keeps an egg at most one rarity above the egg they lost. Starting Catchers can keep up to Epic. | LOCK (replaces "one theft = an egg at the stolen rarity") |
 | 5 | Physically banking stolen eggs | REJECT (no effect without counterplay) |
 | 6 | Two thefts required | REJECT (still rewards early capture; adds frustration) |
-| 7 | Evolution: crossing 1 → Rare always. Crossing 2 → Epic 10%, Legendary 2%. Final crossing → Rare to Epic 10%, Epic to Legendary 1%. | PROTOTYPE |
+| 7 | Evolution: crossing 1 → Rare always. Crossing 2 → Epic 10%, Legendary 2%. Final crossing → Rare to Epic 10%, Epic to Legendary 1%. | LOCK |
 | 8 | First pet: the first won egg also grants a Common pet of a chosen family, and the egg is kept | LOCK |
 | 9 | Recipes sized to hours, not to 3/4/3: Rare 26 (focus 33), Epic 23 (29), Legendary 10 (13) at 45 matches/h, shown as an incubator bar | REVISE |
 | 10 | 3 Common eggs fuse into 1 Rare | LOCK |
-| 11 | Rarity stat bonus (+1.5/3/4.5%) on distance or duration only, never recharge | PROTOTYPE (measured as invisible; see section 6) |
+| 11 | Rarity stat bonus (+1.5/3/4.5%) on distance or duration only, never recharge | LOCK (measured as invisible; see section 6) |
 | 12 | Gold earn kept; Gold prices ×3 | REVISE |
 | 13 | Earned Gems cut to about 31/h (Gems = win + first snatch, max 2 per match) | REVISE |
 | 14 | Gem-paid focusing, sold eggs, sold abilities | REJECT for launch |
