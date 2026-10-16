@@ -7,6 +7,7 @@ SK=../.claude/skills/roblox-ui-maker
 python3 $SK/scripts/bundle.py >/dev/null
 cp rbx/out/EOSUIBuild.rbxmx ../roblox/build/
 python3 $SK/scripts/luau_to_rbxmx.py ../roblox/game/UIController.luau ../roblox/build/UIController.rbxmx UIController ModuleScript >/dev/null
+python3 $SK/scripts/luau_to_rbxmx.py ../roblox/game/Sound.luau ../roblox/build/Sound.rbxmx Sound ModuleScript >/dev/null
 cd ..
 git add -A roblox tools ui/build.py ui/styles ui/rbx.json ui/tools Dev docs ScriptHistory Assets >/dev/null 2>&1 || true
 git commit -q -m "$1" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

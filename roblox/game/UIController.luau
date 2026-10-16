@@ -46,7 +46,7 @@ local overlay: Frame -- toasts, banners, confirm (above every screen)
 local templates: Folder
 
 local profile: any = nil
-local settings = { sfx = true, reduceEffects = false, showHints = true, uiColour = "" }
+local settings = { sfx = true, music = true, reduceEffects = false, showHints = true, uiColour = "" }
 local settingsInit = false
 local shopTab = "gold"
 local resultsData: any = nil
@@ -459,7 +459,13 @@ function UIC.toast(text: string, kind: string?, force: boolean?)
 	end
 	layoutToasts()
 	UI.slideIn(card, 120, 0, 0, 0.35)
-	if kind == "reward" then Sound.play("reward", 1.05) end
+	if kind == "reward" then
+		Sound.play("reward", 1.05)
+	elseif tname == "Toast_error" then
+		Sound.play("error")
+	else
+		Sound.play("pop")
+	end
 	local life = if #text > 50 then 6 else 3.5
 	local bar = find(card, "Time")
 	task.spawn(function()
@@ -651,6 +657,7 @@ end
 
 local function applySettings()
 	Sound.enabled = settings.sfx ~= false
+	Sound.setMusicEnabled(settings.music ~= false)
 	CameraFX.reduceEffects = settings.reduceEffects == true
 	WorldFX.reduceEffects = settings.reduceEffects == true
 	applyUiColour()
@@ -1006,6 +1013,7 @@ end
 
 local function updateHUD()
 	local m = inMatch()
+	Sound.setMusic(if resultsOpen then "results" elseif m then "match" else "lobby")
 	if S.HUD then S.HUD.Visible = not m end
 	if S.MatchHUD then S.MatchHUD.Visible = m end
 	if m then
@@ -1296,6 +1304,7 @@ local function doHatch(focused: boolean)
 		UIC.toast(("Need %d %s pieces (you have %d)"):format(need, materialName(m), have(m)), "bad")
 		local hb = find(S.Incubator, "HatchBar")
 		if hb then UI.shake(hb, 6, 0.3) end
+		Sound.play("error")
 		return
 	end
 	hatchPending = true
@@ -1347,10 +1356,16 @@ local function showReveal(t: any)
 	end
 	setIcon(sc, "Pet", eggSlug(if pet.rarity == "epic" then 3 elseif pet.rarity == "rare" then 2 else 1))
 	Sound.play("open")
+	Sound.duck(0.25, if t.royal then 4.5 else 3.5)
 	task.spawn(function()
 		if petImg then UI.shake(petImg, 14, if t.royal then 2 else 1.2) end
-		task.wait(if t.royal then 2 else 1.2)
-		Sound.play("evolve", 1.1)
+		local shake = if t.royal then 2 else 1.2
+		for k = 0, math.floor(shake / 0.4) - 1 do
+			task.delay(k * 0.4, function() Sound.play("crack", 1 + k * 0.06) end)
+		end
+		task.wait(shake)
+		Sound.play("reveal")
+		Sound.play("applause")
 		setIcon(sc, "Pet", art)
 		if petImg then UI.popFrom(petImg, 0.2) end
 		for _, d in ipairs(hidden) do d.Visible = true end
@@ -1759,7 +1774,7 @@ local settingsTab = "game"
 local function refreshSettings()
 	local sc = S.Settings
 	if not sc then return end
-	local rows = { { "Row1", "sfx" }, { "Row2", "reduceEffects" }, { "Row3", "showHints" } }
+	local rows = { { "Row1", "sfx" }, { "RowMusic", "music" }, { "Row2", "reduceEffects" }, { "Row3", "showHints" } }
 	for _, r in ipairs(rows) do
 		local row = find(sc, r[1])
 		if row then setDual(row:FindFirstChild("Toggle"), settings[r[2]] ~= false and settings[r[2]] ~= nil) end
@@ -1767,8 +1782,8 @@ local function refreshSettings()
 	local r4 = find(sc, "Row4")
 	if r4 then setDual(r4:FindFirstChild("Toggle"), player:GetAttribute("EOS_Volunteer") == true) end
 	local ctl = settingsTab == "controls"
-	for i = 1, 5 do
-		local row = find(sc, "Row" .. i)
+	for _, n in ipairs({ "Row1", "RowMusic", "Row2", "Row3", "Row4", "Row5" }) do
+		local row = find(sc, n)
 		if row then row.Visible = not ctl end
 	end
 	local page = find(sc, "ControlsPage")
@@ -1946,7 +1961,12 @@ local function showResults(data: any)
 	end
 	if yourCard and yourCard:IsA("GuiObject") and yourCard.Visible then UI.slideIn(yourCard, 420, 0, 0.25, 0.6) end
 	if thief and thief:IsA("GuiObject") and thief.Visible then UI.slideIn(thief, -500, 0, 0.6, 0.5) end
-	Sound.play("reward")
+	Sound.setMusic("results")
+	if data.you then
+		Sound.duck(0.2, 6)
+		Sound.play(if data.you.win then "win" else "lose")
+	end
+	task.delay(0.9, function() Sound.play("reward") end)
 end
 
 ----------------------------------------------------------------------------------------------- panels
@@ -2254,7 +2274,7 @@ local function wireButtons()
 	-- Settings
 	local st = S.Settings
 	if st then
-		local keys = { Row1 = "sfx", Row2 = "reduceEffects", Row3 = "showHints" }
+		local keys = { Row1 = "sfx", RowMusic = "music", Row2 = "reduceEffects", Row3 = "showHints" }
 		for rowName, key in pairs(keys) do
 			onClick(find(find(st, rowName), "Toggle"), function()
 				settings[key] = not settings[key]
@@ -2359,7 +2379,7 @@ local function connectEvents()
 	end)
 	Net.event("ShopResult").OnClientEvent:Connect(function(t)
 		if type(t) == "table" and t.ok then
-			Sound.play("reward", 1.1)
+			Sound.play("purchase")
 			local d = find(S.Shop, "Detail")
 			if d then UI.pulse(d, 0.06) end
 		end
@@ -2382,6 +2402,7 @@ local function connectEvents()
 				local target = if t.role == "RUNNER" then Layout.Zones[finish].center else Layout.Arena.CENTER
 				CameraFX.lookToward(target)
 			end)
+			Sound.play("role")
 			if t.role == "RUNNER" then
 				UIC.banner("Runner", "YOU'RE A RUNNER!", "Carry your egg to the glowing safe zone", "runner", 2.4)
 			else
@@ -2411,7 +2432,11 @@ local function connectEvents()
 	Net.event("CaptureFeedback").OnClientEvent:Connect(function(t)
 		if type(t) ~= "table" then return end
 		if typeof(t.position) == "Vector3" then WorldFX.capture(t.position) end
-		Sound.play("capture")
+		if t.hunterId == player.UserId or t.victimId == player.UserId then
+			Sound.play("capture")
+		elseif typeof(t.position) == "Vector3" then
+			Sound.playAt("capture", t.position, 0.7)
+		end
 		local hunter, victim = npcName(t.hunterSlot, t.hunterName), npcName(t.victimSlot, t.victimName)
 		UIC.feed(("%s %s %s's Lv %d egg"):format(hunter, font(Color3.fromRGB(255, 90, 90), "stole"), victim, t.stolenTier or 1), "steal")
 		if t.hunterId == player.UserId then
@@ -2422,7 +2447,9 @@ local function connectEvents()
 	Net.event("MatchState").OnClientEvent:Connect(function(t)
 		if type(t) ~= "table" or not inMatch() then return end
 		if t.phase == "CROSSING" then
+			Sound.play("go")
 			if t.lastStanding == player.UserId then
+				Sound.play("alert")
 				UIC.banner("Last", "LAST ONE STANDING!", "Make it across alone to win it for the Runners", "crown", 1.8)
 			end
 		elseif t.phase == "WAVE_END" then
@@ -2636,6 +2663,7 @@ function UIC.init()
 	gui.Enabled = true
 	UI.PageChanged:Connect(function(name)
 		if name ~= "Results" then resultsOpen = false end
+		if name == nil and not resultsOpen then Sound.play("close") end
 		layoutToasts()
 	end)
 	UI.Opened.Event:Connect(cascade)
@@ -2652,6 +2680,8 @@ function UIC.init()
 		UIC.toast(text, kind)
 	end
 	Pets.onUsed = function()
+		local fam = player:GetAttribute("EOS_PetFamily") or ""
+		Sound.play(if fam == "Decoy" then "poof" elseif fam == "Scout" then "ping" else "ability")
 		local card = hudGroup("MatchHUD", "Ability")
 		if card then UI.pulse(card, 0.1) end
 	end
@@ -2659,7 +2689,7 @@ function UIC.init()
 		return UIC.isOpen() or resultsOpen
 	end
 	Movement.onDash(function()
-		Sound.play("swing", 1.35)
+		Sound.play("dash")
 		local t = hudGroup("MatchHUD", "Touch")
 		local b = t and t:FindFirstChild("TouchDash")
 		if b then UI.pulse(b, -0.12) end

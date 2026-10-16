@@ -69,7 +69,7 @@ function PlayerService.init()
 			return reject(plr, "RequestSettings")
 		end
 		local clean = {}
-		for _, k in ipairs({ "sfx", "reduceEffects", "showHints" }) do
+		for _, k in ipairs({ "sfx", "music", "reduceEffects", "showHints" }) do
 			if type(settings[k]) == "boolean" then
 				clean[k] = settings[k]
 			end

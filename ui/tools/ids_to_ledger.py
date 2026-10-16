@@ -35,6 +35,13 @@ for path, e in ids.items():
     key = ('icon:' if '/icons/' in path else 'art:') + stem
     led[key] = 'rbxassetid://' + aid
     n += 1
+# re-exports that only re-raster an image (headless noise, mean diff < 0.1/255) reuse the uploaded id
+# instead of a new upload; a6f725533cd is the close button re-exported without its corner tabs (16 Oct)
+ALIAS = {'art:a0f5b258ae1': 'art:a9256f992b1', 'art:a176585b5fb': 'art:a0d93acb115', 'art:af3958efa26': 'art:acc69c05fca',
+         'art:a6f725533cd': 'art:close_clean'}
+for new, old in ALIAS.items():
+    if old in led:
+        led[new] = led[old]
 os.makedirs(os.path.dirname(led_p), exist_ok=True)
 json.dump(led, open(led_p, 'w'), indent=1, sort_keys=True)
 print(f'{n} ids -> {led_p}; {pending} still processing; {len(resolved)} decal ids swapped for image ids')

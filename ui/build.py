@@ -843,6 +843,8 @@ SETTINGS = [('sound', 'Sound Effects', 'Hits, steals, crossings and UI clicks.',
             ('burst', 'Reduce Effects', 'Fewer particles, no camera shake or speed zoom.', False),
             ('info', 'Show Hints', 'Tips on screen while you learn the game.', True),
             ('hunt', 'Volunteer To Hunt', 'Start matches as a Catcher when there is room.', False)]
+# Music (16 Oct) sits under Sound Effects; the other rows keep their export names (Row1..Row5) for the controller
+SETTINGS_MUSIC = ('music', 'Music', 'Lobby and match music.', True)
 
 
 def swatches(x, y, sel=None, size=54, gap=12, labels=False):
@@ -862,16 +864,17 @@ def swatches(x, y, sel=None, size=54, gap=12, labels=False):
 def s_settings():
     x0, y0, W, H = 360, 120, 1200, 850
     b = ''
-    rows = SETTINGS + [('abilityfx', 'UI Colour', 'Colour of every menu panel. Looks only.', None)]
+    rows = SETTINGS[:1] + [SETTINGS_MUSIC] + SETTINGS[1:] + [('abilityfx', 'UI Colour', 'Colour of every menu panel. Looks only.', None)]
+    names = ['Row1', 'RowMusic', 'Row2', 'Row3', 'Row4', 'Row5']
     for i, (ic, title, desc, on) in enumerate(rows):
-        y = 24 + i * 124
-        inner = I(ic, 16, 10, 90) + at(128, 14, T(title, 34, 's', name='Title')) + at(130, 60, T(desc, 20, 'xs', 'f-dim', name='Desc'))
+        y = 24 + i * 104
+        inner = I(ic, 16, 10, 76) + at(116, 10, T(title, 32, 's', name='Title')) + at(118, 54, T(desc, 20, 'xs', 'f-dim', name='Desc'))
         if on is None:
-            inner += swatches(604, 26, None, 54, 10)
+            inner += swatches(604, 21, None, 54, 10)
         else:
-            inner += dual(860, 20, 236, 70, 'lime', bl('ON', 32), 'Toggle', on, off_label=bl('OFF', 32))
-        b += well(26, y, 1136, 110, inner, name=f'Row{i + 1}')
-    ty = 24 + len(rows) * 124 + 6
+            inner += dual(860, 13, 236, 70, 'lime', bl('ON', 32), 'Toggle', on, off_label=bl('OFF', 32))
+        b += well(26, y, 1136, 96, inner, name=names[i])
+    ty = 24 + len(rows) * 104 + 6
     b += dual(26, ty, 554, 64, 'purple', bl('GAME', 28), 'TabGame', True)
     b += dual(608, ty, 554, 64, 'purple', row(icn('controls', 36), bl('CONTROLS', 28)), 'TabControls', False)
     ctl = ''
