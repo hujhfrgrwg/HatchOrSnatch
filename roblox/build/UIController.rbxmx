@@ -1712,7 +1712,7 @@ end
 
 -- Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems.
 -- Gold items cost Gold; Gem items show a Gem price and (once its product exists) a Robux price.
-local SHOP_TABS = { featured = "TabFeatured", trails = "TabTrails", cases = "TabEggCases", effects = "TabEffects", emotes = "TabEmotes", gems = "TabGems" }
+local SHOP_TABS = { featured = "TabFeatured", trails = "TabTrails", cases = "TabEggCases", effects = "TabEffects", emotes = "TabEmotes", passes = "TabPasses", gems = "TabGems" }
 local TAG_WORDS = { trail = "ONE MATCH", burst = "LOBBY, ONCE" } -- everything else keeps forever
 local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CASE", burst = "LOBBY EFFECT", entrance = "ENTRANCE", abilityFx = "ABILITY FX", hatchFx = "HATCH FX" }
 
@@ -1830,6 +1830,20 @@ local function rewardItem(it: any)
 		r.use, r.onUse = "USE NOW", function() Net.event("RequestUseItem"):FireServer(it.id) end
 	end
 	UIC.showReward(r)
+end
+
+-- a game pass: VIP or 2x Gold
+local function rewardPass(key: string)
+	local pass = EconomyConfig.pass(key)
+	if not pass then return end
+	UIC.showReward({
+		icon = if iconId(pass.icon) ~= "" then pass.icon elseif key == "vip" then "crown" else "gold",
+		title = "UNLOCKED!",
+		name = pass.name,
+		kind = "GAME PASS  ·  FOREVER",
+		kindColor = Color3.fromRGB(255, 210, 58),
+		sub = pass.desc,
+	})
 end
 
 -- a Gem pack bought with Robux: its own art (gempack1..6), the Gems count up behind
@@ -2001,19 +2015,20 @@ local function fillCard(card: Instance, it: any)
 	wireButtons_(card, it)
 end
 
+local PASS_CARDS = { vip = "PassVip", gold2x = "PassGold2x" }
 local function refreshShop()
 	local sc = S.Shop
 	if not sc or not profile then return end
 	if shopTab == "gold" then shopTab = "featured" end -- old tab names (lobby stalls)
 	if shopTab == "getgems" then shopTab = "gems" end
-	if not SHOP_TABS[shopTab] or (shopTab == "gems" and not PURCHASES) then shopTab = "featured" end
+	if not SHOP_TABS[shopTab] or ((shopTab == "gems" or shopTab == "passes") and not PURCHASES) then shopTab = "featured" end
 	for key, nm in pairs(SHOP_TABS) do
 		local t = find(sc, nm)
 		setDual(t, shopTab == key)
-		if key == "gems" and t and t:IsA("GuiObject") then t.Visible = PURCHASES end
+		if (key == "gems" or key == "passes") and t and t:IsA("GuiObject") then t.Visible = PURCHASES end
 	end
 	local pages = { PageFeatured = shopTab == "featured", PageItems = shopTab == "trails" or shopTab == "cases" or shopTab == "effects",
-		PageEmotes = shopTab == "emotes", GetGemsPage = shopTab == "gems" }
+		PageEmotes = shopTab == "emotes", PagePasses = shopTab == "passes", GetGemsPage = shopTab == "gems" }
 	for nm, on in pairs(pages) do
 		local pg = find(sc, nm)
 		if pg and pg:IsA("GuiObject") then pg.Visible = on end
@@ -2081,6 +2096,20 @@ local function refreshShop()
 		local gb = find(sc, "BtnCrateGems")
 		if gb and gb:IsA("GuiObject") then gb.Visible = not UIC.crateBlocked end
 		setText(sc, "CrateGemsLabel", Format.full(gems))
+	elseif shopTab == "passes" then
+		for key, slot in pairs(PASS_CARDS) do
+			local card = find(sc, slot)
+			local pass = EconomyConfig.pass(key)
+			if card and pass then
+				local owned = player:GetAttribute(pass.attr) == true
+				local buy, own = find(card, "BtnBuy"), find(card, "BtnOwned")
+				if buy and buy:IsA("GuiObject") then buy.Visible = not owned end
+				if own and own:IsA("GuiObject") then own.Visible = owned end
+				setText(card, "Price", Format.full(pass.robux))
+				setText(card, "Have", if owned then "You own this pass. Thank you!" else "Bought once, yours on every server.")
+				if iconId(pass.icon) ~= "" then setIcon(card, "Icon", pass.icon) end
+			end
+		end
 	elseif shopTab == "gems" then
 		local packs = find(sc, "GetGemsPage")
 		for i, pack in ipairs(EconomyConfig.GEM_PACKS) do
@@ -2226,7 +2255,13 @@ local function showResults(data: any)
 	local yourCard = find(sc, "You")
 	if yourCard then yourCard.Visible = you ~= nil end
 	if you then
-		local parts = you.goldParts or {}
+		local parts = table.clone(you.goldParts or {})
+		-- four lines on the card: with the 2x Gold pass line a fifth part folds into the one before it
+		while #parts > 4 do
+			local a, b = parts[#parts - 2], parts[#parts - 1]
+			parts[#parts - 2] = { label = "BONUSES", amount = (a.amount or 0) + (b.amount or 0) }
+			table.remove(parts, #parts - 1)
+		end
 		for i = 1, 4 do
 			local line = find(sc, "Line" .. i)
 			local p = parts[i]
@@ -2726,6 +2761,21 @@ local function wireButtons()
 			if UIC.showEmoteCrate then UIC.showEmoteCrate() end
 		end)
 		onClick(find(shop, "BtnCrateRobux"), function() UIC.buyCrate() end)
+		-- game passes: Roblox's own prompt; PassService grants on PromptGamePassPurchaseFinished
+		for key, slot in pairs(PASS_CARDS) do
+			local pass = EconomyConfig.pass(key)
+			local card = find(shop, slot)
+			onClick(card and find(card, "BtnBuy"), function()
+				if not pass or not PURCHASES or player:GetAttribute(pass.attr) == true then return end
+				Sound.play("click")
+				pcall(function() MarketplaceService:PromptGamePassPurchase(player, pass.passId) end)
+			end)
+		end
+		for _, pass in ipairs(EconomyConfig.PASSES) do
+			player:GetAttributeChangedSignal(pass.attr):Connect(function()
+				if UI.current() == "Shop" then refreshShop() end
+			end)
+		end
 		onClick(find(shop, "BtnSeeEmotes"), function() if UIC.showEmoteCrate then UIC.showEmoteCrate() end end)
 	end
 	-- Settings
@@ -2838,6 +2888,8 @@ local function connectEvents()
 		if type(t) ~= "table" or not t.ok then return end
 		if type(t.gems) == "number" then
 			rewardGems(t.gems)
+		elseif type(t.pass) == "string" then
+			rewardPass(t.pass)
 		elseif type(t.itemId) == "string" and not t.refunded then
 			local it = EconomyConfig.item(t.itemId)
 			if it then rewardItem(it) else Sound.play("purchase") end

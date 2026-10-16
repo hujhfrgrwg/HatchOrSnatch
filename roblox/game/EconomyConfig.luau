@@ -183,6 +183,21 @@ EconomyConfig.FEATURED = {
 	spotlight = "hatch_royal",
 }
 
+-- Game passes (GDD v0.4 Robux catalogue, 16 Oct). PassService mirrors ownership to the player attribute.
+-- VIP is looks only (nameplate + chat tag + one emote); 2x Gold doubles match Gold, never Gems or egg pieces.
+EconomyConfig.PASSES = {
+	{ key = "vip", passId = 2038202784, name = "VIP", robux = 499, attr = "EOS_VIP", icon = "pass_vip", emote = "honored_one",
+		desc = "A gold VIP tag over your head and in chat, plus the legendary Honored One emote." },
+	{ key = "gold2x", passId = 2040494361, name = "2x Gold", robux = 199, attr = "EOS_Gold2x", icon = "pass_gold2x",
+		desc = "Double the Gold from every match. Gems and egg pieces stay the same." },
+}
+function EconomyConfig.pass(key: string): any?
+	for _, p in ipairs(EconomyConfig.PASSES) do
+		if p.key == key then return p end
+	end
+	return nil
+end
+
 -- Robux Gem packs (GDD 06): live developer products since 16 Oct (HOS-GEMS-001). A pack without a
 -- productId is hidden. Purchased Gems are granted only by PurchaseService's ProcessReceipt, once per receipt.
 EconomyConfig.GEM_PACKS = {

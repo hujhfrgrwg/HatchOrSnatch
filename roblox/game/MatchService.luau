@@ -31,6 +31,7 @@ local MatchLogic = require(ServerScriptService.EOS.Core.MatchLogic)
 local RateLimiter = require(ServerScriptService.EOS.Core.RateLimiter)
 local Analytics = require(script.Parent.Analytics)
 local DataService = require(script.Parent.DataService)
+local PassService = require(script.Parent.PassService)
 local CharacterService = require(script.Parent.CharacterService)
 local NpcService = require(script.Parent.NpcService)
 local MapService = require(script.Parent.MapService)
@@ -42,6 +43,14 @@ local N = GameConfig.Npc
 local isBot = NpcService.isBot
 
 local MatchService = {}
+
+-- the results card lists the 2x Gold pass as its own line
+local function goldPartsWithPass(parts: any, bonus: number): any
+	if bonus <= 0 then return parts end
+	local out = table.clone(parts or {})
+	table.insert(out, { label = "2X GOLD PASS", amount = bonus })
+	return out
+end
 
 local state = Net.state()
 local rng = Random.new()
@@ -961,11 +970,12 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 		local p = logic:get(uid)
 		if p and not p.disconnected and plr.Parent and not isBot(plr) then
 			local s = logic:settlementFor(uid)
-			local applied = false
+			local applied, bonus = false, 0
 			if s then
+				bonus = PassService.doubleGold(plr, s) -- 2x Gold pass: Gold only, never Gems or the piece
 				applied = DataService.settle(plr, s)
 			end
-			rewards[uid] = { applied = applied }
+			rewards[uid] = { applied = applied, goldBonus = bonus }
 		end
 	end
 	setGates(true)
@@ -984,8 +994,8 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 				eligible = mine.eligible,
 				source = mine.source,
 				nearMiss = mine.nearMiss,
-				gold = mine.gold,
-				goldParts = mine.goldParts,
+				gold = mine.gold + ((rewards[plr.UserId] and rewards[plr.UserId].goldBonus) or 0),
+				goldParts = goldPartsWithPass(mine.goldParts, rewards[plr.UserId] and rewards[plr.UserId].goldBonus or 0),
 				gems = mine.gems,
 				material = mine.material,
 				crossings = mine.crossings,
@@ -1114,6 +1124,7 @@ local function onLeaving(plr: Player)
 	if removed then
 		local s = c.logic:settlementFor(plr.UserId)
 		if s and ((s.gold or 0) > 0 or (s.gems or 0) > 0) then
+			PassService.doubleGold(plr, s)
 			DataService.settle(plr, s) -- partial: Gold/Gems already earned, never an egg piece
 		end
 		forwardEvents(c)

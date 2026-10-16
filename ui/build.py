@@ -802,7 +802,8 @@ def gem_packs(hid=False):
 
 
 SHOP_TABS = [('featured', 'Featured', 'star', 'gold'), ('trails', 'Trails', 'trail', 'gold'), ('cases', 'Egg Cases', 'case', 'gold'),
-             ('effects', 'Effects', 'burst', 'gold'), ('emotes', 'Emotes', 'emote', 'gold'), ('gems', 'Gems', 'gem', 'lime')]
+             ('effects', 'Effects', 'burst', 'gold'), ('emotes', 'Emotes', 'emote', 'gold'), ('passes', 'Passes', 'crown', 'gold'),
+             ('gems', 'Gems', 'gem', 'lime')]
 # Shop by what you buy (16 Oct, Huss Valley's organisation): id, name, wallet, price, robux, kind label, sub, desc 1, desc 2, icon
 SHOP_ITEMS = {
     'trails': [('trail_spark', 'Sparkle Trail', 'gold', 40, None, 'ONE MATCH', 'EGG TRAIL', 'Your egg leaves sparkles.', 'Lasts one match.', 'trail'),
@@ -873,13 +874,31 @@ def feature_card(x, y, it, title_tag, perks, name):
     return box(x, y, w, h, inner, f'cs r-{acc}', 'border-radius:18px', name=name)
 
 
+def pass_card(x, y, nm, robux, title_tag, line, icon, acc, perks, name):
+    """A game pass (16 Oct): Featured-card layout, one purple Robux button (BtnBuy) or OWNED (BtnOwned)."""
+    w, h = 752, 620
+    inner = tag(20, 18, title_tag, 'pink', 17, 34, name='PassTag')
+    inner += at(26, 66, T(nm.upper(), 52, 'xl', name='Title'))
+    inner += at(28, 132, T(line, 20, 's', name='Tagline'))
+    for k, (pic, a, b_) in enumerate(perks):
+        yy = 178 + k * 92
+        inner += box(22, yy, 330, 80, I(pic, 10, 8, 62) + at(84, 12, T(a, 22, 's', name='PerkTitle')) + at(86, 44, T(b_, 15, 'xs', 'f-dim', name='PerkSub')),
+                     'cw solid', 'border-radius:10px', name=f'Perk{k + 1}')
+    inner += box(370, 178, 360, 264, I(icon, 70, 22, 220, name='Icon'), 'cw', 'border-radius:12px;background:radial-gradient(rgba(255,255,255,.18),rgba(0,0,0,.25))', name='ArtBox')
+    inner += btn(22, 470, 708, 84, 'purple', row(icn('robux', 52), bl(f'{robux:,}', 36, name='Price')), name='BtnBuy')
+    if EXPORT_STATES:
+        inner += btn(22, 470, 708, 84, 'grey', row(icn('check', 46), bl('OWNED', 32)), name='BtnOwned', cls='hid')
+    inner += at(w // 2, 570, T('Bought once, yours on every server.', 17, 'xs', 'f-dim', name='Have'), w=w - 40, align='center')
+    return box(x, y, w, h, inner, f'cs r-{acc}', 'border-radius:18px', name=name)
+
+
 def s_shop(tab='featured'):
     """Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems. Gold items cost
     Gold; Gem items show a Gem price and a Robux price. Short on Gems -> the Robux price is offered (or the Gems tab)."""
     x0, y0, W, H = 170, 118, 1580, 892
     b = ''
     for i, (key, lab, ic, col_) in enumerate(SHOP_TABS):
-        b += dual(26 + i * 248, 20, 236, 62, col_, row(icn(ic, 38), bl(lab, 26)), 'Tab' + lab.replace(' ', ''), tab == key, cls='sm')
+        b += dual(26 + i * 218, 20, 208, 62, col_, row(icn(ic, 36), bl(lab, 25)), 'Tab' + lab.replace(' ', ''), tab == key, cls='sm')
     # Featured: this week's colourway + a spotlight item
     feat = feature_card(26, 102, SHOP_ITEMS['cases'][1], "THIS WEEK'S COLOURWAY  ·  NEW IN 3D 4H",
                         [('case', 'Keep forever', 'Wear it every match'), ('egg_golden', 'Gold colourway', 'Only this week'), ('check', 'Looks only', 'No gameplay edge')], 'FeatA')
@@ -906,6 +925,15 @@ def s_shop(tab='featured'):
         cr += btn(440, 418, 696, 64, 'grey', bl('SEE ALL 51 EMOTES', 26), name='BtnSeeEmotes')
         page = box(26, 102, 1528, 560, cr, 'cs r-pink', 'border-radius:18px', name='CrateCard')
         b += sub('PageEmotes', page, hid=tab != 'emotes')
+    # Passes: VIP and 2x Gold (game passes, GDD v0.4 prices); the runtime fills price / OWNED from EconomyConfig.PASSES
+    if tab == 'passes' or EXPORT_STATES:
+        pg = pass_card(26, 102, 'VIP', 499, 'FOREVER  ·  LOOKS ONLY', 'Stand out in every lobby and every match.', 'crown', 'gold',
+                       [('crown', 'VIP nameplate', 'A gold VIP over your head'), ('star', 'VIP chat tag', '[VIP] before your name'),
+                        ('emote', 'Honored One emote', 'A legendary dance, yours')], 'PassVip')
+        pg += pass_card(800, 102, '2x Gold', 199, 'FOREVER', 'Every match pays double Gold.', 'gold', 'orange',
+                        [('gold', 'Double match Gold', 'Up to 180 a match'), ('shop', 'More looks, sooner', 'Gold buys trails, cases, effects'),
+                         ('check', 'Fair play', 'Gems and pieces unchanged')], 'PassGold2x')
+        b += sub('PagePasses', pg, hid=tab != 'passes')
     if tab == 'gems' or EXPORT_STATES:
         b += gem_packs(hid=tab != 'gems')
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Shop', 'gold', 'Shop', 'shop', b, x0, y0, W, H, shop_right())
@@ -1446,6 +1474,7 @@ SCREENS = [  # (file, title, description, fn, height)
     ('shop_cases.html', 'Shop (Egg Cases)', 'Egg cases', lambda: s_shop('cases'), 1080),
     ('shop_effects.html', 'Shop (Effects)', 'Confetti, entrance, ability colours, hatching', lambda: s_shop('effects'), 1080),
     ('shop_emotes.html', 'Shop (Emotes)', 'The Emote Crate', lambda: s_shop('emotes'), 1080),
+    ('shop_passes.html', 'Shop (Passes)', 'VIP and 2x Gold game passes', lambda: s_shop('passes'), 1080),
     ('shop_getgems.html', 'Shop (Gems)', 'Six Robux Gem packs (developer products, live 16 Oct)', lambda: s_shop('gems'), 1080),
     ('stats.html', 'Stats', 'Your record', s_stats, 1080),
     ('settings.html', 'Settings', 'Real settings, toggles, UI colour, tabs', s_settings, 1080),
