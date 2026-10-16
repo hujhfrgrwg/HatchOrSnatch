@@ -1293,9 +1293,9 @@ def s_reward(kind='item'):
     h += at(960, 720, T('+500 Gems' if gems else 'Rainbow Trail', 72, 'xl', 'f-lime' if gems else '', name='ItemName'), w=1400, align='center')
     h += at(960, 808, T('THANK YOU FOR YOUR SUPPORT!' if gems else 'EGG TRAIL', 30, 's', 'f-gold' if gems else 'f-lime', name='KindText'), w=1200, align='center')
     h += at(960, 852, T('You now have 612 Gems' if gems else 'Yours to keep. It shows in every match.', 26, 's', 'f-dim', name='SubText'), w=1400, align='center')
-    if EXPORT_STATES or not gems:
-        h += btn(700, 920, 250, 84, 'lime', bl('WEAR IT', 36, name='Label'), name='BtnUse', hid=gems)
-    h += btn(970 if (EXPORT_STATES or not gems) else 835, 920, 250, 84, 'purple', bl('NICE!', 36), name='BtnClose')
+    if EXPORT_STATES:    # USE NOW only for a lobby burst; NICE! slides to the middle when it is alone
+        h += btn(700, 920, 250, 84, 'lime', bl('USE NOW', 36, name='Label'), name='BtnUse')
+    h += btn(970 if EXPORT_STATES else 835, 920, 250, 84, 'purple', bl('NICE!', 36), name='BtnClose')
     for sx, sy, s in [(560, 280, 70), (1300, 250, 90), (1360, 580, 54), (500, 600, 60), (1420, 380, 44)]:
         h += I('sparkle', sx, sy, s, name='Sparkle')
     return out + grp('Reveal', h, 'C')

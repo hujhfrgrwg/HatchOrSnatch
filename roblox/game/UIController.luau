@@ -1716,9 +1716,9 @@ local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CA
 -- Reward screen with the hatch reveal's beats: rays spin, the prize pops in, the title slams, sparkles twinkle.
 -- (Emote Crate wins keep their own reveal in the Emotes panel; EmoteController gives it the same beats.)
 local KEEP_WORDS = {
-	trail = "Lasts one match. Have fun out there!",
+	trail = "It goes on your egg next match.",
 	burst = "Pop it in the lobby. One use.",
-	case = "Yours to keep. Wear it on your egg.",
+	case = "Yours to keep. You're wearing it now.",
 	trailPerm = "Yours to keep. It shows in every match.",
 	entrance = "Yours to keep. Plays when you arrive in the lobby.",
 	abilityFx = "Yours to keep. Your ability effects turn gold.",
@@ -1820,9 +1820,8 @@ local function rewardItem(it: any)
 		kind = SUB_WORDS[it.kind] or "",
 		sub = KEEP_WORDS[it.kind] or "Yours to keep.",
 	}
-	if it.kind == "case" then
-		r.use, r.onUse = "WEAR IT", function() Net.event("RequestSetCosmetic"):FireServer("case", it.id) end
-	elseif it.kind == "burst" then
+	-- a bought case is worn straight away (ProfileLogic.buy); a burst can pop right here
+	if it.kind == "burst" then
 		r.use, r.onUse = "USE NOW", function() Net.event("RequestUseItem"):FireServer(it.id) end
 	end
 	UIC.showReward(r)
