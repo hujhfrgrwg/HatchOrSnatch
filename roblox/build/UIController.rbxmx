@@ -1191,9 +1191,9 @@ local function refreshIncubator()
 	if lad then
 		local f = selFamily :: string
 		local info = FAMILY[f] or {}
-		for _, d in lad:GetDescendants() do
-			-- the well's folder-tab title is unnamed in the export (T_...): it is the only T_ label with a dot
-			if d:IsA("TextLabel") and d.Name:match("^T_") and string.find(d.Text, "·", 1, true) then
+		-- the well's folder-tab title is unnamed in the export: init() tags it (and its shadow) LadderTitle
+		for _, d in sc:GetDescendants() do
+			if d:IsA("TextLabel") and d:GetAttribute("LadderTitle") then
 				d.Text = ("%s  ·  %s"):format(familyTitle(f), familyShort(f))
 			end
 		end
@@ -1204,11 +1204,15 @@ local function refreshIncubator()
 				setIcon(sp, "Icon", art)
 				setText(sp, "PetName", nm)
 				local r = EconomyConfig.RECIPES[m]
-				setText(sp, "RecipeText", ("%d random  ·  %d pick"):format(r.base, r.focus))
+				setText(sp, "RecipeText", ("%d random · %d pick"):format(r.base, r.focus))
 			end
 		end
 		moveRing(lad:FindFirstChild("SpeciesSel"), find(lad:FindFirstChild("Species_" .. selRarity), "Tile"), 4)
-		setRich(lad, "RolesText", ("%s %s  ·  %s %s  ·  %s"):format(font(Color3.fromRGB(106, 216, 255), "AS RUNNER"), info.run or "", font(Color3.fromRGB(255, 90, 90), "AS CATCHER"), info.catch or "", font(Color3.fromRGB(210, 210, 216), "you keep it when caught")))
+		local roles = ("%s %s  ·  %s %s"):format(font(Color3.fromRGB(106, 216, 255), "AS RUNNER"), info.run or "", font(Color3.fromRGB(255, 90, 90), "AS CATCHER"), info.catch or "")
+		if #(info.run or "") + #(info.catch or "") <= 28 then
+			roles ..= "  ·  " .. font(Color3.fromRGB(210, 210, 216), "you keep it when caught")
+		end
+		setRich(lad, "RolesText", roles)
 	end
 	-- hatch bar
 	local hf, hl = find(sc, "HatchFirst"), find(sc, "HatchLater")
@@ -2326,6 +2330,14 @@ function UIC.init()
 	overlay.Size = UDim2.fromScale(1, 1)
 	overlay.ZIndex = 40
 	overlay.Parent = root
+	-- tag the incubator ladder's folder-tab title (unnamed in the export) so refreshIncubator can rename it
+	if S.Incubator then
+		for _, d in S.Incubator:GetDescendants() do
+			if d:IsA("TextLabel") and string.find(d.Text, "Two quick dashes", 1, true) then
+				d:SetAttribute("LadderTitle", true)
+			end
+		end
+	end
 	-- each page's dim is a 1920x1080 design rect: stretch it past every edge so taller/wider screens are covered
 	for _, sc in pairs(S) do
 		local dim = sc:FindFirstChild("Dim")
