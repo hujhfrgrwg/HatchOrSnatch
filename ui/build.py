@@ -713,18 +713,18 @@ def s_pets():
     for j in range(len(OWNED), LAUNCH_PETS):
         gx, gy = 18 + (j % 4) * 196, 18 + (j // 4) * 210
         g += slot(gx, gy, 182, 'locked', None, cls='locked', name=f'Empty{j}', inner_extra=at(91, 64, T('?', 56, 'l', 'f-dim', name='Q'), w=180, align='center'))
-    b += well(26, 92, 820, 590, g, name='Grid', style='overflow:hidden')
+    b += well(26, 92, 820, 566, g, name='Grid', style='overflow:hidden')
     pv = slot(110, 18, 340, 'common', pet_img('ShadesShark', 3), name='PreviewSlot', art_pad=.06, cls='fill')
     pv += at(280, 372, T('Shades Shark', 44, 'l', name='PetName'), w=540, align='center')
     pv += at(280, 428, row(T('Common', 22, 'xs', 'f-common', name='RarityText'), stars(3, 3, 26, name='Stars'), T('copies', 18, 'xs', 'f-dim'), gap=10), w=540, align='center')
     pv += at(30, 470, row(icn('ab_dash', 52, name='AbilityIcon'), col(T('DOUBLE DASH', 26, 's', name='AbilityName'), T('Two quick dashes in a row  ·  cooldown 12s', 18, 'xs', 'f-dim', name='AbilityDesc'), gap=0, align='flex-start'), gap=10))
     pv += btn(30, 540, 476, 70, 'lime', row(icn('check', 36), bl('EQUIPPED', 28)), name='BtnEquipped')
     pv += btn(30, 540, 476, 70, 'sky', bl('EQUIP', 28), name='BtnEquip', cls='hid' if EXPORT_STATES else 'hid')
-    b += well(862, 22, 532, 660, pv, name='Preview')
+    b += well(862, 22, 532, 636, pv, name='Preview')
     right = row(icn('pets', 50), T(f'{len(OWNED)} / {LAUNCH_PETS} found', 32, 's', name='CountText'), gap=6)
     if EXPORT_STATES:
-        b += sub('EmptyState', well(26, 92, 820, 590, at(410, 200, col(icn('egg_basic', 120), T('No pets yet', 40, 'l'), T('Hatch one at the Incubator', 24, 'xs', 'f-dim'), gap=8), w=800, align='center')
-                                     + btn(260, 450, 300, 76, 'lime', bl('INCUBATOR', 30), name='GoIncubator', opens='Incubator'), name='EmptyWell'), hid=True)
+        b += sub('EmptyState', well(26, 92, 820, 566, at(410, 190, col(icn('egg_basic', 120), T('No pets yet', 40, 'l'), T('Hatch one at the Incubator', 24, 'xs', 'f-dim'), gap=8), w=800, align='center')
+                                     + btn(260, 430, 300, 76, 'lime', bl('INCUBATOR', 30), name='GoIncubator', opens='Incubator'), name='EmptyWell'), hid=True)
     return world('bg_lobby_blur.jpg', False) + dim() + panel('Pets', 'sky', 'Pets', 'pets', b, x0, y0, W, H, right)
 
 

@@ -38,7 +38,11 @@ for path, e in ids.items():
 # re-exports that only re-raster an image (headless noise, mean diff < 0.1/255) reuse the uploaded id
 # instead of a new upload; a6f725533cd is the close button re-exported without its corner tabs (16 Oct)
 ALIAS = {'art:a0f5b258ae1': 'art:a9256f992b1', 'art:a176585b5fb': 'art:a0d93acb115', 'art:af3958efa26': 'art:acc69c05fca',
-         'art:a6f725533cd': 'art:close_clean'}
+         'art:a6f725533cd': 'art:close_clean',
+         'art:a1fd854d283': 'art:ac081d42ddf'}  # Pets' third-row '?' tile, clipped by the shorter grid: the grid clips it in Roblox
+# panel glows were clipped where the blur still had alpha 44 (a hard edge): the *s versions fade to 0 (16 Oct)
+for _k in ['ab90101a166', 'a64b9af467b', 'ada0c7f70ae', 'a3cfae0ce49', 'affdb20b15c', 'ae84f76b26a', 'a0e7996f923', 'a477426a820', 'a609fe22cc6', 'ac7cef1fd33', 'a68fad07684', 'a879fd92992']:
+    ALIAS['art:' + _k] = 'art:' + _k + 's'
 for new, old in ALIAS.items():
     if old in led:
         led[new] = led[old]

@@ -192,6 +192,23 @@ local function iconId(slug: string?): string
 end
 
 -- set an exported icon (and its "<name>Shadow" twin) to another slug, or to any image url
+-- shrink-to-fit for labels whose text varies (names, long toasts): never cut off, never bigger than designed
+local function fitText(scope: Instance?, name: string)
+	if not scope then return end
+	for _, d in scope:GetDescendants() do
+		if d:IsA("TextLabel") and (d.Name == name or d.Name == name .. "Shadow") then
+			if not d:FindFirstChild("FitMax") then
+				local c = Instance.new("UITextSizeConstraint")
+				c.Name = "FitMax"
+				c.MaxTextSize = math.max(8, math.floor(d.TextSize))
+				c.MinTextSize = 8
+				c.Parent = d
+			end
+			d.TextScaled = true
+		end
+	end
+end
+
 local function setIcon(scope: Instance?, name: string, slugOrUrl: string)
 	if not scope then return end
 	local img = if string.find(slugOrUrl, "://") then slugOrUrl else iconId(slugOrUrl)
@@ -453,6 +470,7 @@ function UIC.toast(text: string, kind: string?, force: boolean?)
 	card:SetAttribute("Msg", text)
 	card:SetAttribute("Born", os.clock())
 	setText(card, "Msg", text)
+	fitText(card, "Msg")
 	setIcon(card, "Icon", icon)
 	card.ZIndex = 5
 	card.Parent = overlay
@@ -537,8 +555,8 @@ function UIC.banner(kind: string, title: string?, sub: string?, icon: string?, h
 			nextBanner()
 			return
 		end
-		if title then setText(card, "Title", title) end
-		if sub then setText(card, "Sub", sub) else
+		if title then setText(card, "Title", title) fitText(card, "Title") end
+		if sub then setText(card, "Sub", sub) fitText(card, "Sub") else
 			local s = find(card, "Sub")
 			if s then setText(card, "Sub", "") end
 		end
@@ -1015,9 +1033,23 @@ local function badges()
 	end
 end
 
+local tensionLatch = false
 local function updateHUD()
 	local m = inMatch()
-	Sound.setMusic(if resultsOpen then "results" elseif m then "match" else "lobby")
+	-- music: lobby beds, crossing tracks, a tension track for the last 12 s of a crossing or the last two
+	-- runners (latched until the crossing ends, so it can't flicker), silence under the results sting
+	local music = "lobby"
+	if resultsOpen then
+		music = "results"
+	elseif m then
+		if state:GetAttribute("Phase") == "CROSSING" then
+			if phaseLeft() <= 12 or (state:GetAttribute("RunnersLeft") or 99) <= 2 then tensionLatch = true end
+		else
+			tensionLatch = false
+		end
+		music = if tensionLatch then "tension" else "match"
+	end
+	Sound.setMusic(music)
 	if S.HUD then S.HUD.Visible = not m end
 	if S.MatchHUD then S.MatchHUD.Visible = m end
 	if m then
@@ -2616,6 +2648,32 @@ function UIC.init()
 					pill.Position = UDim2.fromOffset(right - pill.Size.X.Offset / 2 + 2, top + 2)
 					pill:SetAttribute("JuiceRest", pill.Position)
 				end
+			end
+		end
+	end
+	-- button plates: the export's 3 px radius read as round on the glossy right and square on the left.
+	-- Clip every button plate to one clear radius (not the tilted close button or the rail's square plates)
+	for _, b in root:GetDescendants() do
+		if b:IsA("GuiButton") and b.Name ~= "CloseButton" and not b:FindFirstChild("Plate") then
+			local art = b:FindFirstChild("Art")
+			if art and art:IsA("ImageLabel") and not art:FindFirstChildOfClass("UICorner") and art.Size.Y.Offset <= 120 then
+				local c = Instance.new("UICorner")
+				c.CornerRadius = UDim.new(0, 10)
+				c.Parent = art
+			end
+		end
+	end
+	-- panel glows were exported clipped (alpha 44 at the edge = a hard line beside the panel). Until the
+	-- soft-edged re-renders are uploaded, fade their left and right edges here
+	for _, g in root:GetDescendants() do
+		if (g.Name == "Glow" or g.Name == "GlowMono") and g:IsA("Frame") then
+			local art = g:FindFirstChild("Art")
+			if art and art:IsA("ImageLabel") and not art:FindFirstChild("EdgeFade") then
+				local gr = Instance.new("UIGradient")
+				gr.Name = "EdgeFade"
+				gr.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.025, 0),
+					NumberSequenceKeypoint.new(0.975, 0), NumberSequenceKeypoint.new(1, 1) })
+				gr.Parent = art
 			end
 		end
 	end

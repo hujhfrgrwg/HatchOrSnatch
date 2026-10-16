@@ -28,7 +28,7 @@ local SFX: { [string]: { any } } = {
 	close = { 15675012262, 0.56, 0, 0 }, -- Roblox_UI_Whoosh_04
 	toggle = { 9119717529, 0.63, 0, 0.03 }, -- Switch Click On Or Off Toggle Button 1
 	tab = { 15675037413, 0.75, 0, 0.03 }, -- Roblox_UI_Paper_Swipe
-	pop = { 15675055424, 0.36, 0, 0 }, -- Roblox_UI_Cute_Pop (toasts)
+	pop = { 15675059323, 0.5, 0, 0 }, -- Roblox_UI_Bright_Click (toasts; the cute pop read as kiddy)
 	error = { 9120917438, 1.1, 0, 0 }, -- Wood Impacts Soft Impacts On Temple Blocks 1
 	reward = { 9113849492, 2.1, 0.08, 0 }, -- Coins Or Keys Jingle 6 (gold, claims)
 	purchase = { 9113728042, 0.41, 0.05, 0 }, -- Cash Register 1
@@ -50,18 +50,34 @@ local SFX: { [string]: { any } } = {
 	ping = { 9116224467, 0.69, 0, 0 }, -- Large Metal Triangle Single Ringing Hits 12 (Scout)
 	ability = { 9116402581, 0.69, 0.28, 0.04 }, -- Magic Movement Airy Whips Swooshes 61 (other abilities)
 	-- results
-	win = { 1845466651, 0.5, 0, 0 }, -- APM: Celebration Fanfare (Fanfares And Salutes)
-	lose = { 9119198473, 0.48, 0.3, 0 }, -- Slide Whistle 7
+	win = { 9040322575, 0.75, 0.1, 0 }, -- APM: Looking at the Winner (30 sec), Sports Hip Hop
+	lose = { 9113085438, 1.2, 0.4, 0 }, -- Alarm Buzzer 3 (a final buzzer; the slide whistle read as kiddy)
 }
 
 -- APM Music (Roblox's licensed library). Each state is a playlist; tracks crossfade end to end.
--- Empty until Hunter picks tracks: he rejected the first picks (16 Oct: Paradise Falls, Tender Tropical
--- House, Really Fast, Funky (A)). With no tracks the system stays silent.
-local MUSIC: { [string]: { number } } = {
-	lobby = {},
-	match = {},
+-- Sporty, not kiddy (Hunter, 16 Oct: "mindful of Huss Valley", the game is going less bright). APM Music only.
+-- { asset id, gain }: gain levels each track to the same loudness (measured in the place, AudioAnalyzer RMS).
+-- Rejected earlier, don't reuse: Paradise Falls, Tender Tropical House, Really Fast, Funky (A).
+local MUSIC: { [string]: { { number } } } = {
+	-- lobby: sports hip-hop beds (underscore mixes: no lead line, easy to sit in for minutes)
+	lobby = {
+		{ 9040325939, 1.08 }, -- Want to be Great (underscore), Sports Hip Hop
+		{ 9040323530, 0.93 }, -- Ain't No Competition (underscore), Sports Hip Hop
+		{ 9040323114, 0.61 }, -- Go Hard or Go Home (underscore), Sports Hip Hop
+	},
+	-- crossings: sports trailer hip-hop and drum & bass
+	match = {
+		{ 124019126977788, 1.0 }, -- Heat Check, Trailer Beats - Sports Hip Hop
+		{ 9038426867, 0.27 }, -- In The Race, Sport - Bass and Drums
+		{ 132310085899222, 0.77 }, -- Endgame Drive, Trailer Beats - Sports Hip Hop
+	},
+	-- the last seconds of a crossing, or down to the last runners
+	tension = {
+		{ 133340995970086, 1.2 }, -- All Or Nothing, Trailer Beats - Sports Hip Hop
+	},
 }
-local MUSIC_VOLUME = { lobby = 0.32, match = 0.3, results = 0.16 }
+-- level per state; results drops the bed so the win / lose sting carries the moment
+local MUSIC_VOLUME = { lobby = 0.33, match = 0.38, tension = 0.42, results = 0 }
 local FADE = 1.6
 
 local function group(name: string, volume: number): SoundGroup
@@ -168,26 +184,28 @@ local function fadeOut(s: Sound)
 	t:Play()
 end
 
-local function startTrack(kind: string)
+local currentKind: string? = nil
+local currentGain = 1
+
+local function startTrack(kind: string, fade: number?)
 	local list = MUSIC[kind]
 	if not list or #list == 0 then return end
 	local i = (index[kind] or math.random(1, #list)) % #list + 1
 	index[kind] = i
 	local s = Instance.new("Sound")
 	s.Name = "EOS_Music_" .. kind
-	s.SoundId = "rbxassetid://" .. list[i]
+	s.SoundId = "rbxassetid://" .. list[i][1]
 	s.Volume = 0
 	s.SoundGroup = musicGroup
 	s.Parent = SoundService
 	local old = current
-	current = s
+	current, currentKind, currentGain = s, kind, list[i][2]
 	if old then fadeOut(old) end
 	s:Play()
-	local target = MUSIC_VOLUME[state] or MUSIC_VOLUME[kind] or 0.3
-	TweenService:Create(s, TweenInfo.new(FADE, Enum.EasingStyle.Sine), { Volume = target }):Play()
+	TweenService:Create(s, TweenInfo.new(fade or FADE, Enum.EasingStyle.Sine), { Volume = (MUSIC_VOLUME[state] or 0.3) * currentGain }):Play()
 	-- next track in the same playlist when this one ends (state may have moved on by then)
 	s.Ended:Once(function()
-		if current == s and (state == kind or (state == "results" and kind == "lobby")) then
+		if current == s and state == kind then
 			startTrack(kind)
 		end
 	end)
@@ -195,20 +213,15 @@ end
 
 function Sound.setMusic(newState: string)
 	if newState == state then return end
-	local prev = state
 	state = newState
-	if newState == "off" then
-		if current then fadeOut(current) current = nil end
+	if newState == "off" or (MUSIC_VOLUME[newState] or 0) <= 0 then
+		-- off, or results (the sting plays over silence); the next state starts a fresh track
+		if current then fadeOut(current) current, currentKind = nil, nil end
 		return
 	end
-	local kind = if newState == "results" then "lobby" else newState
-	local playing = if prev == "results" then "lobby" else prev
-	if current and playing == kind then
-		-- same playlist, new level (lobby <-> results)
-		TweenService:Create(current, TweenInfo.new(FADE, Enum.EasingStyle.Sine), { Volume = MUSIC_VOLUME[newState] or 0.3 }):Play()
-		return
-	end
-	startTrack(kind)
+	if current and currentKind == newState then return end
+	-- into tension: a fast cut so the clock feels urgent; everything else crossfades
+	startTrack(newState, if newState == "tension" then 0.5 else FADE)
 end
 
 function Sound.setMusicEnabled(on: boolean)
