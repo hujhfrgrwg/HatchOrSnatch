@@ -37,7 +37,8 @@ for path, e in ids.items():
     n += 1
 # re-exports that only re-raster an image (headless noise, mean diff < 0.1/255) reuse the uploaded id
 # instead of a new upload; a6f725533cd is the close button re-exported without its corner tabs (16 Oct)
-ALIAS = {'art:a19ddaac0b1': 'art:a915ff598c9',  # 16 Oct pass export: item card WEAR button re-rastered (noise only)
+ALIAS = {'art:a08b4757d58': 'art:a81c41f5f1a', 'art:a2fc611591a': 'art:a07d95a6487', 'art:a17ec0597ac': 'art:ac96848e543', 'art:a79ece82a19': 'art:a915ff598c9', 'art:ada65587cb1': 'art:aee49effd1d', 'art:a6bb776197a': 'art:a4edfc92945', 'art:ad9417398e0': 'art:a6971c9b8d4', 'art:ae805efc09d': 'art:ad916e1a788',  # 16 Oct Cosmetics export: item cards + buttons, pixel-identical re-encodes
+         'art:a19ddaac0b1': 'art:a915ff598c9',  # 16 Oct pass export: item card WEAR button re-rastered (noise only)
          'art:a0f5b258ae1': 'art:a9256f992b1', 'art:a176585b5fb': 'art:a0d93acb115', 'art:af3958efa26': 'art:acc69c05fca',
          'art:a6f725533cd': 'art:close_clean',
          'art:a1fd854d283': 'art:ac081d42ddf'}  # Pets' third-row '?' tile, clipped by the shorter grid: the grid clips it in Roblox

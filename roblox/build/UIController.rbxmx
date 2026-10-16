@@ -1725,7 +1725,11 @@ end
 
 -- Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems.
 -- Gold items cost Gold; Gem items show a Gem price and (once its product exists) a Robux price.
-local SHOP_TABS = { featured = "TabFeatured", trails = "TabTrails", cases = "TabEggCases", effects = "TabEffects", emotes = "TabEmotes", passes = "TabPasses", gems = "TabGems" }
+local SHOP_TABS = { featured = "TabFeatured", cosmetics = "TabCosmetics", emotes = "TabEmotes", passes = "TabPasses", gems = "TabGems" }
+-- Cosmetics (16 Oct, Hunter): Trails, Egg Cases and Effects in one tab; chips filter by EconomyConfig.TAB_OF_KIND
+local COS_FILTERS = { all = "FilterAll", trails = "FilterTrails", cases = "FilterCases", effects = "FilterEffects" }
+local COS_ORDER = { trails = 1, cases = 2, effects = 3 }
+local cosFilter = "all"
 local TAG_WORDS = { trail = "ONE MATCH", burst = "LOBBY, ONCE" } -- everything else keeps forever
 local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CASE", burst = "LOBBY EFFECT", entrance = "ENTRANCE", abilityFx = "ABILITY FX", hatchFx = "HATCH FX" }
 
@@ -2058,13 +2062,14 @@ local function refreshShop()
 	if not sc or not profile then return end
 	if shopTab == "gold" then shopTab = "featured" end -- old tab names (lobby stalls)
 	if shopTab == "getgems" then shopTab = "gems" end
+	if COS_FILTERS[shopTab] then cosFilter, shopTab = shopTab, "cosmetics" end -- old tab names open the filtered Cosmetics
 	if not SHOP_TABS[shopTab] or ((shopTab == "gems" or shopTab == "passes") and not PURCHASES) then shopTab = "featured" end
 	for key, nm in pairs(SHOP_TABS) do
 		local t = find(sc, nm)
 		setDual(t, shopTab == key)
 		if (key == "gems" or key == "passes") and t and t:IsA("GuiObject") then t.Visible = PURCHASES end
 	end
-	local pages = { PageFeatured = shopTab == "featured", PageItems = shopTab == "trails" or shopTab == "cases" or shopTab == "effects",
+	local pages = { PageFeatured = shopTab == "featured", PageItems = shopTab == "cosmetics", CosFilters = shopTab == "cosmetics",
 		PageEmotes = shopTab == "emotes", PagePasses = shopTab == "passes", GetGemsPage = shopTab == "gems" }
 	for nm, on in pairs(pages) do
 		local pg = find(sc, nm)
@@ -2097,32 +2102,64 @@ local function refreshShop()
 			local h = page:FindFirstChild(n)
 			if h and h:IsA("GuiObject") then h.Visible = false end
 		end
+		for key, nm in pairs(COS_FILTERS) do setDual(find(sc, nm), cosFilter == key) end
 		local items = {}
 		for _, it in ipairs(EconomyConfig.SHOP) do
-			if EconomyConfig.TAB_OF_KIND[it.kind] == shopTab then table.insert(items, it) end
+			local cat = EconomyConfig.TAB_OF_KIND[it.kind]
+			if COS_ORDER[cat] and (cosFilter == "all" or cat == cosFilter) then table.insert(items, it) end
 		end
+		table.sort(items, function(a, b)
+			local ca, cb = COS_ORDER[EconomyConfig.TAB_OF_KIND[a.kind]], COS_ORDER[EconomyConfig.TAB_OF_KIND[b.kind]]
+			if ca ~= cb then return ca < cb end
+			return (table.find(EconomyConfig.SHOP, a) or 0) < (table.find(EconomyConfig.SHOP, b) or 0)
+		end)
+		-- one row of cards across the 1528 px page: centred while it fits, scrolls sideways once it doesn't
+		local rowF = page:FindFirstChild("Row") :: ScrollingFrame?
+		if not rowF then
+			local r = Instance.new("ScrollingFrame")
+			r.Name = "Row"
+			r.BackgroundTransparency = 1
+			r.BorderSizePixel = 0
+			r.Position = UDim2.fromOffset(0, 0)
+			r.Size = UDim2.fromOffset(1528, 588 + 16)
+			r.ScrollingDirection = Enum.ScrollingDirection.X
+			r.ScrollBarThickness = 8
+			r.ScrollBarImageColor3 = Color3.fromRGB(255, 196, 60)
+			r.VerticalScrollBarInset = Enum.ScrollBarInset.None
+			r.CanvasSize = UDim2.fromOffset(1528, 0)
+			r.Parent = page
+			rowF = r
+		end
+		local row = rowF :: ScrollingFrame
+		local total = #items * 360 + math.max(0, #items - 1) * 24
+		local fits = total <= 1528
+		row.CanvasSize = UDim2.fromOffset(math.max(1528, total), 0)
+		row.ScrollBarImageTransparency = if fits then 1 else 0
+		if row:GetAttribute("Filter") ~= cosFilter then
+			row:SetAttribute("Filter", cosFilter)
+			row.CanvasPosition = Vector2.zero
+		end
+		local x0 = if fits then (1528 - total) // 2 else 0
 		local keep = {}
 		for i, it in ipairs(items) do
 			local nm = "Card_" .. it.id
-			local card = page:FindFirstChild(nm)
+			local card = row:FindFirstChild(nm)
 			local proto = if it.wallet == "gems" then protoM else protoG
 			if not card and proto then
 				card = proto:Clone()
 				card.Name = nm
 				card:SetAttribute("Runtime", true)
 				card:SetAttribute("Wired", nil)
-				card.Parent = page
+				card.Parent = row
 			end
 			if card and card:IsA("GuiObject") then
 				keep[card] = true
 				card.Visible = true
-				-- the page already sits under the tabs (y 217); the row is centred on the 1528 px page width
-				local x0 = (1528 - (#items * 360 + (#items - 1) * 24)) // 2
 				card.Position = UDim2.fromOffset(x0 + (i - 1) * 384, 0)
 				fillCard(card, it)
 			end
 		end
-		for _, c in page:GetChildren() do
+		for _, c in row:GetChildren() do
 			if c:GetAttribute("Runtime") and not keep[c] then c.Visible = false end
 		end
 	elseif shopTab == "emotes" then
@@ -2778,6 +2815,9 @@ local function wireButtons()
 	if shop then
 		for key, nm in pairs(SHOP_TABS) do
 			onClick(find(shop, nm), function() shopTab = key; refreshShop() end)
+		end
+		for key, nm in pairs(COS_FILTERS) do
+			onClick(find(shop, nm), function() cosFilter = key; refreshShop() end)
 		end
 		local packs = find(shop, "GetGemsPage")
 		for i, pack in ipairs(EconomyConfig.GEM_PACKS) do

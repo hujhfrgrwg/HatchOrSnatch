@@ -812,9 +812,10 @@ def gem_packs(hid=False):
     return sub('GetGemsPage', page, hid=hid)
 
 
-SHOP_TABS = [('featured', 'Featured', 'star', 'gold'), ('trails', 'Trails', 'trail', 'gold'), ('cases', 'Egg Cases', 'case', 'gold'),
-             ('effects', 'Effects', 'burst', 'gold'), ('emotes', 'Emotes', 'emote', 'gold'), ('passes', 'Passes', 'crown', 'gold'),
-             ('gems', 'Gems', 'gem', 'lime')]
+# 16 Oct (Hunter): Trails, Egg Cases and Effects folded into one Cosmetics tab (filter chips inside) to keep the bar short
+SHOP_TABS = [('featured', 'Featured', 'star', 'gold'), ('cosmetics', 'Cosmetics', 'case', 'gold'), ('emotes', 'Emotes', 'emote', 'gold'),
+             ('passes', 'Passes', 'crown', 'gold'), ('gems', 'Gems', 'gem', 'lime')]
+COS_FILTERS = [('all', 'All'), ('trails', 'Trails'), ('cases', 'Egg Cases'), ('effects', 'Effects')]
 # Shop by what you buy (16 Oct, Huss Valley's organisation): id, name, wallet, price, robux, kind label, sub, desc 1, desc 2, icon
 SHOP_ITEMS = {
     'trails': [('trail_spark', 'Sparkle Trail', 'gold', 40, None, 'ONE MATCH', 'EGG TRAIL', 'Your egg leaves sparkles.', 'Lasts one match.', 'trail'),
@@ -908,12 +909,12 @@ def pass_card(x, y, nm, robux, title_tag, line, icon, acc, perks, name):
 
 
 def s_shop(tab='featured'):
-    """Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems. Gold items cost
+    """Shop by what you buy (16 Oct, after Huss Valley): Featured, Cosmetics, Emotes, Passes, Gems. Gold items cost
     Gold; Gem items show a Gem price and a Robux price. Short on Gems -> the Robux price is offered (or the Gems tab)."""
     x0, y0, W, H = 170, 118, 1580, 892
     b = ''
     for i, (key, lab, ic, col_) in enumerate(SHOP_TABS):
-        b += dual(26 + i * 218, 20, 208, 62, col_, row(icn(ic, 36), bl(lab, 25)), 'Tab' + lab.replace(' ', ''), tab == key, cls='sm')
+        b += dual(26 + i * 306, 20, 290, 62, col_, row(icn(ic, 38), bl(lab, 26)), 'Tab' + lab.replace(' ', ''), tab == key, cls='sm')
     # Featured: this week's colourway + a spotlight item
     feat = feature_card(26, 102, SHOP_ITEMS['cases'][1], "THIS WEEK'S COLOURWAY  ·  NEW IN 3D 4H",
                         [('case', 'Keep forever', 'Wear it every match'), ('egg_golden', 'Gold colourway', 'Only this week'), ('check', 'Looks only', 'No gameplay edge')], 'FeatA')
@@ -921,12 +922,18 @@ def s_shop(tab='featured'):
                          [('hatchfx', 'Bigger ceremony', 'Light beams and fanfare'), ('incubator', 'Every hatch', 'At the incubator'), ('check', 'Looks only', 'No gameplay edge')], 'FeatB')
     b += sub('PageFeatured', feat, hid=tab != 'featured')
     # Category pages: the runtime fills Cards from EconomyConfig.SHOP (ProtoGold / ProtoGems)
-    if tab in ('trails', 'cases', 'effects'):
-        cards = ''.join(item_card(26 + i * 384, 102, it) for i, it in enumerate(SHOP_ITEMS[tab]))
+    # Cosmetics: filter chips, then one row of cards (scrolls sideways at runtime once there are more than four)
+    if tab == 'cosmetics' or EXPORT_STATES:
+        chips = ''.join(dual(26 + i * 196, 0, 184, 46, 'gold', bl(lab, 21), 'Filter' + key.capitalize(), key == 'all', cls='sm')
+                        for i, (key, lab) in enumerate(COS_FILTERS))
+        b += sub('CosFilters', at(0, 102, chips), hid=tab != 'cosmetics')
+    if tab == 'cosmetics':
+        allit = SHOP_ITEMS['trails'] + SHOP_ITEMS['cases'] + SHOP_ITEMS['effects']
+        cards = ''.join(item_card(26 + i * 384, 160, it) for i, it in enumerate(allit[:4]))
         b += sub('PageItems', cards)
     elif EXPORT_STATES:
-        b += sub('PageItems', sub('ProtoGold', item_card(26, 102, SHOP_ITEMS['trails'][0], name='Card'), hid=True)
-                 + sub('ProtoGems', item_card(26, 102, SHOP_ITEMS['trails'][2], name='Card'), hid=True), hid=True)
+        b += sub('PageItems', sub('ProtoGold', item_card(26, 160, SHOP_ITEMS['trails'][0], name='Card'), hid=True)
+                 + sub('ProtoGems', item_card(26, 160, SHOP_ITEMS['trails'][2], name='Card'), hid=True), hid=True)
     # Emotes: the Emote Crate
     if tab == 'emotes' or EXPORT_STATES:
         cr = I('gift', 40, 40, 360, name='CrateArt')
@@ -1485,9 +1492,7 @@ SCREENS = [  # (file, title, description, fn, height)
     ('incubator_later.html', 'Incubator (after first pet)', 'Random 2 vs choose 3', lambda: s_incubator(False), 1080),
     ('pets.html', 'Pets', 'Collection grid, mastery stars, preview, equip', s_pets, 1080),
     ('shop.html', 'Shop (Featured)', "This week's colourway and a spotlight item", s_shop, 1080),
-    ('shop_trails.html', 'Shop (Trails)', 'Egg trails: one match (Gold) or forever (Gems or Robux)', lambda: s_shop('trails'), 1080),
-    ('shop_cases.html', 'Shop (Egg Cases)', 'Egg cases', lambda: s_shop('cases'), 1080),
-    ('shop_effects.html', 'Shop (Effects)', 'Confetti, entrance, ability colours, hatching', lambda: s_shop('effects'), 1080),
+    ('shop_cosmetics.html', 'Shop (Cosmetics)', 'Trails, egg cases and effects in one row, with filter chips', lambda: s_shop('cosmetics'), 1080),
     ('shop_emotes.html', 'Shop (Emotes)', 'The Emote Crate', lambda: s_shop('emotes'), 1080),
     ('shop_passes.html', 'Shop (Passes)', 'VIP and 2x XP game passes', lambda: s_shop('passes'), 1080),
     ('shop_getgems.html', 'Shop (Gems)', 'Six Robux Gem packs (developer products, live 16 Oct)', lambda: s_shop('gems'), 1080),
