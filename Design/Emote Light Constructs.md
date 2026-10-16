@@ -1,7 +1,7 @@
 ---
 tags: [design, emotes, vfx]
 updated: 2026-10-16
-ticket: HOS-EMOTE-FX-001 (proposed)
+ticket: HOS-EMOTE-FX-001 (prototypes built)
 ---
 # Emote Light Constructs
 
@@ -23,6 +23,31 @@ Glowing see-through "light" pieces in pale spectral cyan (Neon, ~50% transparent
 - `docs/emote-fx/surfer_board_construct_v1.jpg`: glowing board under the feet, spray off the tail.
 
 The samples live in the place only as an unsaved preview (`Workspace._EmoteFXPreview`, Archivable = false, 400 studs up).
+
+## Prototypes (v1, 2026-10-16, Hunter: "Prototype the rest of them. Don't go too crazy though")
+13 constructs, 2-9 glowing pieces each, saved as models in `ServerStorage.EmoteFXPrototypes.<emoteId>` (no code uses them yet). Each model: a root part (named after the clip's joint for the scythe and board), attributes `Part0` (body part it sits on), `C0` (offset from that part), `Joint` (Motor6D name the clip animates, or empty) and `Note`. Pieces are anchored in storage; the runtime will unanchor and weld them.
+
+| Emote | Construct | Sits on |
+|---|---|---|
+| Reaper's Ride | scythe (shaft + crescent blade), wisps | Torso, via the clip's scythe joint |
+| Surfer | surfboard with stringer and fin, tail spray | HumanoidRootPart, via `Surf` |
+| Toilet Sit | toilet: seat, bowl, tank | HumanoidRootPart |
+| Company Dance | office desk + laptop (guess: hands rest at desk height) | HumanoidRootPart |
+| Ice Cream Cart | handle, cart, wheels, umbrella, pink scoop | HumanoidRootPart |
+| Couch Nap | couch: seat, back, arms, pillow | HumanoidRootPart |
+| Sunbath | reclined lounger + pink towel | HumanoidRootPart |
+| Blossom Break | pink blossom tree behind, falling petals | HumanoidRootPart |
+| Shadow Emerge | dark violet shadow pool with a glowing rim, rising smoke | HumanoidRootPart |
+| Coconut Launch | cannon behind the feet (smoke puff) + coconut in the hands | HumanoidRootPart |
+| Trick or Treat | pumpkin bucket | Right Arm |
+| Gambler Dance | two dice | Right Arm |
+| Threaten | bat hanging at the side (guess) | Right Arm |
+
+Skipped: **Honored One** (floats on its back with arms spread: a power pose, no prop implied).
+
+Screenshots: `docs/emote-fx/emote_constructs_sheet_v1.jpg` (all 13) and one `<id>_construct_v1.jpg` per emote. Furniture is fixed to the root part, so it stays put while the body moves; held props follow the hand.
+
+Known limits: Sunbath stands up mid-clip, leaving the lounger empty for a moment; the Surfer's feet lift ~0.6 studs off the board on the hops; shapes are blocky by design (parts only, no meshes, nothing to upload).
 
 ## Plan once the look is approved
 1. Store each construct as a model in `ReplicatedStorage.EOS_EmoteFX.<emoteId>` (root part named after the joint, `Part0` + `C0` attributes); `EmoteConfig` entries get `fx = true`.
