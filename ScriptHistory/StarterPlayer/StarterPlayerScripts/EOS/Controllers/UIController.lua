@@ -33,6 +33,9 @@ local Pets = require(script.Parent.Pets)
 
 local UIC = {}
 UIC.onEmotesRefresh = nil :: ((any, boolean) -> ())?
+UIC.onOpen = {} :: { [string]: () -> () } -- screens owned by other controllers refresh themselves when opened
+UIC.spectating = function(): boolean return false end -- SpectateController fills these two in
+UIC.startSpectate = function() end
 
 local player = Players.LocalPlayer
 local state = Net.state()
@@ -90,7 +93,7 @@ local ACCENT_TINT = { -- UI Colour setting -> tint for the greyscale banner/glow
 }
 local SWATCH_KEY = { Default = "", Purple = "purple", Pink = "pink", Blue = "sky", Green = "lime", Gold = "gold", Red = "coral", Steel = "steel" }
 local PANELS = { "Quests", "Incubator", "Pets", "Shop", "Stats", "Settings" }
-local LOBBY_ONLY = { Incubator = true, Shop = true, Pets = true }
+local LOBBY_ONLY = { Incubator = true, Shop = true, Pets = true, Emotes = true, EmoteWheel = true }
 local SHOP_ICON = {
 	trail_spark = "trail", trail_ember = "trail_ember", burst_confetti = "burst", case_frost = "case_frost",
 	entrance_bolt = "entrance", case_sunset = "case_sunset", trailp_rainbow = "trail_rainbow", fx_gold = "abilityfx_gold",
@@ -947,11 +950,26 @@ local function touchButtons()
 	shade(tagB, math.clamp((os.clock() - Tag.lastSwing) / ((GameConfig.Capture and GameConfig.Capture.TAG_COOLDOWN) or 1), 0, 1), Tag.lastSwing + ((GameConfig.Capture and GameConfig.Capture.TAG_COOLDOWN) or 1) - os.clock())
 end
 
+local SPECTATE_PHASES = { ROLE_REVEAL = true, CROSSING = true, WAVE_END = true }
+local function watchPill()
+	local w = hudGroup("HUD", "Watch")
+	local b = w and w:FindFirstChild("SpectateButton")
+	if b and b:IsA("GuiObject") then
+		b.Visible = not inMatch() and SPECTATE_PHASES[state:GetAttribute("Phase") or ""] == true and not UIC.spectating()
+	end
+end
+
+-- HUNT (Volunteer To Hunt) only in private servers: in public ones it's clutter, and the server ignores it
+local PRIVATE = game.PrivateServerId ~= ""
+
 local function railToggles()
+	watchPill()
 	local rail = hudGroup("HUD", "Rail")
 	if not rail then return end
-	-- one drawing per toggle: full colour when on, the greyed "<slug>_off" copy when off (Hunter's pick, 16 Oct;
-	-- the afk_on play moon is uploaded but unused)
+	local hunt = rail:FindFirstChild("VolunteerToggle")
+	if hunt and hunt:IsA("GuiObject") then hunt.Visible = PRIVATE end
+	-- one drawing per toggle: full colour on a coloured plate when on, the greyed "<slug>_off" copy on the grey
+	-- plate when off (Hunter's pick, 16 Oct; the afk_on play moon is uploaded but unused)
 	for name, t in pairs({ AFKToggle = { "EOS_AFK", "afk" }, VolunteerToggle = { "EOS_Volunteer", "hunt" } }) do
 		local b = rail:FindFirstChild(name)
 		if b then
@@ -961,13 +979,9 @@ local function railToggles()
 			if o then o.Visible = not on end
 			local slug = if on then t[2] else t[2] .. "_off"
 			if iconId(slug) ~= "" then setIcon(b, "Icon", slug) end
-			-- off also borrows AFK's grey plate, so Hunt greys out the same way (its red plate comes back when on)
-			local art = b:FindFirstChild("Plate") and b.Plate:FindFirstChild("Art")
-			local grey = rail:FindFirstChild("AFKToggle") and rail.AFKToggle:FindFirstChild("Plate") and rail.AFKToggle.Plate:FindFirstChild("Art")
-			if art and grey and art ~= grey and art:IsA("ImageLabel") then
-				if not art:GetAttribute("OnImage") then art:SetAttribute("OnImage", art.Image) end
-				art.Image = if on then art:GetAttribute("OnImage") else grey.Image
-			end
+			-- the coloured plate (AFK blue, Hunt purple) shows while the toggle is on; off is the grey plate
+			local plateOn = b:FindFirstChild("PlateOn")
+			if plateOn and plateOn:IsA("GuiObject") then plateOn.Visible = on end
 		end
 	end
 end
@@ -1049,6 +1063,8 @@ local function updateHUD()
 	local music = "lobby"
 	if resultsOpen and os.clock() - resultsShownAt < 9 then
 		music = "results" -- the win / lose sting plays over silence, then the lobby bed comes back
+	elseif UIC.spectating() then
+		music = "match" -- watching the match from the lobby
 	elseif m then
 		if state:GetAttribute("Phase") == "CROSSING" then
 			if phaseLeft() <= 12 or (state:GetAttribute("RunnersLeft") or 99) <= 2 then tensionLatch = true end
@@ -1059,7 +1075,7 @@ local function updateHUD()
 	end
 	Sound.setMusic(music)
 	if music == "lobby" then Sound.resetMatchMusic() end
-	if S.HUD then S.HUD.Visible = not m end
+	if S.HUD then S.HUD.Visible = not m and not UIC.spectating() end
 	if S.MatchHUD then S.MatchHUD.Visible = m end
 	if m then
 		matchStatus()
@@ -1829,7 +1845,13 @@ local function refreshSettings()
 	local ctl = settingsTab == "controls"
 	for _, n in ipairs({ "Row1", "RowMusic", "Row2", "Row3", "Row4", "Row5" }) do
 		local row = find(sc, n)
-		if row then row.Visible = not ctl end
+		if row then row.Visible = not ctl and (n ~= "Row4" or PRIVATE) end
+	end
+	-- public servers: no Volunteer row, so UI Colour moves up into its place
+	local r5 = find(sc, "Row5")
+	if r4 and r5 and r4:IsA("GuiObject") and r5:IsA("GuiObject") and not PRIVATE and not r5:GetAttribute("Moved") then
+		r5:SetAttribute("Moved", true)
+		r5.Position = r4.Position
 	end
 	local page = find(sc, "ControlsPage")
 	if page then page.Visible = ctl end
@@ -2115,10 +2137,6 @@ local function preloadAll()
 end
 
 function UIC.open(name: string)
-	if name == "Emotes" then
-		UIC.toast("Emotes are moving to the new menu soon", "info")
-		return
-	end
 	if not S[name] then return end
 	if LOBBY_ONLY[name] and inMatch() then
 		UIC.toast("That opens between matches", "info", true)
@@ -2130,6 +2148,11 @@ function UIC.open(name: string)
 	end
 	warm(name)
 	refreshOne(name)
+	local hook = UIC.onOpen[name]
+	if hook then
+		local ok, err = pcall(hook)
+		if not ok then warn("[EOSUI] open " .. name .. ": " .. tostring(err)) end
+	end
 	UI.open(name)
 	Sound.play("open")
 	-- gamepad / TV: select the panel's first button
@@ -2180,6 +2203,9 @@ local function wireButtons()
 			end)
 		end
 	end
+	-- SPECTATE pill (HUD.Watch)
+	local watch = hudGroup("HUD", "Watch")
+	onClick(watch and watch:FindFirstChild("SpectateButton"), function() UIC.startSpectate() end)
 	-- rail toggles
 	local rail = hudGroup("HUD", "Rail")
 	if rail then

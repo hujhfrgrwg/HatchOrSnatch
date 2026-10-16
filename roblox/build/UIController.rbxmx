@@ -963,10 +963,15 @@ local function watchPill()
 	end
 end
 
+-- HUNT (Volunteer To Hunt) only in private servers: in public ones it's clutter, and the server ignores it
+local PRIVATE = game.PrivateServerId ~= ""
+
 local function railToggles()
 	watchPill()
 	local rail = hudGroup("HUD", "Rail")
 	if not rail then return end
+	local hunt = rail:FindFirstChild("VolunteerToggle")
+	if hunt and hunt:IsA("GuiObject") then hunt.Visible = PRIVATE end
 	-- one drawing per toggle: full colour on a coloured plate when on, the greyed "<slug>_off" copy on the grey
 	-- plate when off (Hunter's pick, 16 Oct; the afk_on play moon is uploaded but unused)
 	for name, t in pairs({ AFKToggle = { "EOS_AFK", "afk" }, VolunteerToggle = { "EOS_Volunteer", "hunt" } }) do
@@ -1844,7 +1849,13 @@ local function refreshSettings()
 	local ctl = settingsTab == "controls"
 	for _, n in ipairs({ "Row1", "RowMusic", "Row2", "Row3", "Row4", "Row5" }) do
 		local row = find(sc, n)
-		if row then row.Visible = not ctl end
+		if row then row.Visible = not ctl and (n ~= "Row4" or PRIVATE) end
+	end
+	-- public servers: no Volunteer row, so UI Colour moves up into its place
+	local r5 = find(sc, "Row5")
+	if r4 and r5 and r4:IsA("GuiObject") and r5:IsA("GuiObject") and not PRIVATE and not r5:GetAttribute("Moved") then
+		r5:SetAttribute("Moved", true)
+		r5.Position = r4.Position
 	end
 	local page = find(sc, "ControlsPage")
 	if page then page.Visible = ctl end

@@ -45,6 +45,7 @@ function ProfileLogic.default(): any
 		firstCommonFree = true, -- the first Common hatch includes a free family choice
 		cosmetics = { owned = {}, consumables = {}, case = "", trailNext = "" },
 		emotes = {}, -- [emoteId] = true (won from the Emote Crate; see Shared/EmoteConfig)
+		emoteWheel = {}, -- up to 6 owned emote ids on the G wheel ("" = empty slot)
 		receipts = {}, -- bounded exact-once ledger for Robux purchases (newest last)
 		shells = 0, -- V2 currency, moved into gold by migrate (kept for old saves)
 		unhatchedEggsByTier = eggs, -- V2 egg tokens, moved into materials by migrate
@@ -560,6 +561,30 @@ function ProfileLogic.openEmoteCrate(p: any, emoteId: string, emoteConfig: any):
 end
 
 -- Robux Gem packs: grant exactly once per receipt id (ProcessReceipt). Returns (granted, reason).
+-- The G wheel: slots cleaned by EmoteConfig.cleanWheel (owned, no duplicates, 6 entries)
+function ProfileLogic.setEmoteWheel(p: any, slots: any, emoteConfig: any): boolean
+	p.emoteWheel = emoteConfig.cleanWheel(slots, p.emotes)
+	return true
+end
+
+-- a newly won emote goes into the first empty wheel slot (if there is one)
+function ProfileLogic.wheelAdd(p: any, emoteId: string, emoteConfig: any)
+	local w = emoteConfig.cleanWheel(p.emoteWheel, p.emotes)
+	for i = 1, #w do
+		if w[i] == emoteId then
+			p.emoteWheel = w
+			return
+		end
+	end
+	for i = 1, #w do
+		if w[i] == "" then
+			w[i] = emoteId
+			break
+		end
+	end
+	p.emoteWheel = w
+end
+
 function ProfileLogic.grantPurchasedGems(p: any, receiptId: string, gems: number, ledgerSize: number): (boolean, string?)
 	if type(receiptId) ~= "string" or receiptId == "" or type(gems) ~= "number" or gems <= 0 then
 		return false, "BAD_RECEIPT"
@@ -624,6 +649,7 @@ function ProfileLogic.clientView(p: any, questConfig: any): any
 		firstCommonFree = p.firstCommonFree,
 		cosmetics = deepCopy(p.cosmetics),
 		emotes = deepCopy(p.emotes),
+		emoteWheel = deepCopy(p.emoteWheel),
 		stats = deepCopy(p.stats),
 		quests = quests,
 		questDate = p.dailyQuests.utcDate,

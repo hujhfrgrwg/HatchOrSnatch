@@ -76,10 +76,10 @@ body, .ot { font-family: 'Fredoka', sans-serif; font-weight: 700; }
 .cw.solid { background: rgba(0,0,0,.42); }
 
 /* ---------- buttons ---------- */
-.cb { border-radius: 4px; border: 3px solid #050506;
+.cb { border-radius: 10px; border: 3px solid #050506; overflow: hidden;   /* 16 Oct: one clear radius on both ends (4px read as square on the dark left end) */
   background: radial-gradient(circle, rgba(255,255,255,.26) 1.4px, transparent 1.9px) 0 0 / 7px 7px, linear-gradient(180deg, var(--c1) 0%, var(--c2) 55%, var(--c3) 100%);
   box-shadow: inset 0 -5px 0 rgba(0,0,0,.25), inset 0 2px 0 rgba(255,255,255,.3), 0 4px 0 rgba(0,0,0,.5); }
-.cb::before { content: ''; position: absolute; inset: 0; border-radius: 2px; pointer-events: none;
+.cb::before { content: ''; position: absolute; inset: 0; border-radius: 7px; pointer-events: none;
   background: linear-gradient(90deg, var(--c2) 0 45%, transparent 85%); opacity: .95; }
 .cb > .lbl { bottom: 3px; z-index: 1; }
 .k-red    { --c1:#ff3a2a; --c2:#dc0b0b; --c3:#a00008; }
