@@ -45,6 +45,8 @@ Reply with ONE image per message, then wait for my next icon.
 - `piece_crowned`: polished gold shell shard with white speckles
 
 **Menu buttons**
+- `servers`: a chunky teal-green globe with bold meridian lines and a small white signal arc over the top
+- `spectate`: a sporty eye or binoculars with a glowing blue lens
 - `quests`: a clipboard or bounty board with a bold checkmark
 - `incubator`: a sci-fi incubator capsule holding an egg, with metal ring and glowing glass
 - `pets`: a bold paw print, angular, with a slight metallic sheen
@@ -95,6 +97,9 @@ Reply with ONE image per message, then wait for my next icon.
 - `emote`: a hand making a victory sign (simple glove)
 
 ## Still needed (16 Oct)
-Nothing is outstanding. `afk_on` (the play moon) arrived on 16 Oct.
+- `servers`: a chunky teal-green globe with bold meridian lines and a small white signal arc over the top (the Servers button). A drawn stand-in is in use.
+- `spectate`: a sporty eye or a pair of binoculars with a glowing blue lens (the SPECTATE pill). A drawn stand-in is in use.
+
+`afk_on` (the play moon) arrived on 16 Oct; it's uploaded but unused (Hunter kept one drawing per toggle).
 
 Hunter's second zip (16 Oct) brought `case`, `entrance`, `ab_scout`, `ab_brake` and `ab_spring`. `case_frost` and `case_sunset` are recoloured from the new `case` by `ui/tools/icon_variants.py`. The first zip brought `safe`, `catcher`, `runner`, `hunt` and `afk`.

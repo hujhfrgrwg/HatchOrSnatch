@@ -22,7 +22,7 @@ Three lobby systems were added on 16 Oct, modelled on Huss Valley's server list,
 - **Published:** all 51 clips are Animation assets owned by group 228184582, all approved. They were exported with the Studio MCP's `export_rbxm` and uploaded with `upload_asset`. The ids are in `roblox/game/emote_anim_ids.json` and in `EmoteConfig`, so emotes play in live servers.
 - **Play-once clips:** six clips don't loop (`once = true`): Trick or Treat, Dramatic Bow, Threaten, Lose It, Shadow Emerge and Chill Sit. They play once, then the emote ends. The two zero-length poses hold until you move.
 - **No props:** Ice Cream Cart, Couch Nap, Toilet Sit, Surfer, Coconut Launch, Reaper's Ride and Sunbath are mimed.
-- **Songs:** the first 15 keep their licensed songs. The other 36 have none yet.
+- **Songs:** every emote has a licensed APM track (Roblox's library). The 36 added on 16 Oct were picked to fit each emote's mood (`EmoteConfig`; all checked to load in Studio). For example: Surfer gets surf rock, Head Juggle a circus march, Reaper's Ride heavy metal, Blossom Break koto, Cossack Kick balalaika.
 - **Emotes panel:**
   - My Emotes shows a card per owned emote with a live preview of your avatar, plus PLAY and EQUIP buttons. YOUR WHEEL has 6 slots: pick a slot, then EQUIP.
   - The Emote Crate tab has the odds board for all 51, OPEN for 250 Gems, a reel, then the reveal.
