@@ -1,0 +1,164 @@
+[
+ {
+  "pressure": "loose",
+  "P": 8,
+  "seed": 8000,
+  "matches": 600,
+  "crossings_mean": 4.97,
+  "crossings_pct": [
+   3,
+   3,
+   10
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.9767,
+  "survivors_mean": 5.54,
+  "play_seconds_mean": 37.2,
+  "est_cycle_seconds": 88.1,
+  "max_level_mean": 5.95
+ },
+ {
+  "pressure": "loose",
+  "P": 12,
+  "seed": 8010,
+  "matches": 600,
+  "crossings_mean": 5.9,
+  "crossings_pct": [
+   3,
+   3,
+   13
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.9317,
+  "survivors_mean": 8.15,
+  "play_seconds_mean": 45.0,
+  "est_cycle_seconds": 99.6,
+  "max_level_mean": 6.83
+ },
+ {
+  "pressure": "loose",
+  "P": 16,
+  "seed": 8020,
+  "matches": 600,
+  "crossings_mean": 8.06,
+  "crossings_pct": [
+   3,
+   9,
+   13
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.7967,
+  "survivors_mean": 6.0,
+  "play_seconds_mean": 64.5,
+  "est_cycle_seconds": 127.8,
+  "max_level_mean": 8.86
+ },
+ {
+  "pressure": "base",
+  "P": 8,
+  "seed": 8030,
+  "matches": 600,
+  "crossings_mean": 5.8,
+  "crossings_pct": [
+   3,
+   6,
+   8
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.4317,
+  "survivors_mean": 1.52,
+  "play_seconds_mean": 42.1,
+  "est_cycle_seconds": 96.3,
+  "max_level_mean": 6.23
+ },
+ {
+  "pressure": "base",
+  "P": 12,
+  "seed": 8040,
+  "matches": 600,
+  "crossings_mean": 6.27,
+  "crossings_pct": [
+   5,
+   6,
+   8
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.2183,
+  "survivors_mean": 0.89,
+  "play_seconds_mean": 45.9,
+  "est_cycle_seconds": 102.0,
+  "max_level_mean": 6.49
+ },
+ {
+  "pressure": "base",
+  "P": 16,
+  "seed": 8050,
+  "matches": 600,
+  "crossings_mean": 5.33,
+  "crossings_pct": [
+   4,
+   5,
+   7
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.1017,
+  "survivors_mean": 0.15,
+  "play_seconds_mean": 39.5,
+  "est_cycle_seconds": 91.9,
+  "max_level_mean": 5.43
+ },
+ {
+  "pressure": "tight",
+  "P": 8,
+  "seed": 8060,
+  "matches": 600,
+  "crossings_mean": 3.88,
+  "crossings_pct": [
+   3,
+   4,
+   5
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.0183,
+  "survivors_mean": 0.1,
+  "play_seconds_mean": 26.5,
+  "est_cycle_seconds": 73.0,
+  "max_level_mean": 3.9
+ },
+ {
+  "pressure": "tight",
+  "P": 12,
+  "seed": 8070,
+  "matches": 600,
+  "crossings_mean": 4.36,
+  "crossings_pct": [
+   4,
+   4,
+   5
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.0083,
+  "survivors_mean": 0.09,
+  "play_seconds_mean": 30.0,
+  "est_cycle_seconds": 78.4,
+  "max_level_mean": 4.37
+ },
+ {
+  "pressure": "tight",
+  "P": 16,
+  "seed": 8080,
+  "matches": 600,
+  "crossings_mean": 3.53,
+  "crossings_pct": [
+   3,
+   3,
+   4
+  ],
+  "share_hit_cap": 0.0,
+  "runner_win": 0.0,
+  "survivors_mean": 0.0,
+  "play_seconds_mean": 24.8,
+  "est_cycle_seconds": 69.9,
+  "max_level_mean": 3.53
+ }
+]

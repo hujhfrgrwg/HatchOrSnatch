@@ -1,0 +1,103 @@
+{
+ "egg_use_value_hours": [
+  0.0128,
+  0.0385,
+  0.2174,
+  2.5
+ ],
+ "configs": {
+  "A Accessible (1 theft = egg at stolen rarity)": {
+   "egg_rate_beginner": 0.661,
+   "p_no_egg_5_beginner": 0.0045,
+   "honest_over_surrender_value": 0.98,
+   "starting_catcher_over_runner_value": 1.007,
+   "skilled_over_beginner_value": 1.089,
+   "legendary_share_of_eggs": 0.0196,
+   "eggs_per_match": 20.67,
+   "complexity": 1,
+   "loss_sting": 1
+  },
+  "B Competitive (Runners only; 2 thefts for Catchers)": {
+   "egg_rate_beginner": 0.507,
+   "p_no_egg_5_beginner": 0.0291,
+   "honest_over_surrender_value": 1.12,
+   "starting_catcher_over_runner_value": 1.037,
+   "skilled_over_beginner_value": 1.188,
+   "legendary_share_of_eggs": 0.0211,
+   "eggs_per_match": 16.65,
+   "complexity": 2,
+   "loss_sting": 2
+  },
+  "C High-stakes (bank the stolen egg; steals drop a rarity)": {
+   "egg_rate_beginner": 0.645,
+   "p_no_egg_5_beginner": 0.0057,
+   "honest_over_surrender_value": 3.72,
+   "starting_catcher_over_runner_value": 0.253,
+   "skilled_over_beginner_value": 1.05,
+   "legendary_share_of_eggs": 0.0121,
+   "eggs_per_match": 20.27,
+   "complexity": 3,
+   "loss_sting": 3
+  },
+  "D Snatch-back cap (steal up to 1 rarity above the egg you lost)": {
+   "egg_rate_beginner": 0.661,
+   "p_no_egg_5_beginner": 0.0045,
+   "honest_over_surrender_value": 1.91,
+   "starting_catcher_over_runner_value": 0.707,
+   "skilled_over_beginner_value": 1.057,
+   "legendary_share_of_eggs": 0.0118,
+   "eggs_per_match": 20.67,
+   "complexity": 2,
+   "loss_sting": 2
+  },
+  "Today's place (every active player gets a piece)": {
+   "egg_rate_beginner": 1.0,
+   "p_no_egg_5_beginner": 0.0,
+   "honest_over_surrender_value": 1.54,
+   "starting_catcher_over_runner_value": 0.658,
+   "skilled_over_beginner_value": 1.063,
+   "legendary_share_of_eggs": 0.0,
+   "eggs_per_match": 30.0,
+   "complexity": 1,
+   "loss_sting": 0
+  }
+ },
+ "scores": {
+  "balanced": {
+   "A Accessible (1 theft = egg at stolen rarity)": 0.554,
+   "B Competitive (Runners only; 2 thefts for Catchers)": 0.529,
+   "C High-stakes (bank the stolen egg; steals drop a rarity)": 0.477,
+   "D Snatch-back cap (steal up to 1 rarity above the egg you lost)": 0.514,
+   "Today's place (every active player gets a piece)": 0.486
+  },
+  "growth (new players first)": {
+   "A Accessible (1 theft = egg at stolen rarity)": 0.617,
+   "B Competitive (Runners only; 2 thefts for Catchers)": 0.296,
+   "C High-stakes (bank the stolen egg; steals drop a rarity)": 0.445,
+   "D Snatch-back cap (steal up to 1 rarity above the egg you lost)": 0.541,
+   "Today's place (every active player gets a piece)": 0.769
+  },
+  "integrity (no exploits, skill counts)": {
+   "A Accessible (1 theft = egg at stolen rarity)": 0.429,
+   "B Competitive (Runners only; 2 thefts for Catchers)": 0.489,
+   "C High-stakes (bank the stolen egg; steals drop a rarity)": 0.528,
+   "D Snatch-back cap (steal up to 1 rarity above the egg you lost)": 0.462,
+   "Today's place (every active player gets a piece)": 0.412
+  },
+  "hardcore (scarce, risky)": {
+   "A Accessible (1 theft = egg at stolen rarity)": 0.456,
+   "B Competitive (Runners only; 2 thefts for Catchers)": 0.671,
+   "C High-stakes (bank the stolen egg; steals drop a rarity)": 0.618,
+   "D Snatch-back cap (steal up to 1 rarity above the egg you lost)": 0.522,
+   "Today's place (every active player gets a piece)": 0.221
+  }
+ },
+ "passes_exploit_gate": {
+  "A Accessible (1 theft = egg at stolen rarity)": false,
+  "B Competitive (Runners only; 2 thefts for Catchers)": false,
+  "C High-stakes (bank the stolen egg; steals drop a rarity)": true,
+  "D Snatch-back cap (steal up to 1 rarity above the egg you lost)": true,
+  "Today's place (every active player gets a piece)": true
+ },
+ "note": "same 2,000 simulated matches scored under each rule (repeated evaluation)"
+}

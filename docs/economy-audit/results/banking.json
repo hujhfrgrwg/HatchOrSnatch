@@ -1,0 +1,260 @@
+[
+ {
+  "pressure": "loose",
+  "seed": 9000,
+  "matches": 1000,
+  "dynamics": {
+   "runners_at_crossing_start": [
+    27.0,
+    26.249,
+    25.218
+   ],
+   "captures_per_crossing": [
+    0.751,
+    1.031,
+    1.725
+   ],
+   "crossing_seconds": [
+    13.6,
+    13.35,
+    15.35
+   ],
+   "survivor_share": 0.8701,
+   "survivors_mean": 23.493,
+   "zero_survivor_matches": 0.0,
+   "timeouts_per_match": 0.0,
+   "est_cycle_seconds": 85.3
+  },
+  "runner_only": {
+   "eggs_per_match": 23.493,
+   "p_egg_caught_c1": {
+    "p": 0.0,
+    "n": 751,
+    "ci95": [
+     0.0,
+     0.0051
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.0,
+    "n": 3000,
+    "ci95": [
+     0.0,
+     0.0013
+    ]
+   }
+  },
+  "theft1": {
+   "eggs_per_match": 26.207,
+   "p_egg_caught_c1": {
+    "p": 0.5752,
+    "n": 751,
+    "ci95": [
+     0.5396,
+     0.6101
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.5973,
+    "n": 3000,
+    "ci95": [
+     0.5797,
+     0.6147
+    ]
+   }
+  },
+  "banked": {
+   "eggs_per_match": 26.207,
+   "p_egg_caught_c1": {
+    "p": 0.5752,
+    "n": 751,
+    "ci95": [
+     0.5396,
+     0.6101
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.5973,
+    "n": 3000,
+    "ci95": [
+     0.5797,
+     0.6147
+    ]
+   }
+  },
+  "steals_per_match": 3.507,
+  "banked_per_match": 3.507
+ },
+ {
+  "pressure": "base",
+  "seed": 9010,
+  "matches": 1000,
+  "dynamics": {
+   "runners_at_crossing_start": [
+    27.0,
+    24.883,
+    21.216
+   ],
+   "captures_per_crossing": [
+    2.117,
+    3.667,
+    6.234
+   ],
+   "crossing_seconds": [
+    6.95,
+    13.05,
+    12.75
+   ],
+   "survivor_share": 0.5549,
+   "survivors_mean": 14.982,
+   "zero_survivor_matches": 0.0,
+   "timeouts_per_match": 0.0,
+   "est_cycle_seconds": 75.8
+  },
+  "runner_only": {
+   "eggs_per_match": 14.982,
+   "p_egg_caught_c1": {
+    "p": 0.0,
+    "n": 2117,
+    "ci95": [
+     -0.0,
+     0.0018
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.0,
+    "n": 3000,
+    "ci95": [
+     0.0,
+     0.0013
+    ]
+   }
+  },
+  "theft1": {
+   "eggs_per_match": 22.476,
+   "p_egg_caught_c1": {
+    "p": 0.8569,
+    "n": 2117,
+    "ci95": [
+     0.8413,
+     0.8711
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.9603,
+    "n": 3000,
+    "ci95": [
+     0.9527,
+     0.9667
+    ]
+   }
+  },
+  "banked": {
+   "eggs_per_match": 22.476,
+   "p_egg_caught_c1": {
+    "p": 0.8569,
+    "n": 2117,
+    "ci95": [
+     0.8413,
+     0.8711
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.9603,
+    "n": 3000,
+    "ci95": [
+     0.9527,
+     0.9667
+    ]
+   }
+  },
+  "steals_per_match": 12.018,
+  "banked_per_match": 12.018
+ },
+ {
+  "pressure": "tight",
+  "seed": 9020,
+  "matches": 1000,
+  "dynamics": {
+   "runners_at_crossing_start": [
+    27.0,
+    24.373,
+    19.542
+   ],
+   "captures_per_crossing": [
+    2.627,
+    4.831,
+    9.057
+   ],
+   "crossing_seconds": [
+    7.65,
+    10.3,
+    12.1
+   ],
+   "survivor_share": 0.3883,
+   "survivors_mean": 10.485,
+   "zero_survivor_matches": 0.0,
+   "timeouts_per_match": 0.0,
+   "est_cycle_seconds": 73.1
+  },
+  "runner_only": {
+   "eggs_per_match": 10.485,
+   "p_egg_caught_c1": {
+    "p": 0.0,
+    "n": 2627,
+    "ci95": [
+     -0.0,
+     0.0015
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.0,
+    "n": 3000,
+    "ci95": [
+     0.0,
+     0.0013
+    ]
+   }
+  },
+  "theft1": {
+   "eggs_per_match": 20.244,
+   "p_egg_caught_c1": {
+    "p": 0.9635,
+    "n": 2627,
+    "ci95": [
+     0.9556,
+     0.97
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.9957,
+    "n": 3000,
+    "ci95": [
+     0.9926,
+     0.9975
+    ]
+   }
+  },
+  "banked": {
+   "eggs_per_match": 20.244,
+   "p_egg_caught_c1": {
+    "p": 0.9635,
+    "n": 2627,
+    "ci95": [
+     0.9556,
+     0.97
+    ]
+   },
+   "p_egg_initial": {
+    "p": 0.9957,
+    "n": 3000,
+    "ci95": [
+     0.9926,
+     0.9975
+    ]
+   }
+  },
+  "steals_per_match": 16.515,
+  "banked_per_match": 16.515
+ }
+]

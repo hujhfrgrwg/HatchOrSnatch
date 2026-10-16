@@ -1,0 +1,92 @@
+[
+ {
+  "bias": 0.0,
+  "pressure": "base",
+  "seed": 9500,
+  "matches": 1000,
+  "legendary_into_c3_per_match": 1.425,
+  "p_legendary_stolen_in_c3": {
+   "p": 0.3874,
+   "n": 1425,
+   "ci95": [
+    0.3624,
+    0.4129
+   ]
+  },
+  "p_rare_stolen_in_c3": {
+   "p": 0.2616,
+   "n": 14305,
+   "ci95": [
+    0.2544,
+    0.2689
+   ]
+  },
+  "stolen_rarity_share": [
+   0.1636,
+   0.5616,
+   0.2374,
+   0.0375
+  ],
+  "survivors_mean": 12.277
+ },
+ {
+  "bias": 1.0,
+  "pressure": "base",
+  "seed": 9510,
+  "matches": 1000,
+  "legendary_into_c3_per_match": 1.373,
+  "p_legendary_stolen_in_c3": {
+   "p": 0.4428,
+   "n": 1373,
+   "ci95": [
+    0.4167,
+    0.4692
+   ]
+  },
+  "p_rare_stolen_in_c3": {
+   "p": 0.2529,
+   "n": 14161,
+   "ci95": [
+    0.2458,
+    0.2601
+   ]
+  },
+  "stolen_rarity_share": [
+   0.1658,
+   0.5427,
+   0.2513,
+   0.0403
+  ],
+  "survivors_mean": 11.897
+ },
+ {
+  "bias": 3.0,
+  "pressure": "base",
+  "seed": 9520,
+  "matches": 1000,
+  "legendary_into_c3_per_match": 1.397,
+  "p_legendary_stolen_in_c3": {
+   "p": 0.4889,
+   "n": 1397,
+   "ci95": [
+    0.4628,
+    0.5151
+   ]
+  },
+  "p_rare_stolen_in_c3": {
+   "p": 0.2447,
+   "n": 14026,
+   "ci95": [
+    0.2376,
+    0.2519
+   ]
+  },
+  "stolen_rarity_share": [
+   0.167,
+   0.5313,
+   0.2567,
+   0.0451
+  ],
+  "survivors_mean": 11.855
+ }
+]

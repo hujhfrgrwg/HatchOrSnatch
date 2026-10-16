@@ -1,0 +1,30 @@
+{
+ "seed": 31,
+ "timelines": 200000,
+ "uses_per_match": {
+  "Brake": {
+   "Common": 2.968,
+   "Rare": 2.969,
+   "Epic": 2.97,
+   "Legendary": 2.971,
+   "Cosmic": 2.972,
+   "+10% (test)": 2.972
+  },
+  "Scout": {
+   "Common": 1.986,
+   "Rare": 1.987,
+   "Epic": 1.989,
+   "Legendary": 1.993,
+   "Cosmic": 1.998,
+   "+10% (test)": 2.027
+  },
+  "Decoy": {
+   "Common": 1.981,
+   "Rare": 1.982,
+   "Epic": 1.982,
+   "Legendary": 1.983,
+   "Cosmic": 1.983,
+   "+10% (test)": 1.986
+  }
+ }
+}

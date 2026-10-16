@@ -1,0 +1,170 @@
+[
+ {
+  "bonus": 0,
+  "skill": -1.0,
+  "pressure": "base",
+  "seed": 7000,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.4151,
+  "ci95": [
+   0.405,
+   0.4253
+  ],
+  "caught_c1": 0.0919
+ },
+ {
+  "bonus": 0.03,
+  "skill": -1.0,
+  "pressure": "base",
+  "seed": 7000,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.4058,
+  "ci95": [
+   0.3957,
+   0.416
+  ],
+  "caught_c1": 0.0914
+ },
+ {
+  "bonus": 0.045,
+  "skill": -1.0,
+  "pressure": "base",
+  "seed": 7000,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.4096,
+  "ci95": [
+   0.3994,
+   0.4198
+  ],
+  "caught_c1": 0.0919
+ },
+ {
+  "bonus": 0.06,
+  "skill": -1.0,
+  "pressure": "base",
+  "seed": 7000,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.4103,
+  "ci95": [
+   0.4002,
+   0.4205
+  ],
+  "caught_c1": 0.0914
+ },
+ {
+  "bonus": 0.1,
+  "skill": -1.0,
+  "pressure": "base",
+  "seed": 7000,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.4072,
+  "ci95": [
+   0.3971,
+   0.4174
+  ],
+  "caught_c1": 0.091
+ },
+ {
+  "bonus": 0.2,
+  "skill": -1.0,
+  "pressure": "base",
+  "seed": 7000,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.3961,
+  "ci95": [
+   0.3861,
+   0.4063
+  ],
+  "caught_c1": 0.091
+ },
+ {
+  "bonus": 0,
+  "skill": 0.0,
+  "pressure": "base",
+  "seed": 7100,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.4054,
+  "ci95": [
+   0.3953,
+   0.4156
+  ],
+  "caught_c1": 0.092
+ },
+ {
+  "bonus": 0.03,
+  "skill": 0.0,
+  "pressure": "base",
+  "seed": 7100,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.4032,
+  "ci95": [
+   0.3931,
+   0.4134
+  ],
+  "caught_c1": 0.0927
+ },
+ {
+  "bonus": 0.045,
+  "skill": 0.0,
+  "pressure": "base",
+  "seed": 7100,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.3997,
+  "ci95": [
+   0.3896,
+   0.4098
+  ],
+  "caught_c1": 0.0923
+ },
+ {
+  "bonus": 0.06,
+  "skill": 0.0,
+  "pressure": "base",
+  "seed": 7100,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.406,
+  "ci95": [
+   0.3959,
+   0.4162
+  ],
+  "caught_c1": 0.0913
+ },
+ {
+  "bonus": 0.1,
+  "skill": 0.0,
+  "pressure": "base",
+  "seed": 7100,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.401,
+  "ci95": [
+   0.3909,
+   0.4112
+  ],
+  "caught_c1": 0.0918
+ },
+ {
+  "bonus": 0.2,
+  "skill": 0.0,
+  "pressure": "base",
+  "seed": 7100,
+  "matches": 1500,
+  "samples": 9000,
+  "survive": 0.3963,
+  "ci95": [
+   0.3863,
+   0.4065
+  ],
+  "caught_c1": 0.092
+ }
+]

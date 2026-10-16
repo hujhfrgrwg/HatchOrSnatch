@@ -1,6 +1,6 @@
 ---
 tags: [hub]
-updated: 2026-10-15
+updated: 2026-10-16
 ---
 # Hatch or Snatch Home
 
@@ -8,6 +8,8 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 
 ## The game
 *Not written yet.* The one-paragraph pitch, core loop and target players go here, then a `Hatch or Snatch Game Plan.md` and a `Hatch or Snatch Decisions.md` (one line per decision Hunter makes, with the date).
+
+- **Economy and design audit (16 Oct 2026):** [[Economy Audit 2026-10-16]] in `docs/economy-audit/`. Recommends the Snatch-back egg rule, exactly 3 crossings with 30 players, hour-sized hatch recipes and tighter Gold/Gems. The simulation that backs it is in `tools/sim/`.
 
 ## Studio place
 | | |
@@ -28,4 +30,4 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 | `Research/` | Reference material (RoClicks guides and code) |
 | `docs/` | Delivery reports, reference images; `docs/backups/` for pre-edit backups |
 | `ScriptHistory/` | Read-only snapshots of the place's scripts |
-| `tools/` | MCP and upload scripts |
+| `tools/` | MCP and upload scripts; `tools/sim/` is the economy simulation |
