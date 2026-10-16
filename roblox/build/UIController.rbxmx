@@ -1866,6 +1866,34 @@ local function showResults(data: any)
 				end
 			end
 		end
+		-- no reward lines (practice match, or a match spent standing still): fill the gap instead of leaving it empty
+		local l1, l4 = find(sc, "Line1"), find(sc, "Line4")
+		if l1 and l4 and l1:IsA("GuiObject") and l4:IsA("GuiObject") and l1.Parent then
+			local none = l1.Parent:FindFirstChild("NoLines") :: TextLabel?
+			if not none then
+				local n = Instance.new("TextLabel")
+				n.Name = "NoLines"
+				n.BackgroundTransparency = 1
+				n.FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json")
+				n.TextColor3 = Color3.fromRGB(210, 210, 216)
+				n.TextSize = 30
+				n.ZIndex = l1.ZIndex + 1
+				local st = Instance.new("UIStroke")
+				st.Color = Color3.fromRGB(5, 5, 6)
+				st.Thickness = 2
+				st.Parent = n
+				local top = l1.Position.Y.Offset - l1.AnchorPoint.Y * l1.Size.Y.Offset
+				local bottom = l4.Position.Y.Offset + (1 - l4.AnchorPoint.Y) * l4.Size.Y.Offset
+				n.Position = UDim2.fromOffset(l1.Position.X.Offset - l1.AnchorPoint.X * l1.Size.X.Offset, top)
+				n.Size = UDim2.fromOffset(l1.Size.X.Offset, bottom - top)
+				n.Parent = l1.Parent
+				none = n
+			end
+			local nl = none :: TextLabel
+			nl.Text = if #parts == 0 then (if data.isTest then "Practice match: nothing to bank" else "No gold this match") else ""
+			nl.Visible = #parts == 0
+			if #parts == 0 then UI.popFrom(nl, 0.6, 0.3) end
+		end
 		UI.setText(sc, "GoldTotal", "+0")
 		UI.countTo("resultsGold", 0, sc, "GoldTotal", function(v) return "+" .. math.floor(v + 0.5) end)
 		task.delay(0.6, function()
@@ -2462,6 +2490,45 @@ function UIC.init()
 					art.Position = UDim2.fromOffset(cx - 53, cy - 51)
 				end
 			end
+		end
+	end
+	-- the ability card's pet disc was flattened to a tinted glow and lost its pet image: rebuild the round
+	-- slot (pet photo clipped to a circle, green rim, black outline) so abilityCard can fill PetIcon
+	for _, disc in root:GetDescendants() do
+		if disc:IsA("ImageLabel") and disc.Name == "PetDisc" and not disc:FindFirstChild("PetIcon") then
+			local dc = Instance.new("UICorner")
+			dc.CornerRadius = UDim.new(0.5, 0)
+			dc.Parent = disc
+			local rim = Instance.new("UIStroke")
+			rim.Color = Color3.fromRGB(78, 212, 90)
+			rim.Thickness = 3
+			rim.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			rim.Parent = disc
+			local outline = Instance.new("Frame")
+			outline.Name = "Outline"
+			outline.BackgroundTransparency = 1
+			outline.Size = UDim2.new(1, 10, 1, 10)
+			outline.Position = UDim2.fromOffset(-5, -5)
+			outline.ZIndex = disc.ZIndex
+			local oc = Instance.new("UICorner")
+			oc.CornerRadius = UDim.new(0.5, 0)
+			oc.Parent = outline
+			local ostroke = Instance.new("UIStroke")
+			ostroke.Color = Color3.fromRGB(5, 5, 6)
+			ostroke.Thickness = 2
+			ostroke.Parent = outline
+			outline.Parent = disc
+			local icon = Instance.new("ImageLabel")
+			icon.Name = "PetIcon"
+			icon.BackgroundTransparency = 1
+			icon.ScaleType = Enum.ScaleType.Crop
+			icon.Size = UDim2.new(1, -4, 1, -4)
+			icon.Position = UDim2.fromOffset(2, 2)
+			icon.ZIndex = disc.ZIndex
+			local ic = Instance.new("UICorner")
+			ic.CornerRadius = UDim.new(0.5, 0)
+			ic.Parent = icon
+			icon.Parent = disc
 		end
 	end
 	-- gamepad selection: a white rounded ring in the UI's style instead of Roblox's default blue box
