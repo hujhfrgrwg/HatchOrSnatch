@@ -7,7 +7,9 @@ ticket: HOS-UI-001
 
 The on-screen opening for an emote crate: the crate wobbles and bursts, a reel of emote tiles whips past and eases onto the prize, the prize pops with a rarity glow, then a reveal card shows the emote with **Claim** and **Open again**. Made with the `roblox-ui-maker` skill (HTML first, then import).
 
-**Status:** HTML built, waiting for Hunter's approval. Not imported into Studio yet (the skill imports only after an explicit yes).
+**Status:** Approved by Hunter 2026-10-16. Exported and generated (`UI/roblox/ui/Data_*.luau`, 34 images + 1 icon in `UI/web/rbx/out/upload/`; offline mock diff 0.54). Not uploaded or imported yet: the cloud session can't reach the Studio MCP tunnel.
+
+**Next (a session that reaches Studio):** from `UI/web/`, `ledger.py 20` and upload with the Studio MCP `upload_image` until 0 left, then `assets.py`, `bundle.py`, import `rbx/out/EmoteCrateUIBuild.rbxmx` into ServerStorage, `Builder.build()`, `fit()` twice, verify (roblox-ui-maker SKILL.md steps 6-7), then wire `EmoteCrateSpin` into the existing crate purchase.
 
 ## Files
 | Path | What |
@@ -17,6 +19,7 @@ The on-screen opening for an emote crate: the crate wobbles and bursts, a reel o
 | `UI/web/emote_crate*.html` | Reel, crate wobble, reveal, templates, all states |
 | `UI/web/rbx.json` | Export config: ScreenGui `EmoteCrateUI`, screen `EmoteCrate`, templates folder `EmoteCrateTemplates` |
 | `UI/roblox/ui/client/EmoteCrateSpin.luau` | Client module that plays the opening on the imported screen |
+| `UI/roblox/ui/` | Generated `Data_*.luau` plus the skill's runtime modules (Builder, UIKit, UI, ...); the gui is `EmoteCrateUI` |
 
 Preview: `cd UI/web && python3 make_placeholders.py && python3 build.py && python3 -m http.server 8870 --bind 127.0.0.1`, then open `http://127.0.0.1:8870/index.html`.
 
