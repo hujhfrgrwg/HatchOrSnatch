@@ -1318,7 +1318,9 @@ local function showReveal(t: any)
 	setIcon(sc, "AbilityIcon", familyIcon(pet.family))
 	setText(sc, "AbilityText", familyTitle(pet.family))
 	local equip = find(sc, "BtnEquip")
-	local isEquipped = profile and profile.equippedPet == pet.id
+	-- the server auto-equips a new pet when nothing is equipped, and HatchResult lands before that ProfileState
+	local eqd = profile and profile.equippedPet
+	local isEquipped = eqd == pet.id or eqd == nil or eqd == ""
 	if equip then equip.Visible = not isEquipped end
 	sc:SetAttribute("PetId", pet.id)
 	UI.open("Hatch", { keepHistory = true })
@@ -1440,6 +1442,8 @@ local function refreshPets()
 	for _, f in ipairs(fams) do total += 3 end
 	local function place(tile: GuiObject, i: number)
 		local col, row = (i - 1) % 4, math.floor((i - 1) / 4)
+		-- a clone of a juiced prototype arrives centre-anchored: place by its top-left, juicy re-centres it
+		tile.AnchorPoint = Vector2.zero
 		tile.Position = UDim2.fromOffset(18 + col * 196, 18 + row * 210)
 	end
 	local eq = profile.equippedPet
@@ -2416,10 +2420,11 @@ function UIC.init()
 			end
 		end
 	end
-	-- each state of a two-state control (Live/Soon, On/Off, Buy/Poor...) brings its own DropShadow, drawn
-	-- just below it. A hidden state's shadow must hide too, or it covers the visible state (black tiles)
+	-- each state of a two-state control (Live/Soon, On/Off, Buy/Poor...) and each card brings its own
+	-- DropShadow / ShadowRing, drawn just below it. A hidden element's shadow must hide too, or it covers
+	-- the visible state (black family tiles) or floats over another tab (lines across Controls)
 	for _, sh in root:GetDescendants() do
-		if sh:IsA("Frame") and sh.Name == "DropShadow" and sh.Parent then
+		if sh:IsA("Frame") and (sh.Name == "DropShadow" or sh.Name == "ShadowRing") and sh.Parent then
 			local partner: GuiObject? = nil
 			for _, c in sh.Parent:GetChildren() do
 				if c ~= sh and c:IsA("GuiObject") and c.ZIndex == sh.ZIndex + 1 then partner = c end
@@ -2456,6 +2461,21 @@ function UIC.init()
 			end
 		end
 	end
+	-- gamepad selection: a white rounded ring in the UI's style instead of Roblox's default blue box
+	local selRing = Instance.new("Frame")
+	selRing.Name = "EOS_SelectionRing"
+	selRing.BackgroundTransparency = 1
+	selRing.Size = UDim2.new(1, 8, 1, 8)
+	selRing.Position = UDim2.fromOffset(-4, -4)
+	local sc = Instance.new("UICorner")
+	sc.CornerRadius = UDim.new(0, 10)
+	sc.Parent = selRing
+	local ss = Instance.new("UIStroke")
+	ss.Color = Color3.new(1, 1, 1)
+	ss.Thickness = 3
+	ss.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	ss.Parent = selRing
+	pg.SelectionImageObject = selRing
 	-- tag the incubator ladder's folder-tab title (unnamed in the export) so refreshIncubator can rename it
 	if S.Incubator then
 		for _, d in S.Incubator:GetDescendants() do
