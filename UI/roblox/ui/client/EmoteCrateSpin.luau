@@ -66,6 +66,9 @@ export type Options = {
 	onOpened: (() -> ())?, -- e.g. hide the HUD
 	onClosed: (() -> ())?,
 	juicy: ((GuiButton) -> ())?, -- the game's button hover/press helper, if it has one
+	-- the game's own sound player, if it has one: cue = "tick" | "burst" | "reveal" | "land",
+	-- rarity set for "land". When given, `sounds` is not used.
+	playSound: ((cue: string, rarity: string?) -> ())?,
 }
 
 local opts: Options = nil :: any
@@ -77,6 +80,7 @@ local opens = 0
 local blur: BlurEffect? = nil
 local raysConn: RBXScriptConnection? = nil
 local choice: string? = nil
+local againFailed = false
 local design: { [string]: any } = {}
 
 -- ---------------------------------------------------------------- helpers
@@ -147,6 +151,20 @@ end
 
 local function play(s: Sound?)
 	if s then SoundService:PlayLocalSound(s) end
+end
+
+local function cue(name: string, rarity: string?)
+	if opts.playSound then
+		opts.playSound(name, rarity)
+		return
+	end
+	local s = opts.sounds
+	if not s then return end
+	if name == "land" then
+		play(s.land and rarity and s.land[rarity])
+	else
+		play((s :: any)[name])
+	end
 end
 
 -- waits for a tween unless the player taps to skip; returns false when skipped
@@ -296,7 +314,7 @@ local function crateStage(r: Result)
 	end
 	skipping = false
 	-- 2. burst
-	play(opts.sounds and opts.sounds.burst)
+	cue("burst")
 	if burst then
 		show(burst, true)
 		local bs = scaleOf(burst)
@@ -349,7 +367,7 @@ local function spinReel(r: Result): (GuiObject?, { GuiObject }, number)
 			wiggle()
 			if os.clock() - lastTick >= TICK_GAP then
 				lastTick = os.clock()
-				play(opts.sounds and opts.sounds.tick)
+				cue("tick")
 			end
 		end
 	end
@@ -398,8 +416,7 @@ local function land(r: Result, glow: GuiObject?, tiles: { GuiObject }, landing: 
 		show(glow, true)
 		fade(glow, 1, 0, 0.3)
 	end
-	local landSounds = opts.sounds and opts.sounds.land
-	play(landSounds and landSounds[r.prize.rarity])
+	cue("land", r.prize.rarity)
 	if info.landShake > 0 then shakeGroup(find(screen, "Reel"), info.landShake, 0.4) end
 	sleep(EmoteCrateSpin.TIMING.landHold, false)
 end
@@ -444,7 +461,12 @@ local function reveal(r: Result)
 	if r.shortText then setText(rev, "Short", r.shortText) end
 	tint(find(rev, "Glow"), info.glow)
 	local rays = find(rev, "Rays") :: GuiObject
-	tint(rays, info.glow)
+	if rays then -- the rays may be one image or a holder of white ray pieces (see groupRays)
+		tint(rays, info.glow)
+		for _, d in rays:GetDescendants() do
+			if d:IsA("ImageLabel") then (d :: ImageLabel).ImageColor3 = info.glow end
+		end
+	end
 	if raysConn then raysConn:Disconnect() end
 	if rays then
 		raysConn = RunService.RenderStepped:Connect(function(dt)
@@ -457,7 +479,7 @@ local function reveal(r: Result)
 		s.Scale = 0.6
 		tween(s, EmoteCrateSpin.TIMING.reveal, Enum.EasingStyle.Back, Enum.EasingDirection.Out, { Scale = 1 })
 	end
-	play(opts.sounds and opts.sounds.reveal)
+	cue("reveal")
 end
 
 local function openScreen()
@@ -509,9 +531,10 @@ local function runQueue()
 		while not choice do RunService.RenderStepped:Wait() end
 		if choice == "again" and #queue == 0 and opts.onOpenAgain then
 			show(find(screen, "Reveal"), false)
+			againFailed = false
 			opts.onOpenAgain()
 			local t0 = os.clock() -- the server's result arrives through play(); give up quietly if it doesn't
-			while #queue == 0 and os.clock() - t0 < EmoteCrateSpin.TIMING.againTimeout do RunService.RenderStepped:Wait() end
+			while #queue == 0 and not againFailed and os.clock() - t0 < EmoteCrateSpin.TIMING.againTimeout do RunService.RenderStepped:Wait() end
 		end
 	end
 	EmoteCrateSpin.close()
@@ -525,8 +548,43 @@ function EmoteCrateSpin.play(r: Result)
 	if not busy then task.spawn(runQueue) end
 end
 
+-- The server turned down an "Open again" (not enough Gems, restricted, ...): stop waiting and close.
+function EmoteCrateSpin.cancelAgain()
+	againFailed = true
+end
+
 function EmoteCrateSpin.isBusy(): boolean
 	return busy
+end
+
+-- The export can split the rays SVG into separate white "Shape" pieces straight under Reveal. Put them in
+-- one holder named Rays (its centre = the rays' centre) so the reveal can spin and tint them together.
+local function groupRays(rev: Instance?)
+	if not rev or rev:FindFirstChild("Rays") then return end
+	local pieces: { GuiObject } = {}
+	for _, c in rev:GetChildren() do
+		if c.Name == "Shape" and c:IsA("GuiObject") and c:FindFirstChildWhichIsA("ImageLabel") then table.insert(pieces, c) end
+	end
+	if #pieces < 4 then return end
+	local x0, y0, x1, y1, z = math.huge, math.huge, -math.huge, -math.huge, math.huge
+	for _, c in pieces do
+		x0 = math.min(x0, c.Position.X.Offset)
+		y0 = math.min(y0, c.Position.Y.Offset)
+		x1 = math.max(x1, c.Position.X.Offset + c.Size.X.Offset)
+		y1 = math.max(y1, c.Position.Y.Offset + c.Size.Y.Offset)
+		z = math.min(z, c.ZIndex)
+	end
+	local holder = Instance.new("Frame")
+	holder.Name = "Rays"
+	holder.BackgroundTransparency = 1
+	holder.Position = UDim2.fromOffset(x0, y0)
+	holder.Size = UDim2.fromOffset(x1 - x0, y1 - y0)
+	holder.ZIndex = z
+	for _, c in pieces do
+		c.Position = UDim2.fromOffset(c.Position.X.Offset - x0, c.Position.Y.Offset - y0)
+		c.Parent = holder
+	end
+	holder.Parent = rev
 end
 
 function EmoteCrateSpin.init(o: Options)
@@ -541,6 +599,7 @@ function EmoteCrateSpin.init(o: Options)
 	local shade = tpl and find(tpl, "Shade") :: GuiObject
 	design.shadeT = if shade then shade.BackgroundTransparency else 0.38
 	if track then track.ClipsDescendants = false end -- the Strip clips; the landed prize may grow past its row
+	groupRays(find(screen, "Reveal"))
 	hideAll()
 	show(screen, false)
 	-- buttons
