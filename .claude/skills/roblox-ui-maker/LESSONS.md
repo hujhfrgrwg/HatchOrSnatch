@@ -31,6 +31,9 @@ Format: **rule**, then why (what went wrong or what the developer said).
   icons = the pack; every word = live text. - Baked text can never change; icons drawn into plates can't swap.
 - **Never reproduce watermarks or designer logos** from a reference; treat them as noise when measuring.
 
+- **Images pasted into chat mid-turn never reach the disk** (16 Oct): ask for a zip or a repo upload, and
+  check which files actually arrived before ingesting.
+
 ## 2. Style comes from the reference
 
 - **A style reference image is required input.** Ask for one once if none was given. If the developer says
@@ -260,6 +263,13 @@ Format: **rule**, then why (what went wrong or what the developer said).
 - **SVG circles/paths become raster art; progress rings that must animate are native** (disc + UIStroke track
   + two clipped halves with a hard-edged UIGradient).
 
+- **A selection ring's box-shadow exports as `ShadowRing` siblings, not children**: moving the ring left the
+  visible stroke on the design's tile (Incubator, Shop, swatches). Fold them into the ring at init.
+- **Dual-state controls need both states in the export**: render with `UI_EXPORT=1` so on/off, buy/poor/owned,
+  tinted/mono copies all exist (hidden), and the controller only flips Visible.
+- **From a cloud session, import by public raw URL** (`raw.githubusercontent.com/<owner>/<repo>/<sha>/...`):
+  the Studio MCP runs on the developer's PC, so container paths don't exist there and base64 is too big.
+
 ## 10. Roblox GUI facts that caused bugs (details in ROBLOX_FACTS.md)
 
 - **UIStroke now scales with UIScale** (measured late 2026). Older code multiplied by the scale and made rings
@@ -280,6 +290,9 @@ Format: **rule**, then why (what went wrong or what the developer said).
 - **A clone keeps ZIndex 1 and lands behind panel art** under Sibling ZIndexBehavior: set ZIndex = max sibling + 1.
 - **Modal overlays parent to the scaled root, not inside a HUD frame**; use Sibling ZIndexBehavior, not Global.
 - **Some phones can't run `--!native`**: leave it off small client modules.
+
+- **Roblox applies only ONE UIScale per object**: a second one (pop + pulse + fit) is ignored. Reuse a single
+  UIScale and keep the fit scale in a `Base` attribute that every tween multiplies.
 
 ## 11. Data truth (what the HUD shows)
 
@@ -439,6 +452,10 @@ Format: **rule**, then why (what went wrong or what the developer said).
 - **Pooled objects need a generation counter** for delayed callbacks.
 - **Guard optional APIs** (`if UI.PageChanged then`): an older runtime copy without it killed the whole bridge.
 
+- **A module field holding a BindableEvent is not a signal**: `UI.Opened:Connect` threw inside init and
+  silently skipped everything after it (buttons unwired). Connect `.Event`, and read the logs for errors after
+  every reinstall, not only the panel you were looking at.
+
 ## 24. Verification habits
 
 - **Verify with numbers, not screenshots** (TextFits, overlaps, IsLoaded per asset, tap sizes). Playtest captures
@@ -449,6 +466,9 @@ Format: **rule**, then why (what went wrong or what the developer said).
 - **Check the playtest lock before driving a client**: a running playtest may belong to another agent.
 - **Tool calls in one batch are unordered**: camera move + capture raced; sequence across calls.
 - **The developer often plays right after an import**: playtest only when asked; verify in edit mode otherwise.
+
+- **After any reinstall, read the client log for errors before judging the UI**: an init that dies late still
+  opens panels through the API, so API-driven tests pass while every real button is dead. Click one.
 
 ## 25. Approved work (reuse these approaches)
 

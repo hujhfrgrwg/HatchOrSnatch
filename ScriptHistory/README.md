@@ -10,3 +10,4 @@ Read-only copies of every script in the Hatch or Snatch place, so Git shows what
 ## Coverage so far
 - No full baseline yet: the place has 94 scripts (about 1.1 million characters), too much to copy through the Studio MCP in one go. Until a full snapshot is taken (in batches, or by exporting from Hunter's PC), each ticket snapshots only the scripts it changed.
 - HOS-ABIL-001 (15 Oct 2026): `ServerStorage/EOSBuild/PetShowroom/FWPPetData.lua` (nine ability families). Pre-edit copy: `docs/backups/HOS-ABIL-001_2026-10-15/`.
+- HOS-UI-IMPORT-001 (16 Oct 2026): `StarterPlayer/StarterPlayerScripts/EOS/Controllers/UIController.lua` (new UI controller; source of truth `roblox/game/UIController.luau`), `ServerScriptService/EOS/Services/PlayerService.lua` (accepts the `uiColour` setting), `ServerScriptService/EOS/Services/DataService.lua` (today's quests stored on load). Pre-edit copies: `docs/backups/HOS-UI-IMPORT-001_2026-10-16/`.
