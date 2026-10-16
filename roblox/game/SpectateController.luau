@@ -31,9 +31,14 @@ local ROLE_WORD = { RUNNER = "Runner", CATCHER = "Catcher", CAUGHT = "Caught", S
 local function find(scope: Instance?, name: string): Instance?
 	return scope and scope:FindFirstChild(name, true)
 end
+-- every exported label has a black "<name>Shadow" copy under it: keep both in step
 local function setText(scope: Instance?, name: string, text: string)
 	local t = find(scope, name)
-	if t and (t:IsA("TextLabel") or t:IsA("TextButton")) then t.Text = text end
+	if t and (t:IsA("TextLabel") or t:IsA("TextButton")) then
+		t.Text = text
+		local sh = t.Parent and t.Parent:FindFirstChild(name .. "Shadow")
+		if sh and sh:IsA("TextLabel") then sh.Text = text end
+	end
 end
 local function show(g: Instance?, on: boolean)
 	if g and g:IsA("GuiObject") then g.Visible = on end

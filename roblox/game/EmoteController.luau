@@ -29,6 +29,7 @@ local profile: any = nil
 local panel: Instance? = nil -- Root.Emotes.Emotes
 local wheelScreen: Instance? = nil -- Root.EmoteWheel.Wheel
 local tab = "mine"
+local nextTab: string? = nil -- the tab the next open shows (GET EMOTES -> crate, MY EMOTES -> mine)
 local selSlot = 1
 local rolling = false
 local pendingResult: any = nil
@@ -36,6 +37,7 @@ local mineSig = ""
 local oddsCards: { [string]: GuiObject } = {}
 local wheelSent = false
 
+local lazyOddsRef: () -> () = function() end -- set once lazyOdds exists (setTab is defined first)
 local PROTO = { common = "common", rare = "rare", epic = "epic", legendary = "crowned" }
 
 local function find(scope: Instance?, name: string): Instance?
@@ -52,6 +54,14 @@ end
 local function show(g: Instance?, on: boolean)
 	if g and g:IsA("GuiObject") then g.Visible = on end
 end
+-- recolour a label: the export baked its design colour into a UIGradient, which would tint the new colour
+local function tint(label: Instance?, colour: Color3)
+	if not label or not label:IsA("TextLabel") then return end
+	label.TextColor3 = colour
+	local g = label:FindFirstChildOfClass("UIGradient")
+	if g then g.Color = ColorSequence.new(Color3.new(1, 1, 1)) end
+end
+
 local function inMatch(): boolean
 	return player:GetAttribute("EOS_InMatch") == true
 end
@@ -425,6 +435,7 @@ local function setTab(t: string)
 	end
 	show(find(panel, "MinePage"), t == "mine")
 	show(find(panel, "CratePage"), t == "crate")
+	if t == "crate" then task.delay(0.15, function() lazyOddsRef() end) end
 end
 
 -- a scrolling list inside an exported well; design cards hide, prototypes are cloned in
@@ -546,8 +557,7 @@ local function refreshMine()
 			local e = EmoteConfig.get(w[i])
 			setText(s, "EmoteName", if e then e.name else "Empty")
 			setText(s, "Rarity", if e then EmoteConfig.RARITY[e.rarity].name else "pick an emote")
-			local r = find(s, "Rarity")
-			if r and r:IsA("TextLabel") then r.TextColor3 = if e then rarityColour(e) else Color3.fromRGB(150, 150, 160) end
+			tint(find(s, "Rarity"), if e then rarityColour(e) else Color3.fromRGB(150, 150, 160))
 			show(find(s, "BtnClear"), e ~= nil)
 			styleTile(s and s:FindFirstChild("Tile"), e)
 		end
@@ -561,6 +571,24 @@ local function refreshMine()
 		end
 	end
 end
+
+-- odds-board previews are made only as cards scroll into view (51 live avatars at once is too heavy)
+local function lazyOdds()
+	local page = panel and find(panel, "CratePage")
+	if not page or not (page :: GuiObject).Visible or UI.openName() ~= "Emotes" then return end
+	for id, c in pairs(oddsCards) do
+		local sc = c.Parent
+		local view = c:FindFirstChild("View")
+		if sc and sc:IsA("ScrollingFrame") and view and not view:FindFirstChild("EOS_Preview") then
+			local y, h = c.AbsolutePosition.Y, c.AbsoluteSize.Y
+			if y + h > sc.AbsolutePosition.Y - 20 and y < sc.AbsolutePosition.Y + sc.AbsoluteSize.Y + 20 then
+				attachPreview(view, id, 9.5)
+			end
+		end
+	end
+end
+
+lazyOddsRef = lazyOdds
 
 local function refreshCrate()
 	if not panel then return end
@@ -596,7 +624,9 @@ local function refreshCrate()
 			end
 		end
 		sc.CanvasSize = UDim2.fromOffset(0, 16 + math.ceil(#EmoteConfig.LIST / 5) * 194)
+		sc:GetPropertyChangedSignal("CanvasPosition"):Connect(lazyOdds)
 	end
+	if tab == "crate" then task.defer(lazyOdds) end
 	for id, c in pairs(oddsCards) do show(c:FindFirstChild("Owned"), owned(id)) end
 end
 
@@ -612,8 +642,7 @@ function EmoteController.refresh()
 			local e = EmoteConfig.get(w[i])
 			setText(s, "EmoteName", if e then e.name else "EMPTY")
 			setText(s, "Rarity", if e then EmoteConfig.RARITY[e.rarity].name else "equip in My Emotes")
-			local r = find(s, "Rarity")
-			if r and r:IsA("TextLabel") then r.TextColor3 = if e then rarityColour(e) else Color3.fromRGB(150, 150, 160) end
+			tint(find(s, "Rarity"), if e then rarityColour(e) else Color3.fromRGB(150, 150, 160))
 			styleTile(s and s:FindFirstChild("Tile"), e)
 		end
 	end
@@ -631,8 +660,7 @@ local function wheelInfo(i: number)
 	local show_ = e or playing
 	setText(wheelScreen, "SelName", if show_ then show_.name else "Pick an emote")
 	setText(wheelScreen, "SelInfo", if show_ then (EmoteConfig.RARITY[show_.rarity].name .. (if show_.song then "  ·  " .. show_.song else "")) else "1-6 or click a slot")
-	local info = find(wheelScreen, "SelInfo")
-	if info and info:IsA("TextLabel") then info.TextColor3 = if show_ then rarityColour(show_) else Color3.fromRGB(170, 170, 180) end
+	tint(find(wheelScreen, "SelInfo"), if show_ then rarityColour(show_) else Color3.fromRGB(170, 170, 180))
 	-- one ring follows the hovered slot
 	local ring = find(wheelScreen, "SlotSel")
 	local slot = wheelScreen:FindFirstChild("Slot" .. math.max(i, 1))
@@ -650,10 +678,21 @@ local function playSlot(i: number)
 		UI.close()
 		EmoteController.play(id)
 	else
-		tab = "mine"
+		nextTab = "mine"
 		selSlot = i
 		UI.open("Emotes")
 	end
+end
+
+-- show a tab of the Emotes panel ("mine" | "crate"); opens the panel if it's closed
+function EmoteController.showTab(t: string)
+	if UI.openName() ~= "Emotes" then
+		nextTab = t
+		UI.open("Emotes")
+		return
+	end
+	setTab(t)
+	EmoteController.refresh()
 end
 
 function EmoteController.toggleWheel()
@@ -699,8 +738,7 @@ local function showReveal(t: any)
 	local col = rarityColour(e)
 	setText(rv, "EmoteName", e.name)
 	setText(rv, "Rarity", EmoteConfig.RARITY[e.rarity].name)
-	local r = find(rv, "Rarity")
-	if r and r:IsA("TextLabel") then r.TextColor3 = col end
+	tint(find(rv, "Rarity"), col)
 	setText(rv, "Song", if e.song then ("Song: " .. e.song) else "")
 	if t.dupe then
 		setText(rv, "Title", "DUPLICATE")
@@ -818,6 +856,24 @@ local function wire(root: Instance)
 		onClick(close, function() UI.close() end)
 	end
 	if wheelScreen then
+		-- the wheel's backing and centre disc exported as soft glow blobs that vanish on a dark scene:
+		-- make them solid circles (dark translucent ring behind the slots, a rimmed disc in the middle)
+		for _, g in ipairs(wheelScreen:GetChildren()) do
+			if g:IsA("ImageLabel") and g.Name == "Glow" then
+				local disc = g.Size.X.Offset < 400
+				g.BackgroundColor3 = g.ImageColor3
+				g.BackgroundTransparency = if disc then 0 else 0.18
+				g.Image = ""
+				local c = Instance.new("UICorner")
+				c.CornerRadius = UDim.new(0.5, 0)
+				c.Parent = g
+				local st = Instance.new("UIStroke")
+				st.Color = if disc then Color3.fromRGB(5, 5, 6) else Color3.new(1, 1, 1)
+				st.Transparency = if disc then 0 else 0.85
+				st.Thickness = if disc then 4 else 3
+				st.Parent = g
+			end
+		end
 		for i = 1, 6 do
 			local s = wheelScreen:FindFirstChild("Slot" .. i)
 			onClick(s, function() playSlot(i) end)
@@ -827,12 +883,12 @@ local function wire(root: Instance)
 			end
 		end
 		onClick(find(wheelScreen, "BtnStop"), function() EmoteController.stop(); UI.close() end)
-		onClick(find(wheelScreen, "BtnGet"), function() tab = "crate"; UI.open("Emotes") end)
+		onClick(find(wheelScreen, "BtnGet"), function() nextTab = "crate"; UI.open("Emotes") end)
 		local mine = find(wheelScreen, "BtnMine")
 		if mine then
 			mine:SetAttribute("Opens", nil)
 			mine:SetAttribute("OpensVia", nil)
-			onClick(mine, function() tab = "mine"; UI.open("Emotes") end)
+			onClick(mine, function() nextTab = "mine"; UI.open("Emotes") end)
 		end
 		onClick(find(ws, "CloseButton"), function() UI.close() end)
 		local dim = ws and ws:FindFirstChild("Dim")
@@ -874,8 +930,8 @@ function EmoteController.init()
 	UI.onOpen = UI.onOpen or {}
 	UI.onOpen.Emotes = function()
 		revealShown(false)
-		setTab(if tab == "crate" or #ownedList() == 0 then "crate" else "mine")
-		tab = "mine"
+		setTab(nextTab or (if #ownedList() == 0 then "crate" else "mine"))
+		nextTab = nil
 		EmoteController.refresh()
 	end
 	UI.onOpen.EmoteWheel = function()

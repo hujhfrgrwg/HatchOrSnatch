@@ -24,9 +24,14 @@ local ROW_STEP = 108
 local function find(scope: Instance?, name: string): Instance?
 	return scope and scope:FindFirstChild(name, true)
 end
+-- every exported label has a black "<name>Shadow" copy under it: keep both in step
 local function setText(scope: Instance?, name: string, text: string)
 	local t = find(scope, name)
-	if t and (t:IsA("TextLabel") or t:IsA("TextButton")) then t.Text = text end
+	if t and (t:IsA("TextLabel") or t:IsA("TextButton")) then
+		t.Text = text
+		local sh = t.Parent and t.Parent:FindFirstChild(name .. "Shadow")
+		if sh and sh:IsA("TextLabel") then sh.Text = text end
+	end
 end
 local function show(g: Instance?, on: boolean)
 	if g and g:IsA("GuiObject") then g.Visible = on end
@@ -34,6 +39,14 @@ end
 local function dual(b: Instance?, on: boolean)
 	show(b and b:FindFirstChild("On"), on)
 	show(b and b:FindFirstChild("Off"), not on)
+end
+
+-- recolour a label without its baked design gradient tinting the new colour
+local function tint(label: Instance?, colour: Color3)
+	if not label or not label:IsA("TextLabel") then return end
+	label.TextColor3 = colour
+	local g = label:FindFirstChildOfClass("UIGradient")
+	if g then g.Color = ColorSequence.new(Color3.new(1, 1, 1)) end
 end
 
 local function myPing(): number
@@ -87,15 +100,13 @@ local function fillRow(f: GuiObject, v: any)
 	setText(f, "Region", (if you then "YOUR SERVER  ·  " else "") .. place(v))
 	setText(f, "Detail", ("%d / %d players  ·  %s"):format(v.players or 0, v.max or 0, v.phase or "In lobby"))
 	setText(f, "Ping", (if you then "%d ms" else "%d ms avg"):format(ping))
-	local p = find(f, "Ping")
-	if p and p:IsA("TextLabel") then p.TextColor3 = pingColour(ping) end
+	tint(find(f, "Ping"), pingColour(ping))
 	local full = (v.players or 0) >= (v.max or 1)
 	show(find(f, "BtnJoin"), not you and not full)
 	show(find(f, "BtnFull"), not you and full)
 	show(find(f, "BtnHere"), you)
 	f:SetAttribute("JobId", v.id)
-	local reg = find(f, "Region")
-	if reg and reg:IsA("TextLabel") then reg.TextColor3 = if you then Color3.fromRGB(122, 224, 42) else Color3.new(1, 1, 1) end
+	tint(find(f, "Region"), if you then Color3.fromRGB(122, 224, 42) else Color3.new(1, 1, 1))
 	local st = find(f, "EOS_You")
 	if st and st:IsA("UIStroke") then st.Enabled = you end
 end
@@ -261,8 +272,7 @@ function ServersController.init()
 				if yr and data and yr:GetAttribute("JobId") == data.here then
 					local ms = myPing()
 					setText(yr, "Ping", ("%d ms"):format(ms))
-					local p = find(yr, "Ping")
-					if p and p:IsA("TextLabel") then p.TextColor3 = pingColour(ms) end
+					tint(find(yr, "Ping"), pingColour(ms))
 				end
 			end
 		end

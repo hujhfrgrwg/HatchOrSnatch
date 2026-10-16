@@ -25,7 +25,7 @@ Three lobby systems were added on 16 Oct, modelled on Huss Valley's server list,
 - **Songs:** every emote has a licensed APM track (Roblox's library). The 36 added on 16 Oct were picked to fit each emote's mood (`EmoteConfig`; all checked to load in Studio). For example: Surfer gets surf rock, Head Juggle a circus march, Reaper's Ride heavy metal, Blossom Break koto, Cossack Kick balalaika.
 - **Emotes panel:**
   - My Emotes shows a card per owned emote with a live preview of your avatar, plus PLAY and EQUIP buttons. YOUR WHEEL has 6 slots: pick a slot, then EQUIP.
-  - The Emote Crate tab has the odds board for all 51, OPEN for 250 Gems, a reel, then the reveal.
+  - The Emote Crate tab has the odds board for all 51, each card with a live preview made as it scrolls into view. Then OPEN for 250 Gems, a reel, and the reveal.
 - **Emote wheel (G or the EMOTES rail button):** your six emotes sit around a centre disc. Clicking a slot or pressing 1-6 plays it; there are also STOP, MY EMOTES and GET EMOTES. It's lobby only.
 - **The wheel is saved:** `profile.emoteWheel`, set through `RequestEmoteWheel` and cleaned by `EmoteConfig.cleanWheel`. A new crate win fills the first empty slot. Older saves fill with the first six emotes owned.
 
@@ -55,3 +55,18 @@ Three lobby systems were added on 16 Oct, modelled on Huss Valley's server list,
 - **HUNT shows only in private servers**, as does the Settings "Volunteer To Hunt" row; UI Colour moves up into its place in public servers. `MatchService` honours Volunteer only in private servers and in Studio.
 - **SERVERS** sits in the top right, next to STATS.
 - **Buttons** have a 10 px radius on both ends (`sport.css .cb`); the old 4 px read as square on the dark left end.
+
+## Runtime fixes on top of the export
+- **Wheel backing:** the wheel's backing and centre disc exported as soft glow blobs. The controller makes them solid circles.
+- **Label colours:** recoloured labels (rarity, ping, region) drop the gradient the export baked into them, so the new colour shows true.
+- **Label shadows:** every label's black `<name>Shadow` copy is updated with it (no ghost text).
+- **Checked in Studio on 16 Oct:**
+  - the HUD rail;
+  - the wheel;
+  - My Emotes;
+  - the crate odds board with previews;
+  - the reveal;
+  - playing an emote with its published animation and song;
+  - the Servers list.
+
+  All of these were opened from code, because simulated clicks don't reach Studio when it isn't the focused window.
