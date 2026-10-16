@@ -32,7 +32,9 @@
  "Assets/UI/icons/abilityfx_gold.png": {
   "assetId": "127132909595936"
  },
- "Assets/UI/icons/afk.png": {},
+ "Assets/UI/icons/afk.png": {
+  "assetId": "101001281259213"
+ },
  "Assets/UI/icons/burst.png": {
   "assetId": "115992214921605"
  },
@@ -45,7 +47,9 @@
  "Assets/UI/icons/case_sunset.png": {
   "assetId": "139262871063326"
  },
- "Assets/UI/icons/catcher.png": {},
+ "Assets/UI/icons/catcher.png": {
+  "assetId": "109965623644457"
+ },
  "Assets/UI/icons/check.png": {
   "assetId": "128925161760256"
  },
@@ -100,7 +104,9 @@
  "Assets/UI/icons/hatchfx.png": {
   "assetId": "97389837491988"
  },
- "Assets/UI/icons/hunt.png": {},
+ "Assets/UI/icons/hunt.png": {
+  "assetId": "135702971655625"
+ },
  "Assets/UI/icons/incubator.png": {
   "assetId": "101492074797523"
  },
@@ -458,8 +464,12 @@
  "Assets/UI/icons/robux.png": {
   "assetId": "123689301563222"
  },
- "Assets/UI/icons/runner.png": {},
- "Assets/UI/icons/safe.png": {},
+ "Assets/UI/icons/runner.png": {
+  "assetId": "97341013407239"
+ },
+ "Assets/UI/icons/safe.png": {
+  "assetId": "121393207851538"
+ },
  "Assets/UI/icons/settings.png": {
   "assetId": "81199671733710"
  },
@@ -1056,5 +1066,41 @@
  },
  "Assets/UI/icons/music.png": {
   "assetId": "111686034626701"
+ },
+ "Assets/UI/art/ab90101a166s.png": {
+  "assetId": "94586564546634"
+ },
+ "Assets/UI/art/a64b9af467bs.png": {
+  "assetId": "130796941077185"
+ },
+ "Assets/UI/art/ada0c7f70aes.png": {
+  "assetId": "139979891669446"
+ },
+ "Assets/UI/art/a3cfae0ce49s.png": {
+  "assetId": "99183502703642"
+ },
+ "Assets/UI/art/affdb20b15cs.png": {
+  "assetId": "108894020711357"
+ },
+ "Assets/UI/art/ae84f76b26as.png": {
+  "assetId": "134833219095234"
+ },
+ "Assets/UI/art/a0e7996f923s.png": {
+  "assetId": "124802378931012"
+ },
+ "Assets/UI/art/a477426a820s.png": {
+  "assetId": "96356012861713"
+ },
+ "Assets/UI/art/a609fe22cc6s.png": {
+  "assetId": "92993221871247"
+ },
+ "Assets/UI/art/ac7cef1fd33s.png": {
+  "assetId": "123756020599638"
+ },
+ "Assets/UI/art/a68fad07684s.png": {
+  "assetId": "100586095602547"
+ },
+ "Assets/UI/art/a879fd92992s.png": {
+  "assetId": "132523310907507"
  }
 }
