@@ -56,6 +56,7 @@ local settingsInit = false
 local shopTab = "featured"
 local resultsData: any = nil
 local resultsOpen = false
+local shownLevel: number? = nil -- the account level last shown (a rise opens LEVEL UP!)
 local trackedQuest: string? = nil
 local joinedAt = os.clock()
 
@@ -1043,6 +1044,17 @@ local function goalPill()
 	pill:SetAttribute("OpensVia", "Incubator")
 end
 
+-- account level + XP bar under the goal pill (16 Oct: XP system)
+local function levelPlate()
+	local tl = hudGroup("HUD", "TopLeft")
+	local lp = tl and tl:FindFirstChild("LevelPlate")
+	if not lp or not profile then return end
+	local level, into, need = EconomyConfig.levelFor(profile.xp or 0)
+	setText(lp, "LevelText", "LEVEL " .. level)
+	setText(lp, "XpText", ("%s / %s XP"):format(Format.full(into), Format.full(need)))
+	setBar(lp:FindFirstChild("XpBar"), into / need)
+end
+
 local function badges()
 	local tl = hudGroup("HUD", "TopLeft")
 	if not tl then return end
@@ -1098,6 +1110,7 @@ local function updateHUD()
 		lobbyStatus()
 		railToggles()
 		goalPill()
+		levelPlate()
 		badges()
 	end
 	abilityCard()
@@ -1708,7 +1721,7 @@ end
 
 -- Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems.
 -- Gold items cost Gold; Gem items show a Gem price and (once its product exists) a Robux price.
-local SHOP_TABS = { featured = "TabFeatured", trails = "TabTrails", cases = "TabEggCases", effects = "TabEffects", emotes = "TabEmotes", gems = "TabGems" }
+local SHOP_TABS = { featured = "TabFeatured", trails = "TabTrails", cases = "TabEggCases", effects = "TabEffects", emotes = "TabEmotes", passes = "TabPasses", gems = "TabGems" }
 local TAG_WORDS = { trail = "ONE MATCH", burst = "LOBBY, ONCE" } -- everything else keeps forever
 local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CASE", burst = "LOBBY EFFECT", entrance = "ENTRANCE", abilityFx = "ABILITY FX", hatchFx = "HATCH FX" }
 
@@ -1826,6 +1839,44 @@ local function rewardItem(it: any)
 		r.use, r.onUse = "USE NOW", function() Net.event("RequestUseItem"):FireServer(it.id) end
 	end
 	UIC.showReward(r)
+end
+
+-- LEVEL UP!: waits for the results screen to close, then the reward reveal with the level-up pay
+local LEVEL_SKY = Color3.fromRGB(110, 200, 255)
+local function rewardLevelUp(from: number, to: number)
+	task.spawn(function()
+		local t0 = os.clock()
+		while (resultsOpen or UI.current() == "Results") and os.clock() - t0 < 30 do task.wait(0.5) end
+		local R = EconomyConfig.LEVEL_REWARD
+		local gold, gems = 0, 0
+		for L = from + 1, to do
+			gold += R.gold
+			if L % R.gemsEvery == 0 then gems += R.gems end
+		end
+		UIC.showReward({
+			icon = "star",
+			title = "LEVEL UP!",
+			titleColor = LEVEL_SKY,
+			name = "Level " .. to,
+			kind = ("+%s GOLD"):format(Format.full(gold)) .. (if gems > 0 then ("  ·  +%d GEMS"):format(gems) else ""),
+			kindColor = Color3.fromRGB(255, 210, 58),
+			sub = ("Keep playing to reach Level %d."):format(to + 1),
+		})
+	end)
+end
+
+-- a game pass: VIP or 2x XP
+local function rewardPass(key: string)
+	local pass = EconomyConfig.pass(key)
+	if not pass then return end
+	UIC.showReward({
+		icon = if iconId(pass.icon) ~= "" then pass.icon elseif key == "vip" then "crown" else "star",
+		title = "UNLOCKED!",
+		name = pass.name,
+		kind = "GAME PASS  ·  FOREVER",
+		kindColor = Color3.fromRGB(255, 210, 58),
+		sub = pass.desc,
+	})
 end
 
 -- a Gem pack bought with Robux: its own art (gempack1..6), the Gems count up behind
@@ -1997,19 +2048,20 @@ local function fillCard(card: Instance, it: any)
 	wireButtons_(card, it)
 end
 
+local PASS_CARDS = { vip = "PassVip", xp2x = "PassXp2x" }
 local function refreshShop()
 	local sc = S.Shop
 	if not sc or not profile then return end
 	if shopTab == "gold" then shopTab = "featured" end -- old tab names (lobby stalls)
 	if shopTab == "getgems" then shopTab = "gems" end
-	if not SHOP_TABS[shopTab] or (shopTab == "gems" and not PURCHASES) then shopTab = "featured" end
+	if not SHOP_TABS[shopTab] or ((shopTab == "gems" or shopTab == "passes") and not PURCHASES) then shopTab = "featured" end
 	for key, nm in pairs(SHOP_TABS) do
 		local t = find(sc, nm)
 		setDual(t, shopTab == key)
-		if key == "gems" and t and t:IsA("GuiObject") then t.Visible = PURCHASES end
+		if (key == "gems" or key == "passes") and t and t:IsA("GuiObject") then t.Visible = PURCHASES end
 	end
 	local pages = { PageFeatured = shopTab == "featured", PageItems = shopTab == "trails" or shopTab == "cases" or shopTab == "effects",
-		PageEmotes = shopTab == "emotes", GetGemsPage = shopTab == "gems" }
+		PageEmotes = shopTab == "emotes", PagePasses = shopTab == "passes", GetGemsPage = shopTab == "gems" }
 	for nm, on in pairs(pages) do
 		local pg = find(sc, nm)
 		if pg and pg:IsA("GuiObject") then pg.Visible = on end
@@ -2077,6 +2129,20 @@ local function refreshShop()
 		local gb = find(sc, "BtnCrateGems")
 		if gb and gb:IsA("GuiObject") then gb.Visible = not UIC.crateBlocked end
 		setText(sc, "CrateGemsLabel", Format.full(gems))
+	elseif shopTab == "passes" then
+		for key, slot in pairs(PASS_CARDS) do
+			local card = find(sc, slot)
+			local pass = EconomyConfig.pass(key)
+			if card and pass then
+				local owned = player:GetAttribute(pass.attr) == true
+				local buy, own = find(card, "BtnBuy"), find(card, "BtnOwned")
+				if buy and buy:IsA("GuiObject") then buy.Visible = not owned end
+				if own and own:IsA("GuiObject") then own.Visible = owned end
+				setText(card, "Price", Format.full(pass.robux))
+				setText(card, "Have", if owned then "You own this pass. Thank you!" else "Bought once, yours on every server.")
+				if iconId(pass.icon) ~= "" then setIcon(card, "Icon", pass.icon) end
+			end
+		end
 	elseif shopTab == "gems" then
 		local packs = find(sc, "GetGemsPage")
 		for i, pack in ipairs(EconomyConfig.GEM_PACKS) do
@@ -2222,7 +2288,13 @@ local function showResults(data: any)
 	local yourCard = find(sc, "You")
 	if yourCard then yourCard.Visible = you ~= nil end
 	if you then
-		local parts = you.goldParts or {}
+		local parts = table.clone(you.goldParts or {})
+		-- four lines on the card: with the 2x Gold pass line a fifth part folds into the one before it
+		while #parts > 4 do
+			local a, b = parts[#parts - 2], parts[#parts - 1]
+			parts[#parts - 2] = { label = "BONUSES", amount = (a.amount or 0) + (b.amount or 0) }
+			table.remove(parts, #parts - 1)
+		end
 		for i = 1, 4 do
 			local line = find(sc, "Line" .. i)
 			local p = parts[i]
@@ -2722,6 +2794,21 @@ local function wireButtons()
 			if UIC.showEmoteCrate then UIC.showEmoteCrate() end
 		end)
 		onClick(find(shop, "BtnCrateRobux"), function() UIC.buyCrate() end)
+		-- game passes: Roblox's own prompt; PassService grants on PromptGamePassPurchaseFinished
+		for key, slot in pairs(PASS_CARDS) do
+			local pass = EconomyConfig.pass(key)
+			local card = find(shop, slot)
+			onClick(card and find(card, "BtnBuy"), function()
+				if not pass or not PURCHASES or player:GetAttribute(pass.attr) == true then return end
+				Sound.play("click")
+				pcall(function() MarketplaceService:PromptGamePassPurchase(player, pass.passId) end)
+			end)
+		end
+		for _, pass in ipairs(EconomyConfig.PASSES) do
+			player:GetAttributeChangedSignal(pass.attr):Connect(function()
+				if UI.current() == "Shop" then refreshShop() end
+			end)
+		end
 		onClick(find(shop, "BtnSeeEmotes"), function() if UIC.showEmoteCrate then UIC.showEmoteCrate() end end)
 	end
 	-- Settings
@@ -2771,6 +2858,9 @@ end
 local function connectEvents()
 	Net.event("ProfileState").OnClientEvent:Connect(function(view)
 		if type(view) ~= "table" then return end
+		local lvl = (EconomyConfig.levelFor(tonumber(view.xp) or 0))
+		if profile and shownLevel and lvl > shownLevel then rewardLevelUp(shownLevel, lvl) end
+		shownLevel = lvl
 		profile = view
 		if not settingsInit and type(view.settings) == "table" then
 			settingsInit = true
@@ -2834,6 +2924,8 @@ local function connectEvents()
 		if type(t) ~= "table" or not t.ok then return end
 		if type(t.gems) == "number" then
 			rewardGems(t.gems)
+		elseif type(t.pass) == "string" then
+			rewardPass(t.pass)
 		elseif type(t.itemId) == "string" and not t.refunded then
 			local it = EconomyConfig.item(t.itemId)
 			if it then rewardItem(it) else Sound.play("purchase") end
@@ -2922,7 +3014,17 @@ local function connectEvents()
 		end
 	end)
 	Net.event("Results").OnClientEvent:Connect(function(data)
-		if type(data) == "table" then showResults(data) end
+		if type(data) == "table" then
+			showResults(data)
+			-- match XP, with the VIP / 2x XP pass shares named
+			local you = data.you
+			if type(you) == "table" and (tonumber(you.xp) or 0) > 0 then
+				local extra = {}
+				for _, l in ipairs(you.xpExtra or {}) do table.insert(extra, ("%s +%d"):format(l.label, l.amount)) end
+				local text = ("+%s XP"):format(Format.full(you.xp)) .. (if #extra > 0 then ("  (%s)"):format(table.concat(extra, "  ·  ")) else "")
+				task.delay(1.2, function() UIC.toast(text, "reward", true) end)
+			end
+		end
 	end)
 end
 

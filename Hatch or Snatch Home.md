@@ -13,7 +13,7 @@ Evolve or Steal is an 8–16 player infection chase. Runners carry eggs that lev
 
 - **Design doc:** [[Evolve or Steal GDD v0.4 Summary]] (full PDF: `Design/GDD/Evolve or Steal GDD v0.4.pdf`)
 - **Decisions:** [[Evolve or Steal Decisions]]
-- **UI:** round 3 "sport" is built and wired in Studio (images wait on the asset upload): [[UI Redesign]], [[UI Wiring Map]] (buttons, remotes, data), [[UI Runtime Changes]] (what the controller changes and animates at runtime), [[Emotes Servers Spectate]] (emote wheel and crate, server list, spectate)
+- **UI:** round 3 "sport" is built and wired in Studio (images wait on the asset upload): [[UI Redesign]], [[UI Wiring Map]] (buttons, remotes, data), [[UI Runtime Changes]] (what the controller changes and animates at runtime), [[Emotes Servers Spectate]] (emote wheel and crate, server list, spectate), [[XP and Passes]] (account level, VIP and 2x XP passes)
 - **What's built:** [[Studio Place State 2026-10-15]] (latest audit of the Studio place against the GDD)
 
 ## Studio place

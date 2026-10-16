@@ -26,3 +26,4 @@ One line per decision, newest first. "Code" means the decision was found in the 
 - Code: Catchers (players and NPCs) are held for 0.75 s after a crossing opens.
 - Code: NPCs fill matches to 20 Runners and the lobby to 5. Matches start with 1 real player, and fewer than 4 real players is an unsaved practice match.
 - Code: Robux purchases stay off until Hunter approves real developer products.
+- 16 Oct (Hunter): an account XP system like Huss Valley's. Matches pay XP, XP builds the nameplate level, and level-ups pay a little Gold (Gems every 5th level). The passes are VIP (499 R$: +25% XP, VIP tag, Honored One emote) and 2x XP (199 R$). The bonuses stack (2.25x). See [[XP and Passes]].

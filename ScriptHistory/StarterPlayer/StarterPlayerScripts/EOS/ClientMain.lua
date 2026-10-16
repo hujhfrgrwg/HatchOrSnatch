@@ -20,6 +20,7 @@ local FacePlayer = require(Controllers.FacePlayer)
 local EmoteController = require(Controllers.EmoteController)
 local ServersController = require(Controllers.ServersController)
 local SpectateController = require(Controllers.SpectateController)
+local ChatTags = require(Controllers.ChatTags)
 
 Fit.init()
 Movement.init()
@@ -33,6 +34,7 @@ Pets.init()
 EmoteController.init() -- Emotes panel (My Emotes, wheel, Emote Crate), the G wheel, lobby dances and their songs
 ServersController.init() -- Servers panel: live server list, join by teleport
 SpectateController.init() -- SPECTATE: watch the match from the lobby (follow / free cam)
+ChatTags.init() -- [VIP] in chat for VIP pass holders
 UIController.spectating = SpectateController.isActive
 UIController.startSpectate = SpectateController.start
 SlideFX.init() -- streaks on the floor and in the air for every slide (yours, other players', NPCs')

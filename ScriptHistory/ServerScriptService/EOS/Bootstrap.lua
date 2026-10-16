@@ -24,6 +24,7 @@ local EmoteService = require(Services.EmoteService)
 local AbilityService = require(Services.AbilityService)
 local ServerListService = require(Services.ServerListService)
 local PurchaseService = require(Services.PurchaseService)
+local PassService = require(Services.PassService)
 
 CharacterService.init()
 MapService.init() -- before anything reads arena numbers: points Layout at the live map
@@ -37,6 +38,7 @@ EmoteService.init()
 AbilityService.init()
 ServerListService.init() -- the Servers panel: this server in the shared list, join by teleport
 PurchaseService.init() -- Robux Gem packs: ProcessReceipt grants once, after the save
+PassService.init() -- VIP and 2x Gold game passes: ownership -> EOS_VIP / EOS_Gold2x
 LobbyService.init()
 PracticeService.init()
 SandboxService.init() -- Studio only: workspace attribute EOS_Sandbox = knife test baseplate
