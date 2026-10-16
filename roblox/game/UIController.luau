@@ -1318,6 +1318,17 @@ local function showReveal(t: any)
 	local eqd = profile and profile.equippedPet
 	local isEquipped = eqd == pet.id or eqd == nil or eqd == ""
 	if equip then equip.Visible = not isEquipped end
+	-- alone, NICE! moves to the middle of the pair (both are juiced: centre-anchored, rest in JuiceRest)
+	local nice = find(sc, "BtnClose")
+	if equip and nice and equip:IsA("GuiObject") and nice:IsA("GuiObject") then
+		if nice:GetAttribute("PairHome") == nil then
+			nice:SetAttribute("PairHome", nice.Position)
+			nice:SetAttribute("PairMid", nice.Position:Lerp(equip.Position, 0.5))
+		end
+		local at = (if isEquipped then nice:GetAttribute("PairMid") else nice:GetAttribute("PairHome")) :: UDim2
+		nice.Position = at
+		nice:SetAttribute("JuiceRest", at)
+	end
 	sc:SetAttribute("PetId", pet.id)
 	UI.open("Hatch", { keepHistory = true })
 	-- egg shake -> flash -> pet pop
@@ -2432,28 +2443,20 @@ function UIC.init()
 			end
 		end
 	end
-	-- the close button's two corner flicks were clipped to its image box by the export: redraw them
-	for _, x in root:GetDescendants() do
-		if x:IsA("GuiButton") and x.Name == "CloseButton" and not x:FindFirstChild("Flick1") then
-			local art = x:FindFirstChild("Art")
-			local w = if art and art:IsA("GuiObject") then art.Size.X.Offset else 88
-			local h = if art and art:IsA("GuiObject") then art.Size.Y.Offset else 88
-			for i, at in ipairs({ Vector2.new(-9, -9), Vector2.new(w - 15, h - 15) }) do
-				local t = Instance.new("Frame")
-				t.Name = "Flick" .. i
-				t.BorderSizePixel = 0
-				t.BackgroundColor3 = Color3.fromRGB(255, 72, 104)
-				t.Size = UDim2.fromOffset(24, 24)
-				t.Position = UDim2.fromOffset(at.X, at.Y)
-				t.Rotation = -4
-				t.ZIndex = 0
-				local g = Instance.new("UIGradient")
-				g.Rotation = 45
-				g.Transparency = if i == 1
-					then NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(0.501, 1), NumberSequenceKeypoint.new(1, 1) })
-					else NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.499, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 0) })
-				g.Parent = t
-				t.Parent = x
+	-- close button: the export clipped the tilted box (and its corner tabs) to its layout rect. When the
+	-- clean re-render (art close_clean, no tabs) is uploaded, swap it in, centred where the old art was
+	local clean = assets and assets.art and assets.art["close_clean"]
+	if clean and clean ~= "" then
+		for _, x in root:GetDescendants() do
+			if x:IsA("GuiButton") and x.Name == "CloseButton" then
+				local art = x:FindFirstChild("Art")
+				if art and art:IsA("ImageLabel") then
+					local cx = art.Position.X.Offset + art.Size.X.Offset / 2
+					local cy = art.Position.Y.Offset + art.Size.Y.Offset / 2
+					art.Image = clean
+					art.Size = UDim2.fromOffset(106.5, 98.5)
+					art.Position = UDim2.fromOffset(cx - 53, cy - 51)
+				end
 			end
 		end
 	end

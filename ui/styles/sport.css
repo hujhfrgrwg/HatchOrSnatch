@@ -66,13 +66,10 @@ body, .ot { font-family: 'Fredoka', sans-serif; font-weight: 700; }
   -webkit-mask-image: linear-gradient(90deg, #000 0 8%, transparent 24%, transparent 60%, #000 95%); }
 .ch > .sweep, .ch .spk { display: none; }
 
-/* close: tilted red square, light corner tabs, halftone, white X */
+/* close: tilted red square, halftone, white X (corner tabs dropped 16 Oct: Hunter disliked them in game) */
 .cx { width: 88px; height: 82px; border-radius: 3px; border: 4px solid #050506; transform: rotate(-7deg); overflow: visible;
   background: radial-gradient(circle, rgba(255,140,150,.35) 1.4px, transparent 1.9px) 0 0 / 7px 7px, linear-gradient(160deg, #ff3046 0%, #e0101e 50%, #a2001a 100%);
   box-shadow: 0 5px 0 rgba(0,0,0,.5); }
-.cx::before, .cx::after { content: ''; position: absolute; width: 22px; height: 22px; background: #ff4a5e; border: 3px solid #050506; }
-.cx::before { left: -12px; top: -12px; clip-path: polygon(0 0, 100% 0, 0 100%); }
-.cx::after { right: -12px; bottom: -12px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 
 /* wells = the reference's sub-boxes: dark, light rim, black outline */
 .cw { border-radius: 5px; border: 2px solid rgba(225,225,232,.75); box-shadow: 0 0 0 2px #050506; background: rgba(0,0,0,.28); }
