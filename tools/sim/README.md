@@ -12,9 +12,10 @@ Python 3 + numpy. No other dependencies. Results land in `docs/economy-audit/res
 | `compare.py` | Scores the complete designs (A to D, plus today's place) on measured criteria under four weightings. |
 | `cooldowns.py` | How often a rarity recharge bonus buys an extra ability use. |
 | `robustness.py` | Re-checks the egg rules at loose and tight Catcher strength with the tuned table. |
+| `roster.py` | Careers against the cofounder roster (5 archetypes × 4 rarities): species owned and duplicates per species over 50 h. |
 | `hero.py`, `hero_headstart.py` | Hero or Chicken: a lone Runner against the one starting Catcher, with and without extra start protection. |
 
-Run order: `experiments.py`, `longterm.py`, `tune.py`, `compare.py`, `robustness.py`, `cooldowns.py`, `hero.py`, `hero_headstart.py`. Seeds are fixed. `results/manifest.json` lists every job's seed and match count.
+Run order: `experiments.py`, `longterm.py`, `tune.py`, `compare.py`, `robustness.py`, `cooldowns.py`, `hero.py`, `hero_headstart.py`, `roster.py`. Seeds are fixed. `results/manifest.json` lists every job's seed and match count.
 
 **Pressure** is the knob for how good chasing is relative to escaping. Real players and the Catcher's tools will set it, and no sim can. With one starting Catcher (Hunter, 16 Oct): `loose` = 2.0, `base` = 2.6, `tight` = 3.2, giving Runner survival over three crossings of about 65%, 47% and 31% in a 30-player match. The earlier 3-Catcher runs used 1.0 / 1.6 / 2.0; they are in git history.
 

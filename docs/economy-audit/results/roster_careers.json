@@ -1,0 +1,316 @@
+{
+ "species": 20,
+ "careers": 300,
+ "hours": 50,
+ "matches_per_hour": 45,
+ "recipes": {
+  "1": [
+   24,
+   30
+  ],
+  "2": [
+   19,
+   24
+  ],
+  "3": [
+   11,
+   14
+  ]
+ },
+ "variants": {
+  "fuse": {
+   "1h": {
+    "species_owned_median": 1.0,
+    "owned_by_rarity_median": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 0.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": null,
+      "p90": null
+     },
+     {
+      "median": null,
+      "p90": null
+     }
+    ]
+   },
+   "5h": {
+    "species_owned_median": 4.0,
+    "owned_by_rarity_median": [
+     1.0,
+     3.0,
+     0.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 1.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 0.0,
+      "p90": 1.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": null,
+      "p90": null
+     }
+    ]
+   },
+   "10h": {
+    "species_owned_median": 7.0,
+    "owned_by_rarity_median": [
+     1.0,
+     4.0,
+     1.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 5.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 1.0,
+      "p90": 3.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": null,
+      "p90": null
+     }
+    ]
+   },
+   "25h": {
+    "species_owned_median": 9.0,
+    "owned_by_rarity_median": [
+     1.0,
+     5.0,
+     3.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 21.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 4.0,
+      "p90": 7.0
+     },
+     {
+      "median": 0.0,
+      "p90": 1.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     }
+    ]
+   },
+   "50h": {
+    "species_owned_median": 12.0,
+    "owned_by_rarity_median": [
+     1.0,
+     5.0,
+     4.0,
+     1.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 49.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 9.0,
+      "p90": 13.0
+     },
+     {
+      "median": 1.0,
+      "p90": 3.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     }
+    ]
+   }
+  },
+  "common_hatch": {
+   "1h": {
+    "species_owned_median": 1.0,
+    "owned_by_rarity_median": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 0.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": null,
+      "p90": null
+     },
+     {
+      "median": null,
+      "p90": null
+     }
+    ]
+   },
+   "5h": {
+    "species_owned_median": 8.0,
+    "owned_by_rarity_median": [
+     5.0,
+     3.0,
+     0.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 1.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 0.0,
+      "p90": 1.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": null,
+      "p90": null
+     }
+    ]
+   },
+   "10h": {
+    "species_owned_median": 11.0,
+    "owned_by_rarity_median": [
+     5.0,
+     4.0,
+     1.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 5.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 1.0,
+      "p90": 3.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": null,
+      "p90": null
+     }
+    ]
+   },
+   "25h": {
+    "species_owned_median": 13.0,
+    "owned_by_rarity_median": [
+     5.0,
+     5.0,
+     3.0,
+     0.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 21.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 4.0,
+      "p90": 6.0
+     },
+     {
+      "median": 0.0,
+      "p90": 1.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     }
+    ]
+   },
+   "50h": {
+    "species_owned_median": 15.0,
+    "owned_by_rarity_median": [
+     5.0,
+     5.0,
+     4.0,
+     1.0
+    ],
+    "all_20_share": 0.0,
+    "dupes_total_median": 49.0,
+    "dupes_per_owned_species": [
+     {
+      "median": 0.0,
+      "p90": 0.0
+     },
+     {
+      "median": 9.0,
+      "p90": 12.0
+     },
+     {
+      "median": 1.0,
+      "p90": 2.0
+     },
+     {
+      "median": 0.0,
+      "p90": 0.0
+     }
+    ]
+   }
+  }
+ }
+}

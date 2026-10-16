@@ -67,6 +67,8 @@ Each decision has a playtest check. A failed check changes the number in that de
 
 ## Pets and incubation
 15. **The first egg a player wins also gives them a Common pet from a family they choose, and they keep the egg.** The median wait is 1 match.
+    - With the cofounder roster, the choice is between the five Common species: Mimic Crow, Veil Chameleon, Bastion Beetle, Thunder Toad and Ring Imp.
+    - The Crow is the production quality benchmark, so many players' first pet will be the best-made model.
     - *Research:* endowed progress (Nunes & Drèze 2006).
 16. **Recipes are sized in hours:**
 
@@ -80,16 +82,50 @@ Each decision has a playtest check. A failed check changes the number in that de
     - A typical player gets a first Rare pet at about 1.3 h, a first Epic at about 6.3 h and a first Legendary at about 32 h.
     - *Research:* goal gradient (Kivetz et al. 2006).
     - *Check:* the sizes assume 45 matches per hour. Recompute them from real matches per hour using target hours × eggs per hour.
-17. **Three Common eggs fuse into one Rare.** Commons are 9% of eggs under the cap, so they need a use.
+17. **Common eggs:** three Common eggs hatch a Common species the player doesn't have yet. Once all five Commons are owned, three Common eggs fuse into one Rare egg instead.
+    - Commons are 9% of eggs under the cap, so they need a use.
+    - *Data (`roster_careers.json`):* this takes a typical player from 4 to 8 species owned by 5 h, and costs almost nothing in Rare-pet pace.
 18. **Focusing costs eggs, never Gems.** Paying Gems to focus would make hatching a paid random item.
-19. **Duplicate pets give cosmetic mastery stars only.**
-20. **Rarity stat bonus:**
-    - The bonus is +1.5%, +3% and +4.5% on ability duration or distance only, never recharge.
-    - *Data:* it made no measurable difference to survival (45–48% at every bonus level), so it carries no balance risk.
-    - Rarity mostly shows through visuals and sound.
+19. **Duplicate pets raise the pet's mutation level (L1 → L2 → L3, from the cofounder roster handoff). Mutations are cosmetic only.** The thresholds are set by rarity so each tier has a reachable goal:
+
+    | Rarity | L2 | L3 |
+    |---|---|---|
+    | Rare | 2 duplicates | 6 duplicates |
+    | Epic | 1 duplicate | 3 duplicates |
+    | Legendary | 1 duplicate | 2 duplicates |
+    | Common | 1 copy from Common eggs | 3 copies from Common eggs |
+
+    - *Data:* a typical player has a median of 1 duplicate per Rare species at 10 h, 4 at 25 h and 9 at 50 h, and 1 per Epic species at 50 h. On those numbers, Rare L2 arrives around 15 h, Rare L3 around 35 h, and Epic L3 is a long-term goal.
+    - Common copies come from Common eggs, chosen by the player, once all five Commons are owned.
+20. **No rarity stat bonus at launch: rarity changes how an ability looks, never how much it does.** (Revised 16 Oct after the cofounder roster handoff; this used to be +1.5/3/4.5%.)
+    - *Data:* a +3% to +20% bonus made no measurable difference to survival (45–48% at every level). That's exactly the competitive test the handoff asks for, and it found nothing.
+    - *Design:* the handoff's rule is that "the pet decides how an effect looks, not how much it accomplishes". A bonus that does nothing would break that rule for no gain, and it would add balancing work across ten role abilities.
+    - *Psychology:* players perceive the visuals and sound anyway. Revisit the bonus only if playtests show players want rarity to feel stronger.
+
+## Pet roster (cofounder handoff, 16 Oct)
+26. **The economy fits the proposed roster: 5 archetypes × 4 rarities = 20 species, plus 3 cosmetic mutation levels.** Archetype = the family you focus, and rarity = which species hatches.
+    - *Data (`roster_careers.json`, typical player):*
+
+      | Hours played | Species owned | Note |
+      |---|---|---|
+      | 5 h | 8 of 20 | |
+      | 10 h | 11 | |
+      | 25 h | 13 | |
+      | 50 h | 15 | Usually all Commons and Rares, 4 Epics, 1 Legendary |
+
+    - Nobody has all 20 by 50 h, which gives a long tail.
+27. **Build art in the order players will see it:**
+    1. L1 of all Commons and Rares (every player meets these in the first hours)
+    2. Epics (first one at about 6 h)
+    3. Legendaries (about 30 h)
+    4. L2 and L3, Rares first, since Rare duplicates pile up first
+28. **Catcher abilities and the Hero run count towards Catcher strength.** Extended reach, tether pull, the projectile and the rift dash all make Catchers stronger, and the shield, knockback and portal make Runners harder to catch.
+    - Tune the 40–55% survival target and the Hero protection time with abilities switched on, and with the starting Catcher holding each archetype in turn.
+    - The strict Snatch-back cap still holds whatever the abilities do, because it caps rarity, not how often you snatch.
+29. **Still open (not an economy call):** the handoff's five archetypes (Decoy, Invisibility, Guardian, Tempest, Rift) don't match the nine-family, three-wave plan in [[Evolve or Steal Decisions]]. That plan has Double Dash, Decoy and Scout at launch, and Brake, Wall and others later. The economy works with either. Hunter and the cofounder need to pick one.
 
 ## Currencies
-21. **Gold earn rates stay the same, and prices go up 3×:**
+30. **Gold earn rates stay the same, and prices go up 3×:**
 
     | Item | Price |
     |---|---|
@@ -100,11 +136,11 @@ Each decision has a playtest check. A failed check changes the number in that de
     | Weekly colourway | 7,200 |
 
     - *Data:* players earn about 2,700 Gold per hour, so at current prices the whole shop is affordable in under an hour.
-22. **Gems: 1 for a win plus 1 for the first snatch, at most 2 per match.** Level-up Gems stay. That's about 30 per hour, down from 151.
-23. **Robux only buys looks:** Gem packs, passes, cosmetics including Hero-run effects, and the emote crate with its odds shown.
+31. **Gems: 1 for a win plus 1 for the first snatch, at most 2 per match.** Level-up Gems stay. That's about 30 per hour, down from 151.
+32. **Robux only buys looks:** Gem packs, passes, cosmetics including Hero-run effects, and the emote crate with its odds shown.
     - Eggs, focus, abilities, rarity and any boost to being picked as Hero are never sold.
     - *Research:* players see pay-to-win as unfair (Freeman et al. 2022). Huss Valley sells power, and not doing so is our difference.
-24. **No shop prompts until after the first pet.**
+33. **No shop prompts until after the first pet.**
 
 ## Deferred
-25. **Not at launch:** Egg Index, Ranked, the Cosmic tier, Gem-paid focusing, and ability families from waves 2–3.
+34. **Not at launch:** Egg Index, Ranked, the Cosmic tier, Gem-paid focusing, and ability families from waves 2–3.

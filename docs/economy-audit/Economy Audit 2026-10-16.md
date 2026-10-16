@@ -63,8 +63,8 @@ Reasons for each are in [[Economy Decisions]].
 | 9 | Evolution: crossing 1 → Rare always. Crossing 2 → Epic 10%, Legendary 2%. Crossing 3 → Rare to Epic 10%, Epic to Legendary 1%. | LOCK |
 | 10 | First pet: the first won egg also grants a Common pet of a chosen family, and the egg is kept | LOCK |
 | 11 | Recipes sized to hours: Rare 24 (focus 30), Epic 19 (24), Legendary 11 (14) at 45 matches/h, shown as an incubator bar | REVISE |
-| 12 | 3 Common eggs fuse into 1 Rare | LOCK |
-| 13 | Rarity stat bonus (+1.5/3/4.5%) on distance or duration only, never recharge | LOCK (measured as invisible; see section 6) |
+| 12 | 3 Common eggs hatch a missing Common species, then fuse into 1 Rare once all five are owned | LOCK |
+| 13 | No rarity stat bonus at launch; rarity changes looks only (revised after the cofounder roster handoff) | LOCK (measured as invisible; see section 6) |
 | 14 | Gold earn kept; Gold prices ×3 | REVISE |
 | 15 | Earned Gems cut to about 30/h (Gems = win + first snatch, max 2 per match) | REVISE |
 | 16 | Gem-paid focusing, sold eggs, sold abilities | REJECT for launch |
@@ -267,7 +267,14 @@ Giving the pet while keeping the egg costs almost nothing, and it doubles the mo
 | Skilled | 1.3 h | 6.1 h | 34 h; 6% none by 50 h | | |
 
 - **Focusing** stays a surcharge in eggs (+25%), never Gems. The first Legendary is focused by default, which is why it lands later than the 25 h target.
-- **Duplicates** (about 44 by 50 h) give cosmetic mastery stars, never stats.
+- **Duplicates** (about 44 by 50 h) raise a pet's cosmetic mutation level (L1–L3), never stats. Thresholds are set by rarity; see [[Economy Decisions]].
+
+### Against the cofounder pet roster (16 Oct)
+The handoff proposes 5 archetypes × 4 rarities = 20 species, each with three cosmetic mutation levels. `roster.py` replays typical careers against that roster (`roster_careers.json`):
+- **Species owned:** 8 by 5 h (when Common eggs hatch missing Commons), 11 by 10 h, 13 by 25 h and 15 by 50 h. Nobody has all 20 by 50 h.
+- **Duplicates per Rare species:** 1 by 10 h, 4 by 25 h and 9 by 50 h. Epic species get about 1 by 50 h.
+- **That's why the mutation thresholds are set by rarity.**
+- **The ability sets conflict.** The handoff's five archetypes don't match the nine-family wave plan. That's a design call for Hunter and the cofounder; the economy works with either.
 
 ## 6. Pet balance (Part 4F)
 
@@ -280,7 +287,7 @@ Giving the pet while keeping the egg costs almost nothing, and it doubles the mo
 
 **Feedback loop:** stronger pets → more eggs → stronger pets. With an effect this small, the loop is negligible.
 
-**Decision:** keep a small bonus (≤5% at Legendary) on duration or distance only, shown as flavour ("Legendary Decoy lasts 3.15 s"). Make the visual and audio upgrade loud, because that's what players will perceive. If Ranked ever happens, normalise the bonus there.
+**Decision (revised after the cofounder roster handoff):** no stat bonus at launch. Rarity changes how an ability looks, never how much it does. That matches the handoff's "same gameplay, different presentation" rule, and the sim shows the bonus bought nothing measurable. Make the visual and audio upgrade loud, because that's what players will perceive.
 
 ## 7. Hero or Chicken (Hunter's addition, 16 Oct)
 
