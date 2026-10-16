@@ -1139,6 +1139,8 @@ def s_emotes(tab='mine'):
         rv += box(560, 130, 360, 380, emo_view(18, 18, 324, 250) + at(180, 280, T(e[1], 34, 'l', name='EmoteName'), w=360, align='center')
                   + at(180, 324, T(EMO_RNAME[e[2]], 20, 's', FILL.get(e[2], ''), name='Rarity'), w=360, align='center')
                   + at(180, 352, T('Song: ' + e[3], 16, 'xs', 'f-dim', name='Song'), w=360, align='center'), f'cs r-{e[2]}', 'border-radius:20px', name='Card')
+        for sx, sy, sz in [(500, 170, 56), (950, 140, 70), (990, 420, 46), (470, 430, 50)]:
+            rv += I('sparkle', sx, sy, sz, name='Sparkle')
         rv += btn(470, 540, 260, 76, 'lime', bl('PLAY NOW', 30), name='PlayNow') + btn(750, 540, 260, 76, 'grey', bl('DONE', 30), name='Done')
         b += sub('Reveal', rv, hid=tab != 'reveal')
     right = row(icn('gem', 48), T('312', 34, 's', 'f-lime', name='GemsText'), gap=8)
@@ -1275,6 +1277,26 @@ def s_hatch():
     h += at(960, 852, row(T('Common', 30, 's', 'f-common', name='RarityText'), icn('ab_dash', 46, name='AbilityIcon'), T('Double Dash', 30, 's', 'f-orange', name='AbilityText'), gap=12), w=1000, align='center')
     h += btn(700, 920, 250, 84, 'lime', bl('EQUIP', 36), name='BtnEquip') + btn(970, 920, 250, 84, 'purple', bl('NICE!', 36), name='BtnClose')
     for sx, sy, s in [(560, 300, 70), (1300, 260, 90), (1360, 560, 54), (520, 620, 60)]:
+        h += I('sparkle', sx, sy, s, name='Sparkle')
+    return out + grp('Reveal', h, 'C')
+
+
+# ================================================================== Reward reveal (16 Oct)
+def s_reward(kind='item'):
+    """Every buy gets its moment (Hunter, 16 Oct): shop items (Gold, Gems or Robux) and Gem packs. Same beats as
+    the hatch reveal: rays spin, the prize pops, the title slams, sparkles twinkle. Runtime fills it (UIC.showReward)."""
+    out = world('bg_lobby_blur.jpg', False) + dim(.6)
+    gems = kind == 'gems'
+    h = rays(960, 440, 1000, .3)    # centred on the prize
+    h += at(960, 70, T('GEMS ADDED!' if gems else 'UNLOCKED!', 110, 'xl', 'f-lime' if gems else 'f-gold', name='Title'), w=1200, align='center')
+    h += I('gempack3' if gems else 'trail_rainbow', 720, 220, 480, name='Icon')
+    h += at(960, 720, T('+500 Gems' if gems else 'Rainbow Trail', 72, 'xl', 'f-lime' if gems else '', name='ItemName'), w=1400, align='center')
+    h += at(960, 808, T('THANK YOU FOR YOUR SUPPORT!' if gems else 'EGG TRAIL', 30, 's', 'f-gold' if gems else 'f-lime', name='KindText'), w=1200, align='center')
+    h += at(960, 852, T('You now have 612 Gems' if gems else 'Yours to keep. It shows in every match.', 26, 's', 'f-dim', name='SubText'), w=1400, align='center')
+    if EXPORT_STATES or not gems:
+        h += btn(700, 920, 250, 84, 'lime', bl('WEAR IT', 36, name='Label'), name='BtnUse', hid=gems)
+    h += btn(970 if (EXPORT_STATES or not gems) else 835, 920, 250, 84, 'purple', bl('NICE!', 36), name='BtnClose')
+    for sx, sy, s in [(560, 280, 70), (1300, 250, 90), (1360, 580, 54), (500, 600, 60), (1420, 380, 44)]:
         h += I('sparkle', sx, sy, s, name='Sparkle')
     return out + grp('Reveal', h, 'C')
 
@@ -1437,6 +1459,8 @@ SCREENS = [  # (file, title, description, fn, height)
     ('spectate_free.html', 'Spectate (free cam)', 'Fly around the field', lambda: s_spectate('free'), 1080),
     ('results.html', 'Results', 'Winner, podium, top thief, your rewards', s_results, 1080),
     ('hatch.html', 'Hatch reveal', 'New pet moment', s_hatch, 1080),
+    ('reward.html', 'Reward', 'You got it: a shop item (Gold, Gems or Robux)', s_reward, 1080),
+    ('reward_gems.html', 'Reward (Gems)', 'A Gem pack bought with Robux', lambda: s_reward('gems'), 1080),
     ('templates.html', 'Banners + toasts + confirm', 'Runtime templates', s_templates, 1120),
     ('states.html', 'All states', 'Every element in every state', s_states, 1080),
     ('compare.html', 'Before', 'Current lobby HUD', s_compare, 1080),

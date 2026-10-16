@@ -753,6 +753,8 @@ local function showReveal(t: any)
 	revealShown(true)
 	attachPreview(find(rv, "View"), e.id, 9)
 	Sound.play(if e.rarity == "legendary" or e.rarity == "epic" then "evolve" else "reward")
+	if not t.dupe then task.delay(0.12, function() Sound.play("reveal") end) end
+	UI.revealBeats(rv) -- rays spin, sparkles twinkle in, the title slams (same beats as every reward)
 	local card = find(rv, "Card")
 	if card and card:IsA("GuiObject") then
 		local s = card.Size

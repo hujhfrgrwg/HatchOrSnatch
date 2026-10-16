@@ -108,6 +108,14 @@
       ]
     },
     {
+      "name": "Reward",
+      "page": "reward",
+      "groups": [
+        "Dim",
+        "Reveal"
+      ]
+    },
+    {
       "name": "Emotes",
       "page": "emotes",
       "groups": [

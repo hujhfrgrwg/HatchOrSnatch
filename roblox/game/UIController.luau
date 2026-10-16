@@ -1711,6 +1711,140 @@ local SHOP_TABS = { featured = "TabFeatured", trails = "TabTrails", cases = "Tab
 local TAG_WORDS = { trail = "ONE MATCH", burst = "LOBBY, ONCE" } -- everything else keeps forever
 local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CASE", burst = "LOBBY EFFECT", entrance = "ENTRANCE", abilityFx = "ABILITY FX", hatchFx = "HATCH FX" }
 
+----------------------------------------------------------------------------------------------- Reward reveal
+-- Every buy gets its moment (Hunter, 16 Oct): a shop item (Gold, Gems or Robux) or a Gem pack opens the
+-- Reward screen with the hatch reveal's beats: rays spin, the prize pops in, the title slams, sparkles twinkle.
+-- (Emote Crate wins keep their own reveal in the Emotes panel; EmoteController gives it the same beats.)
+local KEEP_WORDS = {
+	trail = "Lasts one match. Have fun out there!",
+	burst = "Pop it in the lobby. One use.",
+	case = "Yours to keep. Wear it on your egg.",
+	trailPerm = "Yours to keep. It shows in every match.",
+	entrance = "Yours to keep. Plays when you arrive in the lobby.",
+	abilityFx = "Yours to keep. Your ability effects turn gold.",
+	hatchFx = "Yours to keep. Plays at every hatch.",
+}
+local REWARD_LIME = Color3.fromRGB(150, 240, 60)
+local rewardUse: (() -> ())? = nil
+
+-- the title keeps its baked gradient for items; Gem packs flatten it to lime
+local function rewardTitleTone(sc: Instance, c: Color3?)
+	for _, d in sc:GetDescendants() do
+		if d:IsA("TextLabel") and d.Name == "Title" then
+			if d:GetAttribute("BaseColor") == nil then d:SetAttribute("BaseColor", d.TextColor3) end
+			d.TextColor3 = c or d:GetAttribute("BaseColor") :: Color3
+			local g = d:FindFirstChildOfClass("UIGradient")
+			if g then g.Enabled = c == nil end
+		end
+	end
+end
+
+local function popPair(scope: Instance, name: string, from: number, delay: number)
+	for _, d in scope:GetDescendants() do
+		if d:IsA("GuiObject") and (d.Name == name or d.Name == name .. "Shadow") then UI.popFrom(d, from, delay) end
+	end
+end
+
+-- the same beats for reveals other controllers own (EmoteController's crate win)
+function UIC.revealBeats(scope: Instance)
+	for _, d in scope:GetDescendants() do
+		if d:IsA("GuiObject") and d.Name == "Rays" then UI.spin(d, 14) end
+		if d:IsA("ImageLabel") and (d.Name == "Sparkle" or d.Name == "SparkleShadow") then
+			UI.popFrom(d, 0, 0.25 + math.random() * 0.4)
+			UI.breathe(d, true)
+		end
+	end
+	popPair(scope, if find(scope, "TitleBig") then "TitleBig" else "Title", 1.6, 0)
+end
+
+function UIC.showReward(r: { icon: string, title: string, name: string, kind: string?, kindColor: Color3?, sub: string?, titleColor: Color3?, use: string?, onUse: (() -> ())? })
+	local sc = S.Reward
+	if not sc then
+		UIC.toast(r.name, "reward")
+		return
+	end
+	rewardTitleTone(sc, r.titleColor)
+	setText(sc, "Title", r.title)
+	setText(sc, "ItemName", r.name)
+	fitText(sc, "ItemName")
+	setText(sc, "KindText", r.kind or "")
+	setColor(sc, "KindText", r.kindColor or REWARD_LIME)
+	setText(sc, "SubText", r.sub or "")
+	setIcon(sc, "Icon", r.icon)
+	rewardUse = r.onUse
+	local use, nice = find(sc, "BtnUse"), find(sc, "BtnClose")
+	if use and use:IsA("GuiObject") then
+		use.Visible = r.use ~= nil
+		if r.use then setText(use, "Label", r.use) end
+	end
+	-- alone, NICE! moves to the middle of the pair (same as the hatch reveal)
+	if use and nice and use:IsA("GuiObject") and nice:IsA("GuiObject") then
+		if nice:GetAttribute("PairHome") == nil then
+			nice:SetAttribute("PairHome", nice.Position)
+			nice:SetAttribute("PairMid", nice.Position:Lerp(use.Position, 0.5))
+		end
+		local at = (if r.use then nice:GetAttribute("PairHome") else nice:GetAttribute("PairMid")) :: UDim2
+		nice.Position = at
+		nice:SetAttribute("JuiceRest", at)
+	end
+	if UI.current() ~= "Reward" then UI.open("Reward", { keepHistory = true }) end
+	-- motion: rays spin, the prize pops, the title slams, the words follow, sparkles twinkle in
+	Sound.play("purchase")
+	Sound.duck(0.25, 2.5)
+	task.delay(0.18, function() Sound.play("reveal") end)
+	for _, d in sc:GetDescendants() do
+		if d:IsA("GuiObject") and d.Name == "Rays" then UI.spin(d, 14) end
+	end
+	popPair(sc, "Icon", 0, 0.08)
+	popPair(sc, "TitleBig", 1.6, 0)
+	popPair(sc, "ItemName", 0.4, 0.22)
+	popPair(sc, "KindText", 0.4, 0.3)
+	popPair(sc, "SubText", 0.4, 0.36)
+	for _, d in sc:GetDescendants() do
+		if d:IsA("ImageLabel") and (d.Name == "Sparkle" or d.Name == "SparkleShadow") then
+			UI.popFrom(d, 0, 0.3 + math.random() * 0.4)
+			UI.breathe(d, true)
+		end
+	end
+	local icon = find(sc, "Icon")
+	if icon and icon:IsA("GuiObject") then task.delay(0.6, function() UI.breathe(icon :: GuiObject, true) end) end
+end
+
+-- a shop item just bought (Gold, Gems or Robux)
+local function rewardItem(it: any)
+	local consumable = EconomyConfig.isConsumable(it)
+	local r: any = {
+		icon = SHOP_ICON[it.id] or "gift",
+		title = if consumable then "ADDED!" else "UNLOCKED!",
+		name = it.name,
+		kind = SUB_WORDS[it.kind] or "",
+		sub = KEEP_WORDS[it.kind] or "Yours to keep.",
+	}
+	if it.kind == "case" then
+		r.use, r.onUse = "WEAR IT", function() Net.event("RequestSetCosmetic"):FireServer("case", it.id) end
+	elseif it.kind == "burst" then
+		r.use, r.onUse = "USE NOW", function() Net.event("RequestUseItem"):FireServer(it.id) end
+	end
+	UIC.showReward(r)
+end
+
+-- a Gem pack bought with Robux: its own art (gempack1..6), the Gems count up behind
+local function rewardGems(gems: number)
+	local idx = 1
+	for i, p in ipairs(EconomyConfig.GEM_PACKS) do
+		if p.gems == gems then idx = i end
+	end
+	UIC.showReward({
+		icon = if iconId("gempack" .. idx) ~= "" then "gempack" .. idx else "gem",
+		title = "GEMS ADDED!",
+		titleColor = REWARD_LIME,
+		name = ("+%s Gems"):format(Format.full(gems)),
+		kind = "THANK YOU FOR YOUR SUPPORT!",
+		kindColor = Color3.fromRGB(255, 210, 58),
+		sub = "Spend them on looks and Emote Crates.",
+	})
+end
+
 local function tagText(frame: Instance?, text: string)
 	if not frame then return end
 	for _, l in frame:GetDescendants() do
@@ -2192,7 +2326,7 @@ end
 -- UI's own pop (frames rise into place, buttons scale in so their hover springs keep their rest)
 local SKIP_CASCADE = { Art = true, ShadowRing = true, SelRing = true, Glow = true, GlowMono = true, Rays = true }
 local function cascade(name: string)
-	if settings.reduceEffects or name == "Results" or name == "Hatch" then return end
+	if settings.reduceEffects or name == "Results" or name == "Hatch" or name == "Reward" then return end
 	local sc = S[name]
 	if not sc then return end
 	local items = {}
@@ -2418,7 +2552,7 @@ local function wireButtons()
 		end)
 	end
 	-- close buttons + scrims go through UIC.close
-	for _, name in ipairs({ "Quests", "Incubator", "Pets", "Shop", "Stats", "Settings", "Hatch", "Results" }) do
+	for _, name in ipairs({ "Quests", "Incubator", "Pets", "Shop", "Stats", "Settings", "Hatch", "Reward", "Results" }) do
 		local sc = S[name]
 		if sc then
 			local dim = sc:FindFirstChild("Dim")
@@ -2507,6 +2641,17 @@ local function wireButtons()
 			UI.close()
 		end)
 		onClick(find(h, "BtnClose"), function() UI.close() end)
+	end
+	-- Reward reveal
+	local rw = S.Reward
+	if rw then
+		onClick(find(rw, "BtnUse"), function()
+			local fn = rewardUse
+			rewardUse = nil
+			UI.close()
+			if fn then fn() end
+		end)
+		onClick(find(rw, "BtnClose"), function() UI.close() end)
 	end
 	-- Pets
 	local pets = S.Pets
@@ -2657,10 +2802,14 @@ local function connectEvents()
 		refreshIncubator()
 	end)
 	Net.event("ShopResult").OnClientEvent:Connect(function(t)
-		if type(t) == "table" and t.ok then
+		if type(t) ~= "table" or not t.ok then return end
+		if type(t.gems) == "number" then
+			rewardGems(t.gems)
+		elseif type(t.itemId) == "string" and not t.refunded then
+			local it = EconomyConfig.item(t.itemId)
+			if it then rewardItem(it) else Sound.play("purchase") end
+		else
 			Sound.play("purchase")
-			local d = find(S.Shop, "Detail")
-			if d then UI.pulse(d, 0.06) end
 		end
 	end)
 	Net.event("PracticeEvent").OnClientEvent:Connect(function(t)

@@ -21,7 +21,7 @@ Net.TO_CLIENT = {
 	"PracticeEvent", -- { kind = "tagged" | "crossed" }
 	"HatchResult", -- { ok, reason, pet, plan } after RequestHatch
 	"CrateResult", -- { ok, reason, emote, dupe, refund } after RequestOpenCrate
-	"ShopResult", -- { ok, reason, itemId }
+	"ShopResult", -- { ok, reason, itemId, robux?, refunded? } or a Gem pack { ok, gems }
 	"AbilityFx", -- { userId, slot?, family, kind, ... } everyone: a pet's ability fired (telegraph)
 	"AbilityState", -- { family, readyAt, ok, reason } owner: cooldown / refusal
 	"ScoutPing", -- { targets = { { uid, slot?, pos } }, untilT } owner: Scout results
