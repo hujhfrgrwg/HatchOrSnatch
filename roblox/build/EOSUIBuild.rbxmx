@@ -18,6 +18,7 @@ return {
 		["abilityfx_gold"] = "rbxassetid://93570700141538",
 		["afk"] = "rbxassetid://75947854058692",
 		["afk_off"] = "rbxassetid://96309959021118",
+		["afk_on"] = "rbxassetid://100809314192902",
 		["burst"] = "rbxassetid://73686104605310",
 		["case"] = "rbxassetid://123016641562087",
 		["case_frost"] = "rbxassetid://119366509538917",
