@@ -441,8 +441,13 @@ function UI.juicy(b: GuiButton)
 		held = false
 		to(SPRING, if hovered then lift else 1, if hovered then -3 else 0)
 	end)
+	-- tabs and filter chips (a dual's On/Off halves, or the button itself) swipe instead of click
+	local function isTab(x: Instance?): boolean
+		return x ~= nil and (x.Name:match("^Tab") ~= nil or x.Name:match("^Filter") ~= nil)
+	end
+	local tabby = isTab(b) or ((b.Name == "On" or b.Name == "Off") and isTab(b.Parent))
 	b.Activated:Connect(function()
-		UI.play("click")
+		UI.play(if tabby then "tab" else "click")
 		local opens = b:GetAttribute("Opens") :: string?
 		if b.Name == "CloseButton" then
 			actionEvent:Fire("CloseButton", screenOf(b), b) -- listeners run first (e.g. "collect on close")

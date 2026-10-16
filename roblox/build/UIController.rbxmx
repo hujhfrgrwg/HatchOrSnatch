@@ -1780,7 +1780,7 @@ function UIC.revealBeats(scope: Instance)
 	popPair(scope, if find(scope, "TitleBig") then "TitleBig" else "Title", 1.6, 0)
 end
 
-function UIC.showReward(r: { icon: string, title: string, name: string, kind: string?, kindColor: Color3?, sub: string?, titleColor: Color3?, use: string?, onUse: (() -> ())? })
+function UIC.showReward(r: { icon: string, title: string, name: string, kind: string?, kindColor: Color3?, sub: string?, titleColor: Color3?, use: string?, onUse: (() -> ())?, levelUp: boolean? })
 	local sc = S.Reward
 	if not sc then
 		UIC.toast(r.name, "reward")
@@ -1812,7 +1812,13 @@ function UIC.showReward(r: { icon: string, title: string, name: string, kind: st
 	end
 	if UI.current() ~= "Reward" then UI.open("Reward", { keepHistory = true }) end
 	-- motion: rays spin, the prize pops, the title slams, the words follow, sparkles twinkle in
-	Sound.play("purchase")
+	-- sound: a buy rings the till then the bells; a level-up gets the bells and applause (no till)
+	if r.levelUp then
+		Sound.play("evolve")
+		Sound.play("applause")
+	else
+		Sound.play("purchase")
+	end
 	Sound.duck(0.25, 2.5)
 	task.delay(0.18, function() Sound.play("reveal") end)
 	for _, d in sc:GetDescendants() do
@@ -1866,6 +1872,7 @@ local function rewardLevelUp(from: number, to: number)
 			icon = "star",
 			title = "LEVEL UP!",
 			titleColor = LEVEL_SKY,
+			levelUp = true,
 			name = "Level " .. to,
 			kind = ("+%s GOLD"):format(Format.full(gold)) .. (if gems > 0 then ("  ·  +%d GEMS"):format(gems) else ""),
 			kindColor = Color3.fromRGB(255, 210, 58),

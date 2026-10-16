@@ -1,6 +1,6 @@
 ---
 tags: [dev, audio]
-updated: 2026-10-16
+updated: 2026-10-16 (reveal, level-up and tab sounds)
 ---
 # Audio
 
@@ -22,7 +22,10 @@ All game audio goes through one client module: `roblox/game/Sound.luau`, which r
 | evolve | safe crossing, egg levels up | bell tree |
 | crack / reveal / applause | hatch shake / new pet | egg crack, bell tree, applause |
 | poof / ping / ability | Decoy / Scout / other pet abilities | magic poof, triangle, airy whip |
-| win / lose | results | APM Celebration Fanfare / slide whistle |
+| win / lose | results | APM "Looking at the Winner" (30 sec) / a final buzzer (Alarm Buzzer 3) |
+| tab | switching any tab or filter chip (Shop, Cosmetics filters, Quests, Emotes) | Roblox_UI_Paper_Swipe |
+| purchase + reveal | the Reward reveal after a buy (shop items, Robux items, Gem packs, passes) | cash register, then bell tree |
+| evolve + applause + reveal | LEVEL UP! (no cash register: nothing was bought) | bell tree, applause |
 
 Every effect was checked in the place (16 Oct): all load, and each one's lead-in silence and loudness were measured with an AudioAnalyzer. The table in `Sound.luau` holds the trims (start offsets) and levelled volumes. For example, the reveal bells start 1.8 s in.
 
@@ -40,3 +43,9 @@ Direction (Hunter, 16 Oct): sporty and mindful of Huss Valley; the game is movin
 - Tracks are levelled with a measured per-track gain (`{ id, gain }` in `MUSIC`). The Music toggle in Settings fades the EOS_Music SoundGroup, and big moments (hatch reveal, results) duck it.
 - Rejected, don't reuse: Paradise Falls, Tender Tropical House, Really Fast, Funky (A). Also dropped as too kiddy: the slide whistle (lose) and the cute pop (toasts).
 - To swap a track, change its id in `MUSIC` in `roblox/game/Sound.luau`, measure its loudness and set the gain.
+
+## Emote songs
+Each emote has its own song (`music` in `Shared/EmoteConfig`). It plays as a 3D sound at the dancer, heard within 70 studs (`MUSIC_RANGE`). All 51 songs are from Roblox's licensed library.
+
+## Status (16 Oct)
+Every sound in the game goes through `Sound.luau` or the emote songs. There are no Sound instances placed in the world, and nothing synthesised or AI-made. Every effect in the table is used. `tab` was the last one unused until tabs started playing it.
