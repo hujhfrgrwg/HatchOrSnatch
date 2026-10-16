@@ -12,6 +12,36 @@ This answers the ChatGPT audit brief Hunter shared on 16 Oct, using the real rep
 - An earlier version of this report assumed 3 starting Catchers. Every simulation was re-run for one, and that version is in git history.
 - The final calls are in [[Economy Decisions]] (`Design/Economy Decisions.md`). Hunter asked Claude to make them from this evidence.
 
+## Latest revision: normal-strength Catcher (Hunter, late 16 Oct)
+Hunter ruled that the starting Catcher must not be stronger than other players, and asked for no more sims. Sections 2–8 below model one *strong* Catcher, tuned to about 47% survival. They still show how the rules behave when catching is hard. The decisions now use the normal-strength results that were already in hand:
+
+**Survival with one normal-strength Catcher:**
+
+| Setup | Survive |
+|---|---|
+| 30 players, 3 crossings | about 81% (`population.json`, "old_base") |
+| 12–30 players | 67–81% (first audit run, git history) |
+| 2 Catchers from crossing 1 (a caught Hero) | about 64% |
+| 4 crossings, 30 players | 64% |
+| 4 crossings, 12–30 players | 48–64% |
+| 5 crossings, 12–30 players | 29–37%, with up to 21% of small matches having no survivors |
+
+The 4- and 5-crossing figures come from a quick check at the same strength.
+
+**Hero runs against a normal-strength Catcher:** a lone Runner makes it 53% of the time as a beginner, 59% as a typical player and 89% as a skilled one (`hero.py` at pressure 1.6, first run). No extra protection is needed.
+
+**Which egg rule:** the nearest measured point is one Catcher at 65% survival (`robustness_by_pressure.json`, "loose").
+- The +1 Snatch-back cap passes there: honest play is worth 1.32× giving up, and the starting Catcher gets 0.68× a Runner's value.
+- The strict cap leaves the lone Catcher at 0.44×.
+- So +1 is back as the rule.
+
+**What changed in [[Economy Decisions]]:**
+- no Catcher-strength tuning, and bot fill stays at 20
+- a 4th crossing is the lever if matches feel too safe
+- a caught Hero joins the Catcher in crossing 1
+- the +1 cap
+- recipes scaled up by estimate: Rare about 31, Epic about 33, Legendary about 19
+
 ## 0. What I think of the prompt itself
 
 **What it gets right:**
@@ -53,16 +83,16 @@ Reasons for each are in [[Economy Decisions]].
 | # | Decision | Verdict |
 |---|---|---|
 | 1 | Exactly 3 crossings, about 30 players, one starting Catcher | LOCK |
-| 2 | Tune the Catcher's tools (not their number) so 40–55% of Runners survive | LOCK the target; tune in playtests |
-| 3 | Bots fill every match to 30 | REVISE (the place fills to 20 Runners) |
+| 2 | The starting Catcher has normal strength (Hunter). Expect about 80% survival; a 4th crossing is the lever if matches feel too safe | LOCK |
+| 3 | Bot fill stays at 20 Runners | KEEP |
 | 4 | Replace the place's "3 clean crossings in a row" end rule with exactly 3 crossings | REVISE (code) |
 | 5 | Eggs are won: survive all 3 crossings, or snatch one | LOCK |
-| 6 | **Snatch-back cap:** a snatched egg is capped at the rarity of the egg you lost. The starting Catcher is capped at Rare. | LOCK (replaces "one theft = an egg at the stolen rarity") |
-| 7 | Hero or Chicken at match start: the Catcher picks a player, that player chooses. A Hero gets 2.5–3 s of protection; a caught Hero converts at crossing 2 | LOCK |
+| 6 | **Snatch-back cap (+1):** a snatched egg can be at most one rarity above the egg you lost. The starting Catcher is capped at Epic. | LOCK (replaces "one theft = an egg at the stolen rarity") |
+| 7 | Hero or Chicken at match start: the Catcher picks a player, that player chooses. No extra protection; a caught Hero joins the Catcher in crossing 1 | LOCK |
 | 8 | Physically banking stolen eggs; needing two thefts | REJECT |
 | 9 | Evolution: crossing 1 → Rare always. Crossing 2 → Epic 10%, Legendary 2%. Crossing 3 → Rare to Epic 10%, Epic to Legendary 1%. | LOCK |
 | 10 | First pet: the first won egg also grants a Common pet of a chosen family, and the egg is kept | LOCK |
-| 11 | Recipes sized to hours: Rare 24 (focus 30), Epic 19 (24), Legendary 11 (14) at 45 matches/h, shown as an incubator bar | REVISE |
+| 11 | Recipes sized to hours, shown as an incubator bar: estimated Rare 31, Epic 33, Legendary 19 at normal strength (24 / 19 / 11 measured for a strong Catcher) | REVISE |
 | 12 | 3 Common eggs hatch a missing Common species, then fuse into 1 Rare once all five are owned | LOCK |
 | 13 | No rarity stat bonus at launch; rarity changes looks only (revised after the cofounder roster handoff) | LOCK (measured as invisible; see section 6) |
 | 14 | Gold earn kept; Gold prices ×3 | REVISE |

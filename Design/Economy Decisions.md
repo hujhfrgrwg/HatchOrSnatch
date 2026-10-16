@@ -5,7 +5,7 @@ ticket: HOS-ECON-001
 ---
 # Economy decisions (16 Oct 2026)
 
-On 16 Oct Hunter asked Claude to settle these himself, using the sim data, the psychology research and the market research in [[Economy Audit 2026-10-16]]. Later that day Hunter set **one starting Catcher**, so every sim was re-run and these decisions were revised around that. Section numbers point into the report, which has the evidence.
+On 16 Oct Hunter asked Claude to settle these himself, using the sim data, the psychology research and the market research in [[Economy Audit 2026-10-16]]. Later that day Hunter set **one starting Catcher at normal strength**: no stronger than any other player, with no more sims run. These decisions use the results already in hand for that setup. Where a number is an estimate rather than a measurement, it says so. Section numbers point into the report, which has the evidence.
 
 **These decisions replace the GDD v0.4 economy rules where the two differ.** They should be added to [[Evolve or Steal Decisions]] once the design branch merges.
 
@@ -13,42 +13,48 @@ Each decision has a playtest check. A failed check changes the number in that de
 
 ## The match
 1. **The match is exactly 3 crossings, with about 30 players and one starting Catcher (Hunter).** This replaces the place's "3 clean crossings in a row" end rule.
-   - *Data:* with one capable Catcher a clean crossing almost never happens. Matches run 4–5 crossings and Runners win 0–1.5% of them (section 2.4).
-2. **Tune the Catcher's tools so 40–55% of Runners survive.** The levers are stab and lunge reach, lunge cooldown and protection time, not a second Catcher.
-   - *Data:* survival is 81% at the Catcher strength the 3-Catcher runs assumed. Adding a second starting Catcher drops it to 9%, so the number of Catchers is too coarse to tune with. Below 40% survival, even the strict cap only just keeps honest play ahead of giving up (1.20×, section 8).
-   - *Check:* playtest survival. Adjust reach or lunge if it lands outside 40–55%.
-3. **Bots fill every match to 30 bodies.** Today the place fills to 20 Runners.
-   - *Data:* with the Catcher tuned for 30 players, survival is 47% at 30, 35% at 24, 14% at 16 and 7% at 12. At 12, 72% of matches end with no survivors (section 4).
+   - *Data:* with three fixed crossings every match has a clear finish. Under the clean-streak rule, the 3-Catcher runs averaged 5–8 crossings, and in 12–16-player matches Runners won only 10–22% of them (git history).
+2. **The starting Catcher has the same strength as everyone else (Hunter).** Expect about 80% of Runners to survive in a 30-player match, and 67–81% across 12–30 players (`population.json` "old_base", and the first audit run in git history).
+   - This replaces the earlier 40–55% target. With one normal Catcher, scarcity comes from the evolution odds and the recipes, not from catches.
+   - *Check:* if playtests show matches feel too safe (survival above about 85%, or few snatches), the lever is a 4th crossing, not a stronger Catcher. A quick check at normal strength gave 64% survival over 4 crossings at 30 players, and 48–64% across 12–30 players. A 5th crossing overshoots to 29–37%, and up to 21% of small matches end with no survivors.
+3. **Bot fill stays as the place has it (20 Runners).** At normal strength, survival barely depends on lobby size, so there's no need to fill to 30.
 4. **Caught Runners convert next crossing, as now.** Converting immediately didn't add pressure in the sim (section 4).
 
 ## Hero or Chicken (from Huss Valley)
 5. **Before crossing 1, the Runners line up and the starting Catcher picks one of them, with 5 s to do it (random if they don't).** The picked player then has 5 s to choose Hero or Chicken (Chicken if they don't).
    - This follows Hunter's first-hand account. Third-party guides say Huss Valley picks at random.
    - *Psychology:* it gives the lone Catcher agency and a social role, gives the picked player a real choice, and gives the lobby a shared spotlight moment.
-6. **A Hero crosses alone, with about 2.75 s of start protection.**
-   - *Data:* without protection, a lone Runner beats a Catcher this strong only 3–6% of the time. With 2.5 s it's 34–37%; with 3.5 s it's 100% (section 7).
-   - *Check:* tune protection in 0.25 s steps until 35–60% of Heroes make it.
+6. **A Hero crosses alone with the normal start protection. No extra help.**
+   - *Data:* a lone Runner against one normal-strength Catcher makes it 53% of the time as a beginner, 59% as a typical player and 89% as a skilled one (`hero.py` at pressure 1.6, first run, 16 Oct). That's a real gamble, and skill shows.
+   - *Check:* 35–65% of Heroes make it in playtests. If not, adjust protection in 0.25 s steps.
 7. **If the Hero makes it:**
    - their crossing 1 is done and the egg turns Rare
    - the egg gets a bonus roll on the crossing-2 odds (Epic 10%, Legendary 2%)
    - a small Gold and XP bonus, and a "Hero" tag for the match
-   - *Data (calculated by hand from sim rates):* a Hero is worth about 1.09× a Chicken on average, against 0.83× without the bonus roll. That makes Hero a fair gamble and not a trap.
-8. **A caught Hero lies down and converts at crossing 2,** like any Runner caught in crossing 1. They can snatch up to Rare.
-   - *Data:* if they joined the Catchers for crossing 1, as Huss Valley appears to do, survival would fall from 47% to 9% (section 4).
+   - *Estimate (calculated by hand from sim rates):* with the bonus roll, a typical Hero is worth about the same as a Chicken on average, but with more swing. Without the bonus, Hero would be the worse pick.
+8. **A caught Hero joins the Catcher straight away for crossing 1,** as Huss Valley appears to do. Under the Snatch-back cap they can snatch up to Rare.
+   - *Data:* at normal strength, a second Catcher from crossing 1 takes that match's survival from about 81% to about 64% (the first audit run, git history). A failed Hero makes the match harder for everyone, which gives the choice real stakes, and the match stays healthy.
+   - Deliberately failing as Hero doesn't pay. A Rare-capped snatch is worth well under an honest Runner's average.
 9. **A Chicken crosses with everyone at no cost.** A chicken emote or sound on their nameplate for that match is the only teasing.
 
 ## Eggs
 10. **Eggs are won, not handed out.** A player wins one by surviving all three crossings, or by snatching one as a Catcher. No egg just for taking part.
     - *Data:* today the place gives out 30 pieces per match, and 98% are Epic (section 2.5).
-11. **Strict Snatch-back cap: a snatched egg can't be higher than the egg you were carrying when caught.**
-    - Caught in crossing 1: Common only. Caught in crossing 2: up to Rare. The starting Catcher and a caught Hero: up to Rare.
+11. **Snatch-back cap (+1): a snatched egg can be at most one rarity above the egg you were carrying when caught.**
+    - Caught in crossing 1 (holding a Common): up to Rare. Caught in crossing 2 (holding a Rare): up to Epic.
+    - The starting Catcher can snatch up to Epic. A caught Hero is holding a Common, so up to Rare.
     - A player keeps one egg per match, the best one, and the HUD shows the cap.
-    - *Data:* it's the only rule that passed every hard constraint with one Catcher (section 8).
-      - Honest play is worth 1.66× giving up early.
-      - The starting Catcher gets 0.62× a Runner's value.
-      - A typical player wins an egg in 66% of matches.
-    - *Data:* the "+1" version (cap one rarity above what you lost), the earlier pick, now loses to giving up in crossing 2 (0.91×).
-    - *Psychology:* the reward follows how far you got, and a loss can still be won partly back in the same match.
+    - *Data:* the closest measured setup to a normal-strength Catcher is one Catcher at 65% survival (`robustness_by_pressure.json`, "loose"). There, both versions of the rule keep honest play ahead of giving up:
+
+      | Version | Honest ÷ give-up | Starting Catcher ÷ Runner |
+      |---|---|---|
+      | +1 | 1.32× | 0.68 |
+      | Strict | 2.44× | 0.44 |
+
+    - The strict version drops the lone starting Catcher below half a Runner's value. At about 80% survival, honest play gains further and Catchers get fewer chances, so the +1 margin should only grow. That last step is an inference.
+    - "One theft = one egg" still loses to giving up in crossing 2 at that setting (0.81×).
+    - *Check:* if strong Catchers return (by a 4th crossing or by tuning), recheck. The strict cap is the fallback (section 8).
+    - *Psychology:* the reward follows how far you got, and a loss can partly be won back in the same match.
 12. **Evolution:**
 
     | Crossing | Odds |
@@ -74,12 +80,15 @@ Each decision has a playtest check. A failed check changes the number in that de
 
     | Rarity | Eggs | Focused (+25%) |
     |---|---|---|
-    | Rare | 24 | 30 |
-    | Epic | 19 | 24 |
-    | Legendary | 11 | 14 |
+    | Rare | about 31 | about 39 |
+    | Epic | about 33 | about 41 |
+    | Legendary | about 19 | about 24 |
 
+    - These are **estimates**, scaled from the measured strong-Catcher rates (Rare 24, Epic 19, Legendary 11).
+      - At normal strength about 23.5 players survive per match instead of 13.5.
+      - Most Epic and Legendary eggs come from survivors (×1.7), while Rares also come from snatches (about ×1.3).
     - Each shows as an incubator bar.
-    - A typical player gets a first Rare pet at about 1.3 h, a first Epic at about 6.3 h and a first Legendary at about 32 h.
+    - The targets for a typical player are unchanged: a first Rare pet at about 1 h, a first Epic at about 5–6 h and a first Legendary at about 25–30 h.
     - *Research:* goal gradient (Kivetz et al. 2006).
     - *Check:* the sizes assume 45 matches per hour. Recompute them from real matches per hour using target hours × eggs per hour.
 17. **Common eggs:** three Common eggs hatch a Common species the player doesn't have yet. Once all five Commons are owned, three Common eggs fuse into one Rare egg instead.
@@ -120,8 +129,8 @@ Each decision has a playtest check. A failed check changes the number in that de
     3. Legendaries (about 30 h)
     4. L2 and L3, Rares first, since Rare duplicates pile up first
 28. **Catcher abilities and the Hero run count towards Catcher strength.** Extended reach, tether pull, the projectile and the rift dash all make Catchers stronger, and the shield, knockback and portal make Runners harder to catch.
-    - Tune the 40–55% survival target and the Hero protection time with abilities switched on, and with the starting Catcher holding each archetype in turn.
-    - The strict Snatch-back cap still holds whatever the abilities do, because it caps rarity, not how often you snatch.
+    - Run the survival and Hero playtest checks with abilities switched on, and with the starting Catcher holding each archetype in turn.
+    - The Snatch-back cap limits rarity, not how often you snatch, so stronger Catcher abilities don't break it.
 29. **Still open (not an economy call):** the handoff's five archetypes (Decoy, Invisibility, Guardian, Tempest, Rift) don't match the nine-family, three-wave plan in [[Evolve or Steal Decisions]]. That plan has Double Dash, Decoy and Scout at launch, and Brake, Wall and others later. The economy works with either. Hunter and the cofounder need to pick one.
 
 ## Currencies
