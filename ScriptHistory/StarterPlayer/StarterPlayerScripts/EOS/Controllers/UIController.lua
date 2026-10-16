@@ -950,13 +950,16 @@ end
 local function railToggles()
 	local rail = hudGroup("HUD", "Rail")
 	if not rail then return end
-	for name, attr in pairs({ AFKToggle = "EOS_AFK", VolunteerToggle = "EOS_Volunteer" }) do
+	for name, t in pairs({ AFKToggle = { "EOS_AFK", "afk" }, VolunteerToggle = { "EOS_Volunteer", "hunt" } }) do
 		local b = rail:FindFirstChild(name)
 		if b then
-			local on = player:GetAttribute(attr) == true
+			local on = player:GetAttribute(t[1]) == true
 			local a, o = b:FindFirstChild("StateOn"), b:FindFirstChild("StateOff")
 			if a then a.Visible = on end
 			if o then o.Visible = not on end
+			-- full-colour icon when on, the greyed "<slug>_off" copy when off (kept as is until that id exists)
+			local slug = if on then t[2] else t[2] .. "_off"
+			if iconId(slug) ~= "" then setIcon(b, "Icon", slug) end
 		end
 	end
 end

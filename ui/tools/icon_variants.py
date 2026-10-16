@@ -10,18 +10,26 @@ from PIL import Image
 HERE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 AI = os.path.join(HERE, 'icons_ai')
 
-# variant: (base, hue shift 0-255 | 'rainbow' | ('set', hue), saturation multiplier)
+# variant: (base, hue shift 0-255 | 'rainbow' | ('set', hue) | 'grey', saturation multiplier (brightness for 'grey'))
 VARIANTS = {
     'trail_ember':    ('trail', 125, 1.1),
     'trail_rainbow':  ('trail', 'rainbow', 1.25),
     'case_frost':     ('case', 110, .85),
     'case_sunset':    ('case', -14, 1.15),
     'abilityfx_gold': ('abilityfx', ('set', 30), 1.15),
+    # rail toggles: the full-colour icon shows ON, this greyed copy shows OFF (16 Oct)
+    'afk_off':        ('afk', 'grey', .8),
+    'hunt_off':       ('hunt', 'grey', 1.45),
 }
 
 
 def shift(im, hue, sat):
     rgba = im.convert('RGBA')
+    if hue == 'grey':                          # sat is the brightness here: luminance only, a cool slate tint
+        a = np.array(rgba).astype(float)
+        lum = (a[..., :3] @ [.299, .587, .114]) * sat
+        a[..., :3] = np.clip(lum[..., None] * [.93, .97, 1.05], 0, 255)
+        return Image.fromarray(a.astype('uint8'), 'RGBA')
     hsv = np.array(rgba.convert('RGB').convert('HSV')).astype(int)
     if hue == 'rainbow':
         h, w = hsv.shape[:2]
