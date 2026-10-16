@@ -95,6 +95,6 @@ Reply with ONE image per message, then wait for my next icon.
 - `emote`: a hand making a victory sign (simple glove)
 
 ## Still needed (16 Oct)
-- `afk_on`: the AFK button's on state (pause/play pair with `afk`).
+Nothing is outstanding. `afk_on` (the play moon) arrived on 16 Oct.
 
 Hunter's second zip (16 Oct) brought `case`, `entrance`, `ab_scout`, `ab_brake` and `ab_spring`. `case_frost` and `case_sunset` are recoloured from the new `case` by `ui/tools/icon_variants.py`. The first zip brought `safe`, `catcher`, `runner`, `hunt` and `afk`.
