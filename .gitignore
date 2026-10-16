@@ -4,3 +4,6 @@ Assets/PlaceExport/
 *.zip
 __pycache__/
 node_modules
+
+# emote clips exported from Studio for the Open Cloud animation upload (16 Oct); ids live in roblox/game/emote_anim_ids.json
+Assets/Emotes/
