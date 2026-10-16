@@ -25,7 +25,12 @@ from economy import (POLICIES, awards, currencies, make_evolution, player_facts,
 OUT = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "economy-audit", "results")
 QUICK = "--quick" in sys.argv
 SCALE = 0.1 if QUICK else 1.0
-PRESSURES = {"loose": 1.0, "base": 1.6, "tight": 2.0}
+# One starting Catcher (Hunter, 16 Oct). Pressure is calibrated so Runner survival over three
+# crossings is about 66% / 46% / 30% in a 30-player match. "old_base" (1.6) is the Catcher strength
+# the earlier 3-Catcher runs assumed; it is kept as a population reference only.
+PRESSURES = {"loose": 2.0, "base": 2.6, "tight": 3.2}
+ALL_PRESSURES = dict(PRESSURES, old_base=1.6)
+NI = 1  # starting Catchers
 EVOS = ["brief", "epic_heavy", "recommended", "code_levels", "deterministic"]
 
 
@@ -112,7 +117,7 @@ def job_population(args):
     P, pname, n_initial, immediate, seed, M, keep = args
     rng = np.random.default_rng(seed)
     t0 = time.time()
-    r = run_matches(M, P, rng, pressure=PRESSURES[pname], n_initial=n_initial,
+    r = run_matches(M, P, rng, pressure=ALL_PRESSURES[pname], n_initial=n_initial,
                     immediate_conversion=immediate, evolution=make_evolution("brief"))
     res = dict(P=P, pressure=pname, n_initial=n_initial, immediate=immediate, seed=seed, matches=M,
                dynamics=dynamics(r), policies=score_policies(r, np.random.default_rng(seed + 1)))
@@ -143,7 +148,7 @@ def job_focal(args):
     """Player 0 has a fixed skill and a strategy; never the starting Catcher."""
     skill, strat, scross, pname, seed, M = args
     rng = np.random.default_rng(seed)
-    P, NI = 30, 3
+    P = 30
     skills = rng.normal(0, 0.6, (M, P))
     skills[:, 0] = skill
     strategies = np.zeros((M, P), int)
@@ -183,7 +188,7 @@ def job_focal(args):
 def job_pet(args):
     bonus, skill, pname, seed, M = args
     rng = np.random.default_rng(seed)  # same seed for every bonus: common random numbers
-    P, NI, K = 30, 3, 6  # K focal Runners per match carry the bonus (never starting Catchers)
+    P, K = 30, 6  # K focal Runners per match carry the bonus (never starting Catchers)
     skills = rng.normal(0, 0.6, (M, P))
     skills[:, :K] = skill
     dm = np.ones((M, P))
@@ -200,7 +205,7 @@ def job_code_rule(args):
     pname, P, seed, M = args
     rng = np.random.default_rng(seed)
     r = run_matches(M, P, rng, pressure=PRESSURES[pname], clean_streak=3, max_crossings=40,
-                    n_initial=max(1, round(P / 10)))
+                    n_initial=NI)
     ec = r["end_cross"]
     surv = r["survived"].sum(1)
     return dict(pressure=pname, P=P, seed=seed, matches=M,
@@ -217,7 +222,7 @@ def job_code_rule(args):
 def job_bank(args):
     pname, seed, M = args
     rng = np.random.default_rng(seed)
-    r = run_matches(M, 30, rng, pressure=PRESSURES[pname], bank_mode=True, evolution=make_evolution("brief"), n_initial=3)
+    r = run_matches(M, 30, rng, pressure=PRESSURES[pname], bank_mode=True, evolution=make_evolution("brief"), n_initial=NI)
     f = player_facts(r)
     res = dict(pressure=pname, seed=seed, matches=M, dynamics=dynamics(r))
     for pol in ["runner_only", "theft1", "banked"]:
@@ -233,7 +238,7 @@ def job_bank(args):
 def job_bias(args):
     bias, pname, seed, M = args
     rng = np.random.default_rng(seed)
-    r = run_matches(M, 30, rng, pressure=PRESSURES[pname], rarity_bias=bias, evolution=make_evolution("brief"), n_initial=3)
+    r = run_matches(M, 30, rng, pressure=PRESSURES[pname], rarity_bias=bias, evolution=make_evolution("brief"), n_initial=NI)
     f = player_facts(r)
     caps = r["captures"]
     stolen = np.array([r["rarity_at"][int(c) - 1][int(m), int(j)] for m, c, i, j, t in caps]) if len(caps) else np.array([])
@@ -255,15 +260,16 @@ def main():
         # 1. population runs: lobby size x initial Catchers x pressure x conversion timing
         pop_args = []
         seed = 1000
-        # main lobby: 30 players, 3 starting Catchers (Hunter, 16 Oct: ~30 players per match)
+        # main lobby: 30 players, 1 starting Catcher (Hunter, 16 Oct)
         for pname in PRESSURES:
-            pop_args.append((30, pname, 3, False, seed, n(3000), True)); seed += 10
-        for ni in (1, 2, 4):  # starting-Catcher count
+            pop_args.append((30, pname, NI, False, seed, n(3000), True)); seed += 10
+        pop_args.append((30, "old_base", NI, False, seed, n(1000), False)); seed += 10  # earlier Catcher strength
+        for ni in (2, 3):  # what extra starting Catchers would do, for reference
             pop_args.append((30, "base", ni, False, seed, n(1000), False)); seed += 10
-        pop_args.append((30, "base", 3, True, seed, n(1000), False)); seed += 10  # immediate conversion
-        for P in (12, 16, 24):  # smaller lobbies, ~1 starting Catcher per 10 players
+        pop_args.append((30, "base", NI, True, seed, n(1000), False)); seed += 10  # immediate conversion
+        for P in (12, 16, 24):  # smaller lobbies, still 1 starting Catcher
             for pname in PRESSURES:
-                pop_args.append((P, pname, max(1, round(P / 10)), False, seed, n(1500), False)); seed += 10
+                pop_args.append((P, pname, NI, False, seed, n(1500), False)); seed += 10
         t = time.time()
         pop = pool.map(job_population, pop_args, chunksize=1)
         print("population", round(time.time() - t), "s", flush=True)
@@ -296,7 +302,7 @@ def main():
         manifest["jobs"]["pet_power"] = pet_args
 
         # 4. the place's current end rule (3 clean crossings in a row)
-        cr_args = [(p, P, 8000 + 10 * i, n(600)) for i, (p, P) in enumerate((p, P) for p in PRESSURES for P in (8, 12, 16))]
+        cr_args = [(p, P, 8000 + 10 * i, n(600)) for i, (p, P) in enumerate((p, P) for p in PRESSURES for P in (12, 16, 30))]
         bank_args = [(p, 9000 + 10 * i, n(1000)) for i, p in enumerate(PRESSURES)]
         bias_args = [(b, "base", 9500 + 10 * i, n(1000)) for i, b in enumerate((0.0, 1.0, 3.0))]
         t = time.time()

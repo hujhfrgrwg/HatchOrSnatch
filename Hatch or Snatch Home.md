@@ -11,7 +11,7 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 
 - **Economy decisions (16 Oct 2026):** [[Economy Decisions]] in `Design/`, the final calls from the audit.
 
-- **Economy and design audit (16 Oct 2026):** [[Economy Audit 2026-10-16]] in `docs/economy-audit/`. Recommends the Snatch-back egg rule, exactly 3 crossings with 30 players, hour-sized hatch recipes and tighter Gold/Gems. The simulation that backs it is in `tools/sim/`.
+- **Economy and design audit (16 Oct 2026):** [[Economy Audit 2026-10-16]] in `docs/economy-audit/`. Built around one starting Catcher: strict Snatch-back egg rule, exactly 3 crossings with bots filling to 30, Hero or Chicken at match start, hour-sized hatch recipes and tighter Gold/Gems. The simulation that backs it is in `tools/sim/`.
 
 ## Studio place
 | | |

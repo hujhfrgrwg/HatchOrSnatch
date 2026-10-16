@@ -5,85 +5,85 @@
   "matches": 1000,
   "dynamics": {
    "runners_at_crossing_start": [
-    27.0,
-    26.249,
-    25.218
+    29.0,
+    28.103,
+    26.45
    ],
    "captures_per_crossing": [
-    0.751,
-    1.031,
-    1.725
+    0.897,
+    1.653,
+    3.105
    ],
    "crossing_seconds": [
-    13.6,
-    13.35,
-    15.35
+    6.35,
+    8.95,
+    10.65
    ],
-   "survivor_share": 0.8701,
-   "survivors_mean": 23.493,
+   "survivor_share": 0.805,
+   "survivors_mean": 23.345,
    "zero_survivor_matches": 0.0,
    "timeouts_per_match": 0.0,
-   "est_cycle_seconds": 85.3
+   "est_cycle_seconds": 69.0
   },
   "runner_only": {
-   "eggs_per_match": 23.493,
+   "eggs_per_match": 23.345,
    "p_egg_caught_c1": {
     "p": 0.0,
-    "n": 751,
+    "n": 897,
     "ci95": [
      0.0,
-     0.0051
+     0.0043
     ]
    },
    "p_egg_initial": {
     "p": 0.0,
-    "n": 3000,
+    "n": 1000,
     "ci95": [
      0.0,
-     0.0013
+     0.0038
     ]
    }
   },
   "theft1": {
-   "eggs_per_match": 26.207,
+   "eggs_per_match": 26.645,
    "p_egg_caught_c1": {
-    "p": 0.5752,
-    "n": 751,
+    "p": 0.9677,
+    "n": 897,
     "ci95": [
-     0.5396,
-     0.6101
+     0.954,
+     0.9774
     ]
    },
    "p_egg_initial": {
-    "p": 0.5973,
-    "n": 3000,
+    "p": 0.997,
+    "n": 1000,
     "ci95": [
-     0.5797,
-     0.6147
+     0.9912,
+     0.999
     ]
    }
   },
   "banked": {
-   "eggs_per_match": 26.207,
+   "eggs_per_match": 26.645,
    "p_egg_caught_c1": {
-    "p": 0.5752,
-    "n": 751,
+    "p": 0.9677,
+    "n": 897,
     "ci95": [
-     0.5396,
-     0.6101
+     0.954,
+     0.9774
     ]
    },
    "p_egg_initial": {
-    "p": 0.5973,
-    "n": 3000,
+    "p": 0.997,
+    "n": 1000,
     "ci95": [
-     0.5797,
-     0.6147
+     0.9912,
+     0.999
     ]
    }
   },
-  "steals_per_match": 3.507,
-  "banked_per_match": 3.507
+  "steals_per_match": 5.655,
+  "banked_per_match": 5.655
  },
  {
   "pressure": "base",
@@ -91,85 +91,85 @@
   "matches": 1000,
   "dynamics": {
    "runners_at_crossing_start": [
-    27.0,
-    24.883,
-    21.216
+    29.0,
+    28.024,
+    26.112
    ],
    "captures_per_crossing": [
-    2.117,
-    3.667,
-    6.234
+    0.976,
+    1.912,
+    3.747
    ],
    "crossing_seconds": [
-    6.95,
-    13.05,
-    12.75
+    6.35,
+    6.35,
+    9.7
    ],
-   "survivor_share": 0.5549,
-   "survivors_mean": 14.982,
+   "survivor_share": 0.7712,
+   "survivors_mean": 22.365,
    "zero_survivor_matches": 0.0,
    "timeouts_per_match": 0.0,
-   "est_cycle_seconds": 75.8
+   "est_cycle_seconds": 65.4
   },
   "runner_only": {
-   "eggs_per_match": 14.982,
+   "eggs_per_match": 22.365,
    "p_egg_caught_c1": {
     "p": 0.0,
-    "n": 2117,
+    "n": 976,
     "ci95": [
-     -0.0,
-     0.0018
+     0.0,
+     0.0039
     ]
    },
    "p_egg_initial": {
     "p": 0.0,
-    "n": 3000,
+    "n": 1000,
     "ci95": [
      0.0,
-     0.0013
+     0.0038
     ]
    }
   },
   "theft1": {
-   "eggs_per_match": 22.476,
+   "eggs_per_match": 26.191,
    "p_egg_caught_c1": {
-    "p": 0.8569,
-    "n": 2117,
+    "p": 0.9939,
+    "n": 976,
     "ci95": [
-     0.8413,
-     0.8711
+     0.9867,
+     0.9972
     ]
    },
    "p_egg_initial": {
-    "p": 0.9603,
-    "n": 3000,
+    "p": 0.998,
+    "n": 1000,
     "ci95": [
-     0.9527,
-     0.9667
+     0.9927,
+     0.9995
     ]
    }
   },
   "banked": {
-   "eggs_per_match": 22.476,
+   "eggs_per_match": 26.191,
    "p_egg_caught_c1": {
-    "p": 0.8569,
-    "n": 2117,
+    "p": 0.9939,
+    "n": 976,
     "ci95": [
-     0.8413,
-     0.8711
+     0.9867,
+     0.9972
     ]
    },
    "p_egg_initial": {
-    "p": 0.9603,
-    "n": 3000,
+    "p": 0.998,
+    "n": 1000,
     "ci95": [
-     0.9527,
-     0.9667
+     0.9927,
+     0.9995
     ]
    }
   },
-  "steals_per_match": 12.018,
-  "banked_per_match": 12.018
+  "steals_per_match": 6.635,
+  "banked_per_match": 6.635
  },
  {
   "pressure": "tight",
@@ -177,84 +177,84 @@
   "matches": 1000,
   "dynamics": {
    "runners_at_crossing_start": [
-    27.0,
-    24.373,
-    19.542
+    29.0,
+    28.011,
+    26.053
    ],
    "captures_per_crossing": [
-    2.627,
-    4.831,
-    9.057
+    0.989,
+    1.958,
+    3.871
    ],
    "crossing_seconds": [
-    7.65,
-    10.3,
-    12.1
+    6.35,
+    6.9,
+    7.75
    ],
-   "survivor_share": 0.3883,
-   "survivors_mean": 10.485,
+   "survivor_share": 0.7649,
+   "survivors_mean": 22.182,
    "zero_survivor_matches": 0.0,
    "timeouts_per_match": 0.0,
-   "est_cycle_seconds": 73.1
+   "est_cycle_seconds": 64.0
   },
   "runner_only": {
-   "eggs_per_match": 10.485,
+   "eggs_per_match": 22.182,
    "p_egg_caught_c1": {
     "p": 0.0,
-    "n": 2627,
+    "n": 989,
     "ci95": [
-     -0.0,
-     0.0015
+     0.0,
+     0.0039
     ]
    },
    "p_egg_initial": {
     "p": 0.0,
-    "n": 3000,
+    "n": 1000,
     "ci95": [
      0.0,
-     0.0013
+     0.0038
     ]
    }
   },
   "theft1": {
-   "eggs_per_match": 20.244,
+   "eggs_per_match": 26.097,
    "p_egg_caught_c1": {
-    "p": 0.9635,
-    "n": 2627,
+    "p": 0.996,
+    "n": 989,
     "ci95": [
-     0.9556,
-     0.97
+     0.9896,
+     0.9984
     ]
    },
    "p_egg_initial": {
-    "p": 0.9957,
-    "n": 3000,
+    "p": 1.0,
+    "n": 1000,
     "ci95": [
-     0.9926,
-     0.9975
+     0.9962,
+     1.0
     ]
    }
   },
   "banked": {
-   "eggs_per_match": 20.244,
+   "eggs_per_match": 26.097,
    "p_egg_caught_c1": {
-    "p": 0.9635,
-    "n": 2627,
+    "p": 0.996,
+    "n": 989,
     "ci95": [
-     0.9556,
-     0.97
+     0.9896,
+     0.9984
     ]
    },
    "p_egg_initial": {
-    "p": 0.9957,
-    "n": 3000,
+    "p": 1.0,
+    "n": 1000,
     "ci95": [
-     0.9926,
-     0.9975
+     0.9962,
+     1.0
     ]
    }
   },
-  "steals_per_match": 16.515,
-  "banked_per_match": 16.515
+  "steals_per_match": 6.818,
+  "banked_per_match": 6.818
  }
 ]

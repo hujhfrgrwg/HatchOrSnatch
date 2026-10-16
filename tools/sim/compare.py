@@ -2,7 +2,7 @@
 
 Scores the SAME 2,000 simulated 30-player matches (results/raw_P30_base.npz, from tune.py) under
 each configuration's egg rule, with the tuned evolution table. "Surrender payoff" uses players who
-were caught in crossing 1 as the stand-in for someone who gives up in crossing 1 (strategy.json
+were caught in crossing 1 or 2 (whichever pays more) as the stand-in for someone who gives up then (strategy.json
 checks this stand-in against simulations where one player really surrenders).
 
 Egg use-value (hours of pacing each egg is worth) comes from the recommended recipes: an egg of
@@ -34,12 +34,14 @@ sk = rr["skills"]
 beg, skl = sk < -0.5, sk > 0.5
 runner = ~rr["initial"]
 c1 = rr["caught_cross"] == 1
+c2 = rr["caught_cross"] == 2
 
 CONFIGS = {
     "A Accessible (1 theft = egg at stolen rarity)": dict(policy="theft1", complexity=1, loss_sting=1),
     "B Competitive (Runners only; 2 thefts for Catchers)": dict(policy="theft2", complexity=2, loss_sting=2),
     "C High-stakes (bank the stolen egg; steals drop a rarity)": dict(policy="stolen_down", complexity=3, loss_sting=3),
-    "D Snatch-back cap (steal up to 1 rarity above the egg you lost)": dict(policy="redeem_plus1", complexity=2, loss_sting=2),
+    "D Snatch-back cap (steal up to the rarity of the egg you lost)": dict(policy="redeem", complexity=2, loss_sting=2),
+    "D+1 Snatch-back +1 (steal up to 1 rarity above the egg you lost)": dict(policy="redeem_plus1", complexity=2, loss_sting=2),
     "Today's place (every active player gets a piece)": dict(policy="code_v04", complexity=1, loss_sting=0),
 }
 rows = {}
@@ -48,7 +50,7 @@ for name, c in CONFIGS.items():
     got = a >= 0
     v = np.where(got, val[np.clip(a, 0, 3)], 0.0)
     honest = v[runner].mean()
-    surrender = v[c1].mean()
+    surrender = max(v[c1].mean(), v[c2].mean())  # the better of giving up in crossing 1 or 2
     # new player frustration: chance of 5 matches in a row without an egg, beginners (independent matches)
     pb = got[beg].mean()
     rows[name] = dict(

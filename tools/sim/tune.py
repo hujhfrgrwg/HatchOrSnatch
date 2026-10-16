@@ -1,6 +1,6 @@
 """Tune the recommended evolution table and hatch recipes against pacing targets (HOS-ECON-001).
 
-1. Simulates 2,000 independent 30-player matches (3 starting Catchers, base pressure) and keeps the
+1. Simulates 2,000 independent 30-player matches (1 starting Catcher, base pressure) and keeps the
    raw outcomes (results/raw_P30_base.npz).
 2. Re-scores those SAME matches under a grid of evolution tables (repeated evaluation, not new
    matches) with the recommended egg rule ("redeem") and reports egg rates per player-hour.
@@ -43,7 +43,7 @@ def load_or_run():
 
 def _run(a):
     seed, M = a
-    return run_matches(M, 30, np.random.default_rng(seed), pressure=1.6, n_initial=3)
+    return run_matches(M, 30, np.random.default_rng(seed), pressure=2.6, n_initial=1)  # base pressure, 1 starting Catcher
 
 
 def merge(parts):
@@ -70,6 +70,9 @@ def table(p2_e, p2_l, p3_re, p3_rl, p3_el):
             3: {1: [(1, 1 - p3_re - p3_rl), (2, p3_re), (3, p3_rl)], 2: [(2, 1 - p3_el), (3, p3_el)]}}
 
 
+# Recommended egg rule. With one starting Catcher (16 Oct) the "+1" cap let players caught in
+# crossing 2 out-earn honest play, so the strict cap ("redeem") is the recommendation.
+RULE = "redeem"
 TARGET_HOURS = {1: 1.0, 2: 5.0, 3: 25.0}  # median hours to the first pet of each rarity (typical player)
 
 
@@ -98,10 +101,10 @@ def main():
     json.dump(rows, open(os.path.join(RES, "tuning_grid.json"), "w"), indent=0)
     # pick: Legendary 0.8-1.6% of eggs, Epic 8-16%, a visible Legendary in >= 1 of 4 matches; then
     # the table closest to Legendary 1.2% / Epic 12%
-    ok = [x for x in rows if 0.008 <= x["redeem_plus1"]["share"][3] <= 0.016 and 0.08 <= x["redeem_plus1"]["share"][2] <= 0.16
+    ok = [x for x in rows if 0.008 <= x[RULE]["share"][3] <= 0.016 and 0.08 <= x[RULE]["share"][2] <= 0.16
           and x["legendary_into_final_per_match"] >= 0.25]
     pool = ok or rows
-    best = min(pool, key=lambda x: abs(x["redeem_plus1"]["share"][3] - 0.012) * 10 + abs(x["redeem_plus1"]["share"][2] - 0.12))
+    best = min(pool, key=lambda x: abs(x[RULE]["share"][3] - 0.012) * 10 + abs(x[RULE]["share"][2] - 0.12))
     print("chosen", best)
     EVOLUTION["_t"] = table(*best["params"])
     rr = reroll(r, "_t", np.random.default_rng(1))
@@ -119,8 +122,8 @@ def main():
         out["paths"][pol] = {k: dict(p_egg=round(float((a[m] >= 0).mean()), 4), value_hours=round(float(v[m].mean()), 4),
                                       dist=[round(float((a[m] == i).mean()), 4) for i in range(4)]) for k, m in paths.items()}
         out["paths"][pol]["_egg_value_hours"] = [round(float(x), 4) for x in val]
-    # recipes sized to the pacing targets from the chosen table's typical rates (redeem_plus1)
-    a = awards(rr, f, "redeem_plus1")
+    # recipes sized to the pacing targets from the chosen table's typical rates (recommended rule)
+    a = awards(rr, f, RULE)
     rate = np.array([(a[typical] == i).mean() * MPH for i in range(4)])
     common_as_rare = rate[0] / 3  # 3 Common fuse into 1 Rare
     rec = {}

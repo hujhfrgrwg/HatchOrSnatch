@@ -1,0 +1,14 @@
+{
+ "matches_per_cell": 2000,
+ "hero_crosses": {
+  "loose/catchers1/skill-1": 0.162,
+  "loose/catchers1/skill+0": 0.165,
+  "loose/catchers1/skill+1": 0.203,
+  "base/catchers1/skill-1": 0.037,
+  "base/catchers1/skill+0": 0.036,
+  "base/catchers1/skill+1": 0.05,
+  "tight/catchers1/skill-1": 0.011,
+  "tight/catchers1/skill+0": 0.007,
+  "tight/catchers1/skill+1": 0.006
+ }
+}

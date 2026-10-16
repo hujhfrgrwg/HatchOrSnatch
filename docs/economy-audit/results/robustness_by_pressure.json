@@ -1,0 +1,91 @@
+{
+ "egg_value_hours": [
+  0.0139,
+  0.0417,
+  0.2632,
+  2.2727
+ ],
+ "by_pressure": {
+  "base": {
+   "survive": 0.463,
+   "theft1": {
+    "p_egg_runner": 0.654,
+    "honest_over_caught_c1": 0.74,
+    "honest_over_caught_c2": 0.63,
+    "starting_catcher_over_runner": 1.64
+   },
+   "redeem": {
+    "p_egg_runner": 0.654,
+    "honest_over_caught_c1": 4.78,
+    "honest_over_caught_c2": 1.66,
+    "starting_catcher_over_runner": 0.62
+   },
+   "redeem_plus1": {
+    "p_egg_runner": 0.654,
+    "honest_over_caught_c1": 1.77,
+    "honest_over_caught_c2": 0.91,
+    "starting_catcher_over_runner": 1.05
+   },
+   "stolen_down": {
+    "p_egg_runner": 0.654,
+    "honest_over_caught_c1": 2.87,
+    "honest_over_caught_c2": 2.62,
+    "starting_catcher_over_runner": 0.39
+   }
+  },
+  "loose": {
+   "survive": 0.657,
+   "theft1": {
+    "p_egg_runner": 0.786,
+    "honest_over_caught_c1": 1.11,
+    "honest_over_caught_c2": 0.81,
+    "starting_catcher_over_runner": 0.97
+   },
+   "redeem": {
+    "p_egg_runner": 0.786,
+    "honest_over_caught_c1": 6.69,
+    "honest_over_caught_c2": 2.44,
+    "starting_catcher_over_runner": 0.44
+   },
+   "redeem_plus1": {
+    "p_egg_runner": 0.786,
+    "honest_over_caught_c1": 2.34,
+    "honest_over_caught_c2": 1.32,
+    "starting_catcher_over_runner": 0.68
+   },
+   "stolen_down": {
+    "p_egg_runner": 0.786,
+    "honest_over_caught_c1": 4.56,
+    "honest_over_caught_c2": 3.92,
+    "starting_catcher_over_runner": 0.23
+   }
+  },
+  "tight": {
+   "survive": 0.307,
+   "theft1": {
+    "p_egg_runner": 0.532,
+    "honest_over_caught_c1": 0.58,
+    "honest_over_caught_c2": 0.48,
+    "starting_catcher_over_runner": 2.0
+   },
+   "redeem": {
+    "p_egg_runner": 0.532,
+    "honest_over_caught_c1": 3.53,
+    "honest_over_caught_c2": 1.2,
+    "starting_catcher_over_runner": 0.85
+   },
+   "redeem_plus1": {
+    "p_egg_runner": 0.532,
+    "honest_over_caught_c1": 1.4,
+    "honest_over_caught_c2": 0.67,
+    "starting_catcher_over_runner": 1.54
+   },
+   "stolen_down": {
+    "p_egg_runner": 0.532,
+    "honest_over_caught_c1": 1.94,
+    "honest_over_caught_c2": 1.73,
+    "starting_catcher_over_runner": 0.57
+   }
+  }
+ }
+}

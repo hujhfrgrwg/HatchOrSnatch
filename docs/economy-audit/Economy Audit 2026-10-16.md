@@ -7,7 +7,10 @@ ticket: HOS-ECON-001
 
 This answers the ChatGPT audit brief Hunter shared on 16 Oct, using the real repo: GDD v0.4, the decisions note, and the place's scripts as snapshotted in `ScriptHistory` on the PR #1 branch. The numbers come from a new multiplayer simulation in `tools/sim/`. Raw results are in `docs/economy-audit/results/`, and every run has a fixed seed listed in `results/manifest.json`.
 
-**Lobby size:** Hunter corrected this mid-audit to about 30 players per match. Everything below uses 30 players with 3 starting Catchers unless it says otherwise. 12, 16 and 24 players are kept as comparisons.
+**Match setup:** about 30 players and **one starting Catcher** (both corrections came from Hunter on 16 Oct).
+- Everything below uses that setup unless it says otherwise. 12, 16 and 24 players are kept as comparisons.
+- An earlier version of this report assumed 3 starting Catchers. Every simulation was re-run for one, and that version is in git history.
+- The final calls are in [[Economy Decisions]] (`Design/Economy Decisions.md`). Hunter asked Claude to make them from this evidence.
 
 ## 0. What I think of the prompt itself
 
@@ -21,114 +24,112 @@ This answers the ChatGPT audit brief Hunter shared on 16 Oct, using the real rep
 All five are what stops this kind of exercise turning into fluff.
 
 **Where it falls short:**
-- **It assumes the game isn't built.** Most of it is. The place already has the chase, eggs, materials, the incubator, three abilities, Gold, Gems, live Gem packs, passes, an emote crate and XP. The real question is what the place does today and what has to change. Section 1 answers that.
-- **It describes a design that is neither the GDD nor the code:** Legendary eggs, random evolution, eggs that are "won, not awarded", and 3/4/3 recipes. Its key numbers were also out of date: about 12 players and 2–3 minute matches. Hunter's lobbies are about 30, and the place's cycle is about 65 seconds.
-- **The "76.5%" figure comes from a simulation that isn't in the repo,** so it can't be checked. I rebuilt the question from scratch instead (section 3).
+- **It assumes the game isn't built.** Most of it is. The place already has the chase, eggs, materials, the incubator, three abilities, Gold, Gems, live Gem packs, passes, an emote crate and XP. The real question is what the place does today and what has to change.
+- **It describes a design that is neither the GDD nor the code:** Legendary eggs, random evolution, eggs that are "won, not awarded", and 3/4/3 recipes. Its key numbers were also out of date: about 12 players and 2–3 minute matches. Real lobbies are about 30 players, and the place's cycle is about 65 seconds.
+- **The "76.5%" figure comes from a simulation that isn't in the repo,** so it can't be checked. I rebuilt the question from scratch (section 3).
 - **It asks for things no simulation can supply,** such as "psychological enjoyment" and "monetization compatibility". I scored those as stated hypotheses and kept them apart from measured results.
-- **It never names the biggest unknown: how good catching is compared with escaping.** That one number decides survival rates, the surrender incentive and egg supply, and only playtests can set it. I ran everything at three levels (loose, base, tight) instead of pretending to know it.
+- **It never names the biggest unknown: how good catching is compared with escaping.** That one number decides survival rates, the surrender incentive and egg supply, and only playtests can set it. With one starting Catcher it matters even more. I ran everything at three Catcher strengths (loose, base, tight) instead of pretending to know it.
 
 ## 1. Executive verdict
 
-**Yes, pursue it, but fix the economy before tuning anything else.** The format has proven demand. Huss Valley, the game this one is modelled on, had 95,644 people playing when checked on 16 Oct 2026 and 132.6 million visits, and it was only created on 31 Aug 2026. That comes from Roblox's public API (verified; links in section 8).
+**Yes, pursue it, but fix the economy before tuning anything else.** The format has proven demand. Huss Valley, the game this one is modelled on, had 95,644 people playing on 16 Oct 2026 and 132.6 million visits, and it was only created on 31 Aug 2026 (Roblox's public API; verified, see section 9).
 
-The economy as specified has three serious problems, and all of them can be fixed:
+The economy as specified has four serious problems, and all of them can be fixed:
 
-1. **Under "one theft = one egg", getting caught early pays as well as or better than playing to survive** (section 3). The fix is one rule, the Snatch-back cap.
-2. **Rewards arrive far too fast.** The place runs a match cycle of about 65 s, not the 135 s the GDD assumed, and a 30-player lobby makes eggs plentiful. Under the brief's 3/4/3 recipes, a typical player hatches their first Legendary pet in about 45 minutes. They own all 28 pets in the nine-family roster well inside 50 hours, by which point they've made about 420 duplicate hatches. Gold income (about 2,500/h) also outruns the whole Gold shop within an hour.
-3. **The place today gives every active player a piece every match, and about 88% of those pieces are Epic.** Eggs are awarded, not won, and Epic has become the common reward.
+1. **With one starting Catcher, getting caught early pays better than playing to survive** under "one theft = one egg". It also pays under the softer "snatch up to one rarity above what you lost" rule (section 3). Only the strict Snatch-back cap fixes this: a Catcher can keep an egg up to the rarity they lost, not above it.
+2. **One Catcher only works if catching is strong.**
+   - At the Catcher strength the 3-Catcher runs assumed, one Catcher lets 81% of Runners survive. A Catcher that strong only produces the target 40–55% survival when there are about 30 players. Smaller lobbies collapse: 16 players survive 14% of the time, 12 players 7%.
+   - So bots must fill every match to about 30, and the Catcher's tools are the main tuning knob (section 4).
+3. **Rewards arrive far too fast.** The place runs a match cycle of about 65 s, not the 135 s the GDD assumed. Under the brief's 3/4/3 recipes, a typical player hatches their first Legendary pet in about 40 minutes, and Gold income (about 2,700/h) outruns the whole Gold shop within an hour.
+4. **The place today gives every active player a piece every match, and about 98% of those pieces are Epic.** Eggs are awarded, not won.
+
+**Hero or Chicken fits Hatch or Snatch,** with two changes so it doesn't wreck the match (section 7).
 
 **The single biggest risk isn't the economy.** It's whether the chase feels as good as Huss Valley's, and no simulation can tell you that. P0 stays "fun with the shop closed".
 
 ### Decisions at a glance
-Final as of 16 Oct: Hunter asked Claude to make the calls, so the former PROTOTYPE items are now settled. Reasons for each are in [[Economy Decisions]] (`Design/Economy Decisions.md`).
+Reasons for each are in [[Economy Decisions]].
 
 | # | Decision | Verdict |
 |---|---|---|
-| 1 | Three fixed crossings, 30 players, 3 starting Catchers (1 per 10) | LOCK (playtest check may move it to 2 or 4) |
-| 2 | Replace the place's "3 clean crossings in a row" end rule with exactly 3 crossings | REVISE (code) |
-| 3 | Eggs are won: survive all 3 crossings, or snatch one | LOCK |
-| 4 | **Snatch-back cap:** a Catcher who snatches keeps an egg at most one rarity above the egg they lost. Starting Catchers can keep up to Epic. | LOCK (replaces "one theft = an egg at the stolen rarity") |
-| 5 | Physically banking stolen eggs | REJECT (no effect without counterplay) |
-| 6 | Two thefts required | REJECT (still rewards early capture; adds frustration) |
-| 7 | Evolution: crossing 1 → Rare always. Crossing 2 → Epic 10%, Legendary 2%. Final crossing → Rare to Epic 10%, Epic to Legendary 1%. | LOCK |
-| 8 | First pet: the first won egg also grants a Common pet of a chosen family, and the egg is kept | LOCK |
-| 9 | Recipes sized to hours, not to 3/4/3: Rare 26 (focus 33), Epic 23 (29), Legendary 10 (13) at 45 matches/h, shown as an incubator bar | REVISE |
-| 10 | 3 Common eggs fuse into 1 Rare | LOCK |
-| 11 | Rarity stat bonus (+1.5/3/4.5%) on distance or duration only, never recharge | LOCK (measured as invisible; see section 6) |
-| 12 | Gold earn kept; Gold prices ×3 | REVISE |
-| 13 | Earned Gems cut to about 31/h (Gems = win + first snatch, max 2 per match) | REVISE |
-| 14 | Gem-paid focusing, sold eggs, sold abilities | REJECT for launch |
-| 15 | Egg Index | DEFER |
-| 16 | Ranked | DEFER |
-| 17 | Cosmic tier | DEFER |
+| 1 | Exactly 3 crossings, about 30 players, one starting Catcher | LOCK |
+| 2 | Tune the Catcher's tools (not their number) so 40–55% of Runners survive | LOCK the target; tune in playtests |
+| 3 | Bots fill every match to 30 | REVISE (the place fills to 20 Runners) |
+| 4 | Replace the place's "3 clean crossings in a row" end rule with exactly 3 crossings | REVISE (code) |
+| 5 | Eggs are won: survive all 3 crossings, or snatch one | LOCK |
+| 6 | **Snatch-back cap:** a snatched egg is capped at the rarity of the egg you lost. The starting Catcher is capped at Rare. | LOCK (replaces "one theft = an egg at the stolen rarity") |
+| 7 | Hero or Chicken at match start: the Catcher picks a player, that player chooses. A Hero gets 2.5–3 s of protection; a caught Hero converts at crossing 2 | LOCK |
+| 8 | Physically banking stolen eggs; needing two thefts | REJECT |
+| 9 | Evolution: crossing 1 → Rare always. Crossing 2 → Epic 10%, Legendary 2%. Crossing 3 → Rare to Epic 10%, Epic to Legendary 1%. | LOCK |
+| 10 | First pet: the first won egg also grants a Common pet of a chosen family, and the egg is kept | LOCK |
+| 11 | Recipes sized to hours: Rare 24 (focus 30), Epic 19 (24), Legendary 11 (14) at 45 matches/h, shown as an incubator bar | REVISE |
+| 12 | 3 Common eggs fuse into 1 Rare | LOCK |
+| 13 | Rarity stat bonus (+1.5/3/4.5%) on distance or duration only, never recharge | LOCK (measured as invisible; see section 6) |
+| 14 | Gold earn kept; Gold prices ×3 | REVISE |
+| 15 | Earned Gems cut to about 30/h (Gems = win + first snatch, max 2 per match) | REVISE |
+| 16 | Gem-paid focusing, sold eggs, sold abilities | REJECT for launch |
+| 17 | Egg Index, Ranked, Cosmic tier | DEFER |
 
 ## 2. Critical flaws (most dangerous first)
 
-1. **Surrender pays (brief's design).** See section 3. At base pressure a typical player who gives up in crossing 1 wins an egg 90% of the time, against 69% for honest play. A skilled player's expected egg value is higher by giving up (1.45 vs 1.34). At tight pressure giving up wins outright (1.47 vs 0.88).
-2. **Pacing is broken by about 30× at the top end.**
-   - The brief's evolution table makes 20.8% of surviving eggs Legendary, which is about 2.5 Legendary eggs per 30-player match.
-   - With 3-egg Legendary recipes, the first Legendary pet arrives at a median of 0.76 h (`longterm.json`, base/typical, brief evolution + one-theft rule).
-   - **The brief's Legendary recipe (3) is also cheaper than its Epic recipe (4).**
-3. **The place's end rule contradicts both the GDD and the brief.**
+1. **Surrender pays.** See section 3. With one starting Catcher, a typical player who gives up in crossing 1 wins an egg 99.8% of the time, against 66% for honest play. Under "one theft = one egg", giving up in crossing 2 is worth 1.28× honest play at base strength, and more at tight.
+2. **One Catcher plus a fixed Catcher strength breaks small lobbies.** The share caught depends on how many Runners a single Catcher wave can reach. Tune it for 30 and a 12-player match ends with no survivors 72% of the time. Tune it for 12 and a 30-player match is a walk (section 4).
+3. **Pacing is broken.**
+   - The brief's evolution table makes 21% of surviving eggs Legendary, about 2.8 per 30-player match.
+   - With 3-egg Legendary recipes, the first Legendary pet arrives at a median of 0.7 h (`longterm.json`, base/typical, brief evolution + one-theft rule).
+   - **The brief's Legendary recipe (3) is cheaper than its Epic recipe (4).**
+4. **The place's end rule contradicts both the GDD and the brief.**
    - `MatchLogic` runs crossings until 3 clean ones in a row, the last Runner's solo crossing, or no Runners.
-   - In the simulation that averages 5–8 crossings. At base pressure Runners win only 10–22% of 12–16-player matches.
-   - Egg levels reach 6–9. `TierConfig` names levels 7–9 "Legendary" and 10+ "Cosmic", while `EconomyConfig.MATERIAL_FOR_TIER` pays Epic. That is exactly the "never label a reward Legendary while granting unrelated material" rule the GDD forbids. (`code_end_rule.json`)
-4. **Pieces are participation rewards in the place today.**
-   - Every active player gets a piece: Runners bank their level when caught, and steals credit up to level 3. That's 30 pieces per 30-player match, about 88% of them Epic.
-   - A theft takes nothing economically: the victim keeps their banked level and the thief gets a new piece.
-5. **Common eggs have no use after the first pet** in the brief's recipes, so they pile up as dead inventory (about 30–200 by 50 h, depending on the rule).
-6. **Currencies inflate.**
-   - Gold is about 2,540/h for a typical player. The most expensive Gold item (2,400) takes 0.7 h from zero.
-   - Gems are about 142/h earned. Every premium item (150–350) and an emote crate (250) costs 1–2.2 h of play.
-   - So a 199 R$ pack of 500 Gems is worth about 3.5 h of free play. That's weak value for buyers and makes Gems feel abundant.
-7. **Bots set the economy at low player counts.** NPCs top up to 20 Runners. While the game is small, most eggs will be stolen from or by bots, so bot difficulty is an economy setting.
+   - With one Catcher strong enough to matter, a crossing is almost never clean. So matches run 4–5 crossings and end with everyone caught: Runners win 0–1.5% of matches (`code_end_rule.json`).
+   - `TierConfig` also names egg levels 7–9 "Legendary" and 10+ "Cosmic" while `EconomyConfig.MATERIAL_FOR_TIER` pays Epic. The GDD forbids that kind of label.
+5. **Pieces are participation rewards in the place today.** Every active player gets a piece: Runners bank their level when caught, and steals credit up to level 3. That's 30 pieces per 30-player match, about 98% of them Epic, and a theft takes nothing from the victim.
+6. **Common eggs have no use after the first pet** in the brief's recipes. Under the cap they're 9% of all eggs, about 130 by 50 h.
+7. **Currencies inflate.**
+   - Gold runs about 2,700/h for a typical player. The most expensive Gold item takes 0.7 h from zero.
+   - Gems run about 151/h earned. Every premium item and the emote crate costs 0.8–2 h of play.
+   - So a 199 R$ pack of 500 Gems is worth about 3.3 h of free play: weak value for buyers.
 8. **Rarity bonuses as proposed are invisible.**
    - A recharge bonus of 1.5–6% changes ability uses per match by under 0.02 (`cooldowns.json`).
-   - A dash-distance bonus of up to +20% didn't change survival measurably in the chase model (`pet_power.json`).
-   - Players may not notice it, so its value is mainly the label.
+   - A dash-distance bonus up to +20% didn't change survival measurably (`pet_power.json`).
 
 ## 3. The surrender problem (Part 2)
 
-**Setup:** in `job_focal`, one player out of 30 has a fixed skill and a strategy, and is never the starting Catcher. "Surrender at crossing c" means walking straight into the nearest Catcher during crossing c. Each cell is 1,200 independent matches (95% CI on egg chance about ±2.7 pts).
-
-Value weights: Common 0.25, Rare 1, Epic 2, Legendary 4. The conclusion doesn't depend on these weights; section 7 repeats it with weights derived from hatch recipes.
+**Setup:**
+- In `job_focal`, one player out of 30 has a fixed skill and a strategy, and is never the starting Catcher.
+- "Surrender at crossing c" means walking straight into the Catcher during crossing c.
+- Each cell is 1,200 independent matches (95% CI on egg chance about ±2.7 pts).
+- Value weights here are Common 0.25, Rare 1, Epic 2 and Legendary 4, with the brief's evolution table. Section 8 repeats the test with recipe-based weights and the tuned table.
 
 Typical skill:
 
-| Pressure | Strategy | P(egg) "1 theft" | Value "1 theft" | P(egg) Snatch-back | Value Snatch-back | Gold/match |
+| Strength | Strategy | P(egg) "1 theft" | Value "1 theft" | Value Snatch-back +1 | Value Snatch-back (strict) | Gold/match |
 |---|---|---|---|---|---|---|
-| loose | play honestly | 0.90 | **2.00** | 0.90 | **1.97** | 72 |
-| loose | give up in crossing 1 | 0.62 | 0.87 | 0.62 | 0.16 | 31 |
-| base | play honestly | 0.69 | 1.39 | 0.69 | **1.18** | 59 |
-| base | give up in crossing 1 | **0.90** | 1.31 | 0.90 | 0.23 | 34 |
-| base | give up in crossing 2 | 0.77 | 1.34 | 0.77 | 0.70 | 43 |
-| tight | play honestly | 0.49 | 0.88 | 0.49 | **0.53** | 50 |
-| tight | give up in crossing 1 | **0.98** | **1.47** | 0.98 | 0.25 | 35 |
+| loose | play honestly | 0.81 | **1.75** | **1.72** | **1.63** | 67 |
+| loose | give up in crossing 1 | 0.98 | 1.56 | 0.98 | 0.25 | 35 |
+| loose | give up in crossing 2 | 0.93 | 1.72 | 1.50 | 0.90 | 46 |
+| base | play honestly | 0.66 | 1.41 | 1.32 | **1.19** | 61 |
+| base | give up in crossing 1 | **1.00** | 1.68 | 1.00 | 0.25 | 35 |
+| base | give up in crossing 2 | 0.97 | **1.80** | **1.58** | 0.93 | 46 |
+| tight | play honestly | 0.53 | 1.13 | 1.04 | 0.88 | 56 |
+| tight | give up in crossing 1 | **1.00** | 1.84 | 1.00 | 0.25 | 35 |
+| tight | give up in crossing 2 | 0.97 | **1.92** | **1.64** | 0.92 | 46 |
 
-"Snatch-back" here is the strict version: a snatch is capped at the rarity you lost, and starting Catchers are capped at Rare. The recommended "+1" version is checked in section 7.
+**Who comes out ahead (base strength, "1 theft" rule, `population.json`):**
+- **The starting Catcher** wins an egg 99.97% of the time and averages 4.1 snatches per match.
+- **A Runner caught in crossing 1** wins an egg 99% of the time.
+- **A Runner caught in crossing 2** wins one 96% of the time.
+- **A Runner caught in crossing 3** never wins one, because there's no crossing left to snatch in.
+- **A survivor** always wins one, and **an honest Runner** wins one 67% of the time.
+- **Skilled players** get more out of giving up early: 3.7 snatches against 2.8 for a typical player.
 
-**Who comes out ahead (base pressure, "1 theft" rule):**
+**Why it's worse with one Catcher:** a lone Catcher has to be strong, so anyone who becomes a Catcher early snatches almost every time. A converted Catcher gets one or two crossings of steal chances against a crowd still carrying eggs. A survivor gets one egg.
 
-- **The starting Catcher** wins an egg 96% of the time.
-- **A Runner caught in crossing 1** wins one 89% of the time.
-- **A Runner caught in crossing 2** wins one 75% of the time.
-- **A Runner caught in crossing 3** never wins one, because conversion happens after the crossing and there's no crossing left.
-- **A survivor** always wins one.
-- **A Runner who plays honestly** wins one 69% of the time (`population.json`).
-- **A player who gives up on purpose** does as well as someone caught early by accident: the surrender sims match the "caught in crossing 1" group within 1–2 points.
-- **Skilled thieves** get more out of giving up. A skilled player averages 2.0 snatches after giving up in crossing 1, against 1.6 for a typical player.
-
-**Conclusion:** the problem is real, and it gets worse as Catchers get stronger. It isn't caused by low effort; it's caused by the number of steal chances. A converted Catcher gets two crossings of steal chances against a crowd still carrying eggs. A survivor gets one egg.
-
-**Why the Snatch-back cap works:**
-
-- **It ties a Catcher's best possible egg to how long they survived,** so surviving is always worth more than giving up, at every pressure.
-- **It doesn't make Catchers miserable.**
-  - A Catcher who snatches still wins an egg, at nearly the same rate as before.
-  - With "+1", someone caught holding a Rare can snatch an Epic.
-  - Starting Catchers can snatch up to Epic, which puts their egg value at 0.71× a Runner's.
-  - The strict version and "stolen eggs drop a rarity" fall to 0.25× for starting Catchers (`design_comparison.json`).
-- **Gold also favours honest play.** Giving up costs about 40% of the match's Gold and Gems in every cell.
+**Why the strict Snatch-back cap is the fix:**
+- **It ties a Catcher's best possible egg to how far they got.** Caught in crossing 1 while holding a Common, you can only snatch a Common. Caught in crossing 2 holding a Rare, you can snatch up to Rare.
+- **The softer "+1" version fails now.** With 3 Catchers it was the recommendation. With one, a player caught in crossing 2 can snatch an Epic, and that beats honest play.
+- **It still pays Catchers.** They win an egg at the same rate, and Commons fuse into Rares (3 → 1).
+- **Gold also favours honest play.** Giving up costs 25–45% of the match's Gold in every cell.
+- **The strict cap passes at every Catcher strength,** but only just when Catchers are strong. See section 8 for the margins.
 
 ## 4. Simulation results (Part 4)
 
@@ -136,77 +137,84 @@ Typical skill:
 - **Arena:** a 2D field of 176 × 140 studs with 30 s crossings. Run speed is 31 for both roles.
 - **Movement and tags:**
   - Runner side-dash: 58 studs/s for 0.16 s, 2 s cooldown.
-  - Stab: 6.5-stud reach, 1 s cooldown.
+  - Stab: 6.5-stud base reach, 1 s cooldown.
   - Lunge: 46 studs/s for 0.2 s, then 50% speed for 0.7 s.
   - Catchers can't dash.
-  - There's a 0.75 s Catcher hold and start protection at the beginning of each crossing.
-- **Each player has:**
-  - a reaction delay
-  - dash timing error and a chance of dashing the wrong way
-  - a chance of dodging a lunge
-  - stab accuracy
-  - how far ahead they read the field
-- **Skill** is a made-up scale (−1 beginner, 0 typical, +1 skilled). Everyone in a lobby is drawn from N(0, 0.6).
-- **Catchers coordinate** by claiming targets, with at most a soft 2 per Runner.
+  - Each crossing opens with 0.75 s of protection.
+- **Each player has:** a reaction delay, dash timing error and a chance of dashing the wrong way, a chance of dodging a lunge, stab accuracy, and a look-ahead distance.
+- **Skill** is a made-up scale (−1 beginner, 0 typical, +1 skilled), with lobbies drawn from N(0, 0.6).
+- **Catcher strength ("pressure")** raises Catcher accuracy and reach and lowers Runner reactions.
+  - One starting Catcher needs far more of it than three did. Base is 2.6 on the model's scale, against 1.6 for the 3-Catcher runs.
+  - In the model that's about 45% more tag reach plus faster Catcher reactions.
+- **Catchers coordinate** by claiming targets.
 - **Conversion is delayed by default:** a caught Runner lies down and becomes a Catcher next crossing, as in the place.
 
-### Match dynamics (`population.json`)
-| Lobby | Starting Catchers | Pressure | Runners at C1 / C2 / C3 | Captures per crossing | Survive | Zero-survivor matches |
-|---|---|---|---|---|---|---|
-| 30 | 3 | loose | 27 / 26.2 / 25.1 | 0.8 / 1.1 / 2.0 | 86% | 0% |
-| 30 | 3 | base | 27 / 24.5 / 20.0 | 2.5 / 4.6 / 7.8 | 45% | 0.2% |
-| 30 | 3 | tight | 27 / 23.2 / 15.6 | 3.8 / 7.7 / 11.9 | 13% | 26% |
-| 30 | 1 / 2 / 4 | base | | | 81% / 64% / 29% | |
-| 30 | 3, immediate conversion | base | | | 52% | |
-| 12 | 1 | base | | | 67% | |
-| 16 | 2 | base | | | 46% | 0.9% |
-| 24 | 2 | base | | | 56% | |
+### Match dynamics (`population.json`, 30 players, one starting Catcher)
+| Catcher strength | Runners at C1 / C2 / C3 | Captures per crossing | Survive | Zero-survivor matches |
+|---|---|---|---|---|
+| loose | 29 / 27.7 / 24.9 | 1.3 / 2.8 / 5.9 | 65% | 0% |
+| base | 29 / 27.3 / 23.3 | 1.7 / 4.0 / 9.8 | 47% | 0.1% |
+| tight | 29 / 27.2 / 22.3 | 1.8 / 4.9 / 13.4 | 31% | 1% |
+| the 3-Catcher runs' strength | | 0.8 / 1.7 / 3.0 | 81% | 0% |
+| base, immediate conversion | | | 50% | |
+| base, 2 starting Catchers | | | 9% | 42% |
+| base, 3 starting Catchers | | | 0.7% | 91% |
+
+**Lobby size at base strength** (one Catcher):
+
+| Players | 12 | 16 | 24 | 30 |
+|---|---|---|---|---|
+| Survive | 7% | 14% | 35% | 47% |
+| Zero-survivor matches | 72% | 40% | 1% | 0.1% |
 
 **What this shows:**
+- **With one Catcher, the second Catcher is the cliff.** Anything that adds a Catcher before crossing 1 takes survival from 47% to 9%. That's why a caught Hero must not join crossing 1 (section 7).
+- **Lobby size matters as much as Catcher strength.** Fill with bots to 30 so every match plays like the tuned one.
+- **Immediate conversion doesn't raise pressure.** Fresh Catchers get up behind the Runner wave.
+- **Crossings last about 6.5 s,** so a full match cycle is about 62–65 s using the place's own timers.
 
-- **The number of starting Catchers is the strongest tuning knob.** At base pressure, going from 1 to 4 starting Catchers takes survival from 81% to 29%.
-- **Immediate conversion doesn't raise pressure.** Fresh Catchers get up behind the Runner wave and can't catch up at equal speed, and it adds visual noise.
-- **Crossings last 7–10 s,** so a full match cycle is about 65–70 s using the place's own timers.
-
-### Egg rules: eggs per 30-player match at base pressure, brief's evolution table
+### Egg rules: eggs per 30-player match at base strength, brief's evolution table
 | Rule | Eggs/match | Common / Rare / Epic / Legendary | P(egg) caught in crossing 1 | Starting Catcher |
 |---|---|---|---|---|
-| Runners only | 12.2 | 0 / 2.3 / 7.3 / 2.5 | 0 | 0 |
-| 1 theft = egg | 20.7 | 0.4 / 6.8 / 10.5 / 3.0 | 0.89 | 0.96 |
-| 2 thefts | 16.7 | 0.05 / 4.6 / 9.2 / 2.8 | 0.54 | 0.73 |
-| Stolen egg drops a rarity | 20.3 | 4.4 / 5.4 / 7.9 / 2.5 | 0.89 | 0.83 |
-| Snatch-back, strict | 20.7 | 2.6 / 8.2 / 7.3 / 2.5 | 0.89 | 0.96 |
-| Banked theft | same as 1 theft | | | |
-| The place today | 30.0 | 0.8 / 2.9 / 26.3 / 0 | 1.0 | 1.0 |
+| Runners only | 13.6 | 0 / 2.6 / 8.1 / 2.8 | 0 | 0 |
+| 1 theft = egg | 20.0 | 0 / 5.1 / 11.5 / 3.5 | 0.99 | 1.0 |
+| 2 thefts | 18.6 | 0 / 4.3 / 10.9 / 3.4 | 0.93 | 0.99 |
+| Stolen egg drops a rarity | 20.0 | 2.5 / 6.0 / 8.8 / 2.8 | 0.99 | 0.98 |
+| Snatch-back, strict | 20.0 | 1.7 / 7.4 / 8.1 / 2.8 | 0.99 (all Common) | 1.0 |
+| Snatch-back +1 | 20.0 | 0 / 5.9 / 11.3 / 2.8 | 0.99 | 1.0 |
+| The place today | 30.0 | 0 / 0.6 / 29.4 / 0 | 1.0 | 1.0 |
 
-**Banked theft** (`banking.json`): every steal was banked, because nothing can stop a carrier. Banking without counterplay is a delay, not a decision.
-
-**Keeping the first stolen egg instead of the best:** it changes the rarity mix, not how many players win an egg. At base pressure it turns about 1.8 Rare-or-better eggs per match into Commons.
-
-**Visible Legendaries** (`visible_rarity_targeting.json`):
-- If Catchers ignore rarity, a Legendary carried into crossing 3 is stolen 39% of the time.
-- If they hunt it hard, 49%. A Rare is stolen 25% of the time.
-- So visible rarity does create a "protect the gold egg" moment without making Legendaries impossible to keep.
+- **Banked theft** (`banking.json`): every steal was banked, because nothing can stop a carrier. Banking without counterplay is a delay, not a decision.
+- **Keeping the first stolen egg instead of the best** turns about one Rare-or-better egg per match into a Common.
+- **Visible Legendaries** (`visible_rarity_targeting.json`):
+  - If Catchers ignore rarity, a Legendary carried into crossing 3 is stolen 43% of the time.
+  - If they lean towards it, 54%; if they hunt it hard, 62%.
+  - A Rare is stolen 27–31% of the time.
+  - Holding a Legendary makes you a target, and roughly half of Legendary carriers keep it.
 
 ### What the sim can't show
-- **Skill barely matters in my model.** Beginners win an egg 66% of the time and skilled players 69%. Real skill gaps are certainly larger, so treat every beginner-vs-skilled number here as a floor on the gap, not an estimate of it.
-- **The model has no friends, no voice chat, no latency and no map geometry.**
+- **Skill barely matters in the model.** Beginners and skilled players both win an egg about 65–66% of the time. Real skill gaps are certainly larger, so treat beginner-vs-skilled numbers as a floor.
+- **No friends, voice chat, latency or map geometry.**
 
 ## 5. Recommended rules (Parts 4B–4E)
 
-### Egg acquisition: Snatch-back (+1)
+### Egg acquisition: strict Snatch-back
 1. **Survive all three crossings:** you keep your egg at its evolved rarity.
-2. **Snatch an egg as a converted Catcher:** you win an egg at the snatched rarity, capped at one rarity above the egg you were carrying when caught. Caught with a Common (crossing 1): up to Rare. Caught with a Rare: up to Epic. Caught with an Epic: up to Legendary.
-3. **Snatch as a starting Catcher:** capped at Epic.
+2. **Snatch an egg as a converted Catcher:** you win an egg at the snatched rarity, capped at the rarity of the egg you were carrying when caught.
+   - Caught in crossing 1 with a Common: a Common.
+   - Caught in crossing 2 with a Rare: up to Rare.
+   - Caught in crossing 3: no crossing left, so no egg.
+3. **Snatch as the starting Catcher:** capped at Rare. A caught Hero is also capped at Rare (section 7).
 4. **One egg per player per match;** keep the best one.
 5. **No snatch and no survival:** Gold and XP only.
-6. **The UI says it plainly,** e.g. "You snatched a LEGENDARY! Your cap: EPIC (you lost a Rare)." The cap is visible on the Catcher's HUD.
+6. **The UI says it plainly,** e.g. "You snatched a LEGENDARY! You keep a RARE (you lost a Rare)." The cap is on the Catcher's HUD.
 
-**Results with the tuned evolution table** (`recommended_economy.json`):
-- A typical player wins an egg in 66% of matches.
-- A beginner's chance of five eggless matches in a row is 0.45%.
-- Honest play is worth 1.9× giving up in crossing 1.
-- A starting Catcher's eggs are worth 0.71× a Runner's.
+**Results with the tuned evolution table** (`recommended_economy.json`, `design_comparison.json`, `robustness_by_pressure.json`):
+- A typical Runner wins an egg in 65–66% of matches.
+- A beginner's chance of five eggless matches in a row is 0.5%.
+- Honest play is worth 1.66× the better of giving up in crossing 1 or 2 at base strength.
+- The starting Catcher's eggs are worth 0.62× a Runner's.
+- Eggs per match: 20.0. Common 1.7, Rare 15.5, Epic 2.5, Legendary 0.28.
 
 ### Evolution
 | Crossing | Rare | Epic | Legendary |
@@ -216,277 +224,326 @@ Typical skill:
 | 3 (final) | Rare stays 90% | Rare → Epic 10%; Epic stays 99% | Epic → Legendary 1% |
 
 **How it plays out:**
-
-- **Every crossing visibly changes the egg.** The level always rises, and the place already tints each level. Rarity doesn't always rise.
-- **Legendaries are mostly born in crossing 2,** so one is in play during the final crossing in about 39% of matches (0.39 per match).
-- **A surviving egg ends** Rare 79%, Epic 18.7% or Legendary 2.1% (exact, from the table).
-- **Across all eggs** (typical player, Snatch-back +1): Common 2%, Rare 83%, Epic 14% and Legendary 1.2%.
-
-**Alternatives rejected:**
-- The brief's table: 21% of survivors' eggs are Legendary.
-- "Epic-heavy": 23%.
-- Deterministic: Legendary for every survivor.
-- The place's levels: Epic for every survivor, with no Legendary.
+- **Every crossing visibly changes the egg.** The level always rises, and rarity sometimes does.
+- **Legendaries are mostly born in crossing 2,** so 0.45 are carried into the final crossing per match. At least one is in play in 36% of matches.
+- **A surviving egg ends** Rare 79%, Epic 18.7% or Legendary 2.1%.
+- **Across all eggs won:** Common 8.6%, Rare 77.6%, Epic 12.4% and Legendary 1.4%.
+- **Rejected tables:**
+  - the brief's (21% of survivors Legendary)
+  - "Epic-heavy" (23%)
+  - deterministic (every survivor Legendary)
+  - the place's levels (every survivor Epic, no Legendary)
 
 ### First pet
 **Rule:** the first won egg also grants a Common pet of a family the player picks, and the egg is kept.
 
 | Option | Median time to first pet | 90th percentile |
 |---|---|---|
-| Pet on first egg (any option that keys off it) | 1 match | about 2–3 matches |
-| Two eggs | 2–3 matches | about 4 matches |
-| A separate "3 Common eggs" recipe | 4–5 hours | over 8 hours |
+| Pet on first egg | 1 match | 2–3 matches |
+| Two eggs | 3 matches | about 4 matches |
+| A separate "3 Common eggs" recipe | 89% have none within 50 h | |
 
-The last option is unacceptable.
-
-Giving the pet while keeping the egg costs almost nothing, and it doubles the moment: you win an egg and you get your first ability. That fits endowed progress (Nunes & Drèze, 2006). The GDD's "first pet after two matches" target is met.
+Giving the pet while keeping the egg costs almost nothing, and it doubles the moment: you win an egg and you get your first ability. That fits endowed progress (Nunes & Drèze, 2006), and it meets the GDD's "first pet after two matches" target.
 
 ### Incubation
-**Recipe size:** recipes are set so a typical player's first pet of each rarity lands at about 1 h (Rare), 5 h (Epic) and 25 h (Legendary). That's a design target, and you can choose different ones. At 45 matches/h (65–70 s cycles plus lobby time) that gives:
+**Recipes are sized so a typical player's first pet of each rarity lands at about 1 h (Rare), 5 h (Epic) and 25 h (Legendary).** That's a design target you can change. At 45 matches/h:
 
 | Rarity | Random | Focused (+25%) |
 |---|---|---|
-| Rare | 26 | 33 |
-| Epic | 23 | 29 |
-| Legendary | 10 | 13 |
+| Rare | 24 | 30 |
+| Epic | 19 | 24 |
+| Legendary | 11 | 14 |
 
-**Common eggs:** 3 Common eggs fuse into 1 Rare.
+- **Common eggs:** 3 fuse into 1 Rare.
+- **Show progress as a filling bar** ("Rare nest 18/24"), not a count.
+- **If the cycle moves back toward the GDD's 135 s,** halve them: Rare 12, Epic 10, Legendary 6.
 
-**The numbers are big, so show progress as a filling incubator bar ("Rare nest 18/26"), not a count.** If the match cycle moves back toward the GDD's 135 s, everything halves: Rare 13, Epic 12, Legendary 5.
+**Careers through the incubator** (300 careers each, resampled, nine families):
 
-**Careers through the incubator** (300 careers each, resampled):
-
-| | First Rare pet | First Epic pet | First Legendary pet | Pets owned at 50 h | Duplicate hatches at 50 h |
+| | First Rare pet | First Epic pet | First Legendary pet | Pets owned at 50 h | Duplicates at 50 h |
 |---|---|---|---|---|---|
-| Typical | 1.3 h (90th pct 1.5) | 6.2 h (7.6) | 33 h (45.5) | 17 of 27 | 44 |
-| Beginner | 1.4 h | 7.0 h | 35 h; 9% none by 50 h | | |
-| Skilled | 1.4 h | 5.8 h | 36 h | | |
+| Typical | 1.3 h (90th pct 1.5) | 6.3 h (8.2) | 32 h (44); 2% none by 50 h | 17 | 44 |
+| Beginner | 1.3 h | 6.7 h | 29 h | | |
+| Skilled | 1.3 h | 6.1 h | 34 h; 6% none by 50 h | | |
 
-Pets owned and duplicates are for the full nine families. In my model skill hardly changes egg income; see the limits in section 4.
-
-**Focusing:**
-- Keep it as a surcharge in eggs (+25%), never in Gems at launch.
-- The first Legendary is focused by default, which is why it lands later than the random-recipe target.
-
-**Duplicates:**
-- About 44 by 50 h. They need a home, such as cosmetic mastery stars.
-- Don't let them multiply stats (that's in the GDD already).
+- **Focusing** stays a surcharge in eggs (+25%), never Gems. The first Legendary is focused by default, which is why it lands later than the 25 h target.
+- **Duplicates** (about 44 by 50 h) give cosmetic mastery stars, never stats.
 
 ## 6. Pet balance (Part 4F)
 
-**Recharge bonus:** with Brake (10 s), Scout (18 s) and Decoy (20 s), ability uses per three-crossing match are 2.97, 1.99 and 1.98 at Common. They are 2.97, 1.99 and 1.98 at Legendary (+4.5%) as well. Even +10% adds at most 0.04 uses (`cooldowns.json`). The thresholds don't line up with the match's timing.
+**Recharge bonus:** with Brake (10 s), Scout (18 s) and Decoy (20 s), ability uses per match are 2.97, 1.99 and 1.98 at both Common and Legendary (+4.5%). Even +10% adds at most 0.04 uses (`cooldowns.json`).
 
 **Distance bonus:**
-- A dash 3–20% longer didn't change survival in the chase model. Survival stayed at 40–41% (95% CI ±1 pt, about 9,000 Runner samples per level, `pet_power.json`).
-- In this model escapes are decided by timing and Catcher positioning, not the last couple of studs.
-- Real players might exploit precision the brains don't, so read this as "small", not "zero".
+- A dash 3–20% longer didn't change survival. It stayed at 45–48% (95% CI ±1 pt, 9,000 Runner samples per level, `pet_power.json`).
+- Escapes in the model come down to timing and positioning.
+- Real players might use precision the model's Runners don't, so read this as "small", not "zero".
 
-**Feedback loop:** stronger pets → more eggs → stronger pets. With the effect this small, the loop is negligible.
+**Feedback loop:** stronger pets → more eggs → stronger pets. With an effect this small, the loop is negligible.
 
-**Recommendation:**
-- If you keep rarity bonuses (you prefer them), put them on duration or distance only, and keep them small (≤5% at Legendary). Show them as flavour ("Legendary Decoy lasts 3.15 s").
-- Expect them to feel like status, not power.
-- Make the visual and audio upgrade with rarity loud, because that's what players will actually perceive.
-- If Ranked ever happens, normalise them there.
+**Decision:** keep a small bonus (≤5% at Legendary) on duration or distance only, shown as flavour ("Legendary Decoy lasts 3.15 s"). Make the visual and audio upgrade loud, because that's what players will perceive. If Ranked ever happens, normalise the bonus there.
 
-## 7. Comparing complete designs (Part 7)
+## 7. Hero or Chicken (Hunter's addition, 16 Oct)
 
-All five designs are scored on the same 2,000 simulated matches (base pressure, tuned evolution). Each egg's value is the hours of progress it's worth under the recommended recipes (Rare 0.038 h, Epic 0.22 h, Legendary 2.5 h, Common a third of a Rare). Source: `design_comparison.json`.
+### How Huss Valley does it
+- **Per Hunter, who has played it:**
+  - The players line up, and the original Catcher picks one of them.
+  - That player chooses Hero (cross alone) or Chicken (stay back and cross with everyone).
+- **[S] Third-party guides agree on what the two choices mean:** a Hero crosses alone for a bonus, and a Chicken gives up the bonus. Sources: games.gg and technerdiness beginner guides, hussvalley.top "Hero or Chicken" guide.
+- **[S] Where the guides differ from Hunter:**
+  - They say the game picks the player at random. None mentions a lineup or the Catcher choosing.
+  - None shows footage. I'm going with Hunter's first-hand account.
+- **Not found:**
+  - the size of the Hero bonus
+  - what happens to a caught Hero (guides imply they join the Chasers)
+  - pick timers
+  - any monetisation (none of its 9 passes relates to it) [V]
+- **Note:** the game's own description is just "RUN!!" [V].
 
-| Design | Beginner egg rate | Honest ÷ give-up value | Starting Catcher ÷ Runner | Eggs/match | Legendary share |
+### What the sim says (`hero_solo.json`, `hero_headstart.json`)
+**A lone Runner against one Catcher,** at the Catcher strength the 30-player match needs:
+
+| Protection at the start of the Hero run | Loose | Base | Tight |
+|---|---|---|---|
+| 0.75 s (the normal crossing) | 15–18% | 3–6% | ~1% |
+| 1.5 s | 22–27% | 6–9% | ~1% |
+| 2.5 s | 52–55% | 34–37% | 19–21% |
+| 3.5 s | 100% | 100% | 100% |
+
+- **Without help, Hero is suicide.** A Catcher strong enough to catch half of a 30-player crowd catches a lone Runner almost every time.
+- **The curve is steep around 2.5–3 s,** so protection is a fine dial for playtests.
+- **Skill barely moves these numbers in the model.** Real 1-v-1 juking should matter more, so treat them as rough.
+
+**If a caught Hero joined the Catchers for crossing 1** (Huss Valley's apparent rule), crossing 1 would start with 2 Catchers. Survival would fall from 47% to 9%, and 42% of matches would end with nobody surviving (`population.json`). With failure that common, the match would collapse in most rounds. **A caught Hero must convert at crossing 2,** like any other Runner caught in crossing 1.
+
+### How it fits Hatch or Snatch
+1. **Before crossing 1,** Runners line up. The starting Catcher has 5 s to pick one; if they don't, it's random.
+2. **The picked player has 5 s to choose Hero or Chicken.** If they don't, it's Chicken.
+3. **Hero:**
+   - crosses alone with about 2.75 s of protection, tuned in playtests so about half of Heroes make it
+   - everyone watches, with a short camera cut and an announcer line
+   - **made it:** the crossing counts as their crossing 1, so the egg turns Rare. The Hero's egg also gets a bonus roll on the crossing-2 odds (Epic 10%, Legendary 2%). Small Gold and XP bonus, plus a "Hero" tag for the match.
+   - **caught:** they lie down, convert at crossing 2, and can snatch up to Rare (the Hero cap). The Catcher's catch counts as a snatch of a Common.
+4. **Chicken:** crosses with everyone, no penalty. A chicken emote or sound on the nameplate for that match is the only teasing.
+
+**Is Hero worth taking?** This is my calculation from simulated rates, in hours of progress:
+
+| Choice | Expected value | |
+|---|---|---|
+| Chicken (plays honestly) | about 0.066 h | |
+| Hero, no bonus roll, about 50% success | about 0.055 h | 0.83× Chicken |
+| Hero with the bonus roll | about 0.072 h | 1.09× Chicken |
+
+So the bonus makes Hero a real, slightly favourable gamble. Hero has more variance, and the spotlight is the real reward.
+
+**Psychology:**
+- The Catcher's pick gives the one starting Catcher agency and a social role from the first second.
+- The choice gives the picked player autonomy.
+- The spotlight run is a shared moment the whole lobby watches.
+- [H] The "Chicken" label adds playful social pressure without costing anything.
+- Keeping the egg odds close to even stops it being a trap or a must-pick.
+
+## 8. Comparing complete designs (Part 7)
+
+All designs are scored on the same 2,000 simulated matches (base strength, tuned evolution). Each egg's value is the hours of progress it's worth under the recommended recipes: Rare 0.042 h, Epic 0.26 h, Legendary 2.27 h, Common a third of a Rare. "Give-up value" is the better of being caught in crossing 1 or 2. Source: `design_comparison.json`.
+
+| Design | Beginner egg rate | Honest ÷ give-up | Starting Catcher ÷ Runner | Eggs/match | Legendary share |
 |---|---|---|---|---|---|
-| A Accessible (1 theft = egg) | 0.66 | **0.98 ✗** | 1.01 | 20.7 | 2.0% |
-| B Competitive (Runners + 2 thefts) | 0.51 | **1.12 ✗** | 1.04 | 16.7 | 2.1% |
-| C High-stakes (banking + steals drop a rarity) | 0.65 | 3.72 | **0.25 ✗** | 20.3 | 1.2% |
-| **D Snatch-back (+1)** | 0.66 | 1.91 | 0.71 | 20.7 | 1.2% |
-| The place today | 1.00 | 1.54 | 0.66 | **30 ✗** (participation) | 0% |
+| A Accessible (1 theft = egg) | 0.67 | **0.63 ✗** | 1.64 | 20.0 | 2.3% |
+| B Competitive (Runners + 2 thefts) | 0.59 | **0.72 ✗** | 1.74 | 18.5 | 2.4% |
+| C High-stakes (banking + steals drop a rarity) | 0.67 | 2.62 | **0.39 ✗** | 19.9 | 1.4% |
+| **D Snatch-back (strict)** | 0.67 | 1.66 | 0.62 | 20.0 | 1.4% |
+| D+1 Snatch-back +1 | 0.67 | **0.91 ✗** | 1.05 | 20.0 | 1.4% |
+| The place today | 1.00 | **1.02 ✗** | 0.91 | **30 ✗** (participation) | 0% |
 
-**Hard constraints come first.** These are taken from your brief:
-- Playing honestly must clearly beat giving up (more than 1.2×).
-- Catchers must not be miserable (a starting Catcher gets at least half a Runner's value).
+**Hard constraints first,** taken from your brief:
+- Honest play must clearly beat giving up (more than 1.2×).
+- The starting Catcher must get at least half a Runner's value.
 - Eggs must be won, not given for showing up.
 
-Only D passes all three.
+**Only strict Snatch-back (D) passes all three.**
 
-**Then the weightings, for completeness:**
+**Does it hold at other Catcher strengths?** (`robustness_by_pressure.json`, 1,200 new matches each)
+
+| Strength (survival) | D: honest ÷ give-up | D: starting Catcher ÷ Runner | D+1: honest ÷ give-up |
+|---|---|---|---|
+| loose (66%) | 2.44 | 0.44 | 1.32 |
+| base (46%) | 1.66 | 0.62 | 0.91 ✗ |
+| tight (31%) | 1.20 (borderline) | 0.85 | 0.67 ✗ |
+
+That's why the survival target is 40–55%, not 35–55%. Below 40%, even the strict cap only just keeps honest play ahead.
+
+**Weightings, for completeness.** Without the constraints, every weighting picks a design that fails one:
 
 | Weighting | Rank 1 | D's rank |
 |---|---|---|
-| Balanced | A | 3rd |
-| Growth | The place today | 2nd |
-| Integrity | C | 3rd |
-| Hardcore | B | 3rd |
+| Balanced | A | 6th |
+| Growth | The place today | 4th |
+| Integrity | C | 5th |
+| Hardcore | B | 4th |
 
-D is never first and never last. Weightings alone pick whichever design matches their bias, which is why the constraints decide here.
+The scores reward high egg rates and Catcher payouts, which are exactly what the exploit comes from. So the constraints decide, not the weights.
 
-**Established by maths vs needing real tests:**
-- **Established:** the exploit ordering of the egg rules holds at all three pressures. The Snatch-back rule removes the give-up advantage at all three.
+**Established by maths vs needing real players:**
+- **Established:** the exploit ordering of the rules, at all three strengths.
 - **Needs real players:**
   - whether the cap feels fair once explained
   - whether a 66% egg rate feels "won"
-  - whether losing a Legendary feels like good tension or like being robbed
+  - whether losing a Legendary is tension or robbery
+  - whether Hero gets picked
 
-## 8. Research (Part 3)
+## 9. Research (Part 3)
 
 Labels:
 - **[V]** I or a helper read the source.
 - **[S]** secondary.
-- **[H]** a hypothesis, not a finding.
+- **[H]** a hypothesis.
 
 ### Huss Valley
-- **[V] Size:** universe 10764627709, owned by the group "Huss Valley Official", created 31 Aug 2026. On 16 Oct: 95,644 playing, 132,591,554 visits, about 88% upvotes, 30-player servers. Source: `games.roblox.com/v1/games?universeIds=10764627709`.
+- **[V] Size:** universe 10764627709, group "Huss Valley Official", created 31 Aug 2026. On 16 Oct: 95,644 playing, 132,591,554 visits, about 88% upvotes, 30-player servers (`games.roblox.com/v1/games?universeIds=10764627709`).
 - **[S] Peak:** RoWatcher reports a 174K concurrent-player peak in Oct 2026.
-- **[V] Passes:** VIP 799 R$ (+25% XP, tag, dagger) and 2x EXP 199 R$. Source: Roblox game-passes API.
-  - So the place's VIP at 499 with +25% XP mirrors this at a lower price.
+- **[V] Passes:** VIP 799 R$ (+25% XP), X2 EXP 199 R$, Premium Pass 799, and knife cosmetics (99–1,799). The place's VIP (499, +25% XP) mirrors it more cheaply.
 - **[V] Developer products:**
-  - **It sells permanent abilities for Robux,** 479–1,299 R$, e.g. Cloak (invisible 3 s) and Big Dagger (double reach). **Huss Valley sells power. Hatch or Snatch's "eggs only, never sold" is a deliberate difference, and it gives up Huss Valley's main Robux lever.**
-  - Coins and Gems packs.
-  - Paid crates at 399 R$ for 1, with odds shown in game.
-  - Spins and quest skips.
-- **[S] Gameplay:** one Chaser, Runners cross, the caught become Chasers, and the last survivor wins. Gems unlock abilities; Coins buy consumables. Source: Beebom's beginner guide.
-- **Not verified:** round length, crate odds and the XP curve.
+  - **It sells permanent abilities for Robux** (479–1,299 R$), e.g. Cloak and Big Dagger. **Huss Valley sells power. Hatch or Snatch's "never sold" rule is a deliberate difference, and it gives up Huss Valley's main Robux lever.**
+  - Coins and Gem packs, paid crates (399 R$, odds shown), spins and quest skips.
+- **[S] Gameplay:**
+  - One Chaser starts. The caught become Chasers, and a crossing teammate can revive with E.
+  - Gems unlock abilities.
+  - Hero or Chicken: see section 7. Sources: Beebom, games.gg, technerdiness and bloxgamer beginner guides, hussvalley.top.
+- **Not verified:** round length, crate odds, the XP curve, the Hero bonus.
 
 ### Roblox platform
-- **[V] Discovery signals:** the most important are play-through rate, first-play bounce, play days per user and playtime per user (capped at 60 min/day). Important but secondary: co-play days, qualified sessions, spend days and Robux spent per user. Only users who arrived organically from Home count. Spend matters, but it ranks below retention. Source: create.roblox.com/docs/discovery.
+- **[V] Discovery signals:**
+  - The most important are play-through rate, first-play bounce, play days per user and playtime per user.
+  - Spend matters, but it ranks below retention.
+  - Source: create.roblox.com/docs/discovery.
 - **[V] Paid random items:**
-  - Odds must be shown and total 100%.
-  - Items bought with purchasable currency, such as Gems, count.
-  - Anything that changes odds counts too.
+  - Odds must be shown.
+  - Items bought with purchasable currency (Gems) count.
   - Users with `ArePaidRandomItemsRestricted` need an alternative.
   - Source: create.roblox.com/docs/production/monetization/paid-random-items.
-  - The emote crate (Gems) is in scope. The place already checks PolicyService and shows odds (`EmoteService`).
-  - **Hatching with earned eggs is not paid random** as long as eggs and focus are never bought. Keep it that way.
+  - The emote crate is in scope, and the place already handles it. **Hatching earned eggs is not paid random as long as eggs and focus are never bought.**
 
 ### Psychology
-- **[V/S] Self-determination theory:** autonomy, competence and relatedness in games predict enjoyment and wanting to keep playing (Ryan, Rigby & Przybylski, 2006, *Motivation and Emotion* 30).
-  - Focusing gives autonomy. The cap rule protects competence ("I survived, so I earned more").
-- **[S] Loss aversion:** losses weigh more than equal gains (Kahneman & Tversky, 1979).
-  - Losing a carried Legendary will sting.
-  - **[H]** The sting is fine because the egg was never banked, and the cap lets the loser win back up to Legendary from an Epic.
-- **[V] Endowed progress:** artificial early progress speeds goal completion (Nunes & Drèze, 2006, JCR 32). This supports the first pet arriving on the first win.
-- **[S] Goal gradient:** people speed up near a reward (Kivetz, Urminsky & Zheng, 2006, JMR 43). This supports the incubator bar.
-- **[V] Loot boxes:** spending on them is linked to problem-gambling severity (Zendle & Cairns, 2018, PLOS ONE). This is correlational. **[H]** It's a reason to keep paid randomness to cosmetics (the emote crate) with odds shown, and never on eggs.
-- **[V] Pay to win:** players judge some purchases "pay to cheat", and payers and non-payers disagree about fairness (Freeman et al., 2022, CHI PLAY).
-- **[S] Near misses:** these raise the desire to play, but only when the player feels in control (Clark et al., 2009, *Neuron*).
-  - "You lost a Legendary 2 studs from safety" is that kind of moment.
-  - **[H]** It's healthy here because the outcome is skill-driven, not a slot machine.
+- **[V/S] Self-determination theory:** autonomy, competence and relatedness in games predict enjoyment and wanting to keep playing (Ryan, Rigby & Przybylski, 2006, *Motivation and Emotion* 30). Focusing and the Hero choice give autonomy. The cap protects competence. The Catcher's pick and the spotlight run add relatedness.
+- **[S] Loss aversion** (Kahneman & Tversky, 1979): losing a carried Legendary will sting. **[H]** That's acceptable because it was never banked and the loser can snatch back.
+- **[V] Endowed progress** (Nunes & Drèze, 2006, JCR 32): supports the first pet on the first win.
+- **[S] Goal gradient** (Kivetz, Urminsky & Zheng, 2006, JMR 43): supports the incubator bar.
+- **[V] Loot boxes** (Zendle & Cairns, 2018, PLOS ONE): spending is linked to problem-gambling severity. The link is correlational, but **[H]** it's a reason to keep paid randomness cosmetic, with odds shown.
+- **[V] Pay to win** (Freeman et al., 2022, CHI PLAY): players judge some purchases "pay to cheat".
+- **[S] Near misses** (Clark et al., 2009, *Neuron*): raise the urge to play again when the player feels in control. **[H]** A Hero caught a stud from safety is that kind of moment.
 
-## 9. Psychological audit (Part 5): short answers
-1. **Is winning worth the risk of losing?** Yes, if the loss can be partly won back the same match. That's the Snatch-back cap.
-2. **Losing a rare egg: tension or frustration?** Tension, as long as it happens to around 40% of Legendary carriers or fewer, and the Catcher who took it is shown. Stronger Catcher pressure makes it frustration.
-3. **How often should meaningful rewards land?** An egg in most matches (66%). A hatch about every 30–60 min early, slowing later. A rarity jump (first Epic or Legendary pet) at 6 h and 33 h.
-4. **Should the first pet come right after the first egg?** Yes, on the first won egg.
-5. **What motivates most?** **[H]** Visible rarity (the Legendary egg everyone chases) and social prestige beat efficiency. The measured stat effects are invisible, so lean on looks.
-6. **Is multi-egg incubation anticipation or grind?** Anticipation if it's a bar with a reveal, grind if it's a 26-item counter.
-7. **Does focusing add investment?** Yes, it's the autonomy lever. Keep it cheap (+25%).
-8. **Is the Egg Index worth it?** Not yet. The rarity chase plus nine families is enough content for launch.
-9. **Can Catchers enjoy the match without undermining survivors?** Yes. Snatching still pays, and every snatch also pays Gold and XP.
-10. **Will players queue again after a loss?** Likely. A 65-second cycle plus a near-miss line plus "your cap next match" gives a reason to run it back.
+## 10. Psychological audit (Part 5): short answers
+1. **Is winning worth the risk of losing?** Yes, if the loss can be partly won back in the same match. That's the snatch.
+2. **Losing a rare egg: tension or frustration?** Tension, if about half of Legendary carriers keep theirs (43–62% are stolen in the model) and the thief is shown. Playtest check 4 decides.
+3. **How often should rewards land?** An egg in about two of three matches. A hatch about hourly early on, a first Epic at about 6 h, a first Legendary at about 30 h.
+4. **First pet right after the first egg?** Yes.
+5. **What motivates most?** **[H]** Visible rarity and social moments (the Legendary egg, the Hero run) beat efficiency. The stat effects are invisible, so lean on looks.
+6. **Multi-egg incubation: anticipation or grind?** Anticipation as a bar with a reveal, grind as a 24-item counter.
+7. **Does focusing add investment?** Yes. It's the autonomy lever, so keep it cheap (+25%).
+8. **Egg Index?** Not yet.
+9. **Can Catchers enjoy it without undermining survivors?** Yes. The starting Catcher averages 4 snatches, picks the Hero, and gets Gold and XP for every snatch.
+10. **Will players queue again after a loss?** Likely, with a 62-second cycle and a fresh Hero pick every match.
 
-## 10. Gold and Gems (Part 6)
+## 11. Gold and Gems (Part 6)
 
 ### Gold (earn only)
-- Keep the formula. A typical player earns about 56 Gold per match and 2,540/h, including level-up pay.
-- **Multiply Gold prices by 3:**
+- Keep the formula: about 59 Gold per match, about 2,700/h including level-ups.
+- **Multiply prices by 3:**
   - consumables 120–180
   - emote 1,500
   - case 2,700
   - entrance 4,200
-  - weekly colourway 7,200
-- That puts the weekly item at about 3 h, roughly two sessions.
-- Keep rotating stock, because that's the real sink.
+  - weekly colourway 7,200 (about 2.7 h)
+- Keep rotating stock as the real sink.
 
 ### Gems (earned + Robux)
-- **Cut earned Gems to "1 for a win + 1 for the first snatch", max 2 per match.** That's about 31/h, down from 142/h.
-- Level-up Gems (10 every 5 levels) stay.
-- **What it costs at 31/h:**
-  - premium trail (150): about 5 h of play
-  - crate (250): about 8 h
-  - Gem pack 500 for 199 R$: about 16 h of play, which is now real value
-- **Sell (cosmetic only):** premium trails, ability colour packs, hatch ceremonies, pet showcase, egg-case skins, and the emote crate (odds shown).
-- **Don't sell:** eggs, focus, abilities, rarity.
+- **Earned Gems become "1 for a win + 1 for the first snatch", max 2 per match.** That's 0.67 per match, about 30/h, down from 151/h. Level-up Gems (10 every 5 levels) stay.
+- **At about 30/h:**
+  - premium trail (150): 5 h
+  - crate (250): 8 h
+  - a 500-Gem pack (199 R$) is worth about 17 h of play
+- **Sell (cosmetic only):** trails, ability colours, hatch ceremonies, pet showcase, egg-case skins, the emote crate (odds shown), and Hero-run effects such as a custom Hero entrance or trail.
+- **Never sell:** eggs, focus, abilities, rarity, or a better chance of being picked as Hero.
+- **No shop prompts before the first pet.**
+- **[H]** For discovery, a first hour that feels earned beats more Robux per user.
 
-### Purchases
-- **Recurring:** Gem packs, emote crate.
-- **Permanent:** passes, premium cosmetics.
-
-### Visibility and first session
-- **Cosmetics others see:** egg trails, cases, entrances and ability colours are all seen by other players. That's good.
-- **First session:** no shop prompts before the first pet.
-
-### Discovery
-- Spend counts, but play-through, bounce, play days and playtime come first.
-- **[H]** A tighter economy that makes the first hour feel earned is better for ranking than more Robux per user.
-
-## 11. The first 15 minutes (Part 5/14)
+## 12. The first 15 minutes (Part 5/14)
 1. **0:00** Spawn in the lobby. The next match starts in 15 s. No shop, no pet.
-2. **0:20** First match as a Runner. Bots fill the lobby if needed. The egg turns Rare after crossing 1, with a big pop. Caught in crossing 2 holding a Rare? The HUD says "SNATCH ONE BACK (up to EPIC)".
-3. **1:30** Results: "You snatched a RARE egg!" Then **First pet! Pick your ability:** Double Dash, Decoy or Scout. The pet appears beside you.
-4. **2–6 min** Matches 2–5 with the ability. The incubator bar fills ("Rare nest 4/26"). XP levels 2 → 4, each paying a little Gold.
-5. **about 8 min** First Gold purchase becomes affordable (a 120–180 Gold trail). Shown in the lobby, never mid-match.
-6. **about 12 min** The first Legendary egg is visible in someone's hands during a final crossing. Everyone chases it. That's the moment to sell the dream.
-7. **15 min** Next goal on screen: "Rare pet in about 45 min" plus today's weekly item.
+2. **0:20** First match. Bots fill to 30. The lineup forms, and the Catcher picks a Hero. Maybe it's you: Hero or Chicken?
+3. **0:40** Crossing 1. The egg pops to Rare.
+4. **Crossing 2:** caught holding a Rare? The HUD says "SNATCH ONE BACK (up to RARE)".
+5. **1:30** Results: "You snatched a RARE egg!" Then **First pet! Pick your ability:** Double Dash, Decoy or Scout.
+6. **2–6 min** Matches 2–5 with the ability. The incubator bar fills ("Rare nest 4/24"). XP levels 2 → 4.
+7. **About 8 min** First Gold purchase affordable. It's shown in the lobby, never mid-match.
+8. **About 12 min** A Legendary egg is visible in someone's hands during a final crossing, and everyone chases it.
+9. **15 min** Next goal on screen: "Rare pet in about 45 min" plus today's weekly item.
 
-## 12. Development priorities (Part 11)
+## 13. Development priorities (Part 11)
 1. **Now (code):**
-   - exactly 3 crossings (drop the clean-streak end rule)
-   - the 1-per-10 starting Catcher table
+   - exactly 3 crossings (drop the clean-streak rule)
+   - one starting Catcher
+   - bot fill to 30
    - `MAX_PLAYERS` 30
-   - the Snatch-back cap in `MatchLogic.capture` / `computeResults`
-   - remove the participation piece (no egg without survival or a snatch)
-   - Legendary tier with the tuned evolution table
-   - fix `TierConfig` naming so levels never claim a rarity they don't pay
+   - the strict Snatch-back cap in `MatchLogic.capture` / `computeResults`
+   - remove the participation piece
+   - Legendary tier with the tuned table
+   - fix `TierConfig` naming
 2. **Next:**
-   - first-pet-on-first-egg
-   - recipe bar UI and the new recipe sizes
+   - Catcher strength tuning (stab and lunge reach, lunge cooldown) against the survival target
+   - Hero or Chicken
+   - first pet on first egg
+   - recipe bar and sizes
    - Common fusion
-   - Gold price ×3, Gems formula
-3. **Later:** Egg Index, Cosmic, Ranked, Gem focusing (if ever), more families (waves 2–3).
+   - Gold ×3 and the new Gems formula
+3. **Later:** Egg Index, Cosmic, Ranked, more families (waves 2–3).
 
-## 13. Validation plan (Part 12)
-
-Four tests, each with a pass line:
+## 14. Validation plan (Part 12)
 
 | # | Test | Measure | Pass |
 |---|---|---|---|
-| 1 | Pressure check: 10+ real 20–30-player matches, telemetry on | Runner survival over 3 crossings | 35–55% (if not, change starting Catchers 2–4) |
-| 2 | Surrender check: same matches | Egg value per match, players caught in crossing 1 vs survivors | Caught-in-crossing-1 group earns less than half the survivors' value |
-| 3 | First session: 20+ new players | First pet in the first 3 matches; still playing at 10 min | 90% get a pet within 3 matches; 70% still playing at 10 min |
-| 4 | Loss feel: 5-question survey after matches where a Legendary was stolen | "Felt fair" (1–5) from victim and thief | Victim median ≥ 3; thief ≥ 4 |
+| 1 | Strength check: 10+ real 30-body matches (bots fill), telemetry on | Runner survival over 3 crossings | 40–55%. If not, adjust Catcher reach and lunge, not the Catcher count |
+| 2 | Surrender check: same matches | Egg value: players caught in crossings 1–2 vs survivors | Caught-early players earn less than 0.8× an honest Runner's value |
+| 3 | Hero check: same matches | Hero success rate; share who choose Hero | 35–60% success; 30–70% choose Hero. Tune protection in 0.25 s steps |
+| 4 | First session: 20+ new players | Pet within 3 matches; still playing at 10 min | 90%; 70% |
+| 5 | Loss feel: survey after a stolen Legendary | "Felt fair" (1–5), victim and thief | Victim median ≥ 3; thief ≥ 4 |
 
-A 20–40 person test finds broken things; it can't measure retention lifts. Soft launch handles that, as the GDD says.
+A 20–40 person test finds broken things; it can't measure retention lifts. Soft launch does that.
 
-## 14. What the GDD v0.4 says vs what supersedes it
+## 15. What the GDD v0.4 says vs what supersedes it
 | GDD v0.4 | Now |
 |---|---|
-| 8–16 players | About 30 (Hunter, 16 Oct) |
-| Every active match ≥ Common piece | Eggs are won only (the brief, and this audit) |
-| Rarity from level, L4 = Epic, Crowned deferred | Random evolution with Legendary at launch (the brief), using the tuned table |
+| 8–16 players | About 30, one starting Catcher, bots fill to 30 |
+| Every active match ≥ Common piece | Eggs are won only |
+| Rarity from level, L4 = Epic, Crowned deferred | Random evolution with Legendary at launch, tuned table |
 | Recipes 2/3/5 | Sized to hours (section 5) |
-| 135 s cycle | About 65 s measured in the place; rates doubled |
-| Gems 64/h | 142/h measured; cut to about 31/h |
-| Rarity stats 0% test | Small distance or duration bonus allowed; measured as invisible |
+| 135 s cycle | About 62–65 s in the place |
+| Gems 64/h | 151/h measured; cut to about 30/h |
+| Rarity stats 0% test | Small distance or duration bonus; measured as invisible |
+| (none) | Hero or Chicken at match start |
 
-## 15. If I were investing my own money
+## 16. If I were investing my own money
 
-> If I were investing my own money and development time, I'd build this version of Hatch or Snatch:
+> If I were investing my own money and development time, this is the version of Hatch or Snatch I would build:
 >
-> - **The match:** a 30-player, exactly-three-crossing chase. Three starting Catchers, tuned so about 45% of Runners survive.
-> - **The eggs:** every crossing visibly evolves your egg. Legendaries are born only in crossing 2, so every final crossing has a gold egg worth chasing.
-> - **The rule:** survive to keep your egg, or snatch one back, up to one rarity above what you lost.
+> - **The match:** a 30-body, exactly-three-crossing chase against one strong starting Catcher, tuned so about half the Runners survive.
+> - **The opener:** a Hero-or-Chicken pick that puts one player in the spotlight before every match.
+> - **The eggs:** each one visibly evolves every crossing. Legendaries are born in crossing 2, so most final crossings have a gold egg worth chasing.
+> - **The rule:** survive to keep your egg, or snatch one back, but never above the rarity you lost.
 > - **The first pet:** the first egg you win also gives you a chosen ability.
-> - **The incubator:** progress fills a bar, paced to hours rather than to a fixed egg count.
-> - **The shop:** Gold and Gems buy only looks, and Robux never buys an egg.
+> - **The incubator:** progress fills a bar, paced in hours.
+> - **The shop:** Gold and Gems buy only looks, and Robux never buys an egg or power.
 >
 > **The reasons:**
-> - The format has proven demand right now (Huss Valley).
-> - The Snatch-back cap is the only rule tested here that keeps surviving worth more than giving up while still paying Catchers.
-> - The pacing fixes turn a progression that would be finished in an afternoon into one that lasts weeks.
+> - The format has proven demand right now.
+> - The strict Snatch-back cap is the only rule tested that keeps surviving worth more than giving up while still paying the Catcher.
+> - Filling to 30 and tuning the Catcher's tools keeps every match in the range where both of those hold.
+> - The pacing fixes turn an afternoon's progression into weeks.
 > - Not selling power is what lets the egg chase mean something.
 
 ## Limits
-- The brains and the skill scale are invented, so skill hardly matters in the model. "Pressure" is a stand-in for real catching skill.
+- The model's player behaviour and skill scale are invented, so skill hardly matters in it. "Catcher strength" is a stand-in for real catching skill and the Catcher's tools.
 - Careers are resampled from simulated matches and treat matches as independent: no learning, no tilt, no parties.
-- Bots aren't modelled separately.
-- 45 matches/h is an assumption: the measured 65–70 s cycle plus about 15% lobby time.
+- Bots aren't modelled separately from players.
+- 45 matches/h is an assumption.
+- The Hero value maths combines simulated rates by hand. It isn't a full simulation of matches with a Hero run.
 - Nothing here measures fun.
