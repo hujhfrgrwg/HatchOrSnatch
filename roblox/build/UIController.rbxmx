@@ -954,7 +954,9 @@ end
 local function railToggles()
 	local rail = hudGroup("HUD", "Rail")
 	if not rail then return end
-	for name, t in pairs({ AFKToggle = { "EOS_AFK", "afk" }, VolunteerToggle = { "EOS_Volunteer", "hunt" } }) do
+	-- AFK is a pause/play pair: off shows the greyed pause moon ("go AFK"), on shows "afk_on", the play moon ("come back")
+	local afkOn = if iconId("afk_on") ~= "" then "afk_on" else "afk"
+	for name, t in pairs({ AFKToggle = { "EOS_AFK", "afk", afkOn }, VolunteerToggle = { "EOS_Volunteer", "hunt", "hunt" } }) do
 		local b = rail:FindFirstChild(name)
 		if b then
 			local on = player:GetAttribute(t[1]) == true
@@ -962,7 +964,7 @@ local function railToggles()
 			if a then a.Visible = on end
 			if o then o.Visible = not on end
 			-- full-colour icon when on, the greyed "<slug>_off" copy when off (kept as is until that id exists)
-			local slug = if on then t[2] else t[2] .. "_off"
+			local slug = if on then t[3] else t[2] .. "_off"
 			if iconId(slug) ~= "" then setIcon(b, "Icon", slug) end
 		end
 	end

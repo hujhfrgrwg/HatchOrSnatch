@@ -51,7 +51,8 @@ Reply with ONE image per message, then wait for my next icon.
 - `shop`: a shopping bag with a lightning bolt emblem
 - `stats`: a podium or bar chart with a trophy star
 - `settings`: a chunky steel cog
-- `afk`: a pause symbol over a small moon
+- `afk`: a pause symbol over a small moon (the AFK button when off: "go AFK"; the game greys it)
+- `afk_on`: the same moon with a play triangle instead of the pause bars (the AFK button when on: "come back")
 - `hunt`: a red targeting reticle with a crosshair
 
 **Roles and match**
@@ -95,6 +96,7 @@ Reply with ONE image per message, then wait for my next icon.
 
 ## Still needed (16 Oct)
 - `ab_scout`, `ab_brake`, `ab_spring`: new families; drawn stand-ins are in use until these arrive.
+- `afk_on`: the AFK button's on state (pause/play pair with `afk`).
 - `case` and `entrance`: regenerate; the first batch came back as a loot chest and a portal.
 
 `safe`, `catcher`, `runner`, `hunt` and `afk` arrived in Hunter's zip on 16 Oct. They're in `ui/icons_ai/` and `Assets/UI/icons/`, queued for upload.
