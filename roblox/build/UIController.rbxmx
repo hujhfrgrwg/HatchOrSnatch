@@ -2326,6 +2326,18 @@ function UIC.init()
 	overlay.Size = UDim2.fromScale(1, 1)
 	overlay.ZIndex = 40
 	overlay.Parent = root
+	-- each page's dim is a 1920x1080 design rect: stretch it past every edge so taller/wider screens are covered
+	for _, sc in pairs(S) do
+		local dim = sc:FindFirstChild("Dim")
+		local f = dim and dim:FindFirstChild("F")
+		if f and f:IsA("GuiObject") then
+			dim.Size = UDim2.fromScale(1, 1)
+			dim.Position = UDim2.fromScale(0, 0)
+			f.AnchorPoint = Vector2.new(0.5, 0.5)
+			f.Position = UDim2.fromScale(0.5, 0.5)
+			f.Size = UDim2.new(1, 600, 1, 600)
+		end
+	end
 	-- placeholders from the mock never reach players: hide demo-only rows until data arrives
 	local feed = hudGroup("MatchHUD", "Feed")
 	if feed then
