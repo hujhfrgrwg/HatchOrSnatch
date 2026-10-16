@@ -8,7 +8,7 @@ Built 16 Oct 2026 (HOS-PASS-001). Hunter asked for an XP system like Huss Valley
 - **Level-up pay:** each level pays 50 Gold, and every 5th level also pays 10 Gems (`LEVEL_REWARD`). The pay is in the match's own exact-once settlement (`ProfileLogic.applySettlement`, `ctx.economy`).
 - **Where it shows:**
   - the nameplate "Lv." is now the account level (it used to be the best egg level);
-  - a LEVEL plate with an XP bar sits under the goal pill (`HUD.TopLeft.LevelPlate`);
+  - a LEVEL plate with an XP bar tops the bottom-left Level / Gold / Gems column (`HUD.Wallet.LevelPlate`; the rail moved up 60 px to make room);
   - after each match, a toast shows the XP earned, naming each pass bonus;
   - a LEVEL UP! reveal (the Reward screen) opens once the results close.
 - **Profile:** `xp` holds total XP, and the player attribute `EOS_Level` holds the level.
