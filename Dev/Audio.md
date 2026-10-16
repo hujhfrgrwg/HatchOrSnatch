@@ -27,5 +27,16 @@ All game audio goes through one client module: `roblox/game/Sound.luau`, which r
 Every effect was checked in the place (16 Oct): all load, and each one's lead-in silence and loudness were measured with an AudioAnalyzer. The table in `Sound.luau` holds the trims (start offsets) and levelled volumes. For example, the reveal bells start 1.8 s in.
 
 ## Music
-- The system is wired: lobby and match playlists, crossfades, ducking under the hatch reveal and the results sting, and a Music toggle in Settings (`settings.music`, saved by the server).
-- **The playlists are empty.** Hunter rejected the first picks on 16 Oct (Paradise Falls, Tender Tropical House, Really Fast, Funky (A)). Add asset ids to `MUSIC.lobby` / `MUSIC.match` in `Sound.luau` once tracks are chosen.
+Direction (Hunter, 16 Oct): sporty and mindful of Huss Valley; the game is moving away from bright and kiddy. All tracks are APM Music.
+
+| State | When | Tracks |
+|---|---|---|
+| lobby | lobby, menus, after the results sting | Sports Hip Hop underscores: Want to be Great, Ain't No Competition, Go Hard or Go Home |
+| match | role reveal and crossings | Trailer Beats – Sports Hip Hop: Heat Check, Endgame Drive; Sport – Bass and Drums: In The Race |
+| tension | the last 12 s of a crossing, or 2 runners left (held until the crossing ends) | Trailer Beats – Sports Hip Hop: All Or Nothing |
+| results | first 9 s of the results screen | silence; the sting plays: win = Looking at the Winner (30 sec), lose = a final buzzer |
+
+- Each state keeps its own player. Leaving a state pauses its track and coming back resumes it, so a crossing → tension → crossing round trip continues the same song. Each new match starts the match playlist fresh.
+- Tracks are levelled with a measured per-track gain (`{ id, gain }` in `MUSIC`). The Music toggle in Settings fades the EOS_Music SoundGroup, and big moments (hatch reveal, results) duck it.
+- Rejected, don't reuse: Paradise Falls, Tender Tropical House, Really Fast, Funky (A). Also dropped as too kiddy: the slide whistle (lose) and the cute pop (toasts).
+- To swap a track, change its id in `MUSIC` in `roblox/game/Sound.luau`, measure its loudness and set the gain.
