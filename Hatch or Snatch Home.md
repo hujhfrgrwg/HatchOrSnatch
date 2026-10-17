@@ -21,6 +21,7 @@ Arena maps are built from code: `ServerStorage.EOSBuild.Maps` (`MapDefs` plus on
 - **Haunted Graveyard** (HOS-MAP-001, Matthew): halloween arena, preview only and not in rotation yet. See [[HOS-MAP-001 Haunted Graveyard map]].
 
 ## Lobby
+- **Floating-island underside** (HOS-MAP-002, Matthew): cliff columns under the Halloween lobby, sloping in to a point. See [[HOS-MAP-002 Lobby underside]].
 - **Leaderboards** (HOS-LB-001, Matthew): the four Halloween boards in `Workspace.Leaderboards` show live this-server stats and turn to face each player. See [[HOS-LB-001 Halloween leaderboards]].
 
 ## Setup
