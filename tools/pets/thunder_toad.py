@@ -17,7 +17,8 @@ K.reset()
 
 BLUE = K.material("Toad_Blue", K.hexrgb(30, 79, 216), rough=0.18)         # #1E4FD8 cobalt, glossy vinyl
 BLUE_DK = K.material("Toad_BlueDark", K.hexrgb(28, 35, 72), rough=0.4)      # #1C2348 navy (grin line, underside)
-CREAM = K.material("Toad_Cream", K.hexrgb(247, 231, 176), rough=0.7)        # #F7E7B0 soft
+CREAM = K.material("Toad_Cream", K.hexrgb(252, 238, 186), rough=0.7)
+GRIN = K.material("Toad_Grin", K.hexrgb(36, 50, 118), rough=0.5)        # #F7E7B0 soft
 YELLOW = K.material("Toad_Yellow", K.hexrgb(255, 217, 59), rough=0.22)      # #FFD93B lightning
 YELLOW_DK = K.material("Toad_YellowDark", K.hexrgb(232, 170, 20), rough=0.3)
 MOUTH = K.material("Toad_Mouth", K.hexrgb(120, 30, 40), rough=0.6)
@@ -26,8 +27,8 @@ IRIS = K.material("Eye_Iris", K.hexrgb(255, 210, 30), rough=0.05)
 BLACK = K.material("Eye_Black", K.hexrgb(14, 14, 22), rough=0.05)
 WHITE = K.material("Eye_White", K.hexrgb(255, 255, 255), rough=0.05)
 # texture standard (HOS-PET-014): painted detail + PBR maps; the lightning markings, crest, warts and toe pads glow
-for _m, _style in ((BLUE, "skin"), (BLUE_DK, "dark"), (CREAM, "skin"), (YELLOW, "skin"), (YELLOW_DK, "skin")):
-    R.paint_material(_m, _style, strength=0.7)
+for _m, _style, _k in ((BLUE, "skin", 0.7), (BLUE_DK, "dark", 0.7), (CREAM, "skin", 0.25), (YELLOW, "skin", 0.5), (YELLOW_DK, "skin", 0.5)):
+    R.paint_material(_m, _style, strength=_k)
 
 # ===== skeleton (Blender: front -Y, up +Z) =====
 bones = [
@@ -58,7 +59,7 @@ def on_ellipsoid(c, r, d):
     return p, n
 
 
-def decal_bolt(builder, mat, p, n, size, spin, bone, thick=0.07, sink=0.045):
+def decal_bolt(builder, mat, p, n, size, spin, bone, thick=0.07, sink=0.045, both=False):
     """A bold flat lightning-bolt marking lying on the skin at p (normal n), long axis turned by `spin` degrees."""
     up = Vector((0, 0, 1)) if abs(n.z) < 0.9 else Vector((0, 1, 0))
     v = (up - n * up.dot(n)).normalized()
@@ -74,7 +75,8 @@ def decal_bolt(builder, mat, p, n, size, spin, bone, thick=0.07, sink=0.045):
             f.normal_flip()
         ext = bmesh.ops.extrude_face_region(bm, geom=[f])
         bmesh.ops.translate(bm, verts=[e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)], vec=n * thick)
-        bmesh.ops.delete(bm, geom=[f], context="FACES")
+        if not both:  # a marking: its base is buried in the skin
+            bmesh.ops.delete(bm, geom=[f], context="FACES")
         bmesh.ops.triangulate(bm, faces=bm.faces[:], ngon_method="EAR_CLIP")
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
     builder.add(g, mat, _M.Identity(4), bone)
@@ -108,7 +110,7 @@ b.sphere(CREAM, (0, -0.35, 0.44), (0.8, 0.74, 0.38), segs=10, rings=5, bone="Bod
 b.sphere(BLUE, HEAD_C, HEAD_R, segs=12, rings=8, bone="Head")
 for side in (-1, 1):
     b.sphere(BLUE, (side * 0.44, -0.72, 1.42), (0.33, 0.32, 0.31), segs=6, rings=5, bone="Head")  # eye bumps on top of the head
-    b.sphere(BLUE, (side * 0.43, -0.98, 1.66), (0.33, 0.14, 0.11), segs=8, rings=4, rot=(16, side * -22, 0), bone="Head")  # heavy brow, low toward the centre
+    b.sphere(BLUE, (side * 0.43, -0.95, 1.67), (0.35, 0.17, 0.12), segs=8, rings=4, rot=(18, side * -20, 0), bone="Head")  # heavy brow blended into the eye bump, low toward the centre
 # the cream throat sac, its top tucked under the grin line (pumps on its own bone)
 b.sphere(CREAM, (0, -0.95, 0.6), (0.68, 0.42, 0.38), segs=10, rings=6, bone="Throat")
 # a wide friendly grin across the face, curving up at the corners
@@ -119,15 +121,15 @@ for i in range(9):
     dz = (z - HEAD_C[2]) / HEAD_R[2]
     k = max(0.0, 1 - (x / HEAD_R[0]) ** 2 - dz ** 2)
     grin.append((x, HEAD_C[1] - HEAD_R[1] * math.sqrt(k) + 0.012, z))
-tube(b, BLUE_DK, grin, 0.024, "Head", segs=3)
+tube(b, GRIN, grin, 0.016, "Head", segs=3)
 # the open mouth (hidden inside the head at rest; slides out on the croak)
 b.sphere(MOUTH, (0, -0.95, 0.98), (0.42, 0.08, 0.13), segs=6, rings=3, bone="Mouth")
 b.sphere(TONGUE, (0, -0.99, 0.93), (0.24, 0.06, 0.06), segs=5, rings=2, bone="Mouth")
 # spiky yellow crest behind the head
-for i, (x, y) in enumerate(((0, -0.3), (-0.22, -0.2), (0.22, -0.2))):
-    b.cone(YELLOW, (x, y, 1.5 - 0.05 * i), 0.14, 0.0, 0.5 - 0.07 * i, segs=4, rot=(-30, x * 80, 0), bone="Head")
+# one big yellow lightning-shaped crest standing up behind the head (as on the sheet)
 # bold lightning bolts: a big one down the back, one on each flank, thigh and foreleg
 p, n = on_ellipsoid(BODY_C, BODY_R, (0, 0.8, 0.62));        decal_bolt(b, YELLOW, p, n, 0.95, 0, "Body")
+decal_bolt(b, YELLOW, Vector((0, -0.3, 1.78)), Vector((1, 0, 0)), 0.78, -12, "Head", thick=0.12, sink=0.06, both=True)  # the crest
 for side, sx in (("L", -1), ("R", 1)):
     p, n = on_ellipsoid(BODY_C, BODY_R, (sx, 0.1, 0.3)); decal_bolt(b, YELLOW, p, n, 0.58, sx * 10, "Body")
     p, n = on_ellipsoid((sx * 0.84, 0.38, 0.38), (0.4, 0.52, 0.36), (sx, 0.05, 0.4)); decal_bolt(b, YELLOW, p, n, 0.36, 0, f"LegU.{side}", sink=0.06)
@@ -145,7 +147,7 @@ for side, sx in (("L", -1), ("R", 1)):
     b.limb(BLUE, (sx * 0.86, 0.3, 0.26), (sx * 0.94, -0.02, 0.07), 0.18, 0.16, segs=8, bone=f"LegL.{side}")
     for foot, bn, n_pads in (((sx * 0.8, -0.98, 0.06), f"ArmL.{side}", 3), ((sx * 0.95, -0.1, 0.06), f"LegL.{side}", 2)):
         for k in ((-1, 0, 1) if n_pads == 3 else (-0.55, 0.55)):
-            b.sphere(YELLOW, (foot[0] + k * 0.13, foot[1] - 0.08 + abs(k) * 0.05, foot[2]), (0.095, 0.1, 0.075), segs=6, rings=3, bone=bn)
+            b.sphere(YELLOW, (foot[0] + k * 0.13, foot[1] - 0.08 + abs(k) * 0.05, foot[2]), (0.095, 0.1, 0.075), segs=8, rings=3, bone=bn)
 body = b.finish_rigged(arm, smooth_angle=62)
 
 # ===== face: big round glossy yellow eyes; the round dark pupils and the large + small highlights are PAINTED
@@ -197,7 +199,7 @@ def paint_eye(mat):
 paint_eye(IRIS)
 f = R.RigBuilder(PREFIX + "Face")
 for side in (-1, 1):
-    f.sphere(IRIS, (side * EYE_X, EYE_Y, EYE_Z), (EYE_S, EYE_S * 0.62, EYE_S), segs=12, rings=8, bone="Head")
+    f.sphere(IRIS, (side * EYE_X, EYE_Y, EYE_Z), (EYE_S, EYE_S * 0.62, EYE_S), segs=12, rings=7, bone="Head")
 face = f.finish_rigged(arm, smooth_angle=89)
 
 # ===== L2: a taller crest spike =====
@@ -207,7 +209,7 @@ l2_ob = l2.finish_rigged(arm)
 
 # ===== L3: crackling gold spikes down the back and a crest gem (plus a lightning aura in Studio) =====
 l3 = R.RigBuilder(PREFIX + "L3")
-for y in (0.05, 0.3):
+for y in (0.18,):
     l3.cone(YELLOW_DK, (0, y, 1.3 - 0.14 * y), 0.09, 0.0, 0.3, segs=4, rot=(25, 0, 0), bone="Body")
 l3.gem(YELLOW, (0, -0.5, 2.0), 0.06, bone="Head")
 l3_ob = l3.finish_rigged(arm)

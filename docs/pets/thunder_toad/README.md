@@ -77,9 +77,13 @@ Built to Hunter's model sheet, `docs/pets/concepts/thunder_toad_model_sheet.png`
 - `thunder_toad_studio_three_quarter.jpg` and `thunder_toad_studio_closeup.jpg`.
 - `thunder_toad_preview.mp4` (re-recorded) and the `thunder_toad_ingame_*.jpg` stills.
 
+**Touch-up (v8, Model 72829019761560; L1 1,975 / L3 1,995 tris)**
+- One big yellow lightning crest, solid from both sides.
+- Warmer cream, softer and thinner navy grin, and brows blended into the eye bumps.
+- Rounder toe-pad domes.
+
 **Remaining gaps against the sheet**
-- The sheet's crest is one large lightning-shaped spike; ours is three smaller spikes.
-- The cream reads slightly grey in Studio's daylight.
+- The cream still reads slightly grey where it's in shade in Studio's daylight.
 
 ## Not done / next
 - **No live playtest:** FACEOFF! had its own test running, and the two places share server.rbxl, so starting one would clash. The clip is staged in edit mode.
