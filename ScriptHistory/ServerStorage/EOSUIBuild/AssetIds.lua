@@ -13,6 +13,9 @@ return {
 		["ab_spring"] = "rbxassetid://77387762457759",
 		["ab_tackle"] = "rbxassetid://116019911259911",
 		["ab_wall"] = "rbxassetid://89321286875768",
+		-- HOS-PET-002 (17 Oct): added by hand (this pack's upload ledger isn't in the repo); ChatGPT icons, Open Cloud upload
+		["ab_rift"] = "rbxassetid://95710596996212",
+		["ab_tempest"] = "rbxassetid://108468538791427",
 		["abilityfx"] = "rbxassetid://123506725390433",
 		["abilityfx_gold"] = "rbxassetid://93570700141538",
 		["afk"] = "rbxassetid://75947854058692",

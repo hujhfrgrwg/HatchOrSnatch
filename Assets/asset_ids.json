@@ -103,5 +103,11 @@
  },
  "UI/web/icons/emote_slot.png": {
   "assetId": "72554873269559"
+ },
+ "Assets/Icons/ab_rift_512.png": {
+  "assetId": "70655053025084"
+ },
+ "Assets/Icons/ab_tempest_512.png": {
+  "assetId": "128962896976411"
  }
 }

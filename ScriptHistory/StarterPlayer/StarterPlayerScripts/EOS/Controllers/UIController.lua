@@ -75,6 +75,10 @@ local FAMILY = { -- the design's families (HOS-ABIL-001); EconomyConfig / Abilit
 	Shield = { title = "Shield", icon = "ab_shield", blurb = "A bubble that blocks one hit", run = "blocks one tag", catch = "to be decided", wave = 3 },
 	Spring = { title = "Spring", icon = "ab_spring", blurb = "Leap forward", run = "leap ahead", catch = "leap onto a Runner", wave = 3 },
 	PetTackle = { title = "Pet Tackle", icon = "ab_tackle", blurb = "Your pet bowls someone over", run = "knock a Catcher over", catch = "to be decided", wave = 3 },
+	-- HOS-PET-002: the new archetypes' icons (no incubator tiles yet; the ability card and touch button use them)
+	Guardian = { title = "Guardian", icon = "ab_shield", blurb = "Block one tag", wave = 3 },
+	Tempest = { title = "Tempest", icon = "ab_tempest", blurb = "A storm that pushes back", wave = 3 },
+	Rift = { title = "Rift", icon = "ab_rift", blurb = "Hop through a portal", wave = 3 },
 }
 -- showroom pets (Workspace.FWP_PetShowroom / FWPPetData.Pools) that skin each family, common -> epic
 local PET_ART = {
