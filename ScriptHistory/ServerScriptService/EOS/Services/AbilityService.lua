@@ -132,6 +132,7 @@ local WORDS = {
 	LOBBY = "Abilities work in matches",
 	STARTER = "The starting Catcher has no pet ability",
 	NOT_BUILT = "This ability isn't ready yet",
+	NO_TARGET = "No Runner in range in front of you",
 	-- Shared.validPosition refusals
 	OFF_MAP = "Can't go there", SAFE_ZONE = "Can't go there", ZONE_LOCKED = "Can't go there",
 	BLOCKED = "Can't go there", NO_ROOM = "Can't go there", NO_GROUND = "Can't go there",

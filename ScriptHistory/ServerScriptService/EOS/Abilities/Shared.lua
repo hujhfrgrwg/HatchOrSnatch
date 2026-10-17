@@ -152,9 +152,11 @@ end
 
 -- ===== "blocks one tag" =====
 -- A charge on a body: the next tag that would land on it is stopped instead (and uses the charge).
+-- After the last charge goes, `immunity` seconds of grace stop any tag too (HOS-PET-007: a Catcher in
+-- contact retries every tick, so without it the next touch would tag you a moment after the block).
 -- Keyed by actor (a Player or an NPC bot). The body carries EOS_TagBlock (charges left) for clients.
 
-type Block = { charges: number, untilT: number, archetype: string }
+type Block = { charges: number, untilT: number, archetype: string, immunity: number, graceUntil: number }
 local blocks: { [any]: Block } = {}
 
 local function show(actor: any, n: number?)
@@ -164,12 +166,18 @@ local function show(actor: any, n: number?)
 	end
 end
 
-function Shared.grantTagBlock(actor: any, charges: number, seconds: number, archetype: string)
-	local b = { charges = math.max(1, math.floor(charges)), untilT = os.clock() + seconds, archetype = archetype }
+function Shared.grantTagBlock(actor: any, charges: number, seconds: number, archetype: string, immunity: number?)
+	local b = {
+		charges = math.max(1, math.floor(charges)),
+		untilT = os.clock() + seconds,
+		archetype = archetype,
+		immunity = immunity or 0,
+		graceUntil = 0,
+	}
 	blocks[actor] = b
 	show(actor, b.charges)
 	task.delay(seconds, function()
-		if blocks[actor] == b then
+		if blocks[actor] == b and b.charges > 0 then
 			blocks[actor] = nil
 			show(actor, nil)
 		end
@@ -178,19 +186,31 @@ end
 
 function Shared.hasTagBlock(actor: any): boolean
 	local b = blocks[actor]
-	return b ~= nil and b.charges > 0 and os.clock() < b.untilT
+	if not b then
+		return false
+	end
+	local now = os.clock()
+	return (b.charges > 0 and now < b.untilT) or now < b.graceUntil
 end
 
--- true = this tag is blocked (one charge used)
+-- true = this tag is blocked (a charge used, or still inside the grace after the last one)
 function Shared.consumeTagBlock(victim: any, hunter: any): boolean
 	if not Shared.hasTagBlock(victim) then
 		return false
 	end
 	local b = blocks[victim] :: Block
+	if b.charges <= 0 then
+		return true -- grace after the block: quietly stopped
+	end
 	b.charges -= 1
 	if b.charges <= 0 then
-		blocks[victim] = nil
 		show(victim, nil)
+		b.graceUntil = os.clock() + b.immunity
+		task.delay(b.immunity, function()
+			if blocks[victim] == b then
+				blocks[victim] = nil
+			end
+		end)
 	else
 		show(victim, b.charges)
 	end
@@ -206,6 +226,108 @@ function Shared.clearTagBlock(actor: any)
 		blocks[actor] = nil
 		show(actor, nil)
 	end
+end
+
+-- ===== match helpers (HOS-PET-007) =====
+
+-- every match actor (player or NPC bot) in `role`, with a body, not safe this crossing and not in a
+-- safe zone. Invisible bodies are left out unless includeHidden.
+function Shared.actorsInRole(role: string, includeHidden: boolean?): { any }
+	local MatchService = require(ServerScriptService.EOS.Services.MatchService)
+	local c = MatchService.current()
+	local out = {}
+	if not c then
+		return out
+	end
+	for uid, actor in pairs(c.roster) do
+		local p = c.logic:get(uid)
+		local char = actor.Character
+		local r = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if p and p.role == role and not p.disconnected and not p.isSafeThisWave and r and not inSafeZone(r.Position)
+			and (includeHidden or char:GetAttribute("EOS_Invisible") ~= true) then
+			table.insert(out, actor)
+		end
+	end
+	return out
+end
+
+-- slide a body to `to` (root position) over `seconds` in a few steps, keeping its facing. Players' bodies
+-- are moved by the server (it wins over their client for the step); call validPosition first.
+function Shared.slideTo(actor: any, to: Vector3, seconds: number)
+	local char = actor and actor.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then
+		return
+	end
+	local from = root.Position
+	local steps = math.max(1, math.ceil(seconds / 0.04))
+	task.spawn(function()
+		for i = 1, steps do
+			if not root.Parent then
+				return
+			end
+			local p = from:Lerp(to, i / steps)
+			local rot = root.CFrame - root.Position
+			char:PivotTo(CFrame.new(p) * rot)
+			root.AssemblyLinearVelocity = Vector3.zero
+			task.wait(seconds / steps)
+		end
+	end)
+end
+
+-- a placeholder telegraph everyone sees: a neon bar between two bodies for `seconds` (prototype look)
+function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, width: number?)
+	local p = Instance.new("Part")
+	p.Name = "EOS_AbilityBeam"
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Material = Enum.Material.Neon
+	p.Color = color
+	p.Transparency = 0.25
+	p.Parent = Shared.runtimeFolder("AbilityFx")
+	local w = width or 0.35
+	local t0 = os.clock()
+	local conn
+	conn = game:GetService("RunService").Heartbeat:Connect(function()
+		if os.clock() - t0 > seconds or not a.Parent or not b.Parent then
+			conn:Disconnect()
+			p:Destroy()
+			return
+		end
+		local d = (b.Position - a.Position)
+		p.Size = Vector3.new(w, w, math.max(0.1, d.Magnitude))
+		p.CFrame = CFrame.lookAt(a.Position + d / 2, b.Position)
+	end)
+	return p
+end
+
+-- a placeholder flat ring on the ground everyone sees (prototype look); returns the part
+function Shared.ring(at: Vector3, radius: number, color: Color3, seconds: number, transparency: number?): Part
+	local p = Instance.new("Part")
+	p.Name = "EOS_AbilityRing"
+	p.Shape = Enum.PartType.Cylinder
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Material = Enum.Material.Neon
+	p.Color = color
+	p.Transparency = transparency or 0.35
+	p.Size = Vector3.new(0.2, radius * 2, radius * 2)
+	p.CFrame = CFrame.new(at) * CFrame.Angles(0, 0, math.rad(90))
+	p.Parent = Shared.runtimeFolder("AbilityFx")
+	if seconds > 0 then
+		task.delay(seconds, function()
+			p:Destroy()
+		end)
+	end
+	return p
+end
+
+-- the ground point under a position (or the position itself if there's none)
+function Shared.groundBelow(pos: Vector3): Vector3
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = bodies()
+	params.RespectCanCollide = true
+	local hit = workspace:Raycast(pos + Vector3.new(0, 2, 0), Vector3.new(0, -20, 0), params)
+	return if hit then hit.Position else pos
 end
 
 return Shared

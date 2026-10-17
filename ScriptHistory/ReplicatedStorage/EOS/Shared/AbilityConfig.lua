@@ -85,17 +85,20 @@ AbilityConfig.ARCHETYPES = {
 		title = "Guardian",
 		color = Color3.fromRGB(120, 220, 255),
 		Runner = {
-			built = false,
+			built = true, -- HOS-PET-007 prototype
 			name = "SHIELD",
 			icon = "ab_shield",
 			text = "a shield that blocks one tag",
 			cooldown = 20,
 			duration = 3,
 			windup = 0,
+			charges = 1, -- tags it blocks
+			immunity = 0.5, -- seconds after the block when no tag lands (a touching Catcher retries every tick)
 		},
 		-- 17 Oct (Hunter): tether moved here from Invisibility; Long Reach was dropped
 		Catcher = {
-			built = false,
+			built = true, -- HOS-PET-007 prototype
+			cone = 60, -- degrees either side of where you face that count as "in front"
 			name = "TETHER",
 			icon = "ab_tether",
 			text = "pull the nearest Runner in front towards you",
