@@ -19,8 +19,8 @@ local Net = require(Shared:WaitForChild("Net"))
 
 local MapService = {}
 
-local ORDER = { "Farm", "SunnyCove", "FrostyPass", "Stadium" } -- rotation order
-local TITLES = { Farm = "Hatchery Farm", SunnyCove = "Sunny Cove", FrostyPass = "Frosty Pass", Stadium = "Egg Bowl Stadium" }
+local ORDER = { "Farm", "SunnyCove", "FrostyPass", "Stadium", "Graveyard" } -- rotation order
+local TITLES = { Farm = "Hatchery Farm", SunnyCove = "Sunny Cove", FrostyPass = "Frosty Pass", Stadium = "Egg Bowl Stadium", Graveyard = "Haunted Graveyard" }
 
 local state = Net.state()
 local current = "Farm"

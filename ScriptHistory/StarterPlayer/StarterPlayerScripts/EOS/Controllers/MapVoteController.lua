@@ -18,7 +18,7 @@ local UIKit: any = nil -- the roblox-ui-maker kit shipped in the built MapVoteUI
 local MapVoteController = {}
 
 local player = Players.LocalPlayer
-local TAGS = { SunnyCove = "SAND + PALMS", FrostyPass = "ICE + SNOW", Farm = "THE CLASSIC", Stadium = "BIG CROWD" }
+local TAGS = { SunnyCove = "SAND + PALMS", FrostyPass = "ICE + SNOW", Farm = "THE CLASSIC", Stadium = "BIG CROWD", Graveyard = "GRAVES + PUMPKINS" }
 local PANEL_Y = 200 -- design px from the top: under the round header
 local PANEL_W = 960 -- Hunter's reference 03: 50% x 44% of 1080p
 MapVoteController.PANEL_H = 473
@@ -147,9 +147,8 @@ local function fillTile(p: GuiObject, idx: number, side: string)
 	if key and art and art:IsA("ImageLabel") and ids and ids:IsA("ModuleScript") then
 		local icons = (require(ids) :: any).icons
 		local img = icons and icons["map_" .. string.lower(key)]
-		if img then
-			art.Image = img
-		end
+		-- a map without a photo yet shows an empty slot, not the photo the tile showed last
+		art.Image = img or ""
 	end
 	-- voter heads, newest first (the server sends up to 8 ids)
 	local ok, voters = pcall(HttpService.JSONDecode, HttpService, (ReplicatedStorage:GetAttribute("MapVoteVoters" .. side) :: string?) or "[]")

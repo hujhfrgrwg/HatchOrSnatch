@@ -381,10 +381,18 @@ return function(world: Instance, def)
 		local cap = zm.BackWallCap
 		cap.Size = Vector3.new(cap.Size.X, 0.3, cap.Size.Z)
 		cap.Position = Vector3.new(cap.Position.X, 0.75, cap.Position.Z)
-		for _, sz in { -1, 1 } do
-			lanternPost(lamps, Vector3.new(X + sx * FX, 0.19, Z + sz * (HZ + 1.5)), Vector3.new(sx, 0, 0))
-		end
 	end
+	-- zone-edge lantern posts and the invisible walls as Matthew placed them by hand (17 Oct): posts on the
+	-- apron at each end of the zone edges, lanterns hanging along the edge toward the field; walls pulled in
+	-- off the fence
+	for _, lp in { { -96.375, -72.625, 1 }, { -96.6, 72.625, -1 }, { 96.375, -72.625, 1 }, { 96.25, 72.625, -1 } } do
+		lanternPost(lamps, Vector3.new(X + lp[1], 0.19, Z + lp[2]), Vector3.new(0, 0, lp[3]))
+	end
+	local walls = arena.Perimeter.ArenaWalls
+	walls.N.Position = Vector3.new(walls.N.Position.X, walls.N.Position.Y, Z - 73.65)
+	walls.S.Position = Vector3.new(walls.S.Position.X, walls.S.Position.Y, Z + 73.85)
+	walls.W.Position = Vector3.new(X - 125.15, walls.W.Position.Y, walls.W.Position.Z)
+	walls.E.Position = Vector3.new(X + 125.15, walls.E.Position.Y, walls.E.Position.Z)
 
 	-- ===== fence: every 4th post becomes a stone pillar with a candle on top and candles at its foot =====
 	for _, f in arena.Perimeter:GetChildren() do

@@ -105,6 +105,19 @@ return function()
 	for _, key in ipairs({ "SunnyCove", "FrostyPass", "Stadium" }) do
 		require(script.Parent.Maps["Build" .. key])(maps, MapDefs[key])
 	end
+	-- HOS-MAP-001: the Graveyard is hand-tuned in its preview (workspace._MapPreview.Preview_Graveyard), so the
+	-- game copy is that preview moved back to the map centre; BuildGraveyard is the fallback without one
+	local preview = workspace:FindFirstChild("_MapPreview") and workspace._MapPreview:FindFirstChild("Preview_Graveyard")
+	if preview then
+		local copy = preview:Clone()
+		local field = copy.Ground.Field.Position
+		local c = MapDefs.Graveyard.CENTER
+		copy:PivotTo(copy:GetPivot() + Vector3.new(c.X - field.X, 0, c.Z - field.Z))
+		copy.Name = "Arena_Graveyard"
+		copy.Parent = maps
+	else
+		require(script.Parent.Maps.BuildGraveyard)(maps, MapDefs.Graveyard)
+	end
 	maps.Parent = ServerStorage
 	world.Parent = workspace
 	lighting()

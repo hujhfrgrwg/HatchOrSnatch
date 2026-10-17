@@ -6,7 +6,7 @@ requested_by: Matthew
 ---
 # HOS-MAP-001: Haunted Graveyard arena
 
-A halloween sharks-and-minnows arena built from Matthew's approved concept (`docs/concepts/HOS-MAP-001_halloween_arena_concept.webp`). The build is a preview next to the other maps. It isn't in the match rotation yet.
+A halloween sharks-and-minnows arena built from Matthew's approved concept (`docs/concepts/HOS-MAP-001_halloween_arena_concept.webp`). The preview sits next to the other maps, and since 17 Oct the map is in the game's rotation and map vote (see **In the game** below).
 
 ![Overview from the concept's camera angle](HOS-MAP-001/overview_concept_angle.jpg)
 
@@ -34,7 +34,7 @@ Not built, by request: trees, the sky, moon, castle and clouds, other off-island
 
 ## Gameplay checks (done in Studio)
 - Downward raycasts across both zones, including right on the glow strips, hit `Pad` with `Side` = A or B. Raycasts on the field hit `Field`.
-- The field patches and glow strips have `CanQuery`, `CanCollide` and `CanTouch` off, so they can't block zone detection.
+- The glow strips have `CanQuery`, `CanCollide` and `CanTouch` off, so they can't block zone detection.
 - There are 2 `EOS_Gate` gates, 2 `EOS_CatcherWall` walls and 4 invisible `ArenaWalls`. These are the same `ArenaFrame` pieces every map uses.
 - The map attributes (`Map`, `MapTitle`, `FIELD_HALF_X`, `ZONE_DEPTH`, `HALF_Z`, `WALL_HEIGHT`, `CENTER`, `LobbyTop`/`LobbyBase`) are set like the other maps.
 
@@ -58,8 +58,26 @@ Not built, by request: trees, the sky, moon, castle and clouds, other off-island
 ![Shrine close-up](HOS-MAP-001/shrine_closeup.jpg)
 ![Zone B at player height](HOS-MAP-001/lane_B_player_height.jpg)
 
+## In the game (17 Oct, Matthew: "make sure the game pulls from the one in workspace")
+**Matthew's hand edits in the preview:**
+- The 4 zone-edge lantern posts were nudged about 1 stud onto the apron and turned so their lanterns hang along the zone edge.
+- The 4 invisible `ArenaWalls` were pulled in off the fence: N/S to z ∓73.65 / +73.85 and E/W to x ±125.15 from the map centre.
+
+What was done:
+- **Game copy:** `ServerStorage.EOS_Maps.Arena_Graveyard` is a copy of `Workspace._MapPreview.Preview_Graveyard` moved back to the map centre (23.25, 0, −390). The game only ever loads maps from `EOS_Maps`.
+- **Code matches the hand edits:** `BuildGraveyard` now places those lantern posts and walls the same way. A part-by-part diff of a fresh code build against the preview matched all 1,825 parts, worst difference 0.0004 studs. Rebuilding from code won't undo the edits.
+- **`BuildAll`** now makes `Arena_Graveyard` by copying the workspace preview (with `BuildGraveyard` as the fallback if the preview is gone). Before this, running `BuildAll` would have wiped the graveyard out of `EOS_Maps`. Later hand edits to the preview reach the game the next time `BuildAll` runs, or when the same copy is repeated by hand.
+- **`MapService`:** `"Graveyard"` added to `ORDER` and `TITLES`. Without it the map would never be picked, even when stored.
+- **`MapVoteController`:** tag "GRAVES + PUMPKINS". A map with no photo now shows an empty photo slot instead of the photo the tile showed last.
+- **Playtest check (server):**
+  - `MapService.available()` lists Graveyard.
+  - `MapService.set("Graveyard")` swaps it in, and Layout gets field half-length 96 and centre (23.25, 0, −390).
+  - Zone rays hit Pads A and B, and the lobby top takes the map colour.
+  - Swapping back to Sunny Cove works. No map errors in the log.
+- Backups of all four scripts are in `docs/backups/HOS-MAP-001_2026-10-17/`.
+
 ## Not done yet / for Matthew or Hunter
-- **Rotation:** the map isn't in the game yet. To add it, `BuildAll` needs `"Graveyard"` in its maps list (it then builds `Arena_Graveyard` into `ServerStorage.EOS_Maps`, and `MapService` and `MapVoteService` pick it up). That's a one-line change in a shared build script, so it's left for the owner to decide.
+- **Map-vote photo:** `docs/HOS-MAP-001/map_graveyard_thumbnail.png` (858 × 452, the vote tile's 429:226 shape) is ready to upload with `tools/upload/upload_assets.py`. Then add `["map_graveyard"] = "rbxassetid://<id>"` to the `icons` table in the `MapVoteUI` AssetIds modules (`MapVoteController.Templates.AssetIds` is the one the controller reads). Until then the Graveyard tile shows an empty photo slot.
 - **Out-of-bounds ground:** it's stone paving to match the concept. For grass instead, change `G.pave` and `G.pave2` in `BuildGraveyard`.
 - **PetLab overlap:** `EOS_PetLab` floats about 18 studs above the island's south-east corner. Fine for a preview, but move one of them if it gets in the way.
 - **ScriptHistory:** this ticket snapshotted `BuildGraveyard` and `MapDefs`. The full-place snapshot was taken afterwards under HOS-LB-001.
