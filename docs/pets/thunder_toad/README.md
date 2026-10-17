@@ -50,6 +50,36 @@ Built to Hunter's model sheet, `docs/pets/concepts/thunder_toad_model_sheet.png`
 - **Opponent readability:** the ball keeps its size, speed and yellow floor scorch, and `Slowed` stays the default.
 - **Export:** `ThunderToad_InPlace.rbxm` holds the template and all Toad effect templates.
 
+
+## v2 pass (17 Oct, after review against the sheet)
+
+**Model** (L1 1,937 / L2 1,943 / L3 1,963 tris)
+- **Finish:** a glossy, rounded vinyl-toy look. Smooth shading, higher-segment head, body, limbs and eyes; blue roughness 0.18, softer cream.
+- **Eyes:** round and large, with a big round dark pupil, one large and one small white highlight, and a warm rim. These are painted into the eye texture as true circles, so no hex shapes and no orange ring. The eyes sit forward on top of the head under a heavy brow angled down toward the centre.
+- **Mouth:** a wide grin line curving up at the corners, with the cream throat below it. No nostril dots.
+- **Markings** (all glow through the emissive mask): one big bolt down the back, a bolt on each flank, thigh and foreleg, round warts, and the crest.
+- **Limbs:** chunky and rounded, with round yellow toe-pad domes.
+- **Asset ids:** Model 130646365247241; map ids are in `docs/VFX-LEDGER.md`. Meshes are set to RenderFidelity Precise.
+
+**Shockwave**
+- Pulled back from white: Flash halved, no beige dust.
+- The rings and branching ground bolts read yellow on the sand.
+- 8 small dark-grey rocks.
+- The toad stays visible during the croak.
+
+**Electric Ball** (per-pet template; the default storm ball is untouched)
+- The scorch strip, dark floor beams and dust are removed.
+- Blue rim with blue seams, plus a flickering yellow lightning-bolt core (AllVFX lightning sprite).
+- The hit no longer has the mud-coloured smoke.
+
+**Previews**
+- `thunder_toad_vs_sheet.jpg`: the sheet's 3/4 view and close-up next to Studio stills.
+- `thunder_toad_studio_three_quarter.jpg` and `thunder_toad_studio_closeup.jpg`.
+- `thunder_toad_preview.mp4` (re-recorded) and the `thunder_toad_ingame_*.jpg` stills.
+
+**Remaining gaps against the sheet**
+- The sheet's crest is one large lightning-shaped spike; ours is three smaller spikes.
+- The cream reads slightly grey in Studio's daylight.
+
 ## Not done / next
-- **No live playtest:** the clip is staged in edit mode (Studio crashed earlier this session; the place was recovered).
-- **Scorch trail:** the Electric Ball still draws the default dark scorch trail on the ground under its yellow spark trail.
+- **No live playtest:** FACEOFF! had its own test running, and the two places share server.rbxl, so starting one would clash. The clip is staged in edit mode.

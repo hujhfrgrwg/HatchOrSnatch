@@ -15,21 +15,19 @@ OUT = K.outdir_arg(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 os.makedirs(OUT, exist_ok=True)
 K.reset()
 
-BLUE = K.material("Toad_Blue", K.hexrgb(30, 79, 216), rough=0.3)          # #1E4FD8 cobalt
-BLUE_DK = K.material("Toad_BlueDark", K.hexrgb(28, 35, 72), rough=0.45)     # #1C2348 navy underside
-CREAM = K.material("Toad_Cream", K.hexrgb(247, 231, 176), rough=0.6)        # #F7E7B0
-YELLOW = K.material("Toad_Yellow", K.hexrgb(255, 217, 59), rough=0.3)       # #FFD93B lightning
-YELLOW_DK = K.material("Toad_YellowDark", K.hexrgb(232, 170, 20), rough=0.35)
+BLUE = K.material("Toad_Blue", K.hexrgb(30, 79, 216), rough=0.18)         # #1E4FD8 cobalt, glossy vinyl
+BLUE_DK = K.material("Toad_BlueDark", K.hexrgb(28, 35, 72), rough=0.4)      # #1C2348 navy (grin line, underside)
+CREAM = K.material("Toad_Cream", K.hexrgb(247, 231, 176), rough=0.7)        # #F7E7B0 soft
+YELLOW = K.material("Toad_Yellow", K.hexrgb(255, 217, 59), rough=0.22)      # #FFD93B lightning
+YELLOW_DK = K.material("Toad_YellowDark", K.hexrgb(232, 170, 20), rough=0.3)
 MOUTH = K.material("Toad_Mouth", K.hexrgb(120, 30, 40), rough=0.6)
 TONGUE = K.material("Toad_Tongue", K.hexrgb(240, 112, 72), rough=0.5)
-IRIS = K.material("Eye_Iris", K.hexrgb(255, 214, 40), rough=0.08)
-GOLD = K.material("Eye_Gold", K.hexrgb(214, 140, 10), rough=0.1)
-BLACK = K.material("Eye_Black", K.hexrgb(16, 16, 24), rough=0.08)
-WHITE = K.material("Eye_White", K.hexrgb(255, 255, 255), rough=0.1)
-RIM = K.material("Eye_Rim", K.hexrgb(20, 40, 120), rough=0.4)
-# texture standard (HOS-PET-014): painted detail + PBR maps; the lightning markings, crest and toe pads glow
+IRIS = K.material("Eye_Iris", K.hexrgb(255, 210, 30), rough=0.05)
+BLACK = K.material("Eye_Black", K.hexrgb(14, 14, 22), rough=0.05)
+WHITE = K.material("Eye_White", K.hexrgb(255, 255, 255), rough=0.05)
+# texture standard (HOS-PET-014): painted detail + PBR maps; the lightning markings, crest, warts and toe pads glow
 for _m, _style in ((BLUE, "skin"), (BLUE_DK, "dark"), (CREAM, "skin"), (YELLOW, "skin"), (YELLOW_DK, "skin")):
-    R.paint_material(_m, _style)
+    R.paint_material(_m, _style, strength=0.7)
 
 # ===== skeleton (Blender: front -Y, up +Z) =====
 bones = [
@@ -37,7 +35,7 @@ bones = [
     ("Body", (0, 0.15, 0.55), (0, 0.15, 0.95), "Root"),
     ("Head", (0, -0.35, 0.8), (0, -0.85, 0.95), "Body"),
     ("Throat", (0, -0.6, 0.58), (0, -0.98, 0.58), "Head"),
-    ("Mouth", (0, -0.85, 0.95), (0, -1.1, 0.95), "Head"),
+    ("Mouth", (0, -0.85, 0.98), (0, -1.1, 0.98), "Head"),
     ("Tail", (0, 0.92, 0.7), (0, 1.25, 1.2), "Body"),
 ]
 for side, sx in (("L", -1), ("R", 1)):
@@ -60,14 +58,14 @@ def on_ellipsoid(c, r, d):
     return p, n
 
 
-def decal_bolt(builder, mat, p, n, size, spin, bone, thick=0.07, sink=0.04):
-    """A flat lightning-bolt marking lying on the skin at p (normal n), long axis turned by `spin` degrees."""
+def decal_bolt(builder, mat, p, n, size, spin, bone, thick=0.07, sink=0.045):
+    """A bold flat lightning-bolt marking lying on the skin at p (normal n), long axis turned by `spin` degrees."""
     up = Vector((0, 0, 1)) if abs(n.z) < 0.9 else Vector((0, 1, 0))
     v = (up - n * up.dot(n)).normalized()
     u = v.cross(n).normalized()
     a = math.radians(spin)
     u, v = u * math.cos(a) + v * math.sin(a), v * math.cos(a) - u * math.sin(a)
-    pts = [(-0.18, -0.5), (0.12, -0.5), (0.02, -0.08), (0.3, -0.1), (-0.06, 0.55), (0.02, 0.1), (-0.28, 0.12)]
+    pts = [(-0.2, -0.5), (0.14, -0.5), (0.04, -0.06), (0.34, -0.08), (-0.06, 0.56), (0.03, 0.12), (-0.3, 0.14)]
 
     def g(bm):
         vs = [bm.verts.new(p - n * sink + (u * x + v * y) * size) for x, y in pts]
@@ -82,71 +80,136 @@ def decal_bolt(builder, mat, p, n, size, spin, bone, thick=0.07, sink=0.04):
     builder.add(g, mat, _M.Identity(4), bone)
 
 
-# ===== L1 body (Hunter's model sheet: stout round cobalt toad, cream belly/throat, yellow lightning markings) =====
-BODY_C, BODY_R = (0, 0.12, 0.62), (0.98, 0.95, 0.66)
-HEAD_C, HEAD_R = (0, -0.5, 0.98), (0.9, 0.64, 0.56)
-b = R.RigBuilder(PREFIX + "Body")
-b.sphere(BLUE, BODY_C, BODY_R, segs=12, rings=7, bone="Body")
-b.sphere(CREAM, (0, -0.35, 0.44), (0.8, 0.74, 0.38), segs=10, rings=5, bone="Body")
-b.sphere(BLUE, HEAD_C, HEAD_R, segs=12, rings=7, bone="Head")
-for side in (-1, 1):
-    b.sphere(BLUE, (side * 0.5, -0.78, 1.3), (0.34, 0.32, 0.32), segs=8, rings=5, bone="Head")  # eye bumps
-    b.sphere(BLUE, (side * 0.48, -1.0, 1.52), (0.3, 0.12, 0.09), segs=6, rings=3, rot=(18, side * -18, 0), bone="Head")  # brow ridge
-    b.sphere(BLUE_DK, (side * 0.11, -1.15, 1.06), (0.035, 0.025, 0.025), segs=4, rings=3, bone="Head")  # nostrils
-# the big cream throat sac (pumps on its own bone)
-b.sphere(CREAM, (0, -0.95, 0.68), (0.68, 0.42, 0.4), segs=10, rings=6, bone="Throat")
-# the open mouth (hidden inside the head at rest; slides out on the croak)
-b.sphere(MOUTH, (0, -0.95, 0.98), (0.42, 0.08, 0.13), segs=8, rings=4, bone="Mouth")
-b.sphere(TONGUE, (0, -0.99, 0.93), (0.24, 0.06, 0.06), segs=6, rings=3, bone="Mouth")
-# spiky yellow crest behind the head
-for i, (x, y) in enumerate(((0, -0.34), (-0.2, -0.24), (0.2, -0.24))):
-    b.cone(YELLOW, (x, y, 1.5 - 0.05 * i), 0.13, 0.0, 0.46 - 0.06 * i, segs=4, rot=(-30, x * 80, 0), bone="Head")
-# lightning-bolt markings: a big one on the back, one on each flank, the head top and each leg
-p, n = on_ellipsoid(BODY_C, BODY_R, (0, 0.85, 0.55));     decal_bolt(b, YELLOW, p, n, 0.72, 0, "Body")
-for side in (-1, 1):
-    p, n = on_ellipsoid(BODY_C, BODY_R, (side, 0.05, 0.35)); decal_bolt(b, YELLOW, p, n, 0.46, side * 10, "Body")
-    p, n = on_ellipsoid(HEAD_C, HEAD_R, (side * 0.75, -0.3, 0.6)); decal_bolt(b, YELLOW, p, n, 0.28, side * -20, "Head")
-# yellow warts / bumps
-for d in ((0.55, 0.6, 0.6), (-0.6, 0.55, 0.55), (0.75, -0.3, 0.6), (-0.7, -0.35, 0.65), (0.35, 0.85, 0.3), (-0.4, 0.8, 0.35), (0.85, 0.35, 0.1), (-0.85, 0.3, 0.12)):
-    p, n = on_ellipsoid(BODY_C, BODY_R, d)
-    b.gem(YELLOW, tuple(p + n * 0.01), 0.07, bone="Body")
-# chunky front arms and big folded back legs with round yellow toe pads
-for side, sx in (("L", -1), ("R", 1)):
-    b.limb(BLUE, (sx * 0.5, -0.58, 0.46), (sx * 0.72, -0.76, 0.26), 0.22, 0.19, segs=6, bone=f"ArmU.{side}")
-    b.limb(BLUE, (sx * 0.72, -0.76, 0.26), (sx * 0.8, -0.92, 0.07), 0.19, 0.16, segs=6, bone=f"ArmL.{side}")
-    b.sphere(BLUE, (sx * 0.82, 0.38, 0.36), (0.38, 0.52, 0.34), segs=8, rings=5, bone=f"LegU.{side}")
-    b.limb(BLUE, (sx * 0.86, 0.3, 0.26), (sx * 0.94, -0.02, 0.07), 0.17, 0.15, segs=6, bone=f"LegL.{side}")
-    p, n = on_ellipsoid((sx * 0.82, 0.38, 0.36), (0.38, 0.52, 0.34), (sx, 0.0, 0.5)); decal_bolt(b, YELLOW, p, n, 0.22, 0, f"LegU.{side}", sink=0.055)
-    for foot, bn in (((sx * 0.8, -0.98, 0.06), f"ArmL.{side}"), ((sx * 0.95, -0.1, 0.06), f"LegL.{side}")):
-        for k in (-1, 0, 1):
-            b.sphere(YELLOW, (foot[0] + k * 0.13, foot[1] - 0.08 + abs(k) * 0.05, foot[2]), (0.09, 0.095, 0.08), segs=6, rings=3, bone=bn)
-body = b.finish_rigged(arm)
+def tube(builder, mat, pts, r, bone, segs=4):
+    """A thin tube through points (the grin line)."""
+    pts = [Vector(p) for p in pts]
 
-# ===== face: big glossy yellow eyes, dark pupils, white highlights, under the brow ridge (same on L1-L3) =====
+    def g(bm):
+        rings = []
+        for i, p in enumerate(pts):
+            t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+            a = t.cross(Vector((0, 1, 0))).normalized()
+            b2 = t.cross(a).normalized()
+            rings.append([bm.verts.new(p + (a * math.cos(2 * math.pi * k / segs) + b2 * math.sin(2 * math.pi * k / segs)) * r) for k in range(segs)])
+        for i in range(len(rings) - 1):
+            for k in range(segs):
+                j = (k + 1) % segs
+                bm.faces.new((rings[i][k], rings[i][j], rings[i + 1][j], rings[i + 1][k]))
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    builder.add(g, mat, _M.Identity(4), bone)
+
+
+# ===== L1 body (Hunter's model sheet: glossy rounded vinyl-toy cobalt toad, cream belly/throat, bold yellow lightning) =====
+BODY_C, BODY_R = (0, 0.12, 0.62), (0.98, 0.95, 0.66)
+HEAD_C, HEAD_R = (0, -0.5, 1.0), (0.9, 0.64, 0.56)
+b = R.RigBuilder(PREFIX + "Body")
+b.sphere(BLUE, BODY_C, BODY_R, segs=12, rings=8, bone="Body")
+b.sphere(CREAM, (0, -0.35, 0.44), (0.8, 0.74, 0.38), segs=10, rings=5, bone="Body")
+b.sphere(BLUE, HEAD_C, HEAD_R, segs=12, rings=8, bone="Head")
+for side in (-1, 1):
+    b.sphere(BLUE, (side * 0.44, -0.72, 1.42), (0.33, 0.32, 0.31), segs=6, rings=5, bone="Head")  # eye bumps on top of the head
+    b.sphere(BLUE, (side * 0.43, -0.98, 1.66), (0.33, 0.14, 0.11), segs=8, rings=4, rot=(16, side * -22, 0), bone="Head")  # heavy brow, low toward the centre
+# the cream throat sac, its top tucked under the grin line (pumps on its own bone)
+b.sphere(CREAM, (0, -0.95, 0.6), (0.68, 0.42, 0.38), segs=10, rings=6, bone="Throat")
+# a wide friendly grin across the face, curving up at the corners
+grin = []
+for i in range(9):
+    x = -0.56 + 1.12 * i / 8
+    z = 1.0 + 0.11 * (x / 0.56) ** 2
+    dz = (z - HEAD_C[2]) / HEAD_R[2]
+    k = max(0.0, 1 - (x / HEAD_R[0]) ** 2 - dz ** 2)
+    grin.append((x, HEAD_C[1] - HEAD_R[1] * math.sqrt(k) + 0.012, z))
+tube(b, BLUE_DK, grin, 0.024, "Head", segs=3)
+# the open mouth (hidden inside the head at rest; slides out on the croak)
+b.sphere(MOUTH, (0, -0.95, 0.98), (0.42, 0.08, 0.13), segs=6, rings=3, bone="Mouth")
+b.sphere(TONGUE, (0, -0.99, 0.93), (0.24, 0.06, 0.06), segs=5, rings=2, bone="Mouth")
+# spiky yellow crest behind the head
+for i, (x, y) in enumerate(((0, -0.3), (-0.22, -0.2), (0.22, -0.2))):
+    b.cone(YELLOW, (x, y, 1.5 - 0.05 * i), 0.14, 0.0, 0.5 - 0.07 * i, segs=4, rot=(-30, x * 80, 0), bone="Head")
+# bold lightning bolts: a big one down the back, one on each flank, thigh and foreleg
+p, n = on_ellipsoid(BODY_C, BODY_R, (0, 0.8, 0.62));        decal_bolt(b, YELLOW, p, n, 0.95, 0, "Body")
+for side, sx in (("L", -1), ("R", 1)):
+    p, n = on_ellipsoid(BODY_C, BODY_R, (sx, 0.1, 0.3)); decal_bolt(b, YELLOW, p, n, 0.58, sx * 10, "Body")
+    p, n = on_ellipsoid((sx * 0.84, 0.38, 0.38), (0.4, 0.52, 0.36), (sx, 0.05, 0.4)); decal_bolt(b, YELLOW, p, n, 0.36, 0, f"LegU.{side}", sink=0.06)
+    p = Vector((sx * 0.83, -0.86, 0.26)); n = Vector((sx * 0.75, -0.66, 0.0)).normalized()
+    decal_bolt(b, YELLOW, p, n, 0.3, 0, f"ArmL.{side}", sink=0.07)
+# round yellow warts over the head and back
+for d in ((0.5, 0.55, 0.65), (-0.55, 0.5, 0.6), (0.25, 0.1, 0.95), (-0.3, -0.05, 0.92), (0.8, 0.45, 0.25), (-0.8, 0.42, 0.28)):
+    p, n = on_ellipsoid(BODY_C, BODY_R, d)
+    b.sphere(YELLOW, tuple(p), (0.075, 0.075, 0.06), segs=4, rings=3, bone="Body")
+# chunky rounded limbs, round yellow toe-pad domes
+for side, sx in (("L", -1), ("R", 1)):
+    b.sphere(BLUE, (sx * 0.62, -0.66, 0.38), (0.24, 0.24, 0.26), segs=7, rings=4, bone=f"ArmU.{side}")
+    b.limb(BLUE, (sx * 0.72, -0.76, 0.26), (sx * 0.8, -0.92, 0.07), 0.2, 0.17, segs=8, bone=f"ArmL.{side}")
+    b.sphere(BLUE, (sx * 0.84, 0.38, 0.38), (0.4, 0.52, 0.36), segs=8, rings=5, bone=f"LegU.{side}")
+    b.limb(BLUE, (sx * 0.86, 0.3, 0.26), (sx * 0.94, -0.02, 0.07), 0.18, 0.16, segs=8, bone=f"LegL.{side}")
+    for foot, bn, n_pads in (((sx * 0.8, -0.98, 0.06), f"ArmL.{side}", 3), ((sx * 0.95, -0.1, 0.06), f"LegL.{side}", 2)):
+        for k in ((-1, 0, 1) if n_pads == 3 else (-0.55, 0.55)):
+            b.sphere(YELLOW, (foot[0] + k * 0.13, foot[1] - 0.08 + abs(k) * 0.05, foot[2]), (0.095, 0.1, 0.075), segs=6, rings=3, bone=bn)
+body = b.finish_rigged(arm, smooth_angle=62)
+
+# ===== face: big round glossy yellow eyes; the round dark pupils and the large + small highlights are PAINTED
+# into the eye texture (perfect circles at any mesh resolution, like the Kitsune's painted face) =====
+EYE_X, EYE_Y, EYE_Z, EYE_S = 0.44, -0.93, 1.44, 0.29
+
+
+def paint_eye(mat):
+    nt = mat.node_tree
+    N, L = nt.nodes, nt.links
+    bsdf = next(n for n in N if n.type == "BSDF_PRINCIPLED")
+    tc = N.new("ShaderNodeTexCoord")
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(tc.outputs["Object"], sep.inputs["Vector"])
+    ax = N.new("ShaderNodeMath"); ax.operation = "ABSOLUTE"
+    L.new(sep.outputs["X"], ax.inputs[0])
+
+    def disc(cx, cz, r, soft=0.008):
+        """1 inside the circle (|x|, z) around (cx, cz) radius r on the eye's front, else 0."""
+        dx = N.new("ShaderNodeMath"); dx.operation = "SUBTRACT"; L.new(ax.outputs[0], dx.inputs[0]); dx.inputs[1].default_value = cx
+        dz = N.new("ShaderNodeMath"); dz.operation = "SUBTRACT"; L.new(sep.outputs["Z"], dz.inputs[0]); dz.inputs[1].default_value = cz
+        c = N.new("ShaderNodeCombineXYZ"); L.new(dx.outputs[0], c.inputs["X"]); L.new(dz.outputs[0], c.inputs["Y"])
+        ln = N.new("ShaderNodeVectorMath"); ln.operation = "LENGTH"; L.new(c.outputs[0], ln.inputs[0])
+        m = N.new("ShaderNodeMapRange"); m.inputs["From Min"].default_value = r - soft; m.inputs["From Max"].default_value = r + soft
+        m.inputs["To Min"].default_value, m.inputs["To Max"].default_value = 1.0, 0.0
+        L.new(ln.outputs["Value"], m.inputs["Value"])
+        front = N.new("ShaderNodeMath"); front.operation = "LESS_THAN"; L.new(sep.outputs["Y"], front.inputs[0]); front.inputs[1].default_value = EYE_Y - 0.06
+        both = N.new("ShaderNodeMath"); both.operation = "MULTIPLY"; L.new(m.outputs["Result"], both.inputs[0]); L.new(front.outputs[0], both.inputs[1])
+        return both.outputs[0]
+
+    def mix(a, color, fac):
+        mm = N.new("ShaderNodeMix"); mm.data_type = "RGBA"
+        L.new(fac, mm.inputs["Factor"])
+        if isinstance(a, tuple):
+            mm.inputs[6].default_value = tuple(a)[:4]
+        else:
+            L.new(a, mm.inputs[6])
+        mm.inputs[7].default_value = tuple(color)[:4]
+        return mm.outputs[2]
+    cx, cz = EYE_X - 0.02, EYE_Z - 0.01
+    col = mix(tuple(bsdf.inputs["Base Color"].default_value), K.hexrgb(205, 130, 10), disc(cx, cz, EYE_S * 0.86, 0.06))  # warm rim
+    col = mix(col, tuple(bsdf.inputs["Base Color"].default_value), disc(cx, cz, EYE_S * 0.66, 0.05))
+    col = mix(col, K.hexrgb(14, 14, 22), disc(cx, cz, EYE_S * 0.5))                         # big round pupil
+    col = mix(col, K.hexrgb(255, 255, 255), disc(EYE_X + 0.04, EYE_Z + 0.08, EYE_S * 0.17))   # large highlight
+    col = mix(col, K.hexrgb(255, 255, 255), disc(EYE_X - 0.07, EYE_Z - 0.08, EYE_S * 0.07))   # small highlight
+    L.new(col, bsdf.inputs["Base Color"])
+
+
+paint_eye(IRIS)
 f = R.RigBuilder(PREFIX + "Face")
 for side in (-1, 1):
-    x, y, z, s = side * 0.5, -1.0, 1.3, 0.27
-    f.sphere(RIM, (x, y + 0.03, z), (s * 1.08, s * 0.5, s * 1.08), segs=8, rings=3, bone="Head")
-    f.sphere(IRIS, (x, y, z), (s, s * 0.55, s), segs=8, rings=6, bone="Head")
-    f.sphere(GOLD, (x - side * 0.02, y - 0.12, z - 0.02), (s * 0.56, s * 0.1, s * 0.56), segs=10, rings=3, bone="Head")
-    f.sphere(BLACK, (x - side * 0.03, y - 0.14, z - 0.02), (s * 0.34, s * 0.08, s * 0.38), segs=10, rings=3, bone="Head")
-    f.sphere(WHITE, (x + side * 0.03, y - 0.16, z + 0.07), (s * 0.15, s * 0.04, s * 0.15), segs=6, rings=2, bone="Head")
-    f.sphere(WHITE, (x - side * 0.08, y - 0.155, z - 0.1), (s * 0.06, s * 0.03, s * 0.06), segs=4, rings=2, bone="Head")
-face = f.finish_rigged(arm)
+    f.sphere(IRIS, (side * EYE_X, EYE_Y, EYE_Z), (EYE_S, EYE_S * 0.62, EYE_S), segs=12, rings=8, bone="Head")
+face = f.finish_rigged(arm, smooth_angle=89)
 
-# ===== L2: more markings (bolts on the arms, a bigger crest spike) =====
+# ===== L2: a taller crest spike =====
 l2 = R.RigBuilder(PREFIX + "L2")
-for side, sx in (("L", -1), ("R", 1)):
-    p = Vector((sx * 0.78, -0.84, 0.2)); n = Vector((sx * 0.8, -0.6, 0.0)).normalized()
-    decal_bolt(l2, YELLOW, p, n, 0.24, 0, f"ArmL.{side}")
-l2.cone(YELLOW, (0, -0.55, 1.5), 0.1, 0.0, 0.42, segs=4, rot=(-22, 0, 0), bone="Head")
+l2.cone(YELLOW, (0, -0.48, 1.55), 0.1, 0.0, 0.46, segs=4, rot=(-22, 0, 0), bone="Head")
 l2_ob = l2.finish_rigged(arm)
 
 # ===== L3: crackling gold spikes down the back and a crest gem (plus a lightning aura in Studio) =====
 l3 = R.RigBuilder(PREFIX + "L3")
-for y in (0.05, 0.3, 0.55):
+for y in (0.05, 0.3):
     l3.cone(YELLOW_DK, (0, y, 1.3 - 0.14 * y), 0.09, 0.0, 0.3, segs=4, rot=(25, 0, 0), bone="Body")
-l3.gem(YELLOW, (0, -0.58, 1.9), 0.06, bone="Head")
+l3.gem(YELLOW, (0, -0.5, 2.0), 0.06, bone="Head")
 l3_ob = l3.finish_rigged(arm)
 
 forms = {"L1": [body, face], "L2": [body, face, l2_ob], "L3": [body, face, l2_ob, l3_ob]}
@@ -244,7 +307,7 @@ for o in (l2_ob, l3_ob):
 K.render_views(1.5, 0.75, OUT, SLUG + "_L1", [("front", 0, 12), ("three_quarter", 38, 18), ("side", 90, 8), ("back", 180, 14)], dist=7.0)
 sc = bpy.context.scene
 cam = sc.camera
-head_at = Vector((0, -1.0, 1.15))
+head_at = Vector((0, -0.95, 1.25))
 for name, pos in (("head_closeup", Vector((1.1, -3.6, 1.6))), ("head_front", Vector((0.0, -3.8, 1.35)))):
     cam.location = pos
     cam.rotation_euler = (head_at - pos).to_track_quat("-Z", "Y").to_euler()

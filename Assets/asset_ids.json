@@ -526,5 +526,104 @@
  },
  "docs/ability-vfx/toad/upload/toad_rock.png": {
   "assetId": "92391687883880"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_Body_emit_v5.png": {
+  "assetId": "119929500529237"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_Body_normal_v5.png": {
+  "assetId": "123355386722258"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_Body_rough_v5.png": {
+  "assetId": "93059785223793"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_Body_v5.png": {
+  "assetId": "75171323790096"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_Face_normal_v5.png": {
+  "assetId": "110912424939894"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_Face_rough_v5.png": {
+  "assetId": "94108829593619"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_Face_v5.png": {
+  "assetId": "96394110217117"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L2_emit_v5.png": {
+  "assetId": "107542694193986"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L2_normal_v5.png": {
+  "assetId": "107967475230893"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L2_rough_v5.png": {
+  "assetId": "133810160079019"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L2_v5.png": {
+  "assetId": "126895742732053"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L3_emit_v5.png": {
+  "assetId": "140165149742510"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L3_normal_v5.png": {
+  "assetId": "76799201589578"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L3_rough_v5.png": {
+  "assetId": "120951198195141"
+ },
+ "docs/pets/thunder_toad/upload_v5/Toad_L3_v5.png": {
+  "assetId": "72419716338000"
+ },
+ "docs/pets/thunder_toad/upload_v5/thunder_toad_v5.fbx": {
+  "assetId": "119610137092891"
+ },
+ "docs/pets/thunder_toad/upload_v5/toad_core_bolt.png": {
+  "assetId": "94918928585257"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_Body_emit_v6.png": {
+  "assetId": "131084837731795"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_Body_normal_v6.png": {
+  "assetId": "116782928147304"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_Body_rough_v6.png": {
+  "assetId": "139644161250563"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_Body_v6.png": {
+  "assetId": "129319882747877"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_Face_normal_v6.png": {
+  "assetId": "130929686823281"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_Face_rough_v6.png": {
+  "assetId": "89630417098537"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_Face_v6.png": {
+  "assetId": "72560535923760"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L2_emit_v6.png": {
+  "assetId": "106110193756980"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L2_normal_v6.png": {
+  "assetId": "108077904111842"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L2_rough_v6.png": {
+  "assetId": "112990042893920"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L2_v6.png": {
+  "assetId": "98696369603067"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L3_emit_v6.png": {
+  "assetId": "125867694210839"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L3_normal_v6.png": {
+  "assetId": "93795970653322"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L3_rough_v6.png": {
+  "assetId": "104503466272102"
+ },
+ "docs/pets/thunder_toad/upload_v6/Toad_L3_v6.png": {
+  "assetId": "134262430829364"
+ },
+ "docs/pets/thunder_toad/upload_v6/thunder_toad_v6.fbx": {
+  "assetId": "130646365247241"
  }
 }
