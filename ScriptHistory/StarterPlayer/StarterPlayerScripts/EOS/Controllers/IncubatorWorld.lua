@@ -292,10 +292,11 @@ local function applyEgg(animate: boolean)
 		setSlot(i, if i <= n then (keep or rar[i]) else nil, animate)
 	end
 	setHologram(n < SLOTS, animate)
-	-- the core fades in with the fill: faint in an empty egg, full glow when it's ready
+	-- the core glows brighter through the cracks as it fills; a whole egg hides it (it's taller than the egg, and the
+	-- ready glow takes over)
 	local frac = math.clamp(displayFill / need, 0, 1)
 	for _, p in S.core do
-		local goal = { Transparency = 0.75 * (1 - frac) }
+		local goal = { Transparency = if n == SLOTS then 1 else 0.3 + 0.55 * (1 - frac) }
 		if animate then
 			TweenService:Create(p, TweenInfo.new(0.4), goal):Play()
 		else

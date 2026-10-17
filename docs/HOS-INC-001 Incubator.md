@@ -41,15 +41,21 @@ The lobby incubator (`Workspace.Incubator.Incubator`) is now animated and wired 
 
 The Incubator model's `ModelStreamingMode` is `Atomic`, so the client gets it whole.
 
-## To do in Studio: import the egg pieces (one time)
-The game builds each piece from a baked mesh. I generated them, but a plugin can't upload meshes yet ("CreateAssetAsync … not available yet"), so they need one pass through the 3D Importer. Until then the egg uses the fallback: the same cracks and animation, drawn with wedge parts in flat rarity colours and without the shard texture.
+## The baked egg pieces (done 17 Oct)
+The game builds each piece from a baked mesh. A plugin can't upload meshes yet ("CreateAssetAsync … not available yet"), and Studio's importer merges an OBJ's objects into one mesh. So the pieces went through the 3D Importer as `docs/HOS-INC-001/IncubatorEggPieces.glb`, which keeps one node per piece:
+- Matthew imported the file with creator **Eggs with Friends**.
+- `BakeIncubatorEgg.adopt` moved the 18 MeshParts into `ReplicatedStorage.IncubatorEggPieces` (Piece1–Piece18, attributes `Centre` / `Mid`), and the sizes matched the generator.
+- Mesh ids, Piece1 to Piece18: 84269797617090, 88118522965095, 122256290543998, 120066833790496, 127530689738706, 120913288208629, 74531545298493, 113063044109553, 77904836546807, 121436036274647, 107033692907946, 125280533840727, 89072925326374, 109207612983235, 88905020084450, 80226418040872, 73834036291579, 128125464800223.
 
-1. Get `docs/HOS-INC-001/IncubatorEggPieces.glb` from the `matthew` branch.
-2. In Studio, go to **File → Import 3D** and pick the file. Set the creator to the group **Eggs with Friends**, then import. The preview should list `Piece1` … `Piece18` as separate parts.
-3. In the command bar, run:
-   `print(require(game.ServerStorage.EOSBuild.BakeIncubatorEgg).adopt(workspace.IncubatorEggPieces))`
-   This checks each piece's size, moves the pieces into `ReplicatedStorage.IncubatorEggPieces` with the attributes the client needs, and removes the empty import model.
-4. Save the place. Or ask me (or a later session) to do steps 3 and 4 and check the result in a playtest. That includes checking that the shard texture isn't upside down; if it is, the fix is a one-line change to the OBJ export.
+**If the shape ever changes** (the tuning values below), re-export and re-import:
+1. Save `BakeIncubatorEgg.obj()` to the `.obj`.
+2. Run `tools/build/HOS-INC-001_obj2glb.py <obj> <glb>`.
+3. Import the `.glb` and run `adopt`.
+
+Without the folder, the egg falls back to wedge parts in flat rarity colours.
+
+![In game, 7 of 18 pieces](HOS-INC-001/ingame_building_7of18.jpg)
+![In game, ready to hatch](HOS-INC-001/ingame_ready.jpg)
 
 ## Checks (Studio playtests)
 - **Fill 11/18:** pieces 1–11 show and the rest are hidden.
@@ -57,7 +63,8 @@ The game builds each piece from a baked mesh. I generated them, but a plugin can
 - **Ready egg:** 18/18 pieces, hologram fully transparent, gold glow.
 - **Hatch:** a pet was granted, every piece part was thrown more than 3 studs out mid-burst, then 0 pieces showed and the hologram came back.
 - **No errors** from IncubatorWorld in the logs.
-- **Mesh pieces:** checked in edit mode, both whole and half built (screenshots above). The cracks line up, the inner faces and rim show, and the rarity textures map onto the outer faces.
+- **Mesh pieces:** checked in edit mode, both whole and half built, and in game after the import: 18 baked MeshParts with rarity textures, 7 of 18 shown at fill 7, all 18 when ready, all 18 thrown out by the hatch.
+- **Core glow:** the incubator's neon core glows through the cracks as the egg fills (transparency 0.85 → 0.3) and hides once the egg is whole. It's taller than the egg and poked out of the top.
 - **EggTests:** 75 passed, 0 failed. G04 and E03 also print FAIL lines; they did before this ticket too (old pieces path).
 
 ## Notes
