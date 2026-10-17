@@ -1,0 +1,42 @@
+{
+  "gui": "RetentionUI",
+  "templates_folder": "RetentionUITemplates",
+  "port": 8870,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/ui_retention",
+  "stud_asset": "",
+  "screens": [
+    {
+      "name": "Gift",
+      "page": "gift_claim",
+      "groups": [
+        "Dim",
+        "GiftCard"
+      ]
+    },
+    {
+      "name": "Starter",
+      "page": "starter_pack",
+      "groups": [
+        "Dim",
+        "StarterPack"
+      ]
+    },
+    {
+      "name": "WaitOffer",
+      "page": "wait_offer",
+      "groups": [
+        "WaitOffer"
+      ],
+      "visible": false,
+      "hud": true
+    }
+  ],
+  "templates": [],
+  "font_map": {
+    "Arial": "Arimo"
+  }
+}

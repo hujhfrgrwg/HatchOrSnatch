@@ -7,7 +7,7 @@ ticket: HOS-RET-001
 
 Hunter asked for a favorites prompt at a reasonable time and a returning-player gift like the reference game's "come back tomorrow for a FREE weapon" card, then added the reference's event RSVP prompt, starter pack and waiting-round offer card. Made with `roblox-ui-maker` in the round 3 "sport" style (`ui/build.py`, pages `gift_*`, `event_rsvp`, `starter_pack`, `wait_offer*`). Review stills: `docs/ui/retention/`.
 
-**Status:** HTML mockup sent for Hunter's approval 2026-10-17. Nothing in Studio yet.
+**Status:** Hunter approved 2026-10-17 ("build it all"). Code and exports done: `roblox/game/Retention*.luau`, `roblox/ui_retention/`, export config `ui_ret/rbx.json`. Install steps: [[HOS-RET-001 Install]]. Daily gift set at 250 Gold + 2 Gems. Starter pack built but off (`RetentionConfig.STARTER.enabled = false`) until Hunter sets contents and price. Event prompt off until `RetentionConfig.EVENT_ID` is set.
 
 ## When each shows
 | Prompt | When | How often |
@@ -21,6 +21,5 @@ Hunter asked for a favorites prompt at a reasonable time and a returning-player 
 Lobby prompts: one at a time, 3+ minutes apart, never mid-match.
 
 ## Open for Hunter
-- Daily gift amount: proposed 250 Gold + 2 Gems (about 6 minutes of play).
 - Starter pack contents and Robux price (looks only, decision 32). Not wired to a purchase until set.
 - The reference's Catcher Pack sells an ability; left out (decision 32).

@@ -1469,10 +1469,10 @@ def gift_card(state='claim', x=410, y=300, scale=1.0):
     'wait' = first visit, or just claimed: 'come back tomorrow' with the countdown to the next gift."""
     w, h = 1100, 520
     claim = state == 'claim'
-    chip = row(icn('clock', 44), T('Next gift in 23:51:10' if not claim else 'Ready now!', 30, 's', '' if not claim else 'f-lime', name='TimerText'), gap=8)
+    chip = row(icn('clock', 44), T('Next gift in 23:51:10' if not claim or EXPORT_STATES else 'Ready now!', 30, 's', '' if not claim or EXPORT_STATES else 'f-lime', name='TimerText'), gap=8)
     b = ''
     # left: the gift itself (reference: the item tile with its rarity word)
-    b += slot(50, 56, 300, 'gold' if claim else 'locked', 'gift', label='FREE GIFT', name='GiftTile', art_pad=.12, label_size=30)
+    b += slot(50, 56, 300, 'gold' if claim or EXPORT_STATES else 'locked', 'gift_daily', label='FREE GIFT', name='GiftTile', art_pad=.12, label_size=30)
     # right: what's inside + the action
     if claim:
         b += at(400, 52, T('Thanks for coming back!', 44, 'l', name='Head'))
@@ -1482,13 +1482,13 @@ def gift_card(state='claim', x=410, y=300, scale=1.0):
         b += at(402, 112, T('for another FREE gift!', 44, 'l', 'f-gold', name='Sub'))
     b += slot(400, 178, 136, 'gold', 'gold', f'x{GIFT_GOLD}', 'Gold', name='GoldSlot')
     b += slot(552, 178, 136, 'lime', 'gem', f'x{GIFT_GEMS}', 'Gems', name='GemsSlot')
-    if claim:
+    if claim or EXPORT_STATES:   # export: both buttons, the runtime shows one
         b += btn(720, 196, 320, 100, 'lime', bl('CLAIM', 44), name='BtnClaim')
-    else:
-        b += btn(720, 196, 320, 100, 'grey', bl('COME BACK LATER', 28), name='BtnLater', cls='off')
+    if not claim or EXPORT_STATES:
+        b += btn(720, 196, 320, 100, 'grey', bl('COME BACK LATER', 28), name='BtnLater', cls='off', hid=claim)
     b += at(400, 334, T('One free gift every day you play.', 24, 'xs', 'f-dim', name='Note'))
     title = 'Welcome back!' if claim else 'Free gift'
-    p = panel_sport('GiftCard', 'gold', title, 'gift', b, x, y, w, h, right=chip, title_size=58)
+    p = panel_sport('GiftCard', 'gold', title, 'gift_daily', b, x, y, w, h, right=chip, title_size=58)
     if scale != 1.0:
         p = p.replace("data-a='C' style='", f"data-a='C' style='transform:scale({scale});transform-origin:960px 560px;", 1)
     return p
@@ -1611,13 +1611,13 @@ def s_starter():
 
 
 WAIT_OFFERS = [  # rotate every ~8 s while you wait out a Hero run. Looks and XP only (decision 32): no abilities, eggs or focus.
-    ('vip', 'VIP', 'crown', 'gold', '499', ['+25% match XP', 'VIP tag over your head', 'Stacks with 2x XP']),
+    ('vip', 'VIP', 'crown', 'gold', '499', ['+25% match XP', 'VIP tag over your head', 'Honored One emote']),
     ('xp2', '2x XP', 'star', 'sky', '199', ['Double XP every match', 'Level up twice as fast', 'Yours forever']),
     ('starter', 'Starter Pack', 'shop', 'pink', '???', ['Gems x??, a trail', 'An emote, an egg case', 'PLACEHOLDER offer']),
 ]
 
 
-def wait_offer(o, x=1300, y=700, dot=0):
+def wait_offer(o, x=1300, y=700, dot=0, gname=None):
     key, title, icon, acc, price, lines = o
     w, h = 580, 230
     inner = box(0, 0, w, h, '', f'cs r-{acc}', 'border-radius:16px', name='Card')
@@ -1625,16 +1625,16 @@ def wait_offer(o, x=1300, y=700, dot=0):
     inner += btn(14, 152, 156, 62, 'lime', row(icn('robux', 38), T(price, 30, 'l', name='PriceText'), gap=6), name='BtnBuy')
     for i, ln in enumerate(lines):
         inner += at(196, 34 + i * 52, T(ln, 28, 's', 'f-orange' if ln.startswith('PLACEHOLDER') else '', name=f'Line{i + 1}'))
-    inner += at(w // 2 + 90, 196, row(*[f"<span style='display:inline-block;width:12px;height:12px;border-radius:6px;background:{'#fff' if i == dot else 'rgba(255,255,255,.35)'}'></span>" for i in range(len(WAIT_OFFERS))], gap=8), w=200, align='center', name='Dots')
+    inner += at(w // 2 + 90, 196, row(*[f"<span data-n='Dot{i + 1}' style='display:inline-block;width:12px;height:12px;border-radius:6px;background:{'#fff' if i == dot else 'rgba(255,255,255,.35)'}'></span>" for i in range(len(WAIT_OFFERS))], gap=8), w=200, align='center', name='Dots')
     inner += f"<div class='cx' data-n='CloseButton' data-btn=1 style='left:{w - 46}px;top:-30px;transform:scale(.62);transform-origin:0 0'>{T('X', 48, 'l')}</div>"
     inner += at(w // 2, -64, T(title, 56, 'xl', name='Title'), w=w, align='center')
-    return grp(f'WaitOffer_{key}', box(x, y, w, h, inner, name='WaitOffer'), 'BR')
+    return grp(gname or f'WaitOffer_{key}', box(x, y, w, h, inner, name='Offer'), 'BR')
 
 
 def s_wait_offer():
     out = world() + topbar()
     out += hv_topcenter('HERO RUN', 'Mia is crossing alone!', T('Round 1  ·  0:19  ·  you are waiting', 22, 'xs', name='SublineText'))
-    out += wait_offer(WAIT_OFFERS[0])
+    out += wait_offer(WAIT_OFFERS[0], gname='WaitOffer')
     out += at(960, 1020, T('Only while you wait out a Hero run. Never while you play a crossing.', 26, 's'), w=1400, align='center')
     return out
 
