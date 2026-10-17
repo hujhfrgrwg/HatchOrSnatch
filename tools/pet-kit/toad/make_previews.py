@@ -38,7 +38,7 @@ for lv in (1, 2, 3):
     kview.lit_turnaround(mb, rest, tex, os.path.join(OUT, 'turn_L%d.png' % lv), mats=set(by_level[lv]))
 
 # head close-up (3/4 front, zoomed on the head)
-ctr = np.array([0, -0.85, 0.85])
+ctr = np.array([0, -1.0, 1.15])
 im = kview.lit_render(mb, rest, texs[1], -30, 12, size=520, scale=300, center=ctr, mats={0, 1})
 im.save(os.path.join(OUT, 'head.png'))
 # hero 3/4 beside the card

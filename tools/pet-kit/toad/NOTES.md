@@ -19,6 +19,13 @@
 4. **v4:** removed the grin tube (the blue/cream jaw line is the smile, as on the card); saturated yellow markings.
 5. **Animation pass 2:** less front-leg reach in Run and Hop.
 
+## Passes after the coordinator's card review (05:58)
+6. **v5:** tall rounded head raised on the front of the body, a cream belly bulge from the chin under the body, front legs planted (chest lifted), back legs splayed, three chunky toe-claws per foot, bold bolts, a bolt-shaped swept-back crest, cheek dots, and a smile line that conforms to the head.
+7. **v6:** brow lid direction fixed. The slant was tested both ways, and lower-toward-the-nose won. Removed the brow geometry, which read as horns. Under the head now blends into the cream throat.
+8. **v7:** raised eye bumps so the big eye decals sit flat and face forward. Eyes are about a third of the head width.
+
+**Triangles now:** L1 1,808 / L2 1,824 / L3 1,848.
+
 ## Checks (`make_previews.py`)
 - Tris, weights (≤4, normalised), lowest point = 0, toe-pad clipping into the body in every animation frame (none).
 - Open edges only on the eye-socket rims, which are hidden behind the eye decal.

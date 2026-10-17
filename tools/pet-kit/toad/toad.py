@@ -45,20 +45,20 @@ YEL_DK = 'f0a810'
 def bones_def():
     b = [
         ('Root', V(0, 0, 0), V(0, 0, 0.2), None),
-        ('Body', V(0, 0.35, 0.52), V(0, -0.15, 0.56), 'Root'),
-        ('Chest', V(0, -0.15, 0.56), V(0, -0.5, 0.62), 'Body'),
-        ('Head', V(0, -0.5, 0.66), V(0, -1.1, 0.72), 'Chest'),
-        ('Jaw', V(0, -0.55, 0.5), V(0, -1.1, 0.46), 'Head'),
-        ('Tail', V(0, 0.78, 0.46), V(0, 1.05, 0.38), 'Body'),
+        ('Body', V(0, 0.4, 0.58), V(0, -0.1, 0.66), 'Root'),
+        ('Chest', V(0, -0.1, 0.66), V(0, -0.55, 0.86), 'Body'),
+        ('Head', V(0, -0.55, 0.9), V(0, -1.15, 1.1), 'Chest'),
+        ('Jaw', V(0, -0.6, 0.6), V(0, -1.12, 0.7), 'Chest'),      # throat / belly sac (puffs on the croak)
+        ('Tail', V(0, 0.82, 0.5), V(0, 1.08, 0.42), 'Body'),
     ]
     for s, x in (('L', 1), ('R', -1)):
         b += [
-            ('FrontUpper.' + s, V(x * 0.38, -0.42, 0.5), V(x * 0.78, -0.56, 0.36), 'Chest'),
-            ('FrontLower.' + s, V(x * 0.78, -0.56, 0.36), V(x * 0.84, -0.74, 0.1), 'FrontUpper.' + s),
-            ('FrontFoot.' + s, V(x * 0.84, -0.74, 0.1), V(x * 0.88, -0.98, 0.04), 'FrontLower.' + s),
-            ('BackUpper.' + s, V(x * 0.42, 0.36, 0.5), V(x * 0.9, 0.26, 0.4), 'Body'),
-            ('BackLower.' + s, V(x * 0.9, 0.26, 0.4), V(x * 0.96, 0.02, 0.1), 'BackUpper.' + s),
-            ('BackFoot.' + s, V(x * 0.96, 0.02, 0.1), V(x * 1.0, -0.22, 0.04), 'BackLower.' + s),
+            ('FrontUpper.' + s, V(x * 0.42, -0.5, 0.64), V(x * 0.7, -0.66, 0.4), 'Chest'),
+            ('FrontLower.' + s, V(x * 0.7, -0.66, 0.4), V(x * 0.76, -0.78, 0.14), 'FrontUpper.' + s),
+            ('FrontFoot.' + s, V(x * 0.76, -0.78, 0.14), V(x * 0.8, -1.0, 0.06), 'FrontLower.' + s),
+            ('BackUpper.' + s, V(x * 0.45, 0.4, 0.58), V(x * 0.96, 0.34, 0.42), 'Body'),
+            ('BackLower.' + s, V(x * 0.96, 0.34, 0.42), V(x * 1.02, 0.1, 0.14), 'BackUpper.' + s),
+            ('BackFoot.' + s, V(x * 1.02, 0.1, 0.14), V(x * 1.06, -0.14, 0.06), 'BackLower.' + s),
         ]
     return b
 
@@ -92,130 +92,189 @@ def solid(mb, region, a, b):
     return ATLAS.uv(region, a, b)
 
 
+def _surface(tris, p, n):
+    """Project p onto the surface along -n (ray from outside)."""
+    o = np.asarray(p, float) + np.asarray(n, float) * 1.2
+    t = raycast(o, -np.asarray(n, float), tris)
+    return None if t is None else o - np.asarray(n, float) * t
+
+
+def conform_disc(mb, tris, c, n, r, w, segs, uvc, part, lift=0.008, uv_fn=None, inside=None):
+    """A decal disc that hugs the surface: ring verts projected onto the surface along n and lifted."""
+    n = nrm(np.asarray(n, float))
+    up = nrm(V(0, 0, 1) - n * n[2]) if abs(n[2]) < 0.95 else nrm(V(0, -1, 0) - n * n[1])
+    side = nrm(np.cross(up, n))
+    cs = _surface(tris, c, n)
+    cs = c if cs is None else cs
+    ring = []
+    for k in range(segs):
+        a = 2 * math.pi * k / segs
+        q = cs + (side * math.cos(a) + up * math.sin(a)) * r
+        s = _surface(tris, q, n)
+        s = q if s is None else s
+        ring.append((mb.vert(s + n * lift, w), uv_fn(a) if uv_fn else uvc))
+    ci = mb.vert(cs + n * (lift + 0.004), w)
+    ins = cs - n * 0.4 if inside is None else inside
+    for k in range(segs):
+        k2 = (k + 1) % segs
+        mb.face([ring[k][0], ring[k2][0], ci], [ring[k][1], ring[k2][1], uv_fn(None) if uv_fn else uvc], inside=ins, part=part)
+    return side, up
+
+
 # ---------------------------------------------------------------- build
+EYE_C = {1: V(0.28, -1.22, 1.32), -1: V(-0.28, -1.22, 1.32)}
+
+
 def build():
     mb = MB()
     mb.mat = 0
-    # one connected body + head loft (rear -> snout): long, low, crouched; broad head
     W_B, W_C, W_H = {'Body': 1}, {'Chest': 1}, {'Head': 1}
-    stations = [
-        (V(0, 0.92, 0.46), (0.3, 0.22), W_B),
-        (V(0, 0.7, 0.52), (0.62, 0.38), W_B),
-        (V(0, 0.4, 0.56), (0.78, 0.46), W_B),
-        (V(0, 0.08, 0.58), (0.76, 0.47), {'Body': 0.6, 'Chest': 0.4}),
-        (V(0, -0.24, 0.6), (0.72, 0.47), W_C),
-        (V(0, -0.5, 0.7), (0.78, 0.52), {'Chest': 0.4, 'Head': 0.6}),
-        (V(0, -0.76, 0.82), (0.84, 0.6), W_H),
-        (V(0, -1.0, 0.86), (0.76, 0.54), W_H),
-        (V(0, -1.18, 0.82), (0.56, 0.4), W_H),
+    # one connected body + neck + head loft: long low body rising to a tall, rounded, raised head
+    st = [
+        (V(0, 0.98, 0.5), (0.3, 0.24), W_B),
+        (V(0, 0.76, 0.56), (0.6, 0.4), W_B),
+        (V(0, 0.46, 0.62), (0.76, 0.48), W_B),
+        (V(0, 0.12, 0.66), (0.74, 0.48), {'Body': 0.6, 'Chest': 0.4}),
+        (V(0, -0.2, 0.74), (0.68, 0.48), W_C),
+        (V(0, -0.5, 0.9), (0.62, 0.5), {'Chest': 0.4, 'Head': 0.6}),
+        (V(0, -0.78, 1.06), (0.66, 0.56), W_H),
+        (V(0, -1.02, 1.12), (0.62, 0.52), W_H),
+        (V(0, -1.2, 1.08), (0.48, 0.4), W_H),
     ]
-    tube(mb, 'skin', [s[0] for s in stations], [s[1] for s in stations], 14, [s[2] for s in stations], 'body',
-         start='point', end='point', start_pt=V(0, 1.0, 0.44), end_pt=V(0, -1.31, 0.8))
-    # cream lower jaw / throat, buried into the head; it drops open on the croak
-    jaw = [(V(0, -0.42, 0.42), (0.52, 0.26)), (V(0, -0.72, 0.46), (0.72, 0.4)), (V(0, -1.0, 0.58), (0.68, 0.36)),
-           (V(0, -1.2, 0.68), (0.44, 0.22))]
-    jw = [{'Chest': 0.5, 'Jaw': 0.5}, {'Jaw': 1}, {'Jaw': 1}, {'Jaw': 1}]
-    tube(mb, 'jaw', [j[0] for j in jaw], [j[1] for j in jaw], 12, jw, 'jaw', start='point', end='point',
-         start_pt=V(0, -0.3, 0.42), end_pt=V(0, -1.29, 0.72))
-    # the smile is the line where the blue head meets the cream throat (as on the card)
-    # eye sockets with heavy brows (blue), on the upper sides of the head
-    for s, x in (('L', 1), ('R', -1)):
-        c0 = V(x * 0.34, -0.86, 1.16)
-        d = nrm(V(x * 0.62, -0.6, 0.5))
-        tube(mb, 'brow', [c0, c0 + d * 0.12, c0 + d * 0.2], [(0.26, 0.26), (0.29, 0.28), (0.27, 0.26)], 12,
-             [W_H] * 3, 'socket' + s, start='point', end='open', side_hint=V(0, 0, 1))
-    # legs: buried in the body, chunky, elbows/knees out
+    tube(mb, 'skin', [s[0] for s in st], [s[1] for s in st], 14, [s[2] for s in st], 'body',
+         start='point', end='point', start_pt=V(0, 1.06, 0.48), end_pt=V(0, -1.32, 1.04))
+    # raised eye bumps on the front-top of the head (the eye decals sit flat on their fronts)
+    for x in (1, -1):
+        n = nrm(V(x * 0.28, -1.0, 0.18))
+        c = EYE_C[x]
+        tube(mb, 'brow', [c - n * 0.3, c - n * 0.14, c - n * 0.02], [(0.24, 0.24), (0.31, 0.3), (0.29, 0.28)], 12,
+             [W_H] * 3, 'eyebump', start='point', end='point', start_pt=c - n * 0.34, end_pt=c + n * 0.03,
+             side_hint=V(0, 0, 1))
+    head_tris = tris_of(mb, {'body', 'eyebump'})
+    # cream throat + belly: a big rounded bulge from the chin, down the chest, under the body
+    bel = [(V(0, -1.1, 0.86), (0.5, 0.24), {'Head': 0.6, 'Jaw': 0.4}),
+           (V(0, -0.98, 0.74), (0.56, 0.36), {'Jaw': 1}),
+           (V(0, -0.72, 0.56), (0.6, 0.42), {'Jaw': 0.7, 'Chest': 0.3}),
+           (V(0, -0.36, 0.44), (0.62, 0.38), {'Chest': 0.7, 'Jaw': 0.3}),
+           (V(0, 0.04, 0.4), (0.6, 0.32), {'Chest': 0.4, 'Body': 0.6}),
+           (V(0, 0.42, 0.42), (0.5, 0.26), W_B)]
+    tube(mb, 'jaw', [b[0] for b in bel], [b[1] for b in bel], 12, [b[2] for b in bel], 'belly',
+         start='point', end='point', start_pt=V(0, -1.08, 0.98), end_pt=V(0, 0.62, 0.46), side_hint=V(1, 0, 0))
+    # legs: front straighter and planted (chest lifted), back splayed wide; buried in the body
     for s, x in (('L', 1), ('R', -1)):
         fu, fl, ff = 'FrontUpper.' + s, 'FrontLower.' + s, 'FrontFoot.' + s
-        front = [(V(x * 0.36, -0.42, 0.52), (0.24, 0.26), {'Chest': 0.6, fu: 0.4}),
-                 (V(x * 0.62, -0.5, 0.44), (0.26, 0.26), {fu: 1}),
-                 (V(x * 0.78, -0.56, 0.34), (0.24, 0.24), {fu: 0.5, fl: 0.5}),
-                 (V(x * 0.82, -0.66, 0.2), (0.2, 0.2), {fl: 1}),
-                 (V(x * 0.85, -0.78, 0.15), (0.2, 0.14), {fl: 0.4, ff: 0.6}),
-                 (V(x * 0.87, -0.92, 0.1), (0.23, 0.09), {ff: 1})]
+        front = [(V(x * 0.36, -0.48, 0.7), (0.24, 0.26), {'Chest': 0.6, fu: 0.4}),
+                 (V(x * 0.58, -0.6, 0.54), (0.24, 0.24), {fu: 1}),
+                 (V(x * 0.7, -0.67, 0.38), (0.22, 0.22), {fu: 0.5, fl: 0.5}),
+                 (V(x * 0.74, -0.74, 0.24), (0.2, 0.2), {fl: 1}),
+                 (V(x * 0.77, -0.82, 0.14), (0.21, 0.16), {fl: 0.4, ff: 0.6}),
+                 (V(x * 0.79, -0.94, 0.11), (0.24, 0.1), {ff: 1})]
         tube(mb, 'limb', [f[0] for f in front], [f[1] for f in front], 10, [f[2] for f in front], 'front' + s,
-             start='point', end='point', end_pt=V(x * 0.88, -1.0, 0.07), start_pt=V(x * 0.2, -0.4, 0.55))
+             start='point', end='point', end_pt=V(x * 0.8, -1.02, 0.1), start_pt=V(x * 0.18, -0.44, 0.74))
         bu, bl, bf = 'BackUpper.' + s, 'BackLower.' + s, 'BackFoot.' + s
-        back = [(V(x * 0.4, 0.36, 0.54), (0.34, 0.36), {'Body': 0.6, bu: 0.4}),
-                (V(x * 0.72, 0.32, 0.5), (0.36, 0.34), {bu: 1}),
-                (V(x * 0.9, 0.24, 0.38), (0.3, 0.28), {bu: 0.5, bl: 0.5}),
-                (V(x * 0.95, 0.1, 0.2), (0.21, 0.2), {bl: 1}),
-                (V(x * 0.98, -0.04, 0.15), (0.2, 0.14), {bl: 0.4, bf: 0.6}),
-                (V(x * 1.0, -0.18, 0.1), (0.23, 0.09), {bf: 1})]
+        back = [(V(x * 0.42, 0.4, 0.6), (0.34, 0.36), {'Body': 0.6, bu: 0.4}),
+                (V(x * 0.76, 0.38, 0.54), (0.36, 0.34), {bu: 1}),
+                (V(x * 0.96, 0.32, 0.4), (0.3, 0.28), {bu: 0.5, bl: 0.5}),
+                (V(x * 1.0, 0.18, 0.24), (0.21, 0.2), {bl: 1}),
+                (V(x * 1.03, 0.04, 0.15), (0.21, 0.15), {bl: 0.4, bf: 0.6}),
+                (V(x * 1.05, -0.1, 0.11), (0.24, 0.1), {bf: 1})]
         tube(mb, 'limb', [f[0] for f in back], [f[1] for f in back], 10, [f[2] for f in back], 'back' + s,
-             start='point', end='point', end_pt=V(x * 1.01, -0.26, 0.07), start_pt=V(x * 0.22, 0.38, 0.56))
-        # chunky yellow toe pads (3 front, 3 back), buried in the foot
-        for foot, bone, fwd in ((V(x * 0.87, -0.96, 0.1), ff, -0.96), (V(x * 1.0, -0.22, 0.1), bf, -0.22)):
+             start='point', end='point', end_pt=V(x * 1.06, -0.18, 0.1), start_pt=V(x * 0.2, 0.42, 0.62))
+        # three chunky rounded yellow toe-claws per foot
+        for foot, bone in ((V(x * 0.8, -0.98, 0.1), ff), (V(x * 1.06, -0.16, 0.1), bf)):
             for k in (-1, 0, 1):
-                ang = math.radians(k * 32)
-                dirv = nrm(V(x * math.sin(ang) * 0.9 + x * 0.25, -math.cos(ang), 0))
-                base = foot + dirv * 0.05 + V(0, 0, 0.0)
-                tip = base + dirv * 0.16
-                tube(mb, 'pad', [base, base + dirv * 0.07, tip], [(0.09, 0.08), (0.1, 0.085), (0.08, 0.07)],
-                     6, [{bone: 1}] * 3, 'pad', start='point', end='point', start_pt=base - dirv * 0.06,
-                     end_pt=tip + dirv * 0.05, side_hint=V(0, 0, 1))
+                ang = math.radians(k * 34 + x * 10)
+                dirv = nrm(V(x * 0.0 + math.sin(ang), -math.cos(ang), -0.05))
+                base = foot + dirv * 0.03
+                tip = base + dirv * 0.2
+                tube(mb, 'pad', [base, base + dirv * 0.09, tip], [(0.105, 0.09), (0.11, 0.09), (0.085, 0.07)],
+                     8, [{bone: 1}] * 3, 'pad', start='point', end='point', start_pt=base - dirv * 0.08,
+                     end_pt=tip + dirv * 0.07, side_hint=V(0, 0, 1))
     # short tail nub
-    tube(mb, 'tail', [V(0, 0.82, 0.46), V(0, 0.98, 0.42), V(0, 1.1, 0.36)], [(0.16, 0.13), (0.12, 0.1), (0.07, 0.06)],
+    tube(mb, 'tail', [V(0, 0.86, 0.5), V(0, 1.0, 0.46), V(0, 1.12, 0.4)], [(0.16, 0.13), (0.12, 0.1), (0.07, 0.06)],
          8, [{'Body': 0.5, 'Tail': 0.5}, {'Tail': 1}, {'Tail': 1}], 'tail', start='point', end='point',
-         start_pt=V(0, 0.7, 0.48), end_pt=V(0, 1.18, 0.32))
-    # spikes down the spine and the crest at the back of the head (chunky gems, rigid weights)
+         start_pt=V(0, 0.74, 0.52), end_pt=V(0, 1.2, 0.36))
+    # the heavy brows are painted into the eye decal (a lid slanting down toward the nose)
+    # the wide smile: a thin dark line conforming to the head where blue meets cream, curving up at the corners
+    pts = []
+    for i in range(9):
+        t = -1 + 2 * i / 8
+        p = V(t * 0.44, -1.2, 0.97 + 0.12 * t * t)
+        n = nrm(V(t * 0.7, -1, 0.1))
+        s_ = _surface(head_tris, p, n)
+        pts.append((s_ if s_ is not None else p) + n * 0.012)
+    tube(mb, 'mouth', pts, [(0.024, 0.014)] * len(pts), 4, [W_H] * len(pts), 'smile', start='flat', end='flat',
+         side_hint=V(0, 0, 1), anti=False)
+    # yellow cheek dots near each mouth corner
+    for x in (1, -1):
+        conform_disc(mb, head_tris, V(x * 0.42, -1.16, 1.06), nrm(V(x * 0.55, -0.8, 0.1)), 0.075, W_H, 8,
+                     solid(mb, 'yellow', 0.5, 0.2), 'cheek')
+    # spikes down the spine (chunky gems, rigid weights) + one big swept-back bolt horn as the head crest
     yb, yt = solid(mb, 'yellow', 0.3, 0.7), solid(mb, 'yellow', 0.6, 0.2)
-    for (by, bz, ty, tz, wdt, ht, bone) in ((-0.42, 1.24, -0.16, 1.62, 0.44, 0.18, 'Head'),
-                                            (-0.02, 1.02, 0.16, 1.34, 0.34, 0.15, 'Chest'),
-                                            (0.32, 0.98, 0.5, 1.24, 0.3, 0.13, 'Body'),
-                                            (0.62, 0.86, 0.78, 1.06, 0.22, 0.1, 'Body')):
+    for (by, bz, ty, tz, wdt, ht, bone) in ((-0.2, 1.14, -0.04, 1.42, 0.3, 0.13, 'Chest'),
+                                            (0.16, 1.06, 0.34, 1.32, 0.3, 0.13, 'Body'),
+                                            (0.48, 1.0, 0.66, 1.2, 0.24, 0.11, 'Body'),
+                                            (0.76, 0.86, 0.9, 1.02, 0.18, 0.09, 'Body')):
         bipyramid(mb, V(0, by, bz), V(0, ty, tz), V(1, 0, 0), V(0, 1, 0), wdt, ht, {bone: 1}, yb, yt, 'spike',
                   wide_at=0.35, ridge_at=0.3)
-    # crest side fins at the back of the head
-    # ---- face decal (mat 1): flush round eyes, a disc just in front of each socket
-    mb.mat = 1
-    for s, x in (('L', 1), ('R', -1)):
-        c0 = V(x * 0.34, -0.86, 1.16)
-        d = nrm(V(x * 0.62, -0.6, 0.5))
-        c = c0 + d * 0.205
-        up = nrm(V(0, 0, 1) - d * d[2])
-        side = nrm(np.cross(up, d))
-        if x < 0:
-            side = -side
-        ring = []
-        n = 14
-        for k in range(n):
-            a = 2 * math.pi * k / n
-            p = c + (side * math.cos(a) + up * math.sin(a)) * 0.235
-            ring.append((mb.vert(p, W_H), (0.5 + 0.48 * math.cos(a), 0.5 + 0.48 * math.sin(a))))
-        ci = mb.vert(c + d * 0.012, W_H)
-        for k in range(n):
-            k2 = (k + 1) % n
-            mb.face([ring[k][0], ring[k2][0], ci], [ring[k][1], ring[k2][1], (0.5, 0.5)], inside=c - d * 0.3, part='eye')
-    # ---- level 2 extras (mat 2): taller crest + spike on each haunch
-    mb.mat = 2
-    bipyramid(mb, V(0, -0.62, 1.3), V(0, -0.5, 1.62), V(1, 0, 0), V(0, 1, 0), 0.22, 0.1, {'Head': 1}, yb, yt, 'L2',
-              wide_at=0.35, ridge_at=0.3)
-    for x in (1, -1):
-        bipyramid(mb, V(x * 0.62, 0.42, 0.86), V(x * 0.84, 0.48, 1.1), V(0, 1, 0), V(x, 0, 1), 0.2, 0.1, {'Body': 1},
-                  yb, yt, 'L2', wide_at=0.35, ridge_at=0.3)
-    # ---- level 3 extras (mat 3): a glowing star gem on the crest and shoulder spikes
-    mb.mat = 3
-    bipyramid(mb, V(0, -0.3, 1.5), V(0, -0.12, 1.86), V(1, 0, 0), V(0, 1, 0), 0.22, 0.14, {'Head': 1}, yb, yt, 'L3',
+    # crest: a zig-zag bolt horn (two stacked gems, kinked) swept back from the top of the head
+    bipyramid(mb, V(0, -0.72, 1.5), V(0, -0.5, 1.86), V(1, 0, 0), V(0, 1, 0), 0.36, 0.14, W_H, yb, yt, 'crest',
               wide_at=0.4, ridge_at=0.35)
+    bipyramid(mb, V(0, -0.6, 1.72), V(0, -0.24, 1.98), V(1, 0, 0), V(0, 1, 0), 0.3, 0.12, W_H, yb, yt, 'crest',
+              wide_at=0.3, ridge_at=0.3)
+    # ---- face decal (mat 1): BIG round eyes set high on the front of the head, facing forward
+    mb.mat = 1
     for x in (1, -1):
-        bipyramid(mb, V(x * 0.56, -0.3, 0.92), V(x * 0.78, -0.24, 1.18), V(0, 1, 0), V(x, 0, 1), 0.2, 0.1,
-                  {'Chest': 1}, yb, yt, 'L3', wide_at=0.35, ridge_at=0.3)
+        n = nrm(V(x * 0.28, -1.0, 0.18))
+
+        def uvf(a, x=x):
+            if a is None:
+                return (0.5, 0.5)
+            return (0.5 + 0.48 * math.cos(a) * (1 if x > 0 else -1), 0.5 + 0.48 * math.sin(a))
+        conform_disc(mb, head_tris, EYE_C[x], n, 0.25, W_H, 16, None, 'eye', lift=0.01, uv_fn=uvf)
+    # ---- level 2 extras (mat 2): haunch spikes + a third crest kink
+    mb.mat = 2
+    for x in (1, -1):
+        bipyramid(mb, V(x * 0.62, 0.46, 0.94), V(x * 0.84, 0.52, 1.16), V(0, 1, 0), V(x, 0, 1), 0.2, 0.1, W_B,
+                  yb, yt, 'L2', wide_at=0.35, ridge_at=0.3)
+    # ---- level 3 extras (mat 3): shoulder spikes + a star gem at the crest base
+    mb.mat = 3
+    for x in (1, -1):
+        bipyramid(mb, V(x * 0.52, -0.3, 1.0), V(x * 0.74, -0.24, 1.24), V(0, 1, 0), V(x, 0, 1), 0.2, 0.1, W_C,
+                  yb, yt, 'L3', wide_at=0.35, ridge_at=0.3)
+    bipyramid(mb, V(0, -0.86, 1.52), V(0, -0.86, 1.74), V(1, 0, 0), V(0, -1, 0), 0.2, 0.2, W_H, yb, yt, 'L3',
+              wide_at=0.5, ridge_at=0.5)
     mb.mat = 0
     return mb
 
 
 # ---------------------------------------------------------------- painting
 def _bolt_mask(h, w, cx, cy, sx, sy, rot=0.0):
-    """A star-burst lightning bolt polygon (pixel coords, cy down), filled with PIL, soft edge."""
-    from PIL import Image, ImageDraw, ImageFilter
-    pts = [(-0.06, -0.62), (0.3, -0.62), (0.1, -0.12), (0.4, -0.14), (-0.18, 0.66), (-0.02, 0.12), (-0.34, 0.14)]
-    c, s = math.cos(rot), math.sin(rot)
-    poly = [(cx + (x * c - y * s) * sx, cy + (x * s + y * c) * sy) for x, y in pts]
-    im = Image.new('L', (w, h), 0)
-    ImageDraw.Draw(im).polygon(poly, fill=255)
-    im = im.filter(ImageFilter.GaussianBlur(1.2))
-    return np.asarray(im, np.float32) / 255
+    """A lightning-bolt polygon (pixel coords, cy down), filled in numpy (even-odd rule), 4x supersampled edge.
+    Pure numpy: the module runs inside Blender, which has no PIL (pet-kit section 4)."""
+    pts = [(-0.12, -0.66), (0.4, -0.66), (0.16, -0.16), (0.52, -0.18), (-0.24, 0.7), (-0.04, 0.16), (-0.46, 0.18)]
+    c, s_ = math.cos(rot), math.sin(rot)
+    poly = np.array([(cx + (x * c - y * s_) * sx, cy + (x * s_ + y * c) * sy) for x, y in pts], np.float32)
+    x0, x1 = int(max(0, poly[:, 0].min() - 2)), int(min(w, poly[:, 0].max() + 3))
+    y0, y1 = int(max(0, poly[:, 1].min() - 2)), int(min(h, poly[:, 1].max() + 3))
+    out = np.zeros((h, w), np.float32)
+    if x1 <= x0 or y1 <= y0:
+        return out
+    acc = np.zeros((y1 - y0, x1 - x0), np.float32)
+    for oy in (0.125, 0.375, 0.625, 0.875):
+        for ox in (0.125, 0.375, 0.625, 0.875):
+            ys, xs = np.mgrid[y0:y1, x0:x1].astype(np.float32)
+            xs += ox; ys += oy
+            inside = np.zeros(xs.shape, bool)
+            n = len(poly)
+            for i in range(n):
+                xa, ya = poly[i]; xb, yb = poly[(i + 1) % n]
+                cond = ((ya > ys) != (yb > ys))
+                xint = (xb - xa) * (ys - ya) / ((yb - ya) if yb != ya else 1e-9) + xa
+                inside ^= cond & (xs < xint)
+            acc += inside
+    out[y0:y1, x0:x1] = acc / 16.0
+    return out
 
 
 def _disc(h, w, cx, cy, r, soft=1.5):
@@ -242,25 +301,23 @@ def paint_atlas(level):
     u /= w; v /= h
     up = np.cos((u - 0.5) * 2 * math.pi)            # +1 spine, -1 belly
     blue = grad((up + 1) / 2, [(0.0, NAVY), (0.35, BLUE_DK), (0.65, BLUE), (1.0, BLUE_HI)])
-    belly = ss(-0.42, -0.62, up)                      # cream on the underside
-    belly = np.maximum(belly, ss(0.84, 0.95, v) * ss(-0.05, -0.35, up))   # throat runs up the front
+    belly = ss(-0.2, -0.55, up) * ss(0.66, 0.8, v)     # under the head: cream, blending into the throat mesh
     c = blue * (1 - belly[..., None]) + grad(np.clip((up + 1) * 1.3, 0, 1), [(0, 'eadbb0'), (1, CREAM)]) * belly[..., None]
     c += grit(h, w, 3)[..., None] * 0.05
     marks = np.zeros((h, w), np.float32)
     # big star-burst bolts: down the back, on each flank, and on the top of the head
-    marks = np.maximum(marks, _bolt_mask(h, w, 0.5 * w, 0.4 * h, 0.24 * w, 0.62 * h, 0.12))
-    marks = np.maximum(marks, _bolt_mask(h, w, 0.31 * w, 0.42 * h, 0.15 * w, 0.48 * h, -0.25))
-    marks = np.maximum(marks, _bolt_mask(h, w, 0.69 * w, 0.42 * h, 0.15 * w, 0.48 * h, 0.25))
+    marks = np.maximum(marks, _bolt_mask(h, w, 0.5 * w, 0.36 * h, 0.22 * w, 0.5 * h, 0.1))
+    marks = np.maximum(marks, _bolt_mask(h, w, 0.28 * w, 0.42 * h, 0.12 * w, 0.32 * h, -0.3))
+    marks = np.maximum(marks, _bolt_mask(h, w, 0.72 * w, 0.42 * h, 0.12 * w, 0.32 * h, 0.3))
     if level >= 2:
-        marks = np.maximum(marks, _bolt_mask(h, w, 0.5 * w, 0.14 * h, 0.1 * w, 0.22 * h, -0.1))
+        marks = np.maximum(marks, _bolt_mask(h, w, 0.5 * w, 0.08 * h, 0.12 * w, 0.14 * h, -0.1))
     # warts on the back and flanks, cheek dots near the snout
     rng = np.random.default_rng(11)
     spots = np.zeros((h, w), np.float32)
     for uu, vv, rr in ((0.42, 0.12, 0.012), (0.58, 0.14, 0.011), (0.36, 0.7, 0.01), (0.64, 0.7, 0.01),
                        (0.24, 0.2, 0.011), (0.76, 0.2, 0.011)):
         spots = np.maximum(spots, _disc(h, w, uu * w, vv * h, rr * w))
-    for uu in (0.31, 0.69):   # cheek dots under the eyes
-        spots = np.maximum(spots, _disc(h, w, uu * w, 0.9 * h, 0.022 * w))
+
     marks = np.maximum(marks, spots)
     ycol = grad(np.clip(marks, 0, 1), [(0, YEL_DK), (0.5, YEL), (0.97, YEL), (1.0, 'ffe866')])
     c = c * (1 - marks[..., None]) + ycol * marks[..., None]
@@ -274,7 +331,7 @@ def paint_atlas(level):
     v, u = np.mgrid[0:h, 0:w].astype(np.float32)
     u /= w
     up = np.cos((u - 0.5) * 2 * math.pi)
-    col[y0:y1, x0:x1] = grad((up + 1) / 2, [(0, 'e3cf98'), (0.6, CREAM), (1, CREAM_HI)]) + grit(h, w, 5)[..., None] * 0.03
+    col[y0:y1, x0:x1] = grad((up + 1) / 2, [(0, 'e6cf92'), (0.55, CREAM), (1, 'fbeec4')]) + grit(h, w, 5)[..., None] * 0.02
     rgh[y0:y1, x0:x1] = 0.45
     # --- legs: blue with a bolt on the outer side, darker toward the feet
     y0, y1, x0, x1 = R['limb']
@@ -283,8 +340,8 @@ def paint_atlas(level):
     u /= w; v /= h
     up = np.cos((u - 0.5) * 2 * math.pi)
     lc = grad((up + 1) / 2 * (1 - 0.35 * v), [(0, NAVY), (0.4, BLUE_DK), (0.75, BLUE), (1, BLUE_HI)])
-    lm = np.maximum(_bolt_mask(h, w, 0.25 * w, 0.42 * h, 0.09 * w, 0.42 * h, 0.1),
-                    _bolt_mask(h, w, 0.75 * w, 0.42 * h, 0.09 * w, 0.42 * h, -0.1))
+    lm = np.maximum(_bolt_mask(h, w, 0.25 * w, 0.4 * h, 0.13 * w, 0.52 * h, 0.1),
+                    _bolt_mask(h, w, 0.75 * w, 0.4 * h, 0.13 * w, 0.52 * h, -0.1))
     lc = lc * (1 - lm[..., None]) + grad(lm, [(0, YEL_DK), (0.5, YEL), (1, YEL)]) * lm[..., None]
     col[y0:y1, x0:x1] = lc + grit(h, w, 6)[..., None] * 0.04
     hgt[y0:y1, x0:x1] = lm * 0.3
@@ -335,6 +392,9 @@ def emissive_mask(level):
     return np.repeat(g[..., None], 3, -1)
 
 
+LID_Y, LID_SLANT = 0.4, 0.55
+
+
 def face_texture(level, size=512):
     """mat 1: one round eye (used by both discs): glossy yellow iris, dark rim, big round pupil, two highlights."""
     x, y = coords(size)
@@ -344,15 +404,15 @@ def face_texture(level, size=512):
     iris = iris * (1 - 0.25 * ss(0.7, 1.0, r))[..., None]
     rim = ss(0.86, 0.93, r)
     c = iris * (1 - rim[..., None]) + hx('15204a') * rim[..., None]
-    py = y + 0.02
+    py = y - 0.04
     pupil = ss(0.47, 0.44, np.sqrt((x * 0.95) ** 2 + py ** 2))
     c = c * (1 - pupil[..., None]) + hx('0d0d16') * pupil[..., None]
     for hx_, hy_, hr in ((-0.2, 0.26, 0.17), (0.2, -0.22, 0.07)):
         hl = ss(hr, hr * 0.75, np.sqrt((x - hx_) ** 2 + (y - hy_) ** 2))
         c = c * (1 - hl[..., None]) + hl[..., None]
-    lid = ss(-0.02, 0.04, y - (0.62 + 0.2 * x))       # the brow lid edge slants down toward the nose
+    lid = ss(-0.02, 0.04, y - (LID_Y + LID_SLANT * x))       # the brow lid edge slants down toward the nose
     lidc = grad(np.clip(0.5 + y * 0.5, 0, 1), [(0, '1636a8'), (1, '3a7af0')])
-    edge = ss(0.07, 0.0, np.abs(y - (0.62 + 0.2 * x))) * (1 - lid)
+    edge = ss(0.07, 0.0, np.abs(y - (LID_Y + LID_SLANT * x))) * (1 - lid)
     c = c * (1 - lid[..., None]) + lidc * lid[..., None]
     c = c * (1 - 0.7 * edge[..., None]) + hx('0d1640') * 0.7 * edge[..., None]
     rgba[..., :3] = c
@@ -383,7 +443,7 @@ def anim_idle():
         keys[f] = {'Body': P(loc=(0, 0, 0.015 * math.sin(t))),
                    'Chest': P(('x', 1.5 * math.sin(t))),
                    'Head': P(('z', 5 * math.sin(t * 0.5)), ('x', -2 * math.sin(t))),
-                   'Jaw': P(loc=(0, 0, -0.012 * max(0, math.sin(t * 2)))),
+                   'Jaw': P(loc=(0, -0.02 * max(0, math.sin(t * 2)), -0.01 * max(0, math.sin(t * 2)))),
                    'Tail': P(('z', 8 * math.sin(t)))}
     keys[48] = keys[0]
     return {'frames': 48, 'loop': True, 'keys': keys}
@@ -440,7 +500,7 @@ def anim_ability():
         rise = max(0.0, min(1.0, rise))
         p = {'Body': P(('x', -10 * rise), loc=(0, 0, 0.06 * rise)),
              'Head': P(('x', -14 * rise)),
-             'Jaw': P(('x', 22 * rise), loc=(0, 0, -0.04 * rise))}
+             'Jaw': P(loc=(0, -0.1 * rise, -0.06 * rise))}
         for s, x in (('L', 1), ('R', -1)):
             p['FrontUpper.' + s] = P(('y', -x * 14 * rise), ('x', -10 * rise))
         keys[f] = p
