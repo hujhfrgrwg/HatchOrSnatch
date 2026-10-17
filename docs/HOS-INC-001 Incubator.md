@@ -37,15 +37,15 @@ The lobby incubator (`Workspace.Incubator.Incubator`) is now animated and wired 
 | `IncubatorLogic` | `incubator.unseen` (each settled shard's rarity, capped at 12), `markSeen`, and `view` includes `unseen`. Hatching clears it. |
 | `EggService` | New `EOS_Egg.SeenShards` remote (1 s cooldown) calling `IncubatorLogic.markSeen` |
 | `EggTests.ProfileIncubatorSpec` | 3 tests for the unseen list |
-| `docs/HOS-INC-001/IncubatorEggPieces.obj` | The 18 pieces, ready for Studio's 3D Importer |
+| `docs/HOS-INC-001/IncubatorEggPieces.glb` | The 18 pieces, ready for Studio's 3D Importer (made from the `.obj` by `tools/build/HOS-INC-001_obj2glb.py`; the importer merges an OBJ's objects into one mesh, so use the `.glb`) |
 
 The Incubator model's `ModelStreamingMode` is `Atomic`, so the client gets it whole.
 
 ## To do in Studio: import the egg pieces (one time)
 The game builds each piece from a baked mesh. I generated them, but a plugin can't upload meshes yet ("CreateAssetAsync … not available yet"), so they need one pass through the 3D Importer. Until then the egg uses the fallback: the same cracks and animation, drawn with wedge parts in flat rarity colours and without the shard texture.
 
-1. Get `docs/HOS-INC-001/IncubatorEggPieces.obj` from the `matthew` branch.
-2. In Studio, go to **File → Import 3D** and pick the file. Set the creator to the group **Eggs with Friends**, then import. It should arrive as a model named `IncubatorEggPieces` containing `Piece1` … `Piece18`.
+1. Get `docs/HOS-INC-001/IncubatorEggPieces.glb` from the `matthew` branch.
+2. In Studio, go to **File → Import 3D** and pick the file. Set the creator to the group **Eggs with Friends**, then import. The preview should list `Piece1` … `Piece18` as separate parts.
 3. In the command bar, run:
    `print(require(game.ServerStorage.EOSBuild.BakeIncubatorEgg).adopt(workspace.IncubatorEggPieces))`
    This checks each piece's size, moves the pieces into `ReplicatedStorage.IncubatorEggPieces` with the attributes the client needs, and removes the empty import model.
