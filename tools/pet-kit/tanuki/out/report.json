@@ -1,0 +1,63 @@
+{
+ "total": 1444,
+ "by_mat": {
+  "0": 1128,
+  "1": 36,
+  "2": 146,
+  "3": 134
+ },
+ "by_part": {
+  "body": 140,
+  "head": 96,
+  "ear": 16,
+  "leaf": 8,
+  "scarf": 136,
+  "scroll": 120,
+  "strap": 96,
+  "frontL": 80,
+  "backL": 80,
+  "claw": 96,
+  "frontR": 80,
+  "backR": 80,
+  "tail": 100,
+  "faceshell": 36,
+  "L2": 146,
+  "L3": 134
+ },
+ "bones": 22,
+ "open_edges_body": {
+  "scarf": 10,
+  "strap": 8
+ },
+ "bbox_min": [
+  -0.5,
+  -0.56,
+  -0.009
+ ],
+ "bbox_max": [
+  0.5,
+  1.119,
+  1.976
+ ],
+ "tris_per_level": {
+  "1": 1164,
+  "2": 1310,
+  "3": 1444
+ },
+ "lowest_z": -0.00902903378454601,
+ "clip": [
+  "Idle f0: 4 toe verts inside body",
+  "Idle f2: 4 toe verts inside body",
+  "Idle f4: 4 toe verts inside body",
+  "Idle f6: 4 toe verts inside body",
+  "Idle f8: 4 toe verts inside body",
+  "Idle f10: 2 toe verts inside body",
+  "Idle f12: 2 toe verts inside body",
+  "Idle f14: 2 toe verts inside body",
+  "Idle f16: 4 toe verts inside body",
+  "Idle f18: 4 toe verts inside body",
+  "Idle f20: 1 toe verts inside body",
+  "Idle f22: 1 toe verts inside body"
+ ],
+ "issues": []
+}

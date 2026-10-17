@@ -254,6 +254,10 @@ def run():
     if 'emissive_mask' in globals():
         for lv, suf in ((1, ''), (2, '_L2'), (3, '_L3')):
             save_rgba(NAME + '_Emit' + suf, emissive_mask(lv), data=True)
+    # HOS addition: face decal emissive masks (glowing eyes / runes), when the module paints them
+    if 'face_emissive' in globals():
+        for lv, suf in ((1, ''), (2, '_L2'), (3, '_L3')):
+            save_rgba(NAME + '_FaceEmit' + suf, face_emissive(lv), data=True)
     m_body = make_body_material(col_img, nrm_img, rgh_img)
     m_face = make_face_material(face1)
 
@@ -276,7 +280,7 @@ def run():
     tc = lambda o: sum(len(p.vertices) - 2 for p in o.data.polygons)
     counts = {o.name: tc(o) for o in objs}
     os.makedirs(SAVE_DIR, exist_ok=True)
-    bpy.data.libraries.write(os.path.join(SAVE_DIR, NAME + '_Pet.blend'), {scn}, fake_user=True, compress=True)
+    bpy.data.libraries.write(os.path.join(SAVE_DIR, NAME + '_Pet.blend'), {scn, *acts.values()}, fake_user=True, compress=True)  # HOS: keep the actions
     # FBX in the bind pose: textures referenced by file name, found next to the .fbx by Studio's importer
     rig.data.pose_position = 'REST'
     keep = {o.name for o in objs} | {rig.name}      # HOS: by name; object identity fails in headless Blender

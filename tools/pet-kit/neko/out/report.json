@@ -1,0 +1,50 @@
+{
+ "total": 1417,
+ "by_mat": {
+  "0": 1222,
+  "1": 35,
+  "2": 80,
+  "3": 80
+ },
+ "by_part": {
+  "body": 168,
+  "head": 112,
+  "ear": 16,
+  "cheek": 32,
+  "collar": 120,
+  "gold": 62,
+  "frontL": 80,
+  "backL": 80,
+  "claw": 96,
+  "tail": 160,
+  "fire": 64,
+  "frontR": 80,
+  "backR": 80,
+  "ruff": 72,
+  "faceshell": 35,
+  "L2": 80,
+  "L3": 80
+ },
+ "bones": 25,
+ "open_edges_body": {
+  "collar": 10
+ },
+ "bbox_min": [
+  -0.565,
+  -1.11,
+  0.037
+ ],
+ "bbox_max": [
+  0.565,
+  1.434,
+  2.577
+ ],
+ "tris_per_level": {
+  "1": 1257,
+  "2": 1337,
+  "3": 1417
+ },
+ "lowest_z": 0.03653654733371485,
+ "clip": [],
+ "issues": []
+}

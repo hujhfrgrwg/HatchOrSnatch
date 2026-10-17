@@ -1,0 +1,53 @@
+{
+ "total": 1949,
+ "by_mat": {
+  "0": 1504,
+  "1": 33,
+  "2": 168,
+  "3": 244
+ },
+ "by_part": {
+  "body": 168,
+  "head": 96,
+  "ear": 160,
+  "gold": 288,
+  "scarf": 128,
+  "gem": 8,
+  "dial": 16,
+  "strap": 112,
+  "frontL": 80,
+  "claw": 96,
+  "frontR": 80,
+  "tail": 48,
+  "faceshell": 33,
+  "L2": 168,
+  "L3": 244,
+  "backL": 112,
+  "backR": 112
+ },
+ "bones": 21,
+ "open_edges_body": {
+  "gold": 18,
+  "scarf": 10,
+  "dial": 16,
+  "strap": 8
+ },
+ "bbox_min": [
+  -0.431,
+  -0.299,
+  0.0
+ ],
+ "bbox_max": [
+  0.453,
+  1.167,
+  2.402
+ ],
+ "tris_per_level": {
+  "1": 1537,
+  "2": 1705,
+  "3": 1949
+ },
+ "lowest_z": 4.990644488621354e-05,
+ "clip": [],
+ "issues": []
+}

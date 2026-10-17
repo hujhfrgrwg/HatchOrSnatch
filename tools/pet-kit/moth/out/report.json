@@ -1,0 +1,57 @@
+{
+ "total": 1125,
+ "by_mat": {
+  "0": 780,
+  "1": 15,
+  "2": 178,
+  "3": 152
+ },
+ "by_part": {
+  "body": 288,
+  "fluff": 80,
+  "wing": 88,
+  "wing2": 80,
+  "ant": 16,
+  "arm": 72,
+  "gold": 156,
+  "faceshell": 15,
+  "L2": 178,
+  "L3": 152
+ },
+ "bones": 13,
+ "open_edges_body": {
+  "wing": 12,
+  "wing2": 12
+ },
+ "bbox_min": [
+  -1.066,
+  -0.368,
+  0.056
+ ],
+ "bbox_max": [
+  1.066,
+  0.58,
+  2.003
+ ],
+ "tris_per_level": {
+  "1": 795,
+  "2": 973,
+  "3": 1125
+ },
+ "lowest_z": 0.0558672305757682,
+ "clip": [
+  "Idle f0: 4 toe verts inside body",
+  "Idle f2: 4 toe verts inside body",
+  "Idle f4: 4 toe verts inside body",
+  "Idle f6: 4 toe verts inside body",
+  "Idle f8: 4 toe verts inside body",
+  "Idle f10: 4 toe verts inside body",
+  "Idle f12: 4 toe verts inside body",
+  "Idle f14: 4 toe verts inside body",
+  "Idle f16: 4 toe verts inside body",
+  "Idle f18: 4 toe verts inside body",
+  "Idle f20: 4 toe verts inside body",
+  "Idle f22: 4 toe verts inside body"
+ ],
+ "issues": []
+}

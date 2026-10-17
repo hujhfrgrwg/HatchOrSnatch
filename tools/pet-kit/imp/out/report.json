@@ -1,0 +1,52 @@
+{
+ "total": 1758,
+ "by_mat": {
+  "0": 1148,
+  "1": 50,
+  "2": 336,
+  "3": 224
+ },
+ "by_part": {
+  "body": 288,
+  "collar": 92,
+  "ear": 16,
+  "horn": 160,
+  "brow": 16,
+  "armL": 64,
+  "claw": 48,
+  "legL": 48,
+  "armR": 64,
+  "legR": 48,
+  "wing": 48,
+  "tail": 48,
+  "spade": 8,
+  "ring": 200,
+  "faceshell": 50,
+  "L2": 336,
+  "L3": 224
+ },
+ "bones": 19,
+ "open_edges_body": {
+  "ring": 10
+ },
+ "bbox_min": [
+  -0.92,
+  -0.379,
+  0.13
+ ],
+ "bbox_max": [
+  0.92,
+  0.98,
+  1.96
+ ],
+ "tris_per_level": {
+  "1": 1198,
+  "2": 1534,
+  "3": 1758
+ },
+ "lowest_z": 0.13,
+ "clip": [
+  "Ability f8: 4 toe verts inside body"
+ ],
+ "issues": []
+}

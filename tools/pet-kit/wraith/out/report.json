@@ -1,0 +1,49 @@
+{
+ "total": 1730,
+ "by_mat": {
+  "0": 992,
+  "1": 54,
+  "2": 416,
+  "3": 268
+ },
+ "by_part": {
+  "body": 224,
+  "head": 192,
+  "stem": 30,
+  "hood": 154,
+  "mantle": 40,
+  "tatter": 80,
+  "cape": 24,
+  "armL": 64,
+  "handL": 36,
+  "claw": 48,
+  "armR": 64,
+  "handR": 36,
+  "faceshell": 54,
+  "L2": 416,
+  "L3": 268
+ },
+ "bones": 14,
+ "open_edges_body": {
+  "stem": 6,
+  "hood": 14
+ },
+ "bbox_min": [
+  -0.804,
+  -0.497,
+  0.0
+ ],
+ "bbox_max": [
+  0.804,
+  0.92,
+  2.092
+ ],
+ "tris_per_level": {
+  "1": 1046,
+  "2": 1462,
+  "3": 1730
+ },
+ "lowest_z": 0.0,
+ "clip": [],
+ "issues": []
+}

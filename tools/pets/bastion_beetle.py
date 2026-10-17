@@ -268,10 +268,11 @@ body = b.finish_rigged(arm)
 # ===== face: small narrow glowing cyan eyes in dark sockets under the V brow (same on L1-L3) =====
 f = R.RigBuilder(PREFIX + "Face")
 for side in (-1, 1):
-    x, y, z = side * 0.21, -1.39, 0.74
-    f.sphere(SOCKET, (x, y + 0.02, z), (0.15, 0.05, 0.075), segs=8, rings=3, rot=(0, -side * 18, 0), bone="Head")
-    f.sphere(EYE, (x, y - 0.025, z), (0.11, 0.035, 0.038), segs=8, rings=3, rot=(0, -side * 18, 0), bone="Head")
-    f.sphere(EYE_HOT, (x + side * 0.01, y - 0.05, z + 0.003), (0.05, 0.02, 0.016), segs=6, rings=3, rot=(0, -side * 18, 0), bone="Head")
+    # (HOS-PET-REDO 17 Oct: bigger, sharper eyes, ~1.35x, narrower and slanted harder toward the nose)
+    x, y, z = side * 0.22, -1.39, 0.745
+    f.sphere(SOCKET, (x, y + 0.02, z), (0.2, 0.05, 0.085), segs=8, rings=3, rot=(0, -side * 24, 0), bone="Head")
+    f.sphere(EYE, (x, y - 0.025, z), (0.155, 0.035, 0.042), segs=8, rings=3, rot=(0, -side * 24, 0), bone="Head")
+    f.sphere(EYE_HOT, (x + side * 0.015, y - 0.05, z + 0.003), (0.07, 0.02, 0.018), segs=6, rings=3, rot=(0, -side * 24, 0), bone="Head")
 face = f.finish_rigged(arm)
 
 # ===== L2: a bigger crystal cluster on the back and brighter eye glow =====
@@ -280,7 +281,7 @@ crystal(l2, (0, 0.62, 1.12), (0, 0.55, 1), 0.46, 0.16, "Body")
 crystal(l2, (0.16, 0.5, 1.18), (0.5, 0.3, 1), 0.3, 0.1, "Body", mat=CRYSTAL_LT)
 crystal(l2, (-0.16, 0.5, 1.18), (-0.5, 0.3, 1), 0.3, 0.1, "Body", mat=CRYSTAL_LT)
 for side in (-1, 1):
-    l2.sphere(EYE_HOT, (side * 0.21, -1.445, 0.744), (0.085, 0.012, 0.02), segs=6, rings=3, rot=(0, -side * 18, 0), bone="Head")
+    l2.sphere(EYE_HOT, (side * 0.225, -1.445, 0.749), (0.12, 0.012, 0.022), segs=6, rings=3, rot=(0, -side * 24, 0), bone="Head")
 l2_ob = l2.finish_rigged(arm)
 
 # ===== L3: full crystal growth on the back and shoulders =====

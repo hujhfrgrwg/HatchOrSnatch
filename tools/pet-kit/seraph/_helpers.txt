@@ -1,0 +1,120 @@
+def _cum(centers):
+    c = [np.asarray(p, float) for p in centers]
+    d = [0.0]
+    for a, b in zip(c, c[1:]):
+        d.append(d[-1] + float(np.linalg.norm(b - a)))
+    return [x / max(d[-1], 1e-9) for x in d]
+
+
+def tube(mb, region, centers, radii, n, weights, part, start='point', end='point', start_pt=None, end_pt=None,
+         side_hint=None, anti=True, th0=-math.pi / 2):
+    vv = _cum(centers)
+
+    def profile(k, nn, a, b, i):
+        th = th0 + 2 * math.pi * (k + (0.5 if (anti and i % 2) else 0.0)) / nn
+        return a * math.cos(th), b * math.sin(th)
+
+    def uvf(i, k, seg, fk):
+        return ATLAS.uv(region, k / n, vv[i])
+    return loft(mb, centers, radii, n, weights, uvf, part, start=start, end=end, profile=profile,
+                start_pt=start_pt, end_pt=end_pt, side_hint=side_hint)
+
+
+def wing(mb, region, root, pts, w, part, thick=0.04):
+    """a flat wing: a fan of triangles from the root to an outline (pts), both faces, planar UV across the region."""
+    root = np.asarray(root, float)
+    allp = [root] + [np.asarray(p, float) for p in pts]
+    xs = [p[0] for p in allp]; zs = [p[2] for p in allp]
+    span = max(abs(max(xs) - root[0]), abs(min(xs) - root[0]), 1e-6)
+    zmin, zmax = min(zs), max(zs)
+
+    def uv(p):
+        a = abs(p[0] - root[0]) / span
+        b = (p[2] - zmin) / max(zmax - zmin, 1e-6)
+        return ATLAS.uv(region, 0.02 + 0.96 * a, 0.02 + 0.96 * (1 - b))
+    n = nrm(np.cross(allp[1] - root, allp[-1] - root))
+    top = [mb.vert(p + n * thick * 0.5, w) for p in allp]
+    bot = [mb.vert(p - n * thick * 0.5, w) for p in allp]
+    c = sum(allp) / len(allp)
+    for i in range(1, len(allp) - 1):
+        mb.face([top[0], top[i], top[i + 1]], [uv(allp[0]), uv(allp[i]), uv(allp[i + 1])], inside=c - n, part=part)
+        mb.face([bot[0], bot[i + 1], bot[i]], [uv(allp[0]), uv(allp[i + 1]), uv(allp[i])], inside=c + n, part=part)
+    for i in range(1, len(allp) - 1):
+        mb.face([top[i], bot[i], bot[i + 1], top[i + 1]], [uv(allp[i])] * 2 + [uv(allp[i + 1])] * 2, inside=c, part=part)
+
+
+def ring(mb, region, c, normal, R, r, n_around, n_tube, w, part, arc=1.0, a0=0.0):
+    normal = nrm(np.asarray(normal, float))
+    a = nrm(np.cross(normal, V(0, 0, 1) if abs(normal[2]) < 0.9 else V(1, 0, 0)))
+    b = np.cross(normal, a)
+    m = n_around + 1
+    cen = [np.asarray(c, float) + (a * math.cos(a0 + 2 * math.pi * arc * i / n_around) + b * math.sin(a0 + 2 * math.pi * arc * i / n_around)) * R
+           for i in range(m)]
+    rad = [(r * (math.sin(math.pi * i / n_around) * 0.85 + 0.15) if arc < 1 else r,) * 2 for i in range(m)]
+    tube(mb, region, cen, rad, n_tube, [w] * m, part, start='point' if arc < 1 else 'open', end='point' if arc < 1 else 'open',
+         side_hint=normal, anti=False)
+    return a, b
+
+
+def disc(mb, region, c, normal, R, n, w, part, thick=0.03):
+    """a thin closed disc (both faces), radial UV."""
+    normal = nrm(np.asarray(normal, float))
+    a = nrm(np.cross(normal, V(0, 0, 1)))
+    b = np.cross(normal, a)
+    c = np.asarray(c, float)
+    pts = [c + (a * math.cos(2 * math.pi * i / n) + b * math.sin(2 * math.pi * i / n)) * R for i in range(n)]
+    for sgn in (1, -1):
+        ci = mb.vert(c + normal * thick * 0.5 * sgn, w)
+        ring_ = [mb.vert(p + normal * thick * 0.5 * sgn, w) for p in pts]
+        for i in range(n):
+            j = (i + 1) % n
+            mb.face([ci, ring_[i], ring_[j]], [ATLAS.uv(region, 0.5, 0.5), ATLAS.uv(region, 0.5 + 0.48 * math.cos(2 * math.pi * i / n), 0.5 + 0.48 * math.sin(2 * math.pi * i / n)),
+                                               ATLAS.uv(region, 0.5 + 0.48 * math.cos(2 * math.pi * j / n), 0.5 + 0.48 * math.sin(2 * math.pi * j / n))],
+                    inside=c - normal * sgn, part=part)
+
+
+FX, FZ, FZH = 0.27, 1.42, 0.24
+HEAD_C = V(0, -0.15, 1.42)
+
+
+def _vnormals(mb, faces):
+    acc = {}
+    for fi in faces:
+        f = mb.F[fi]
+        a, b, c = mb.V[f[0]], mb.V[f[1]], mb.V[f[2]]
+        n = np.cross(b - a, c - a)
+        for v in f:
+            acc[v] = acc.get(v, np.zeros(3)) + n
+    return {v: nrm(n) for v, n in acc.items()}
+
+
+def face_shell(mb, faces, lift=0.008):
+    sel = [fi for fi in faces if all(mb.V[v][1] < -0.19 and 1.22 < mb.V[v][2] < 1.64 for v in mb.F[fi])]
+    vn = _vnormals(mb, faces)
+    remap = {}
+    for fi in sel:
+        for v in mb.F[fi]:
+            if v not in remap:
+                remap[v] = mb.vert(mb.V[v] + vn[v] * lift, dict(mb.W[v]))
+    face_shell.src = dict(remap)
+    for fi in sel:
+        f = mb.F[fi]
+        uvs = [(0.5 + mb.V[v][0] / (2 * FX), 0.5 + (mb.V[v][2] - FZ) / (2 * FZH)) for v in f]
+        mb.face([remap[v] for v in f], uvs, part='faceshell')
+
+
+def _wing_outline(x, tip, root_low, n_feath, lead):
+    """leading edge points (lead), then a jagged trailing edge of feather tips from the tip down to root_low."""
+    pts = [V(x * p[0], p[1], p[2]) for p in lead]
+    tx, ty, tz = tip
+    lx, ly, lz = root_low
+    for i in range(n_feath + 1):
+        t = i / n_feath
+        px = tx + (lx - tx) * t
+        pz = tz + (lz - tz) * t - 0.1 * math.sin(math.pi * t)
+        py = ty + (ly - ty) * t
+        if i % 2 == 1:      # notch between feathers
+            px -= 0.07 * (1 - 0.5 * t); pz += 0.06
+        pts.append(V(x * px, py, pz))
+    return pts
+

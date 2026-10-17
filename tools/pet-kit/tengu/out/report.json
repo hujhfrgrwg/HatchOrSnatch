@@ -1,0 +1,61 @@
+{
+ "total": 1460,
+ "by_mat": {
+  "0": 976,
+  "1": 20,
+  "2": 132,
+  "3": 332
+ },
+ "by_part": {
+  "body": 288,
+  "beak": 48,
+  "crest": 40,
+  "tail": 40,
+  "wing": 112,
+  "warm": 96,
+  "leg": 72,
+  "claw": 48,
+  "horn": 96,
+  "gold": 128,
+  "gem": 8,
+  "faceshell": 20,
+  "L2": 132,
+  "L3": 332
+ },
+ "bones": 11,
+ "open_edges_body": {
+  "wing": 12,
+  "gold": 8
+ },
+ "bbox_min": [
+  -1.02,
+  -0.57,
+  0.478
+ ],
+ "bbox_max": [
+  1.02,
+  1.011,
+  2.03
+ ],
+ "tris_per_level": {
+  "1": 996,
+  "2": 1128,
+  "3": 1460
+ },
+ "lowest_z": 0.4779702941596418,
+ "clip": [
+  "Idle f0: 3 toe verts inside body",
+  "Idle f2: 3 toe verts inside body",
+  "Idle f4: 3 toe verts inside body",
+  "Idle f6: 3 toe verts inside body",
+  "Idle f8: 3 toe verts inside body",
+  "Idle f10: 3 toe verts inside body",
+  "Idle f12: 3 toe verts inside body",
+  "Idle f14: 3 toe verts inside body",
+  "Idle f16: 3 toe verts inside body",
+  "Idle f18: 3 toe verts inside body",
+  "Idle f20: 3 toe verts inside body",
+  "Idle f22: 3 toe verts inside body"
+ ],
+ "issues": []
+}

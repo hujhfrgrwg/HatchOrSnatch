@@ -1,0 +1,47 @@
+{
+ "total": 1596,
+ "by_mat": {
+  "0": 856,
+  "1": 52,
+  "2": 464,
+  "3": 224
+ },
+ "by_part": {
+  "body": 432,
+  "horn": 160,
+  "fin": 64,
+  "armL": 64,
+  "claw": 48,
+  "armR": 64,
+  "wisp": 24,
+  "faceshell": 52,
+  "L2": 464,
+  "L3": 224
+ },
+ "bones": 14,
+ "open_edges_body": {},
+ "bbox_min": [
+  -0.829,
+  -0.469,
+  0.098
+ ],
+ "bbox_max": [
+  0.829,
+  1.12,
+  2.082
+ ],
+ "tris_per_level": {
+  "1": 908,
+  "2": 1372,
+  "3": 1596
+ },
+ "lowest_z": 0.09804513684230104,
+ "clip": [
+  "Ability f6: 8 toe verts inside body",
+  "Ability f8: 8 toe verts inside body",
+  "Ability f10: 8 toe verts inside body",
+  "Ability f12: 8 toe verts inside body",
+  "Ability f14: 2 toe verts inside body"
+ ],
+ "issues": []
+}

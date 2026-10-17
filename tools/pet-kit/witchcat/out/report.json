@@ -1,0 +1,50 @@
+{
+ "total": 1501,
+ "by_mat": {
+  "0": 1022,
+  "1": 25,
+  "2": 230,
+  "3": 224
+ },
+ "by_part": {
+  "body": 120,
+  "head": 120,
+  "ear": 48,
+  "haunch": 96,
+  "paw": 96,
+  "claw": 48,
+  "tail": 72,
+  "haft": 48,
+  "bristle": 112,
+  "binding": 64,
+  "brim": 108,
+  "cone": 90,
+  "faceshell": 25,
+  "L2": 230,
+  "L3": 224
+ },
+ "bones": 16,
+ "open_edges_body": {
+  "bristle": 8,
+  "binding": 8,
+  "cone": 10
+ },
+ "bbox_min": [
+  -0.36,
+  -0.78,
+  0.09
+ ],
+ "bbox_max": [
+  0.36,
+  1.28,
+  1.747
+ ],
+ "tris_per_level": {
+  "1": 1047,
+  "2": 1277,
+  "3": 1501
+ },
+ "lowest_z": 0.09000000000000002,
+ "clip": [],
+ "issues": []
+}

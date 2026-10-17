@@ -1,0 +1,59 @@
+{
+ "total": 1367,
+ "by_mat": {
+  "0": 1024,
+  "1": 15,
+  "2": 208,
+  "3": 120
+ },
+ "by_part": {
+  "body": 288,
+  "muzzle": 48,
+  "ear": 16,
+  "wing": 112,
+  "warm": 96,
+  "leg": 144,
+  "gold": 232,
+  "gem": 8,
+  "tail": 80,
+  "faceshell": 15,
+  "L2": 208,
+  "L3": 120
+ },
+ "bones": 16,
+ "open_edges_body": {
+  "wing": 12,
+  "gold": 16
+ },
+ "bbox_min": [
+  -1.04,
+  -0.46,
+  0.6
+ ],
+ "bbox_max": [
+  1.04,
+  1.207,
+  1.96
+ ],
+ "tris_per_level": {
+  "1": 1039,
+  "2": 1247,
+  "3": 1367
+ },
+ "lowest_z": 0.6,
+ "clip": [
+  "Idle f0: 6 toe verts inside body",
+  "Idle f2: 6 toe verts inside body",
+  "Idle f4: 6 toe verts inside body",
+  "Idle f6: 6 toe verts inside body",
+  "Idle f8: 6 toe verts inside body",
+  "Idle f10: 6 toe verts inside body",
+  "Idle f12: 6 toe verts inside body",
+  "Idle f14: 6 toe verts inside body",
+  "Idle f16: 6 toe verts inside body",
+  "Idle f18: 6 toe verts inside body",
+  "Idle f20: 6 toe verts inside body",
+  "Idle f22: 6 toe verts inside body"
+ ],
+ "issues": []
+}

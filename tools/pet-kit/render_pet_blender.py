@@ -69,6 +69,26 @@ if mat:
         nt.links.new(mul.outputs[0], bsdf.inputs['Emission Color'])
         bsdf.inputs['Emission Strength'].default_value = 1.4
 
+# face decal: per-level texture + glowing eyes / runes from the face emissive mask
+fmat = bpy.data.materials.get(NAME + '_FaceMat')
+if fmat:
+    nt = fmat.node_tree
+    bsdf = next(n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED')
+    ftex = next(n for n in nt.nodes if n.type == 'TEX_IMAGE')
+    fp = tex_path(NAME + '_Face' + suf)
+    if fp:
+        ftex.image = bpy.data.images.load(fp, check_existing=True)
+    fe = tex_path(NAME + '_FaceEmit' + suf)
+    if fe:
+        e = nt.nodes.new('ShaderNodeTexImage')
+        e.image = bpy.data.images.load(fe, check_existing=True)
+        e.image.colorspace_settings.name = 'Non-Color'
+        mul = nt.nodes.new('ShaderNodeMixRGB'); mul.blend_type = 'MULTIPLY'; mul.inputs[0].default_value = 1
+        nt.links.new(ftex.outputs['Color'], mul.inputs[1])
+        nt.links.new(e.outputs['Color'], mul.inputs[2])
+        nt.links.new(mul.outputs[0], bsdf.inputs['Emission Color'])
+        bsdf.inputs['Emission Strength'].default_value = 2.5
+
 # lights + dark backdrop
 world = bpy.data.worlds.new('W'); scn.world = world; world.use_nodes = True
 bg = next(n for n in world.node_tree.nodes if n.type == 'BACKGROUND')

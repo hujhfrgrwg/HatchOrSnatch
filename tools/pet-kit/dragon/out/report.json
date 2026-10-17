@@ -1,0 +1,53 @@
+{
+ "total": 1918,
+ "by_mat": {
+  "0": 1560,
+  "1": 30,
+  "2": 224,
+  "3": 104
+ },
+ "by_part": {
+  "skull": 152,
+  "horn": 96,
+  "jaw": 64,
+  "tooth": 128,
+  "spine": 132,
+  "spike": 72,
+  "blade": 8,
+  "rib": 400,
+  "core": 24,
+  "legL": 48,
+  "claw": 64,
+  "legR": 48,
+  "wingUL": 36,
+  "wingFL": 36,
+  "fingerL": 72,
+  "membrane": 36,
+  "wingUR": 36,
+  "wingFR": 36,
+  "fingerR": 72,
+  "faceshell": 30,
+  "L2": 224,
+  "L3": 104
+ },
+ "bones": 19,
+ "open_edges_body": {},
+ "bbox_min": [
+  -1.627,
+  -1.02,
+  0.566
+ ],
+ "bbox_max": [
+  1.627,
+  2.0,
+  2.072
+ ],
+ "tris_per_level": {
+  "1": 1590,
+  "2": 1814,
+  "3": 1918
+ },
+ "lowest_z": 0.566,
+ "clip": [],
+ "issues": []
+}
