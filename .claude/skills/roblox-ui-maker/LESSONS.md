@@ -443,3 +443,7 @@ Format: **rule**, then why (what went wrong or what the developer said).
   the approved kit with the reference's ORGANISATION copied 1:1, world-placed systems moved out of menus.
 - Presenting several flow options (phone + desktop shots, problems grid, comparison, recommendation) on one
   decision page before building the chosen flow.
+- A crate opening as one full-screen overlay: crate wobble -> burst -> single reel (Quint Out onto a random spot on the
+  prize tile, Back Out settle to centre) -> landing juice scaled by rarity -> reveal card with Claim / Open again, plus an
+  animated HTML preview using the runtime's exact timings so the developer judges the motion, not stills. - Approved first
+  round ("approved").

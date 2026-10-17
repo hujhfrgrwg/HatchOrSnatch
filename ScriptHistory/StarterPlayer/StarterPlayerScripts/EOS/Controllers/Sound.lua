@@ -1,0 +1,276 @@
+-- Sound: every game/UI sound and the music, in one place (HOS-AUDIO-001, 16 Oct 2026).
+-- All audio comes from Roblox's licensed libraries: Pro Sound Effects (real recordings), APM Music, and
+-- Roblox's own UI pack. No synthesised or AI-made sounds (Hunter's rule).
+--   Sound.play(name, pitch?)            2D one-shot (UI, your own events)
+--   Sound.playAt(name, position, vol?)  3D one-shot in the world (other players' steals, poofs)
+--   Sound.setMusic(state)               "lobby" | "match" | "results" | "off" (crossfades; idempotent)
+--   Sound.duck(level, seconds)          dip the music under a big moment (reveal, results sting)
+--   Sound.enabled / Sound.setMusicEnabled(on)   the Settings toggles
+-- Volumes and start offsets were measured in the place (16 Oct, AudioAnalyzer RMS): each sound skips its silent
+-- lead-in and is levelled to about the same loudness. The SFX and Music SoundGroups carry the Settings toggles.
+
+local ContentProvider = game:GetService("ContentProvider")
+local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
+
+local Sound = {}
+Sound.enabled = true
+
+-- name = { id, volume, startAt (skips a silent lead-in), jitter (random pitch +/-) }
+local SFX: { [string]: { any } } = {
+	-- UI (Roblox UI pack + Pro Sound Effects foley)
+	click = { 15675032796, 3.0, 0, 0.04 }, -- Roblox_UI_Small_Click
+	open = { 15675024286, 0.52, 0.08, 0 }, -- Roblox_UI_Whoosh_01
+	close = { 15675012262, 0.56, 0, 0 }, -- Roblox_UI_Whoosh_04
+	toggle = { 9119717529, 0.63, 0, 0.03 }, -- Switch Click On Or Off Toggle Button 1
+	tab = { 15675037413, 0.75, 0, 0.03 }, -- Roblox_UI_Paper_Swipe
+	pop = { 15675059323, 0.5, 0, 0 }, -- Roblox_UI_Bright_Click (toasts; the cute pop read as kiddy)
+	error = { 9120917438, 1.1, 0, 0 }, -- Wood Impacts Soft Impacts On Temple Blocks 1
+	reward = { 9113849492, 2.1, 0.08, 0 }, -- Coins Or Keys Jingle 6 (gold, claims)
+	purchase = { 9113728042, 0.41, 0.05, 0 }, -- Cash Register 1
+	-- match
+	tick = { 9120917813, 0.8, 0, 0 }, -- Wood Impacts Soft Impacts On Temple Blocks 6 (countdowns)
+	go = { 9118113825, 0.74, 0.08, 0 }, -- Referee Whistle 2 (crossing starts)
+	role = { 15675043410, 0.5, 0, 0 }, -- Roblox_UI_Tonal_Stinger (role reveal)
+	alert = { 15675085146, 0.83, 0, 0 }, -- Roblox_UI_Indicator (last one standing)
+	swing = { 9120704978, 1.7, 0.05, 0.06 }, -- Whooshes Fast Wipes Quick Airy Slices 3 (tag)
+	dash = { 9126229255, 0.27, 0, 0.05 }, -- Whoosh By Fast Airy Swooshing Whipping Thuds
+	caught = { 9113518281, 0.88, 0, 0 }, -- Body Hits Thuds 1 (you got caught)
+	capture = { 9113482967, 0.67, 0, 0.06 }, -- Body Grabs 8 (a steal; 3D for everyone else's)
+	evolve = { 9119447936, 3.75, 0.55, 0 }, -- Sparkle Bell Tree Wind Chimes 1 (safe / egg levels up)
+	-- pets and hatching
+	crack = { 9113958649, 0.93, 0.18, 0.05 }, -- Crack Egg Crunchy 2 (egg shaking)
+	reveal = { 9119448154, 2.1, 1.8, 0 }, -- Sparkle Bell Tree Wind Chimes 2 (new pet)
+	applause = { 9113138088, 1.1, 0.07, 0 }, -- Applause Tight 2
+	poof = { 9116406610, 0.88, 0, 0.04 }, -- Magic Poofs Thumpy Wheezy Exhale 1 (Decoy)
+	ping = { 9116224467, 0.69, 0, 0 }, -- Large Metal Triangle Single Ringing Hits 12 (Scout)
+	ability = { 9116402581, 0.69, 0.28, 0.04 }, -- Magic Movement Airy Whips Swooshes 61 (other abilities)
+	-- results
+	win = { 9040322575, 0.75, 0.1, 0 }, -- APM: Looking at the Winner (30 sec), Sports Hip Hop
+	lose = { 9113085438, 1.2, 0.4, 0 }, -- Alarm Buzzer 3 (a final buzzer; the slide whistle read as kiddy)
+}
+
+-- APM Music (Roblox's licensed library). Each state is a playlist; tracks crossfade end to end.
+-- Sporty, not kiddy (Hunter, 16 Oct: "mindful of Huss Valley", the game is going less bright). APM Music only.
+-- { asset id, gain }: gain levels each track to the same loudness (measured in the place, AudioAnalyzer RMS).
+-- Rejected earlier, don't reuse: Paradise Falls, Tender Tropical House, Really Fast, Funky (A).
+local MUSIC: { [string]: { { number } } } = {
+	-- lobby: sports hip-hop beds (underscore mixes: no lead line, easy to sit in for minutes)
+	lobby = {
+		{ 9040325939, 1.08 }, -- Want to be Great (underscore), Sports Hip Hop
+		{ 9040323530, 0.93 }, -- Ain't No Competition (underscore), Sports Hip Hop
+		{ 9040323114, 0.61 }, -- Go Hard or Go Home (underscore), Sports Hip Hop
+	},
+	-- crossings: sports trailer hip-hop and drum & bass
+	match = {
+		{ 124019126977788, 1.0 }, -- Heat Check, Trailer Beats - Sports Hip Hop
+		{ 9038426867, 0.27 }, -- In The Race, Sport - Bass and Drums
+		{ 132310085899222, 0.77 }, -- Endgame Drive, Trailer Beats - Sports Hip Hop
+	},
+	-- the last seconds of a crossing, or down to the last runners
+	tension = {
+		{ 133340995970086, 1.2 }, -- All Or Nothing, Trailer Beats - Sports Hip Hop
+	},
+}
+-- level per state; results drops the bed so the win / lose sting carries the moment
+local MUSIC_VOLUME = { lobby = 0.33, match = 0.38, tension = 0.42, results = 0 }
+local FADE = 1.6
+
+local function group(name: string, volume: number): SoundGroup
+	local g = SoundService:FindFirstChild(name) :: SoundGroup?
+	if not g then
+		local n = Instance.new("SoundGroup")
+		n.Name = name
+		n.Volume = volume
+		n.Parent = SoundService
+		g = n
+	end
+	return g :: SoundGroup
+end
+local sfxGroup = group("EOS_SFX", 1)
+local musicGroup = group("EOS_Music", 1)
+
+local cache: { [string]: Sound } = {}
+local last: { [string]: number } = {}
+
+local function make(name: string): Sound?
+	local def = SFX[name]
+	if not def then return nil end
+	local s = Instance.new("Sound")
+	s.Name = "EOS_" .. name
+	s.SoundId = "rbxassetid://" .. def[1]
+	s.Volume = def[2]
+	s.SoundGroup = sfxGroup
+	return s
+end
+
+local function get(name: string): Sound?
+	local s = cache[name]
+	if not s then
+		s = make(name)
+		if s then
+			s.Parent = SoundService
+			cache[name] = s
+		end
+	end
+	return s
+end
+
+local function rate(name: string): boolean
+	-- no machine-gun repeats of the same sound inside 60 ms
+	local now = os.clock()
+	if last[name] and now - last[name] < 0.06 then return false end
+	last[name] = now
+	return true
+end
+
+function Sound.play(name: string, pitch: number?)
+	if not Sound.enabled or not rate(name) then return end
+	local s = get(name)
+	local def = SFX[name]
+	if not s or not def then return end
+	local j = def[4] or 0
+	s.PlaybackSpeed = (pitch or 1) * (1 + (if j > 0 then (math.random() * 2 - 1) * j else 0))
+	if (def[3] or 0) > 0 then
+		s.TimePosition = def[3]
+		s:Play()
+	else
+		SoundService:PlayLocalSound(s)
+	end
+end
+
+-- 3D one-shot at a world position: quieter with distance, so a 20-player match isn't a wall of steals
+function Sound.playAt(name: string, position: Vector3, volume: number?)
+	if not Sound.enabled or not rate(name .. "@") then return end
+	local s = make(name)
+	local def = SFX[name]
+	if not s or not def then return end
+	local att = Instance.new("Attachment")
+	att.Name = "EOS_SoundAt"
+	att.WorldPosition = position
+	att.Parent = workspace.Terrain
+	s.Volume = def[2] * (volume or 1)
+	s.RollOffMode = Enum.RollOffMode.InverseTapered
+	s.RollOffMinDistance = 12
+	s.RollOffMaxDistance = 140
+	local j = def[4] or 0
+	s.PlaybackSpeed = 1 + (if j > 0 then (math.random() * 2 - 1) * j else 0)
+	s.Parent = att
+	if (def[3] or 0) > 0 then s.TimePosition = def[3] end
+	s.Ended:Once(function() att:Destroy() end)
+	s:Play()
+	task.delay(8, function()
+		if att.Parent then att:Destroy() end
+	end)
+end
+
+----------------------------------------------------------------------------------------------- music
+local musicOn = true
+local state = "off"
+local index: { [string]: number } = {}
+local duckTween: Tween? = nil
+
+-- one player per state: leaving a state pauses its track (after a fade) and coming back resumes it, so a
+-- crossing -> tension -> crossing round trip continues the same song instead of shuffling every wave
+local players: { [string]: Sound } = {}
+local fades: { [Sound]: Tween } = {}
+
+local function fadeTo(s: Sound, volume: number, time: number, after: (() -> ())?)
+	if fades[s] then fades[s]:Cancel() end
+	local t = TweenService:Create(s, TweenInfo.new(time, Enum.EasingStyle.Sine), { Volume = volume })
+	fades[s] = t
+	t.Completed:Once(function(st)
+		if fades[s] == t then fades[s] = nil end
+		if st == Enum.PlaybackState.Completed and after then after() end
+	end)
+	t:Play()
+end
+
+local function newTrack(kind: string): Sound?
+	local list = MUSIC[kind]
+	if not list or #list == 0 then return nil end
+	local i = (index[kind] or math.random(1, #list)) % #list + 1
+	index[kind] = i
+	local s = Instance.new("Sound")
+	s.Name = "EOS_Music_" .. kind
+	s.SoundId = "rbxassetid://" .. list[i][1]
+	s.Volume = 0
+	s.SoundGroup = musicGroup
+	s:SetAttribute("Gain", list[i][2])
+	s.Parent = SoundService
+	-- next song in the same playlist when this one ends
+	s.Ended:Once(function()
+		if players[kind] ~= s then return end
+		players[kind] = nil
+		s:Destroy()
+		if state == kind then
+			local n = newTrack(kind)
+			if n then
+				players[kind] = n
+				n:Play()
+				fadeTo(n, (MUSIC_VOLUME[kind] or 0.3) * (n:GetAttribute("Gain") or 1), FADE)
+			end
+		end
+	end)
+	return s
+end
+
+function Sound.setMusic(newState: string)
+	if newState == state then return end
+	local prev = state
+	state = newState
+	-- park whatever was playing (paused, so it can resume later)
+	local old = players[prev]
+	if old then
+		fadeTo(old, 0, if newState == "tension" then 0.5 else FADE, function()
+			if state ~= prev then old:Pause() end
+		end)
+	end
+	if newState == "off" or (MUSIC_VOLUME[newState] or 0) <= 0 then return end
+	local s = players[newState]
+	if not s then
+		s = newTrack(newState)
+		if not s then return end
+		players[newState] = s
+		s:Play()
+	elseif not s.IsPlaying then
+		s:Resume()
+	end
+	fadeTo(s, (MUSIC_VOLUME[newState] or 0.3) * (s:GetAttribute("Gain") or 1), if newState == "tension" then 0.5 else FADE)
+end
+
+-- a new match starts its playlists fresh (called between matches)
+function Sound.resetMatchMusic()
+	for _, k in ipairs({ "match", "tension" }) do
+		local s = players[k]
+		if s and state ~= k then
+			players[k] = nil
+			s:Destroy()
+		end
+	end
+end
+
+function Sound.setMusicEnabled(on: boolean)
+	musicOn = on
+	TweenService:Create(musicGroup, TweenInfo.new(0.6, Enum.EasingStyle.Sine), { Volume = if on then 1 else 0 }):Play()
+end
+
+function Sound.duck(level: number, seconds: number)
+	if not musicOn then return end
+	if duckTween then duckTween:Cancel() end
+	musicGroup.Volume = level
+	duckTween = TweenService:Create(musicGroup, TweenInfo.new(seconds, Enum.EasingStyle.Sine, Enum.EasingDirection.In), { Volume = 1 })
+	duckTween:Play()
+end
+
+-- load every sound up front, so the first dash / tag / click isn't late while its file loads
+task.spawn(function()
+	local list = {}
+	for name in pairs(SFX) do
+		local s = get(name)
+		if s then table.insert(list, s) end
+	end
+	pcall(function() ContentProvider:PreloadAsync(list) end)
+end)
+
+return Sound
