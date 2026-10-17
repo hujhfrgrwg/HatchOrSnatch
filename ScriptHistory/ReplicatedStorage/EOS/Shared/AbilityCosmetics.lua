@@ -6,6 +6,7 @@
 --  * color: the summon ring / telegraph tint (default: the archetype's colour)
 --  * sound: a Sound controller key played with the summon (default "ability")
 --  * vfx: per-effect overrides { [key] = template name } (see AbilityCosmetics.vfx below)
+--  * sfx: per-effect sound overrides { [key] = a key in Shared.AbilitySounds, or NONE } (HOS-SFX-001)
 --  (which rigged model plays the summon is PetBehaviors.MODULES on the client: looks only too)
 --
 -- Per-pet VFX (HOS-VFX-OVR, Hunter 17 Oct: every pet gets its own ability VFX one day; the archetype's
@@ -28,7 +29,7 @@ local AbilityConfig = require(script.Parent:WaitForChild("AbilityConfig"))
 
 local AbilityCosmetics = {}
 
-AbilityCosmetics.ALLOWED = { color = true, sound = true, vfx = true } :: { [string]: boolean }
+AbilityCosmetics.ALLOWED = { color = true, sound = true, vfx = true, sfx = true } :: { [string]: boolean }
 AbilityCosmetics.GOLD = Color3.fromRGB(255, 210, 58)
 AbilityCosmetics.NONE = "None" -- a vfx value: draw nothing for this effect (the species' own effect covers it)
 
@@ -47,6 +48,22 @@ function AbilityCosmetics.vfx(species: any, key: string): string
 	local o = entry and entry.vfx
 	local v = if type(o) == "table" then o[key] else nil
 	return if type(v) == "string" and v ~= "" then v else key
+end
+
+-- the sound to play for effect `key` (HOS-SFX-001): the species' sfx override (a key in AbilitySounds, or
+-- NONE), else the default (`key`). A species whose own effect covers `key` (its vfx override is NONE) gets
+-- no default sound for it either, so defaults never play on top of a pet's own look.
+function AbilityCosmetics.sfx(species: any, key: string, vfxKey: string?): string
+	local entry = if type(species) == "string" then AbilityCosmetics.SPECIES[species] else nil
+	local o = entry and entry.sfx
+	local v = if type(o) == "table" then o[key] else nil
+	if type(v) == "string" and v ~= "" then
+		return v
+	end
+	if AbilityCosmetics.vfx(species, vfxKey or key) == AbilityCosmetics.NONE then
+		return AbilityCosmetics.NONE
+	end
+	return key
 end
 
 -- per archetype, when the species has no sound of its own

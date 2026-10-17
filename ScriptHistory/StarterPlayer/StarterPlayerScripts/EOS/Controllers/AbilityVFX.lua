@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local AbilityCosmetics = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("AbilityCosmetics"))
+local AbilitySounds = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("AbilitySounds"))
 local VFXFolder = ReplicatedStorage:WaitForChild("VFX")
 local Emit = require(VFXFolder:WaitForChild("Emit"))
 local Templates = VFXFolder:WaitForChild("Abilities")
@@ -37,8 +38,64 @@ function AbilityVFX.template(key: string, species: any): Instance?
 	return (if name ~= key then Templates:FindFirstChild(name) else nil) or Templates:FindFirstChild(key)
 end
 
--- plays a one-shot effect at a CFrame (`species`: whose ability it is, for its override)
+-- ===== sounds (HOS-SFX-001) =====
+-- Every ability sound goes through SoundService.Abilities, positioned in 3D with a rolloff so a crossing
+-- full of players doesn't stack up into noise. `at`: a position (one-shot, removed when done) or a part /
+-- attachment to ride on (lasting; the caller stops it). Returns the Sound, or nil when nothing plays.
+local SoundService = game:GetService("SoundService")
+
+local function group(): SoundGroup?
+	return SoundService:FindFirstChild("Abilities") :: SoundGroup?
+end
+
+function AbilityVFX.sound(key: string, at: Vector3 | Instance, species: any?, vfxKey: string?): Sound?
+	local k = AbilityCosmetics.sfx(species, key, vfxKey)
+	local def = if k ~= AbilityCosmetics.NONE then AbilitySounds.SOUNDS[k] else nil
+	if not def then
+		return nil
+	end
+	local holderInst: Instance
+	local temp: Attachment? = nil
+	if typeof(at) == "Vector3" then
+		local a = Instance.new("Attachment")
+		a.Name = "EOS_AbilitySound"
+		a.WorldPosition = at
+		a.Parent = workspace.Terrain
+		holderInst, temp = a, a
+	else
+		holderInst = at
+	end
+	local snd = Instance.new("Sound")
+	snd.Name = "EOS_AbilitySound"
+	snd.SoundId = "rbxassetid://" .. tostring(def.id)
+	snd.Volume = def.volume or 0.7
+	snd.PlaybackSpeed = def.speed or 1
+	snd.Looped = def.loop == true
+	snd.RollOffMode = Enum.RollOffMode.InverseTapered
+	snd.RollOffMinDistance = AbilitySounds.ROLLOFF.min
+	snd.RollOffMaxDistance = AbilitySounds.ROLLOFF.max
+	snd.SoundGroup = group()
+	snd.TimePosition = def.start or 0
+	snd.Parent = holderInst
+	snd:Play()
+	if not snd.Looped then
+		local secs = (def.length or 3) / (def.speed or 1)
+		task.delay(secs, function()
+			if def.length then
+				snd:Stop()
+			end
+			snd:Destroy()
+			if temp then
+				temp:Destroy()
+			end
+		end)
+	end
+	return snd
+end
+
+-- plays a one-shot effect at a CFrame (`species`: whose ability it is, for its override), with its sound
 function AbilityVFX.play(name: string, cf: CFrame, species: any?)
+	AbilityVFX.sound(name, cf.Position, species)
 	local t = AbilityVFX.template(name, species)
 	if not t then
 		return
@@ -244,10 +301,20 @@ local function dress(part: Instance)
 		return
 	end
 	local fn = DRESS[name]
-	local t = AbilityVFX.template(name, part:GetAttribute("VFXSpecies")) -- HOS-VFX-OVR
+	local species = part:GetAttribute("VFXSpecies")
+	local t = AbilityVFX.template(name, species) -- HOS-VFX-OVR
 	local ok, cleanup = pcall(function()
 		return if fn then fn(part, t) else follow(part, t)
 	end)
+	-- its sound as it appears (HOS-SFX-001); a looping one rides on the part and stops with it
+	local snd = if AbilitySounds.ON_DRESS[name] then AbilityVFX.sound(name, part, species) else nil
+	if ok and cleanup and snd and snd.Looped then
+		local inner = cleanup
+		cleanup = function()
+			snd:Destroy()
+			inner()
+		end
+	end
 	if ok and cleanup then
 		active[part] = cleanup
 	elseif not ok then

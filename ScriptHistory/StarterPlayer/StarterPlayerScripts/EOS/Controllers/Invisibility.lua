@@ -17,6 +17,7 @@ local RunService = game:GetService("RunService")
 
 local AbilityCosmetics = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("AbilityCosmetics"))
 local Templates = ReplicatedStorage:WaitForChild("VFX"):WaitForChild("Abilities")
+local AbilityVFX = require(script.Parent:WaitForChild("AbilityVFX")) -- the cloak's on / off sounds (HOS-SFX-001)
 
 local Invisibility = {}
 
@@ -138,6 +139,7 @@ local function cloakFor(model: Model, st: State): { Instance }?
 		end
 	end
 	st.cloak, st.base = made, base
+	AbilityVFX.sound("InvisOn", root, model:GetAttribute("EOS_InvisibleSpecies"), "InvisShimmer")
 	return made
 end
 
@@ -240,6 +242,12 @@ local function restore(model: Model, st: State)
 	end
 	if st.shimmer then
 		st.shimmer:Destroy()
+	end
+	if st.cloak then
+		local r = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if r then
+			AbilityVFX.sound("InvisOff", r.Position, model:GetAttribute("EOS_InvisibleSpecies"), "InvisShimmer")
+		end
 	end
 	for _, x in ipairs(st.cloak or {}) do
 		x:Destroy()
