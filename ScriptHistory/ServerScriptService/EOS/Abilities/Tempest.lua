@@ -33,6 +33,7 @@ function Tempest.Runner(ctx: any): (boolean, string?)
 	local me = ctx.player
 	local role = me:GetAttribute("EOS_Role")
 	local tele = Shared.ring(Shared.groundBelow(root.Position) + Vector3.new(0, 0.12, 0), d.radius, COLOR, d.windup, 0.55)
+	Shared.tagVfx(tele, "PulseCharge") -- the charge ring and arcs (HOS-VFX-003)
 	task.spawn(function()
 		local t0 = os.clock()
 		while os.clock() - t0 < d.windup and tele.Parent and root.Parent do
@@ -45,7 +46,7 @@ function Tempest.Runner(ctx: any): (boolean, string?)
 			return
 		end
 		local center = root.Position
-		Shared.ring(Shared.groundBelow(center) + Vector3.new(0, 0.15, 0), d.radius, COLOR, 0.25, 0.1)
+		Shared.vfx("PulseBlast", Shared.groundBelow(center))
 		local now = os.clock()
 		for _, c in ipairs(Shared.actorsInRole("CATCHER", true)) do
 			local cr = c.Character.HumanoidRootPart :: BasePart
@@ -57,6 +58,7 @@ function Tempest.Runner(ctx: any): (boolean, string?)
 					if Shared.validPosition(c, dest) then
 						pushImmuneUntil[c] = now + d.immunity
 						Shared.slideTo(c, dest, 0.2)
+						Shared.vfx("KnockHit", cr.Position, dir)
 						break
 					end
 				end
@@ -81,11 +83,12 @@ function Tempest.Catcher(ctx: any): (boolean, string?)
 	ball.Name = "EOS_StormBall"
 	ball.Shape = Enum.PartType.Ball
 	ball.Size = Vector3.new(2.4, 2.4, 2.4)
-	ball.Material = Enum.Material.Neon
-	ball.Color = COLOR
+	ball.Material = Enum.Material.SmoothPlastic -- a solid toy ball (HOS-VFX-003); clients add arcs, glow and dust
+	ball.Color = Color3.fromRGB(255, 205, 30)
 	ball.Anchored, ball.CanCollide, ball.CanQuery, ball.CanTouch, ball.CastShadow = true, false, false, false, false
 	ball.CFrame = CFrame.new(start)
 	ball.Parent = Shared.runtimeFolder("AbilityFx")
+	Shared.tagVfx(ball, "StormBall", true)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	local ignore: { Instance } = { Shared.runtimeFolder("AbilityFx") }
@@ -102,6 +105,7 @@ function Tempest.Catcher(ctx: any): (boolean, string?)
 	params.RespectCanCollide = true
 	params.CollisionGroup = root.CollisionGroup
 	local travelled = 0
+	local bounces = 0
 	local pos = start
 	local conn
 	local function stop()
@@ -120,18 +124,30 @@ function Tempest.Catcher(ctx: any): (boolean, string?)
 		end
 		local hit = workspace:Raycast(pos, dir * (step + 1.2), params)
 		if hit then
+			-- HOS-VFX-003 (Wrecking Ball reference): bounce off the first wall, same total range; stop at the next
+			local n = flat(hit.Normal)
+			n = if n.Magnitude > 0.01 then n.Unit else -dir
+			Shared.vfx("StormBounce", hit.Position, n)
+			if bounces < (d.bounces or 0) then
+				bounces += 1
+				local out = flat(dir - 2 * dir:Dot(n) * n)
+				dir = if out.Magnitude > 0.01 then out.Unit else -dir
+				return
+			end
 			stop()
 			return
 		end
 		pos += dir * step
 		travelled += step
-		ball.CFrame = CFrame.new(pos) * CFrame.Angles(0, 0, -travelled / 1.2)
+		-- it rolls: spin about the axis across its path
+		ball.CFrame = CFrame.lookAt(pos, pos + dir) * CFrame.Angles(-travelled / 1.2, 0, 0)
 		for _, r in ipairs(Shared.actorsInRole("RUNNER", true)) do
 			local rr = r.Character.HumanoidRootPart :: BasePart
 			local off = rr.Position - pos
 			if flat(off).Magnitude <= d.hitRadius and math.abs(off.Y) < 5 then
 				CharacterService.slowFor(r, d.slow, d.slowTime)
-				Shared.ring(Shared.groundBelow(rr.Position) + Vector3.new(0, 0.15, 0), 2.2, COLOR, d.slowTime, 0.15)
+				Shared.tagVfx(Shared.ring(Shared.groundBelow(rr.Position) + Vector3.new(0, 0.15, 0), 2.2, COLOR, d.slowTime, 0.15), "Slowed")
+				Shared.vfx("StormHit", pos)
 				stop()
 				return
 			end

@@ -142,6 +142,23 @@ DRESS.TetherBeam = function(part: BasePart): () -> ()
 	end
 end
 
+-- Tempest Catcher's storm ball (HOS-VFX-003): the server's solid ball rolls; this adds a dark cartoon outline
+-- and the template's arcs, halo, sparks and dust following it.
+DRESS.StormBall = function(part: BasePart): () -> ()
+	local stop = follow(part, "StormBall")
+	local h = Instance.new("Highlight")
+	h.FillTransparency = 1
+	h.OutlineColor = Color3.fromRGB(110, 70, 0)
+	h.OutlineTransparency = 0
+	h.DepthMode = Enum.HighlightDepthMode.Occluded
+	h.Adornee = part
+	h.Parent = holder()
+	return function()
+		stop()
+		h:Destroy()
+	end
+end
+
 local function dress(part: Instance)
 	if not part:IsA("BasePart") or active[part] then
 		return
