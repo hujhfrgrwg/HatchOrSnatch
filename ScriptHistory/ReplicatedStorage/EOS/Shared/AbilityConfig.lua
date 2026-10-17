@@ -115,22 +115,30 @@ AbilityConfig.ARCHETYPES = {
 		title = "Tempest",
 		color = Color3.fromRGB(255, 232, 90),
 		Runner = {
-			built = false,
+			built = true, -- HOS-PET-009 prototype
 			name = "PULSE",
 			icon = "ab_tempest",
 			text = "push nearby Catchers away",
 			cooldown = 22,
 			duration = 0,
 			windup = 0.3,
+			radius = 10, -- studs around you
+			push = 12, -- studs each Catcher is pushed
+			immunity = 3, -- seconds a pushed Catcher can't be pushed again
 		},
 		Catcher = {
-			built = false,
+			built = true, -- HOS-PET-009 prototype
 			name = "STORM BALL",
 			icon = "ab_stormball",
 			text = "roll a storm ball that slows a Runner",
 			cooldown = 18,
 			duration = 0,
 			windup = 0,
+			speed = 40, -- studs per second
+			range = 50, -- studs
+			hitRadius = 2.5, -- studs from the ball that count as a hit
+			slow = 0.5, -- fraction of top speed while slowed
+			slowTime = 1, -- seconds
 		},
 	},
 	Rift = {
