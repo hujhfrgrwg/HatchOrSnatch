@@ -1,6 +1,6 @@
 ---
 tags: [hub]
-updated: 2026-10-15
+updated: 2026-10-17
 ---
 # Hatch or Snatch Home
 
@@ -12,9 +12,9 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 ## Studio place
 | | |
 |---|---|
-| Place name | *(fill in)* |
-| Place id / universe id | *(fill in)* |
-| Owner | *(group or Hunter's account)* |
+| Place name | Hatch or Snatch in Studio; the published place on Roblox is still called "Huss Evolution" |
+| Place id / universe id | 128015050187408 / 10771117139 |
+| Owner | Group "Eggs with Friends" (228184582) |
 
 ## Setup
 - **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
