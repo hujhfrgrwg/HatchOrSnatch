@@ -60,3 +60,6 @@ All ten abilities now work as prototypes (placeholder looks: neon parts in the a
 Checked in local playtests (2 players + bots): shield blocks exactly one tag then the next lands after the 0.5 s immunity; push immunity holds for 3 s; Rift refuses safe zone, wall, box and zone-locked spots on the press with no cooldown, and fizzles with a refund if the spot goes bad during the windup; hops can't climb onto walls or boxes (fixed during testing). Catcher-side tests used a test helper to convert the player (a 2-player test match ends or converts people too early to stage naturally).
 
 New hooks: `MatchService.onCatcherAttack` (stab / lunge), `ctx.refund` (AbilityService), `Shared.actorsInRole / slideTo / beam / ring / groundBelow`.
+
+## Queued for the polish pass
+- **Storm Ball** (17 Oct): reference Mad Maggie's Wrecking Ball (Apex Legends), Hunter's pick. Mechanics decided: bounces off a wall **once**, same 50-stud total range; no speed pads (would make Catchers stronger); no detonation (keeps "slow the first Runner hit"). Build the bounce in the Storm Ball polish ticket, not before.
