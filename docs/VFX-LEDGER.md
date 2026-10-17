@@ -27,32 +27,68 @@ Every pet and effect asset uploaded to Roblox (group 228184582) for Hatch or Sna
 | Bastion Beetle v3 (superseded by v4) | `Beetle_L3_emit_v3.png` | 121854295964230 | emissive mask |
 | Bastion Beetle v3 (superseded by v4) | `Beetle_L3_v3.png` | 123555067617039 | colour map |
 | Bastion Beetle v3 (superseded by v4) | `bastion_beetle_v3.fbx` | 105439147577643 | model (FBX) |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Body_emit_v4.png` | 138004223323256 | emissive mask |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Body_metal_v4.png` | 138576641261237 | metalness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Body_normal_v4.png` | 77081148910310 | normal map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Body_rough_v4.png` | 80848720489950 | roughness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Body_v4.png` | 87696509421436 | colour map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Face_emit_v4.png` | 99251058675702 | emissive mask |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Face_metal_v4.png` | 124416373052573 | metalness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Face_normal_v4.png` | 101200737557958 | normal map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Face_rough_v4.png` | 139074068306498 | roughness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_Face_v4.png` | 96428737531798 | colour map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L2_emit_v4.png` | 103169892575817 | emissive mask |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L2_metal_v4.png` | 72083494105209 | metalness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L2_normal_v4.png` | 122109508763802 | normal map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L2_rough_v4.png` | 88125830948458 | roughness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L2_v4.png` | 76353812844160 | colour map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L3_emit_v4.png` | 82625710850576 | emissive mask |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L3_metal_v4.png` | 101786538242314 | metalness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L3_normal_v4.png` | 131445332977075 | normal map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L3_rough_v4.png` | 97792541981198 | roughness map |
-| Bastion Beetle v4 (live, PBR) | `Beetle_L3_v4.png` | 121844569709252 | colour map |
-| Bastion Beetle v4 (live, PBR) | `bastion_beetle_v4.fbx` | 128824837218745 | model (FBX) |
-| Thunder Toad v2 (superseded by PBR build) | `Toad_Body_emit_v2.png` | 80917119841498 | emissive mask |
-| Thunder Toad v2 (superseded by PBR build) | `Toad_Body_v2.png` | 140262336549848 | colour map |
-| Thunder Toad v2 (superseded by PBR build) | `Toad_Face_v2.png` | 84587837636656 | colour map |
-| Thunder Toad v2 (superseded by PBR build) | `Toad_L2_emit_v2.png` | 74598409218794 | emissive mask |
-| Thunder Toad v2 (superseded by PBR build) | `Toad_L2_v2.png` | 83286456948781 | colour map |
-| Thunder Toad v2 (superseded by PBR build) | `Toad_L3_emit_v2.png` | 110942317276691 | emissive mask |
-| Thunder Toad v2 (superseded by PBR build) | `Toad_L3_v2.png` | 117921039381206 | colour map |
-| Thunder Toad v2 (superseded by PBR build) | `thunder_toad_v2.fbx` | 114122866538752 | model (FBX) |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Body_emit_v4.png` | 138004223323256 | emissive mask |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Body_metal_v4.png` | 138576641261237 | metalness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Body_normal_v4.png` | 77081148910310 | normal map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Body_rough_v4.png` | 80848720489950 | roughness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Body_v4.png` | 87696509421436 | colour map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Face_emit_v4.png` | 99251058675702 | emissive mask |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Face_metal_v4.png` | 124416373052573 | metalness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Face_normal_v4.png` | 101200737557958 | normal map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Face_rough_v4.png` | 139074068306498 | roughness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_Face_v4.png` | 96428737531798 | colour map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L2_emit_v4.png` | 103169892575817 | emissive mask |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L2_metal_v4.png` | 72083494105209 | metalness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L2_normal_v4.png` | 122109508763802 | normal map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L2_rough_v4.png` | 88125830948458 | roughness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L2_v4.png` | 76353812844160 | colour map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L3_emit_v4.png` | 82625710850576 | emissive mask |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L3_metal_v4.png` | 101786538242314 | metalness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L3_normal_v4.png` | 131445332977075 | normal map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L3_rough_v4.png` | 97792541981198 | roughness map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `Beetle_L3_v4.png` | 121844569709252 | colour map |
+| Bastion Beetle v4 (PBR; metal maps still live) | `bastion_beetle_v4.fbx` | 128824837218745 | model (FBX) |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Body_emit_v5.png` | 139307937290337 | emissive mask |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Body_normal_v5.png` | 133437821793365 | normal map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Body_rough_v5.png` | 111425491047639 | roughness map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Body_v5.png` | 110718269307342 | colour map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Face_emit_v5.png` | 136868165746329 | emissive mask |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Face_normal_v5.png` | 129557449191890 | normal map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Face_rough_v5.png` | 93537787780476 | roughness map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_Face_v5.png` | 132514137316401 | colour map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L2_emit_v5.png` | 82139979844037 | emissive mask |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L2_normal_v5.png` | 123227727278068 | normal map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L2_rough_v5.png` | 139797727794934 | roughness map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L2_v5.png` | 85452720616183 | colour map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L3_emit_v5.png` | 119676777912588 | emissive mask |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L3_normal_v5.png` | 111251964818735 | normal map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L3_rough_v5.png` | 94415892915168 | roughness map |
+| Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L3_v5.png` | 99660022253191 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_emit_v2.png` | 80917119841498 | emissive mask |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_v2.png` | 140262336549848 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_v2.png` | 84587837636656 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_emit_v2.png` | 74598409218794 | emissive mask |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_v2.png` | 83286456948781 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_emit_v2.png` | 110942317276691 | emissive mask |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_v2.png` | 117921039381206 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `thunder_toad_v2.fbx` | 114122866538752 | model (FBX) |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_emit_v3.png` | 96863442965358 | emissive mask |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_metal_v3.png` | 105113545052987 | metalness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_normal_v3.png` | 131850022061037 | normal map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_rough_v3.png` | 129539009906105 | roughness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_v3.png` | 113482463051138 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_metal_v3.png` | 132527274040211 | metalness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_normal_v3.png` | 99968413669991 | normal map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_rough_v3.png` | 82285159408413 | roughness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_v3.png` | 85953943885038 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_emit_v3.png` | 75437331693904 | emissive mask |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_metal_v3.png` | 71547302259747 | metalness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_normal_v3.png` | 118292863192105 | normal map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_rough_v3.png` | 135567405188561 | roughness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_v3.png` | 139987849551461 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_emit_v3.png` | 73019552130863 | emissive mask |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_metal_v3.png` | 99651814439018 | metalness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_normal_v3.png` | 80293593567227 | normal map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_rough_v3.png` | 71712399921144 | roughness map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_v3.png` | 139121628130008 | colour map |
+| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `thunder_toad_v3.fbx` | 105986079507870 | model (FBX) |

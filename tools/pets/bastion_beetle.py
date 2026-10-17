@@ -35,6 +35,9 @@ for _m, _metal in ((BRONZE, 1.0), (BRONZE_DK, 0.85)):
     _m["metal"] = _metal
 for _m, _r in ((IVORY, 0.55), (BRONZE, 0.3), (BRONZE_DK, 0.4), (DARK, 0.75), (DARK_LT, 0.6), (CRYSTAL, 0.08), (CRYSTAL_LT, 0.08), (EYE, 0.1), (EYE_HOT, 0.1)):
     next(n for n in _m.node_tree.nodes if n.type == "BSDF_PRINCIPLED").inputs["Roughness"].default_value = _r
+# painted surface detail baked into the colour / normal maps (HOS-PET-014 texture standard)
+for _m, _style in ((IVORY, "filigree"), (BRONZE, "metal"), (BRONZE_DK, "metal"), (CRYSTAL, "crystal"), (CRYSTAL_LT, "crystal"), (DARK, "dark"), (DARK_LT, "dark")):
+    R.paint_material(_m, _style)
 
 
 # ===== plate primitives =====

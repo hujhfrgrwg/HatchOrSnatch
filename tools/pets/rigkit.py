@@ -353,3 +353,117 @@ def apply_pose_blender(arm, pose):
         pb.rotation_quaternion = R.inverted() @ q @ R
         pb.location = R.inverted() @ t
     bpy.context.view_layer.update()
+
+
+# ===== painted surface detail (HOS-PET-014, Hunter's "premium" Manta reference) =====
+# Procedural node graphs feeding each material's Base Colour (and a Bump into its Normal) before the bake, so
+# the baked colour / normal maps carry real surface detail instead of flat fills: tonal gradients inside every
+# area, micro-pattern, edge wear, crystal facets and sparkle. Object-space coordinates keep the pattern scale
+# the same across separate pieces. Styles:
+#   "skin"     soft mottling + top-lit gradient (fur, skin, scales at a distance)
+#   "filigree" ivory/stone armour: mottling, top-lit gradient, engraved swirl lines (darker, bumped in)
+#   "metal"    worn metal rims: dark-to-bright variation, bright worn convex edges (pointiness), fine scratches
+#   "crystal"  faceted cells of lighter / darker hue, white inner sparkle specks
+#   "dark"     understructure: low-contrast noise
+def paint_material(mat, style, scale=1.0, strength=1.0):
+    nt = mat.node_tree
+    N, L = nt.nodes, nt.links
+    bsdf = next(n for n in N if n.type == "BSDF_PRINCIPLED")
+    base = tuple(bsdf.inputs["Base Color"].default_value)
+    tc = N.new("ShaderNodeTexCoord")
+    mp = N.new("ShaderNodeMapping")
+    mp.inputs["Scale"].default_value = (scale, scale, scale)
+    L.new(tc.outputs["Object"], mp.inputs["Vector"])
+
+    def rgb(c):
+        n = N.new("ShaderNodeRGB")
+        n.outputs[0].default_value = c
+        return n.outputs[0]
+
+    def shade(k):  # base colour times k (k > 1 lightens)
+        return (min(1, base[0] * k), min(1, base[1] * k), min(1, base[2] * k), 1)
+
+    def mix(a, b, fac, blend="MIX"):
+        m = N.new("ShaderNodeMix")
+        m.data_type = "RGBA"
+        m.blend_type = blend
+        L.new(fac, m.inputs["Factor"])
+        L.new(a, m.inputs[6])
+        L.new(b, m.inputs[7])
+        return m.outputs[2]
+
+    def noise(s, detail=4.0, rough=0.55):
+        n = N.new("ShaderNodeTexNoise")
+        n.inputs["Scale"].default_value = s
+        n.inputs["Detail"].default_value = detail
+        n.inputs["Roughness"].default_value = rough
+        L.new(mp.outputs["Vector"], n.inputs["Vector"])
+        return n.outputs["Fac"]
+
+    def ramp(fac, a, b, p0=0.35, p1=0.65):
+        r = N.new("ShaderNodeValToRGB")
+        r.color_ramp.elements[0].position, r.color_ramp.elements[1].position = p0, p1
+        r.color_ramp.elements[0].color, r.color_ramp.elements[1].color = a, b
+        L.new(fac, r.inputs["Fac"])
+        return r.outputs["Color"]
+
+    # top-lit gradient: object Z -> darker underneath, lighter on top
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(tc.outputs["Object"], sep.inputs["Vector"])
+    grad = N.new("ShaderNodeMapRange")
+    grad.inputs["From Min"].default_value, grad.inputs["From Max"].default_value = 0.1, 1.6
+    L.new(sep.outputs["Z"], grad.inputs["Value"])
+    lit = ramp(grad.outputs["Result"], shade(1 - 0.22 * strength), shade(1 + 0.12 * strength), 0.0, 1.0)
+    out = lit
+    bump_h = None
+    if style in ("skin", "filigree", "dark"):
+        mott = ramp(noise(9.0), shade(1 - 0.12 * strength), shade(1 + 0.08 * strength))
+        out = mix(out, mott, noise(3.0, 2.0), "MULTIPLY") if style == "dark" else mix(out, mott, rgb((0.45, 0.45, 0.45, 1)))
+    if style == "filigree":
+        w = N.new("ShaderNodeTexWave")
+        w.wave_type = "RINGS"
+        w.inputs["Scale"].default_value = 4.5
+        w.inputs["Distortion"].default_value = 3.0
+        w.inputs["Detail"].default_value = 1.0
+        L.new(mp.outputs["Vector"], w.inputs["Vector"])
+        lines = N.new("ShaderNodeMapRange")  # thin engraved lines where the wave is near its trough
+        lines.inputs["From Min"].default_value, lines.inputs["From Max"].default_value = 0.0, 0.035
+        lines.inputs["To Min"].default_value, lines.inputs["To Max"].default_value = 1.0, 0.0
+        L.new(w.outputs["Fac"], lines.inputs["Value"])
+        out = mix(out, rgb(shade(0.8)), lines.outputs["Result"])
+        bump_h = lines.outputs["Result"]
+    if style == "metal":
+        geo = N.new("ShaderNodeNewGeometry")
+        edge = N.new("ShaderNodeMapRange")
+        edge.inputs["From Min"].default_value, edge.inputs["From Max"].default_value = 0.54, 0.62
+        L.new(geo.outputs["Pointiness"], edge.inputs["Value"])
+        var = ramp(noise(6.0, 6.0, 0.6), shade(0.62), shade(1.05))
+        out = mix(out, var, rgb((0.55, 0.55, 0.55, 1)))
+        out = mix(out, rgb(shade(1.3)), edge.outputs["Result"])
+        scr = N.new("ShaderNodeTexWave")
+        scr.inputs["Scale"].default_value = 40.0
+        scr.inputs["Distortion"].default_value = 2.0
+        L.new(mp.outputs["Vector"], scr.inputs["Vector"])
+        out = mix(out, rgb(shade(1.25)), ramp(scr.outputs["Fac"], (0, 0, 0, 1), (0.25, 0.25, 0.25, 1), 0.9, 1.0))
+    if style == "crystal":
+        v = N.new("ShaderNodeTexVoronoi")
+        v.inputs["Scale"].default_value = 14.0
+        L.new(mp.outputs["Vector"], v.inputs["Vector"])
+        cells = ramp(v.outputs["Color"], shade(0.55), shade(1.4), 0.2, 0.8)
+        out = mix(out, cells, rgb((0.85, 0.85, 0.85, 1)))
+        ve = N.new("ShaderNodeTexVoronoi")
+        ve.feature = "DISTANCE_TO_EDGE"
+        ve.inputs["Scale"].default_value = 14.0
+        L.new(mp.outputs["Vector"], ve.inputs["Vector"])
+        facet = ramp(ve.outputs["Distance"], (1, 1, 1, 1), (0, 0, 0, 1), 0.0, 0.06)
+        out = mix(out, rgb(shade(1.6)), facet)
+        sp = ramp(noise(60.0, 1.0), (0, 0, 0, 1), (1, 1, 1, 1), 0.72, 0.78)
+        out = mix(out, rgb((1, 1, 1, 1)), sp)
+        bump_h = ve.outputs["Distance"]
+    L.new(out, bsdf.inputs["Base Color"])
+    if bump_h is not None:
+        b = N.new("ShaderNodeBump")
+        b.inputs["Strength"].default_value = 0.35
+        b.inputs["Distance"].default_value = 0.02
+        L.new(bump_h, b.inputs["Height"])
+        L.new(b.outputs["Normal"], bsdf.inputs["Normal"])
