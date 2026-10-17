@@ -3,3 +3,5 @@ Assets/PlaceExport/
 *.mp4
 *.zip
 __pycache__/
+Assets/VFXPack/
+Assets/AllVFX/

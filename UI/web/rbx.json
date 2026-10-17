@@ -1,0 +1,18 @@
+{
+  "gui": "EmoteCrateUI",
+  "templates_folder": "EmoteCrateTemplates",
+  "port": 8870,
+  "design": [1920, 1080],
+  "luau_out": "../roblox/ui",
+  "stud_asset": "",
+  "screens": [
+    {"name": "EmoteCrate", "page": "emote_crate", "groups": [
+      "CrateTitle",
+      {"page": "emote_crate_intro", "group": "CrateStage", "visible": false},
+      "Reel",
+      "SkipHint",
+      {"page": "emote_crate_reveal", "group": "Reveal", "visible": false}
+    ]}
+  ],
+  "templates": ["emote_crate_templates"]
+}

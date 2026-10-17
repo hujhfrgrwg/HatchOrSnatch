@@ -1,0 +1,9 @@
+# stand-in texture from make_placeholders.py; the real one is the ui-resources.com Stud texture
+stud.png
+# icons come from the licensed pack via copy_icons.py; only our own placeholder slot is committed
+icons/*
+!icons/emote_slot.png
+# export scratch; rbx/out/upload + upload_list.json + the page JSON stay so another machine can upload and bundle
+rbx/out/raw/
+rbx/out/mock/
+shots/
