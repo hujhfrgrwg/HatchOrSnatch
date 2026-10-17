@@ -33,6 +33,23 @@ To change the TOP PLAYERS formula, edit `TOP_PARTS` in `LobbyService`. To add a 
 - Standing 3, 5 and 8 studs in front at five spots along the row: neighbouring boards never overlapped.
 - No errors in the output.
 
+## Placement (HOS-LB-002, 17 Oct 2026)
+
+The boards stand in an arc just inside the lobby fence. The fence is a circle of radius ~54.5 around the plaza centre (0, 1500), with its inner face at radius 54.2.
+
+| Model | Angle (atan2 z, x) | Pivot (bottom centre) |
+|---|---|---|
+| `Leaderboard_01` | 28.8° | 43.29, 10, 1523.80 |
+| `Leaderboard_02` | 39.6° | 38.06, 10, 1531.49 |
+| `Leaderboard_03` | 50.4° | 31.49, 10, 1538.06 |
+| `Leaderboard_04` | 61.2° | 23.80, 10, 1543.29 |
+
+- **Radius 49.4:** a turning board can reach ~4.4 studs from its pivot in any direction, since it's edge-on when a player stands off to the side. At 49.4 the board never touches the fence; the closest it gets is 0.36 studs, fully side-on. Facing straight in, it stands ~3.9 studs off the fence. At radius 51 the boards went through the fence by up to 1.2 studs.
+- **Spacing:** boards are 10.8° apart (9.3 studs). That's more than two reaches, so neighbours can't touch at any angle.
+- **Ground:** the boards sit on `Ground_Outer` (y 10). The ledge they used to stand on had been removed, which left them floating at y 11.2.
+- **Checked in a playtest:** player at radii 30, 35, 40, 45, 47 and 48, angles 15° to 75° (54 spots). There was no overlap between any board part and the fence or a neighbouring board.
+- **Previous pivots, for undo:** 37.03, 11.2, 1517.41 / 30.49, 11.2, 1523.95 / 23.95, 11.2, 1530.49 / 17.41, 11.2, 1537.03, all facing yaw 45°.
+
 ## Backups and notes
 
 - Pre-edit scripts and restore steps: `docs/backups/HOS-LB-001_2026-10-17/`. The old boards' model is in `ServerStorage._Backup_OldLeaderboards_20261017`.
