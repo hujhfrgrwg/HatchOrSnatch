@@ -13,7 +13,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Pieces = {}
 Pieces.COUNT = 18
-Pieces.BAKED = "IncubatorEggPieces" -- ReplicatedStorage folder: MeshParts Piece1..Piece18, attributes Centre and Mid
+Pieces.BAKED = "IncubatorEggPieces" -- ReplicatedStorage folder: MeshParts Piece1..Piece18, attributes Centre, Mid, MeshTurn
 
 local TAU = math.pi * 2
 local H, R, BULGE, YC = 2.2, 1.78, 0.08, -0.12 -- half-height, waist radius, wider bottom, egg middle below the centre
@@ -324,7 +324,8 @@ function Pieces.build(parent: Instance?, partsOnly: boolean?): any
 			mp.Parent = model
 			piece.centre = tpl:GetAttribute("Centre")
 			table.insert(piece.parts, mp)
-			table.insert(piece.locals, CFrame.new(tpl:GetAttribute("Mid")))
+			local turn = tpl:GetAttribute("MeshTurn") -- how the importer turned the mesh (undone here)
+			table.insert(piece.locals, CFrame.new(tpl:GetAttribute("Mid")) * (if typeof(turn) == "CFrame" then turn else CFrame.identity))
 		else
 			local coarse = if reg.cap then shell(reg, 8, 2) else shell(reg, 4, 3)
 			piece.centre = coarse.centre

@@ -54,7 +54,9 @@ The game builds each piece from a baked mesh. A plugin can't upload meshes yet (
 
 Without the folder, the egg falls back to wedge parts in flat rarity colours.
 
-![In game, 7 of 18 pieces](HOS-INC-001/ingame_building_7of18.jpg)
+**Fixed 17 Oct (Matthew: "the eggs are not put together"):** the importer had turned every mesh 180° about Y, so each piece sat in its right spot but faced the wrong way. Reading the uploaded meshes back confirmed the same exact turn on all 18 (0.0000 stud miss). Each baked piece now has a `MeshTurn` attribute that `EggPieces` applies, and `adopt` detects the turn itself on any future import. No re-import was needed.
+
+![In game, 13 of 18 pieces, with the hologram dome on top](HOS-INC-001/ingame_building_13of18.jpg)
 ![In game, ready to hatch](HOS-INC-001/ingame_ready.jpg)
 
 ## Checks (Studio playtests)
@@ -74,7 +76,31 @@ Without the folder, the egg falls back to wedge parts in flat rarity colours.
 - **Hologram:** a ForceField copy of each piece mesh, 1% larger, in light lavender (225, 175, 255). It fades out as its piece snaps in and comes back after a hatch.
 
 ![Empty egg: all hologram](HOS-INC-001/ingame_hologram_empty.jpg)
-![Building: solid pieces at the bottom, hologram above](HOS-INC-001/ingame_building_hologram.jpg)
+
+## Test bench (Studio only)
+`ServerScriptService.HOS_IncubatorTestBench` (server) and `StarterPlayerScripts.HOS_IncubatorTestBenchCamera` (camera) do nothing outside Studio. Studio profiles live in their own datastore.
+
+When you press Play, the bench:
+- empties your egg (attribute `ResetOnPlay`)
+- gives you the fragments in the `Shards` attribute (default `common,rare,rare,epic,legendary`) as unseen fragments
+- puts you 17 studs in front of the incubator, facing it
+
+Walk up and they fly in.
+
+**Chat commands:**
+- `!shards`: give the `Shards` list again
+- `!shards epic legendary`: give those rarities
+- `!shards 5`: give 5 random fragments
+- `!full`: fill the egg to ready
+- `!reset`: empty the egg
+- `!tp`: go back in front of the incubator
+
+Fragments fly in when you walk up, so step away and come back after a command. Set the `Enabled` attribute to false to turn the bench off.
+
+Checked in a playtest:
+- **Spawn:** you start at the spot, facing the incubator, with 5 fragments waiting.
+- **Walk-up:** the fly-in placed 13 of 18 pieces and the screen opened.
+- **`!full`:** brought the fill to exactly 18. `DataService.update` runs its callback twice; the first version of the bench didn't account for that and gave double.
 
 ## Notes
 - **Why the pieces are baked:** building the pieces at runtime with EditableMesh worked in Studio, but a player's client ran out of its EditableMesh memory budget after 8 of the 18 pieces, and phones get less. Baked meshes have no such limit and don't need the "Allow Mesh / Image APIs" setting.

@@ -6,8 +6,10 @@
 --      the egg shard atlas). It's saved as docs/HOS-INC-001/IncubatorEggPieces.obj.
 --   2. In Studio: File > Import 3D, pick that file, creator = the group, import. The model lands in the workspace.
 --   3. Bake.adopt(thatModel) moves its MeshParts into ReplicatedStorage.IncubatorEggPieces (what the client clones),
---      with attributes Centre and Mid (relative to the egg's centre), after checking each one's size.
+--      with attributes Centre and Mid (relative to the egg's centre) and MeshTurn (the importer turns meshes; this
+--      undoes it), after checking each one's size and matching its uploaded mesh to the generator.
 -- Run from the command bar:  require(game.ServerStorage.EOSBuild.BakeIncubatorEgg).adopt(workspace.IncubatorEggPieces)
+local AssetService = game:GetService("AssetService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 
@@ -67,6 +69,35 @@ function Bake.obj(): string
 	return table.concat(out, "\n") .. "\n"
 end
 
+-- the turn the importer gave a piece's mesh (it turned all 18 by 180 degrees about Y on 17 Oct): reads the uploaded
+-- mesh back and finds the turn that lands the generator's vertices on it. Returns the turn and the worst miss (studs).
+local TURNS = { CFrame.identity, CFrame.Angles(0, math.pi, 0), CFrame.Angles(math.pi, 0, 0), CFrame.Angles(0, 0, math.pi) }
+local function turnOf(mp: MeshPart, gen: EditableMesh): (CFrame?, number)
+	local ok, em = pcall(AssetService.CreateEditableMeshAsync, AssetService, Content.fromUri(mp.MeshId), { FixedSize = true })
+	if not ok or not em then return nil, math.huge end
+	local imp = {}
+	for _, v in em:GetVertices() do table.insert(imp, em:GetPosition(v)) end
+	em:Destroy()
+	local g = {}
+	for _, v in gen:GetVertices() do table.insert(g, gen:GetPosition(v)) end
+	local best, bestErr = nil, math.huge
+	for _, turn in TURNS do
+		local worst = 0
+		for k = 1, #g, 7 do
+			local q = turn * g[k]
+			local m = math.huge
+			for _, p in imp do
+				local d = (p - q).Magnitude
+				if d < m then m = d end
+			end
+			worst = math.max(worst, m)
+			if worst > bestErr then break end
+		end
+		if worst < bestErr then best, bestErr = turn, worst end
+	end
+	return best, bestErr
+end
+
 -- moves the imported pieces into ReplicatedStorage.IncubatorEggPieces
 function Bake.adopt(model: Instance): string
 	assert(model, "pass the imported model (e.g. workspace.IncubatorEggPieces)")
@@ -96,6 +127,13 @@ function Bake.adopt(model: Instance): string
 				table.insert(log, ("Piece%d size %s, expected %s: resized"):format(i, tostring(mp.Size), tostring(want)))
 				mp.Size = want
 			end
+			local turn, miss = turnOf(mp, info.em)
+			if turn and miss < 0.01 then
+				info.turn = turn
+			else
+				table.insert(log, ("Piece%d: couldn't match the mesh to the generator (miss %.3f)"):format(i, miss))
+				nFound -= 1
+			end
 		end
 		info.em:Destroy()
 	end
@@ -113,10 +151,11 @@ function Bake.adopt(model: Instance): string
 		mp.Anchored, mp.CanCollide, mp.CanQuery, mp.CanTouch, mp.CastShadow = true, false, false, false, false
 		mp.Material = Enum.Material.SmoothPlastic
 		mp.Color = Color3.new(1, 1, 1)
-		mp.CFrame = CFrame.new(info.mid) -- egg-local, round the origin
+		mp.CFrame = CFrame.new(info.mid) * info.turn -- egg-local, round the origin
 		for _, c in mp:GetChildren() do c:Destroy() end
 		mp:SetAttribute("Centre", info.centre)
 		mp:SetAttribute("Mid", info.mid)
+		mp:SetAttribute("MeshTurn", info.turn) -- undoes the importer's turn (EggPieces applies it)
 		mp.Parent = folder
 	end
 	folder.Parent = ReplicatedStorage
