@@ -39,7 +39,8 @@ AbilityCosmetics.SPECIES = {
 	Kitsune = { sound = "poof", vfx = { DecoySplit = "None" } }, -- its run-in summon is the split
 	["Grim Ghost"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own glints (Controllers.Invisibility)
 	["Prism Chameleon"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own prism glints
-	-- HOS-PET-013, Hunter's concept sheet: Shell Shield (Runner) and Horn Tether (Catcher), gold and blue
+	-- HOS-PET-013c, Hunter's model sheet: Shell Shield (Runner) = cyan hex crystal dome, Horn Tether (Catcher) =
+	-- jagged cyan crystal spear from the horn
 	["Bastion Beetle"] = {
 		vfx = {
 			ShieldUp = "BeetleShieldUp",

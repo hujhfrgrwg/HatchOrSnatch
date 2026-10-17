@@ -122,12 +122,22 @@ local function scaleSizes(root: Instance, k: number)
 	end
 end
 
--- default dressing: the template's model follows the tagged part every frame
+-- default dressing: the template's model follows the tagged part every frame. Template attributes:
+-- Offset (Vector3, e.g. a dome sitting on the ground under the bubble's centre) and HideServerPart (the
+-- species' look replaces the server's own part on this client, like the Bastion Beetle's hex dome).
 local function follow(part: BasePart, t: Instance?, offset: CFrame?): () -> ()
 	if not t or not t:IsA("Model") then
 		return function() end
 	end
 	local m = t:Clone()
+	local off = t:GetAttribute("Offset")
+	if typeof(off) == "Vector3" then
+		offset = CFrame.new(off) * (offset or CFrame.identity)
+	end
+	local hide = t:GetAttribute("HideServerPart") == true
+	if hide then
+		part.LocalTransparencyModifier = 1
+	end
 	m:PivotTo(CFrame.new(part.Position) * (offset or CFrame.identity))
 	m.Parent = holder()
 	local conn = RunService.RenderStepped:Connect(function()
@@ -137,6 +147,9 @@ local function follow(part: BasePart, t: Instance?, offset: CFrame?): () -> ()
 	end)
 	return function()
 		conn:Disconnect()
+		if hide and part.Parent then
+			part.LocalTransparencyModifier = 0
+		end
 		m:Destroy()
 	end
 end
