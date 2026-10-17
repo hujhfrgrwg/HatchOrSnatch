@@ -1,0 +1,161 @@
+{
+  "gui": "EOSUI",
+  "templates_folder": "EOSUITemplates",
+  "port": 8870,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/ui",
+  "stud_asset": "",
+  "screens": [
+    {
+      "name": "HUD",
+      "page": "hud",
+      "groups": [
+        "TopLeft",
+        "TopRight",
+        "Goal",
+        "Rail",
+        "Status",
+        "Wallet",
+        "Ability",
+        "Dash",
+        "Watch",
+        "MenuDrop"
+      ],
+      "visible": true,
+      "hud": true
+    },
+    {
+      "name": "MatchHUD",
+      "page": "hud_match",
+      "groups": [
+        "Status",
+        "Egg",
+        "Feed",
+        "Ability",
+        "Dash",
+        "Touch"
+      ],
+      "visible": false,
+      "hud": true
+    },
+    {
+      "name": "Quests",
+      "page": "quests",
+      "groups": [
+        "Dim",
+        "Quests"
+      ]
+    },
+    {
+      "name": "Incubator",
+      "page": "incubator",
+      "groups": [
+        "Dim",
+        "Incubator"
+      ]
+    },
+    {
+      "name": "Pets",
+      "page": "pets",
+      "groups": [
+        "Dim",
+        "Pets"
+      ]
+    },
+    {
+      "name": "Shop",
+      "page": "shop",
+      "groups": [
+        "Dim",
+        "Shop"
+      ]
+    },
+    {
+      "name": "Stats",
+      "page": "stats",
+      "groups": [
+        "Dim",
+        "Stats"
+      ]
+    },
+    {
+      "name": "Settings",
+      "page": "settings",
+      "groups": [
+        "Dim",
+        "Settings"
+      ]
+    },
+    {
+      "name": "Results",
+      "page": "results",
+      "groups": [
+        "Dim",
+        "Banner",
+        "Podium",
+        "Thief",
+        "You",
+        "NextMatch"
+      ]
+    },
+    {
+      "name": "Hatch",
+      "page": "hatch",
+      "groups": [
+        "Dim",
+        "Reveal"
+      ]
+    },
+    {
+      "name": "Reward",
+      "page": "reward",
+      "groups": [
+        "Dim",
+        "Reveal"
+      ]
+    },
+    {
+      "name": "Emotes",
+      "page": "emotes",
+      "groups": [
+        "Dim",
+        "Emotes"
+      ]
+    },
+    {
+      "name": "EmoteWheel",
+      "page": "emote_wheel",
+      "groups": [
+        "Dim",
+        "Wheel"
+      ]
+    },
+    {
+      "name": "Servers",
+      "page": "servers",
+      "groups": [
+        "Dim",
+        "Servers"
+      ]
+    },
+    {
+      "name": "Spectate",
+      "page": "spectate",
+      "groups": [
+        "Bar",
+        "Hint"
+      ],
+      "visible": false,
+      "hud": true
+    }
+  ],
+  "templates": [
+    "templates"
+  ],
+  "font_map": {
+    "Arial": "Arimo"
+  }
+}

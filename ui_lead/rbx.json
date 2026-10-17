@@ -1,0 +1,18 @@
+{
+  "gui": "LeadCatcherUI",
+  "templates_folder": "LeadCatcherUITemplates",
+  "port": 8894,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/ui_lead",
+  "stud_asset": "",
+  "screens": [],
+  "templates": [
+    "lead_templates"
+  ],
+  "font_map": {
+    "Arial": "Arimo"
+  }
+}

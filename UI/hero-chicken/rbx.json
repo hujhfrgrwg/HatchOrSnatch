@@ -1,0 +1,35 @@
+{
+  "gui": "HeroChickenUI",
+  "templates_folder": "HeroChickenTemplates",
+  "port": 8879,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/hero-chicken",
+  "stud_asset": "",
+  "screens": [
+    {
+      "name": "HeroChicken",
+      "page": "hero_chicken",
+      "groups": [
+        "Letterbox",
+        "Title",
+        "Lead",
+        "PickHint",
+        "NameCard",
+        "Choice",
+        "Reveal",
+        "Ready",
+        "HeroRun",
+        "Success",
+        "Group",
+        "Flash"
+      ],
+      "visible": true
+    }
+  ],
+  "templates": [
+    "hero_chicken_templates"
+  ]
+}

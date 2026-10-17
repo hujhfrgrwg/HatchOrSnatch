@@ -1,0 +1,18 @@
+{
+  "gui": "HalloweenUI",
+  "templates_folder": "HalloweenUITemplates",
+  "port": 8893,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/ui_hwn",
+  "stud_asset": "",
+  "screens": [],
+  "templates": [
+    "hwn_templates"
+  ],
+  "font_map": {
+    "Arial": "Arimo"
+  }
+}

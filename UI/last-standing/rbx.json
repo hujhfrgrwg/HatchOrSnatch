@@ -1,0 +1,15 @@
+{
+  "gui": "LastStandingUI",
+  "templates_folder": "LastStandingTemplates",
+  "port": 8872,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/last-standing",
+  "stud_asset": "",
+  "screens": [],
+  "templates": [
+    "last_standing_templates"
+  ]
+}

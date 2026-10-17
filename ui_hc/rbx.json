@@ -1,0 +1,34 @@
+{
+  "gui": "HeroChickenUI",
+  "templates_folder": "HeroChickenTemplates",
+  "port": 8881,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/ui_hc",
+  "stud_asset": "",
+  "screens": [
+    {
+      "name": "HeroChicken",
+      "page": "hc_screen",
+      "groups": [
+        "Letterbox",
+        "Title",
+        "Choice",
+        "Reveal",
+        "HCHeader",
+        "Success",
+        "Dip"
+      ],
+      "visible": true,
+      "hud": true
+    }
+  ],
+  "templates": [
+    "hc_templates"
+  ],
+  "font_map": {
+    "Arial": "Arimo"
+  }
+}

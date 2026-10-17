@@ -1,0 +1,11 @@
+{
+  "gui": "FieldGemsUI",
+  "templates_folder": "FieldGemsUITemplates",
+  "port": 8874,
+  "design": [1920, 1080],
+  "luau_out": "../roblox/ui_gems",
+  "stud_asset": "",
+  "screens": [],
+  "templates": ["field_gems_templates"],
+  "font_map": { "Arial": "Arimo" }
+}

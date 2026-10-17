@@ -1,0 +1,18 @@
+{
+  "gui": "MapVoteUI",
+  "templates_folder": "MapVoteUITemplates",
+  "port": 8894,
+  "design": [
+    1920,
+    1080
+  ],
+  "luau_out": "../roblox/ui_mapvote",
+  "stud_asset": "",
+  "screens": [],
+  "templates": [
+    "mapvote_templates"
+  ],
+  "font_map": {
+    "Arial": "Arimo"
+  }
+}

@@ -1,0 +1,10 @@
+/* style.css: per-game tokens read from ref.png by read_reference.py (DRAFT: confirm each by eye).
+   Preset to load before this file: styles/stud.css. Keep only values that differ from the preset. */
+:root {
+  /* palette: #d1e7f6 #88c4e2 #f4f1eb #e7e3d6 #60b3e6 #b6c2c8 #c2b559 #4e6b92 #252b35 #e0f0fb */
+  --ink: #252b35;
+  --plate-ow: 4px;  --panel-bw: 5px;
+  --stroke-k: 0.57;   /* visible text outline ~2.0px vs the preset 3.5 (7px stroke, half outside) */
+  /* no studs in the zoom? -> --stud-op: 0; --head-stud-op: 0; (flat plates) */
+}
+/* colour ramps: copy the nearest .c-* from the preset and set --top/--mid/--bot/--lip from the palette */

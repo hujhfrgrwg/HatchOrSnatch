@@ -1,0 +1,78 @@
+{
+ "halftone_corner": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/halftones/amz/White_Corner_Piece_Halftone.png",
+  "card": ""
+ },
+ "halftone_corner2": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/halftones/amz/WHalf_Tone_7.png",
+  "card": ""
+ },
+ "halftone_fade": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/halftones/angelz/LongWhiteStar.png",
+  "card": ""
+ },
+ "halftone_sweep": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/halftones/angelz/Haldtonefromcentertotopleft.png",
+  "card": ""
+ },
+ "halftone_blob": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/halftones/mamba/White_Circle.png",
+  "card": ""
+ },
+ "grid_dark": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/Textures/251bfa7f-7903-42c3-9bfa-9b0ed1bf026c_05_67fab072064b98db4fab10ed21246c68.png",
+  "card": "Grid texture | Textures | Grid | provided Grid texture"
+ },
+ "grid_fine": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/Textures/dd6ecfe8-166f-4af0-9bc0-86553b5cd0b9_03_1c535ece9f13e52b19c2a9bc27374e63.png",
+  "card": "Grid texture | Textures | Grid | provided Grid texture"
+ },
+ "scratch_fine": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/Textures/a54a9476-340e-463b-b58d-2ff2037e6bb3_01_1d90e24ae1075a4844bd30f1c83a2d40_1.png",
+  "card": "Scratch texture | Textures | Scatch | provided Scratch texture"
+ },
+ "scratch_streak": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/Textures/b4c8ef72-aade-4b7e-b9bc-ac610c0e38f9_02_8fa88c088c3197303047f8ce9332b09b.webp",
+  "card": "Grid Scratch texture | Textures | Scatch | provided Grid Scratch texture"
+ },
+ "rays": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/other/Rays.webp",
+  "card": "rays | Effects | Rays | By ??"
+ },
+ "sparkles": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/other/sparkes/f46106a8-9443-4a4d-8714-07eed6d6d8df_5-sparkle-3_-_Copy.png",
+  "card": "Sparkle Effect | Effects | Sparkle | Effect by ???"
+ },
+ "speedlines": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/other/sparkes/kek/kek_speedlines_1.png",
+  "card": "Speedline effect | Effects | Speedlines | Speedline by Kek"
+ },
+ "stud": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/textures/stud.png",
+  "card": "Stud texture | Textures | Stud (ui-resources.com)"
+ },
+ "sunburst_a": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/osky/OskySunburst.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "sunburst_b": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/quelly/quelly6.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "sunburst_c": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/sinister/sunburst1.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "sunburst_d": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/sunbursts/stuxfian/Stuxburst01.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "shine": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/stars/shine2.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ },
+ "shine_b": {
+  "url": "https://uiassets.commissiontoolz.xyz/images/effects/stars/shine3.png",
+  "card": "Sunburst/Shine | Effects (ui-resources.com)"
+ }
+}

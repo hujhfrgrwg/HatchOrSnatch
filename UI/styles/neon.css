@@ -1,0 +1,156 @@
+/* PRESET: neon (Evolve or Steal). Read from the developer's two references (ref.png "Season Pass",
+   ref2.png "Settings"): angled banner titles with halftone + light streaks and a sparkle at the tip,
+   dark panels with a neon accent edge, outer glow, grid texture and halftone corners, an angled back
+   slab, chamfered buttons with a scratched sheen, diagonal-striped halftoned reward tiles, heavy
+   italic outlined text. Inspired by, not a copy: own palette per screen, own shapes, own icons.
+   Load order: kit.css -> styles/neon.css -> style.css. Textures: tex/ (ui-resources.com, see tools/textures.json). */
+:root {
+  --ink: #07090c;
+  --font: 'Montserrat', sans-serif;
+  --font2: 'Montserrat', sans-serif;
+  --text-ol: #07090c; --stroke-k: 1; --drop-k: 1;
+  --text-fill: linear-gradient(#ffffff 55%, #e6e9ee);
+  --stud-op: 0; --head-stud-op: 0;
+}
+body { font-family: var(--font); }
+.ot.it, .it { font-style: italic; }
+.ot.k9 { font-weight: 900; }
+
+/* ---------- accents: one per screen (a1 light, a2 mid, a3 deep, ab panel body, ag glow) ---------- */
+.a-lime   { --a1: #e9ff6a; --a2: #7dff2e; --a3: #14b01e; --ab: #06240a; --ag: rgba(90,255,50,.55); --al: #b6ff7a; }
+.a-red    { --a1: #ff8a8a; --a2: #ff2a2a; --a3: #a1060d; --ab: #2a0306; --ag: rgba(255,30,40,.55); --al: #ff9aa0; }
+.a-gold   { --a1: #fff28a; --a2: #ffc21c; --a3: #d06a00; --ab: #2a1702; --ag: rgba(255,190,30,.5); --al: #ffe37a; }
+.a-cyan   { --a1: #a8fbff; --a2: #22c8ff; --a3: #0b5fd0; --ab: #031a2e; --ag: rgba(40,190,255,.55); --al: #9be8ff; }
+.a-purple { --a1: #f0b4ff; --a2: #b44dff; --a3: #5a17b8; --ab: #17052c; --ag: rgba(180,80,255,.55); --al: #dca0ff; }
+.a-pink   { --a1: #ffb0c8; --a2: #ff2f6e; --a3: #b0063a; --ab: #2a0312; --ag: rgba(255,40,110,.5); --al: #ff9ab8; }
+
+/* ---------- panel: glow + angled back slab + body (grid, radial accent, halftone corners) ---------- */
+.np-glow { position: absolute; border-radius: 26px; background: var(--ag); filter: blur(34px); opacity: .75; }
+.np-back { position: absolute; background: linear-gradient(#0a0d10, #050608 70%, var(--a3) 70.5%, var(--a2) 100%);
+  clip-path: polygon(0 3%, 100% 0, 99% 100%, 1% 97%); }
+.np { position: absolute; border-radius: 8px; overflow: hidden;
+  border: 5px solid var(--a2);
+  box-shadow: 0 0 0 4px var(--ink), inset 0 0 0 2px rgba(255,255,255,.18);
+  background:
+    radial-gradient(ellipse 55% 60% at 68% 8%, color-mix(in srgb, var(--a2) 55%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--ab) 70%, #000) 0%, var(--ab) 45%, #020403 100%); }
+.np::before { content: ''; position: absolute; inset: 0; background: url(../tex/grid_dark.png) 0 0 / 360px 360px;
+  mix-blend-mode: screen; opacity: .45; pointer-events: none; }
+.np::after { content: ''; position: absolute; left: -10px; bottom: -10px; width: 330px; height: 330px;
+  background: var(--a2); -webkit-mask: url(../tex/halftone_corner.png) 0 0 / 100% 100%; transform: scaleX(-1);
+  opacity: .55; pointer-events: none; }
+.np > .hc2 { position: absolute; right: -10px; bottom: -10px; width: 280px; height: 280px; background: var(--a2);
+  -webkit-mask: url(../tex/halftone_corner.png) 0 0 / 100% 100%; opacity: .4; pointer-events: none; }
+.np > .body { position: absolute; inset: 0; }
+
+/* ---------- banner title: dark outline shape -> gradient face + halftone + streaks; notch at the tail ---------- */
+.bn { position: absolute; filter: drop-shadow(0 8px 0 rgba(0,0,0,.45)) drop-shadow(0 0 22px var(--ag)); }
+.bn-ol, .bn-face { position: absolute; clip-path: polygon(var(--sl) 0, 100% 0, calc(100% - var(--nt)) 50%, 100% 100%, 0 100%); }
+.bn-ol { inset: 0; background: var(--ink); }
+.bn-face { inset: 6px 7px 6px 7px;
+  background: linear-gradient(100deg, var(--a1) 0%, var(--a2) 45%, var(--a3) 100%); overflow: hidden; }
+.bn-face::before { content: ''; position: absolute; inset: 0; background: #fff; opacity: .5;
+  -webkit-mask: url(../tex/halftone_fade.png) 0 0 / 100% 100%; mix-blend-mode: soft-light; }
+.bn-face::after { content: ''; position: absolute; inset: 0; background: url(../tex/rays.png) 40% 50% / 70% 140% no-repeat;
+  mix-blend-mode: screen; opacity: .55; }
+.bn .lbl { position: absolute; inset: 0; display: flex; align-items: center; gap: 14px; padding-left: calc(var(--sl) + 18px); z-index: 2; }
+.bn .spk { position: absolute; width: 74px; height: 74px; right: -14px; top: -40px; z-index: 3;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.8)) drop-shadow(0 0 0 #000); }
+
+/* ---------- chamfered button: outline -> face gradient + top shine + scratch sheen + lip ---------- */
+.nb { position: absolute; --cut: 14px; --lip: 7px; }
+.nb > .o, .nb > .f { position: absolute; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+.nb > .o { inset: 0; background: var(--ink); }
+.nb > .f { inset: 4px; background:
+    linear-gradient(to bottom, rgba(255,255,255,.55) 0, rgba(255,255,255,.55) 2px, transparent 2px),
+    linear-gradient(to bottom, var(--b1) 0%, var(--b2) 50%, var(--b3) calc(100% - var(--lip)), var(--b4) calc(100% - var(--lip))); overflow: hidden; }
+.nb > .f::after { content: ''; position: absolute; inset: 0; background: url(../tex/scratch_streak.png) 0 0 / 260px 460px;
+  mix-blend-mode: screen; opacity: .28; }
+.nb > .lbl { position: absolute; left: 0; right: 0; top: 0; bottom: var(--lip); display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 2; }
+.b-green  { --b1: #8dff7a; --b2: #26d63a; --b3: #12a826; --b4: #0a6a16; }
+.b-red    { --b1: #ff7a7a; --b2: #ee1f2a; --b3: #b80d17; --b4: #6a0409; }
+.b-pink   { --b1: #ff8aae; --b2: #ff2f6e; --b3: #d10f4a; --b4: #7a0428; }
+.b-silver { --b1: #f2f4f7; --b2: #a8b0bb; --b3: #6c7480; --b4: #3a3f47; }
+.b-dark   { --b1: #3a414d; --b2: #232830; --b3: #181c22; --b4: #0b0d10; }
+.b-gold   { --b1: #fff3a0; --b2: #ffc21c; --b3: #e58a00; --b4: #8a4a00; }
+.b-cyan   { --b1: #a8f4ff; --b2: #22b8ff; --b3: #0f78e0; --b4: #063f80; }
+.b-purple { --b1: #e6a8ff; --b2: #a845ff; --b3: #7420d6; --b4: #3d0a80; }
+.b-lime   { --b1: #f0ff8a; --b2: #9cff2e; --b3: #46c41a; --b4: #1c6a0a; }
+.nb.off > .f { filter: saturate(.1) brightness(.6); }
+
+/* close: pink parallelogram, white italic X (text, never an icon) */
+.nx { position: absolute; width: 112px; height: 86px; z-index: 6; filter: drop-shadow(0 6px 0 rgba(0,0,0,.45)); }
+.nx > .o, .nx > .f { position: absolute; clip-path: polygon(22% 0, 100% 0, 78% 100%, 0 100%); }
+.nx > .o { inset: 0; background: var(--ink); }
+.nx > .f { inset: 6px 8px; background: linear-gradient(#ff7aa0, #ff2f6e 50%, #c8063e); box-shadow: inset 0 0 0 3px rgba(255,255,255,.35); }
+.nx > .lbl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; }
+
+/* ---------- reward / item tile: outline, light rim, diagonal stripes + halftone, label top ---------- */
+.nt { position: absolute; border: 4px solid var(--ink); border-radius: 6px; overflow: hidden;
+  box-shadow: inset 0 0 0 3px var(--t1), 0 6px 0 rgba(0,0,0,.4);
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 18px, rgba(255,255,255,0) 18px 40px),
+    linear-gradient(160deg, var(--t1) 0%, var(--t2) 45%, var(--t3) 100%); }
+.nt::before { content: ''; position: absolute; inset: 0; background: #fff; opacity: .35;
+  -webkit-mask: url(../tex/halftone_sweep.png) 0 0 / 100% 100%; mix-blend-mode: soft-light; pointer-events: none; }
+.nt.sel { box-shadow: inset 0 0 0 3px var(--t1), 0 0 0 5px #fff, 0 0 26px 6px rgba(255,255,255,.55); }
+.nt.locked > .art { filter: grayscale(.8) brightness(.35); }
+.nt.locked { --t1: #59606a; --t2: #3a4048; --t3: #23272d; }
+.t-common { --t1: #fff6da; --t2: #d9c79a; --t3: #8f7a4c; }
+.t-rare   { --t1: #9fe0ff; --t2: #2f93ff; --t3: #1844b8; }
+.t-epic   { --t1: #f0b0ff; --t2: #a64dff; --t3: #4c14a8; }
+.t-lime   { --t1: #e9ff8a; --t2: #66e52e; --t3: #1d8a1a; }
+.t-gold   { --t1: #fff19a; --t2: #ffb51c; --t3: #c45a00; }
+.t-red    { --t1: #ff9a9a; --t2: #f0303a; --t3: #8a0610; }
+.t-cyan   { --t1: #b4f6ff; --t2: #25bfff; --t3: #0b58c8; }
+.t-dark   { --t1: #4a525e; --t2: #262c34; --t3: #12161b; }
+
+/* ---------- list row (settings / quests): deep accent gradient, scratched, accent rim ---------- */
+.nr { position: absolute; border-radius: 6px; overflow: hidden;
+  box-shadow: 0 0 0 3px var(--ink), inset 0 0 0 3px color-mix(in srgb, var(--a2) 80%, #fff), 0 0 24px var(--ag);
+  background: linear-gradient(175deg, var(--a2) 0%, var(--a3) 38%, color-mix(in srgb, var(--a3) 40%, #000) 100%); }
+.nr::before { content: ''; position: absolute; inset: 0; background: url(../tex/scratch_fine.png) 0 0 / 540px 960px;
+  mix-blend-mode: screen; opacity: .35; pointer-events: none; }
+.nr::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+  background: linear-gradient(transparent, rgba(0,0,0,.45)); pointer-events: none; }
+
+/* ---------- HUD pieces ---------- */
+.hp { position: absolute; }                              /* HUD pill: dark chamfered plate with accent stripe */
+.hp > .o, .hp > .f { position: absolute; clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%); }
+.hp > .o { inset: 0; background: var(--ink); }
+.hp > .f { inset: 4px; background: linear-gradient(rgba(255,255,255,.14) 0 2px, transparent 2px),
+  linear-gradient(#20262f, #12161c); overflow: hidden; }
+.hp > .f::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 12px; background: linear-gradient(var(--a1), var(--a2)); transform: skewX(-12deg); transform-origin: 0 100%; left: 8px; }
+.hp > .f::after { content: ''; position: absolute; inset: 0; background: url(../tex/grid_dark.png) 0 0 / 200px 200px; mix-blend-mode: screen; opacity: .4; }
+.hp > .lbl { position: absolute; inset: 0; display: flex; align-items: center; gap: 12px; padding: 0 22px 0 34px; z-index: 2; }
+
+.hb { position: absolute; }                              /* HUD square button (left rail) */
+.hb > .o, .hb > .f { position: absolute; clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px); }
+.hb > .o { inset: 0; background: var(--ink); }
+.hb > .f { inset: 4px; overflow: hidden; box-shadow: inset 0 0 0 3px var(--t1);
+  background: repeating-linear-gradient(135deg, rgba(255,255,255,.14) 0 14px, rgba(255,255,255,0) 14px 32px), linear-gradient(160deg, var(--t1), var(--t2) 45%, var(--t3)); }
+.hb > .f::before { content: ''; position: absolute; inset: 0; background: #fff; opacity: .3; -webkit-mask: url(../tex/halftone_sweep.png) 0 0 / 100% 100%; mix-blend-mode: soft-light; }
+
+.chip { position: absolute; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.chip > .o, .chip > .f { position: absolute; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.chip > .o { inset: 0; background: var(--ink); }
+.chip > .f { inset: 3px; background: linear-gradient(var(--b1), var(--b2) 55%, var(--b3)); }
+.chip > .lbl { position: relative; z-index: 2; display: flex; align-items: center; gap: 6px; }
+
+.trk { position: absolute; height: 26px; border: 4px solid var(--ink); background: #2a2f37; border-radius: 3px; overflow: hidden; }
+.trk > i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(var(--a1), var(--a2) 50%, var(--a3)); }
+.node { position: absolute; width: 94px; height: 86px; border: 4px solid var(--ink); border-radius: 8px;
+  background: radial-gradient(#3a414c 1.5px, transparent 1.6px) 0 0 / 7px 7px, linear-gradient(#2c323b, #171b21);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.14), 0 5px 0 rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center; }
+.node.on { background: radial-gradient(rgba(255,255,255,.18) 1.5px, transparent 1.6px) 0 0 / 7px 7px, linear-gradient(var(--a2), var(--a3)); }
+
+.keycap { position: absolute; width: 58px; height: 58px; border: 4px solid var(--ink); border-radius: 10px;
+  background: linear-gradient(#ffffff, #d5dbe2 60%, #aab3be); box-shadow: 0 4px 0 #000; display: flex; align-items: center; justify-content: center; }
+.cd { position: absolute; height: 12px; border: 3px solid var(--ink); background: #20252c; overflow: hidden; }
+.cd > i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(var(--a1), var(--a2)); }
+.pip { position: absolute; width: 26px; height: 26px; transform: rotate(45deg); border: 4px solid var(--ink); background: #2a2f37; }
+.pip.on { background: linear-gradient(135deg, var(--a1), var(--a2) 60%, var(--a3)); box-shadow: 0 0 12px var(--ag); }
+.vign { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0,0,0,.55)); pointer-events: none; }
+.f-lime { --fg: linear-gradient(#f4ffc0 10%, #b6ff4a 55%, #6fe01e); }
+.f-pink { --fg: linear-gradient(#ffd0de 10%, #ff6f9a 55%, #ff2f6e); }

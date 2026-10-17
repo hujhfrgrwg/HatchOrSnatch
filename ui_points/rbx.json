@@ -1,0 +1,18 @@
+{
+  "gui": "PointsUI",
+  "templates_folder": "PointsUITemplates",
+  "port": 8874,
+  "design": [1920, 1080],
+  "luau_out": "../roblox/ui_points",
+  "stud_asset": "",
+  "screens": [
+    {
+      "name": "Points",
+      "page": "points_x_screen",
+      "groups": ["Dim", "Leaderboard", "PodiumBanner", "ResultsV2", "ResultsSkinRed"],
+      "visible": false
+    }
+  ],
+  "templates": ["points_x_templates"],
+  "font_map": { "Arial": "Arimo" }
+}

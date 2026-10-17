@@ -1,0 +1,15 @@
+{
+  "gui": "EggUI",
+  "templates_folder": "EggUITemplates",
+  "port": 8886,
+  "design": [1920, 1080],
+  "luau_out": "../roblox/ui_egg",
+  "stud_asset": "",
+  "screens": [
+    {"name": "EggHUD", "page": "egg_x_hud", "groups": ["EggCard", "EggTip"], "visible": true, "hud": true},
+    {"name": "EggIncubator", "page": "egg_x_incubator", "groups": ["Dim", "Incubator"]},
+    {"name": "EggFirstPet", "page": "egg_x_first_pet", "groups": ["Dim", "FirstPet"]}
+  ],
+  "templates": ["egg_x_templates"],
+  "font_map": {"Arial": "Arimo"}
+}
