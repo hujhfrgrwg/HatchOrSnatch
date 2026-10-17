@@ -16,6 +16,17 @@ if (-not $Domain) {
 if (-not $Domain) { throw "No domain. Run setup_cloud.ps1 first, or pass -Domain your-domain.ngrok-free.dev" }
 if (-not (Get-Command ngrok -ErrorAction SilentlyContinue)) { throw "ngrok not found. Run setup_cloud.ps1 first." }
 
+# Free ngrok accounts need agent 3.20.0 or newer (ERR_NGROK_121); winget can install an older build.
+$verText = (ngrok version 2>&1 | Out-String)
+if ($verText -match '(\d+)\.(\d+)\.(\d+)') {
+    $v = [version]("{0}.{1}.{2}" -f $Matches[1], $Matches[2], $Matches[3])
+    if ($v -lt [version]"3.20.0") {
+        Write-Host "ngrok $v is too old (free accounts need 3.20+). Updating..."
+        ngrok update
+        Write-Host ("ngrok is now: " + (ngrok version))
+    }
+}
+
 $listening = Get-NetTCPConnection -LocalPort 58741 -State Listen -ErrorAction SilentlyContinue
 if (-not $listening) {
     Write-Host "Nothing is listening on port 58741 yet: open the Claude desktop app, or run"
