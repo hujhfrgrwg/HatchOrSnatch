@@ -5,3 +5,11 @@ Assets/PlaceExport/
 __pycache__/
 Assets/VFXPack/
 Assets/AllVFX/
+docs/backups/
+_clip/
+*.blend1
+.robloxstudio-mcp/
+.env
+*.env
+_frames/
+_cmp/
