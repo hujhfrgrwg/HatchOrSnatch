@@ -319,4 +319,44 @@ return function(JestGlobals: any, EggLogic: any, EggConfig: any, IncubatorLogic:
 			expect(p.incubator.fill).toBe(1) -- the first shard still went into the egg
 		end)
 	end)
+
+	describe("unseen shards (HOS-INC-001)", function()
+		it("remembers each settled shard until seen, oldest first, at most 12", function()
+			local p = profile()
+			Inc.applySettlement(p, { shard = "rare", seconds = 10 })
+			Inc.applySettlement(p, { shard = "epic", seconds = 10 })
+			local v = Inc.view(p)
+			expect(#v.unseen).toBe(2)
+			expect(v.unseen[1]).toBe("rare")
+			expect(v.unseen[2]).toBe("epic")
+			for _ = 1, 20 do
+				Inc.applySettlement(p, { shard = "common", seconds = 1 })
+			end
+			expect(#Inc.view(p).unseen).toBe(12)
+			expect(#p.incubator.unseen).toBe(12)
+		end)
+		it("markSeen clears them once; a hatch forgets them", function()
+			local p = profile()
+			local ok, why = Inc.markSeen(p)
+			expect(ok).toBe(false)
+			expect(why).toBe("NONE")
+			Inc.applySettlement(p, { shard = "legendary", seconds = 10 })
+			expect((Inc.markSeen(p))).toBe(true)
+			expect(#Inc.view(p).unseen).toBe(0)
+			for _ = 1, 3 do
+				Inc.applySettlement(p, { shard = "legendary", seconds = 10 })
+			end
+			expect(#Inc.view(p).unseen).toBe(3)
+			expect((Inc.hatch(p, econ, { rarity = 0.5, family = 0.5, species = 0.5 }))).toBe(true)
+			expect(#Inc.view(p).unseen).toBe(0)
+		end)
+		it("ignores junk in a saved list and never changes the profile from the view", function()
+			local p = profile()
+			Inc.applySettlement(p, { shard = "rare", seconds = 10 })
+			p.incubator.unseen = { "rare", "crowned", 5, "epic" }
+			local v = Inc.view(p)
+			expect(#v.unseen).toBe(2)
+			expect(#p.incubator.unseen).toBe(4)
+		end)
+	end)
 end

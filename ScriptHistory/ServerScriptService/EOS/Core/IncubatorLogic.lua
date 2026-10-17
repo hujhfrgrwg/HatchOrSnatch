@@ -2,7 +2,8 @@
 -- IncubatorLogic (HOS-EGG-002, 17 Oct 2026): the profile side of the egg plan, pure (no services, no yields; every
 -- random draw is passed in so DataService can replay a change and get the same result). ProfileLogic hooks it in
 -- one line each (migrate, applySettlement, clientView); EggService calls hatch / setFocus / claimFirstPet.
---   p.incubator = { fill, shards = { common, rare, epic, legendary }, focus = "Any" | family, hatched, firstWon }
+--   p.incubator = { fill, shards = { common, rare, epic, legendary }, focus = "Any" | family, hatched, firstWon,
+--                   unseen = { rarity, ... } (HOS-INC-001: shards not yet watched flying into the lobby incubator) }
 --   p.incubatorV1 = true once the old pieces were converted (they stay in p.materials, zeroed, for one release)
 --   p.stats.secondsPlayed = match time from settlements (new players fill the meter faster: first EggConfig.CHARGE.NEWBIE_HOURS)
 -- Families and species come from EconomyConfig (`econ`): a family can hatch a rarity when it is a launch family
@@ -31,6 +32,27 @@ end
 
 local function num(v: any): number
 	return if type(v) == "number" and v == v and v ~= math.huge and v ~= -math.huge then v else 0
+end
+
+-- shards not yet seen at the lobby incubator (HOS-INC-001, 17 Oct, Matthew): each settled shard is also remembered in
+-- p.incubator.unseen (rarity names, oldest first, at most UNSEEN_MAX) until the player walks up to the incubator and
+-- watches it fly into the egg (EggService SeenShards -> markSeen). A hatch starts a new egg, so it forgets them.
+-- Presentation only: fill, odds and hatches never read it.
+local UNSEEN_MAX = 12
+
+local function cleanUnseen(list: any): { string }
+	local out = {}
+	if type(list) == "table" then
+		for _, r in ipairs(list) do
+			if EggLogic.isRarity(r) then
+				table.insert(out, r)
+			end
+		end
+	end
+	while #out > UNSEEN_MAX do
+		table.remove(out, 1)
+	end
+	return out
 end
 
 -- creates / repairs p.incubator and p.stats.secondsPlayed. Returns true when it changed something.
@@ -159,8 +181,21 @@ function IncubatorLogic.applySettlement(p: any, s: any): string?
 		return nil
 	end
 	EggLogic.addShard(p.incubator, shard)
+	local unseen = cleanUnseen(p.incubator.unseen)
+	table.insert(unseen, shard)
+	p.incubator.unseen = cleanUnseen(unseen)
 	p.incubator.firstWon = true
 	return shard
+end
+
+-- the player watched their unseen shards fly into the egg (EggService SeenShards). (false, "NONE") = nothing to clear.
+function IncubatorLogic.markSeen(p: any): (boolean, string?)
+	IncubatorLogic.ensure(p)
+	if #cleanUnseen(p.incubator.unseen) == 0 then
+		return false, "NONE"
+	end
+	p.incubator.unseen = {}
+	return true, nil
 end
 
 -- ===== focus =====
@@ -236,6 +271,7 @@ function IncubatorLogic.hatch(p: any, econ: any, rolls: any): (boolean, string?,
 	local fillAtHatch, boostTier = inc.fill, inc.boost -- overfill: the odds came from this (minus the focus cost); the hatch spends it all
 	local cost = EggLogic.focusCost(inc)
 	EggLogic.consumeHatch(inc)
+	inc.unseen = {} -- a new egg: the old egg's unseen shards went into this pet (HOS-INC-001)
 	local refund = 0
 	if refunded then
 		-- "Focus refunded": what the focus cost is credited to the next egg; the focus goes back to Any
@@ -288,6 +324,7 @@ function IncubatorLogic.view(p: any): any
 		hatched = inc.hatched,
 		firstWon = inc.firstWon == true,
 		secondsPlayed = num(type(p.stats) == "table" and p.stats.secondsPlayed),
+		unseen = cleanUnseen(inc.unseen), -- HOS-INC-001: shards to fly into the lobby incubator's egg
 	}
 	if Econ then -- what the screen shows, computed here so it is exactly what the server rolls
 		local C = EggLogic.config()

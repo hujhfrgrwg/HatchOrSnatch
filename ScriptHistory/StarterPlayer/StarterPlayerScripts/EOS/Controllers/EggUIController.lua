@@ -827,6 +827,7 @@ function EggUIController.init(uic: any)
 	RunService.Heartbeat:Connect(hideOldCard)
 	task.spawn(require(script.Parent:WaitForChild("EggFX")).init) -- stage 5: glow, pulse, roll flicker, upgrade burst
 	task.spawn(require(script.Parent:WaitForChild("EggShardIntro")).init) -- start-of-match shard intro (approved 17 Oct)
+	task.spawn(require(script.Parent:WaitForChild("IncubatorWorld")).init, { view = function() return view end, open = openIncubator, ui = EUI, remotes = remotes }) -- HOS-INC-001: the lobby incubator (animation, your egg built from its shards, walk-up)
 	refreshCard()
 end
 

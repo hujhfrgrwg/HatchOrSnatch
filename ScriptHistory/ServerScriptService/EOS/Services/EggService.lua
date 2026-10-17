@@ -13,7 +13,7 @@
 -- HeroChickenService's c.hc, no edit there). Snatches (Q4, 17 Oct): a catch is pending while the Runner is down; a revive cancels it, the Runner's
 -- conversion makes it final. A Catcher keeps their best final snatch, capped one rarity above the egg they held
 -- when caught (the starting Catcher: Epic). Remotes: ReplicatedStorage.EOS_Egg (Charged, Rolled, Stash to clients;
--- HatchIncubator, SetFocus, ClaimFirstPet from clients). Telemetry: EggCharged, ShardStep, ShardGranted,
+-- HatchIncubator, SetFocus, ClaimFirstPet, SeenShards from clients). Telemetry: EggCharged, ShardStep, ShardGranted,
 -- IncubatorHatched, FocusChanged.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -471,6 +471,23 @@ local function onClaimFirst(plr: Player, family: any)
 	Analytics.log("PetCrafted", { userId = plr.UserId, speciesId = res.species, abilityFamily = res.family, rarity = res.rarity, randomFlag = false })
 end
 
+-- HOS-INC-001: the player watched their new shards fly into the lobby incubator's egg (Controllers.IncubatorWorld).
+-- Its own 1 s cooldown (not the hatch limiter, so it never costs a hatch); a no-op when nothing is unseen.
+local seenAt: { [number]: number } = {}
+local function onSeenShards(plr: Player)
+	if not EggService.on() then
+		return
+	end
+	local now = os.clock()
+	if now - (seenAt[plr.UserId] or -1e9) < 1 then
+		return
+	end
+	seenAt[plr.UserId] = now
+	helpers.tryUpdate(plr, "eggSeen", function(p)
+		return IncubatorLogic.markSeen(p)
+	end)
+end
+
 -- ===== init (EconomyService.init) =====
 -- h = { tryUpdate = (plr, label, fn) -> (ok, info), toast = (plr, text, kind) -> () }
 function EggService.init(h: any)
@@ -484,7 +501,7 @@ function EggService.init(h: any)
 	end
 	local f = Instance.new("Folder")
 	f.Name = "EOS_Egg"
-	for _, name in ipairs({ "Charged", "Rolled", "Stash", "HatchIncubator", "SetFocus", "ClaimFirstPet" }) do
+	for _, name in ipairs({ "Charged", "Rolled", "Stash", "HatchIncubator", "SetFocus", "ClaimFirstPet", "SeenShards" }) do
 		local r = Instance.new("RemoteEvent")
 		r.Name = name
 		r.Parent = f
@@ -495,6 +512,7 @@ function EggService.init(h: any)
 	remotes.SetFocus.OnServerEvent:Connect(onSetFocus)
 	require(script.Parent.CharacterService).onEggBuilt(require(script.Parent.EggShardBack).dress) -- the carried egg shows as a back shard (approved 17 Oct)
 	remotes.ClaimFirstPet.OnServerEvent:Connect(onClaimFirst)
+	remotes.SeenShards.OnServerEvent:Connect(onSeenShards) -- HOS-INC-001
 	local Players = game:GetService("Players")
 	for _, plr in Players:GetPlayers() do
 		task.spawn(checkLucky, plr)
@@ -504,6 +522,7 @@ function EggService.init(h: any)
 	end)
 	Players.PlayerRemoving:Connect(function(plr)
 		lucky[plr.UserId] = nil
+		seenAt[plr.UserId] = nil
 	end)
 	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(plr, id, purchased)
 		if purchased and id == EggConfig.LUCKY_PASS.gamePassId and id ~= 0 then
