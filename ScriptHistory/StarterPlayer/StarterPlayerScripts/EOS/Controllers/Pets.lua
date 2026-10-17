@@ -24,6 +24,7 @@ local Sound = require(script.Parent.Sound)
 local CrowPet = require(script.Parent.CrowPet) -- rigged crow: walking follower, swoop-in summon
 local PetBehaviors = require(script.Parent.PetBehaviors) -- rigged pets: follower + summon per species
 local Invisibility = require(script.Parent.Invisibility) -- how invisible players look from here
+local AbilityVFX = require(script.Parent.AbilityVFX) -- the abilities' effects (HOS-VFX-001)
 
 local Pets = {}
 Pets.readyAt = 0 -- os.clock() when the ability is ready again
@@ -168,7 +169,9 @@ local function updateFollowers(dt: number)
 				end
 				followers[plr] = f
 			end
-			if f.hiddenUntil > now then
+			-- hidden while it's in the ability, and for as long as its owner is invisible: it never shows
+			-- up before they do (the reveal clears EOS_Invisible, then it pops back)
+			if f.hiddenUntil > now or (r.Parent and r.Parent:GetAttribute("EOS_Invisible")) then
 				f.model.Parent = nil -- it flew into the ability
 			elseif f.crow and f.beh then
 				if f.model.Parent == nil then
@@ -327,8 +330,12 @@ function Pets.init()
 			-- the crow's copy leaves in a scatter of crows at level 2+
 			local beh = PetBehaviors.get(t.species)
 			if not (beh and beh.poof(t.pos, tonumber(t.level) or 1)) then
-				poof(t.pos)
+				AbilityVFX.play("DecoyPoof", CFrame.new(t.pos)) -- (the old grey puff: poof)
 			end
+		elseif t.kind == "vfx" and type(t.name) == "string" and typeof(t.pos) == "Vector3" then
+			-- an ability's one-shot effect (Abilities.Shared.vfx), facing `look` when given
+			local look = if typeof(t.look) == "Vector3" and t.look.Magnitude > 0.01 then t.look else nil
+			AbilityVFX.play(t.name, if look then CFrame.lookAt(t.pos, t.pos + look) else CFrame.new(t.pos))
 		elseif t.kind == "blocked" and typeof(t.pos) == "Vector3" then
 			-- a "blocks one tag" charge stopped a tag: everyone sees where (archetype colour, never gold)
 			ring(t.pos - Vector3.new(0, 1.5, 0), AbilityCosmetics.resolve(nil, t.family).color)
@@ -336,6 +343,7 @@ function Pets.init()
 		end
 	end)
 	Invisibility.init()
+	AbilityVFX.init()
 	-- a new match: the cooldown starts fresh
 	player:GetAttributeChangedSignal("EOS_InMatch"):Connect(function()
 		Pets.readyAt = 0

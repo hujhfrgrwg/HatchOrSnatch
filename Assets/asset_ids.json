@@ -130,5 +130,59 @@
  },
  "Assets/Icons/ab_tether_512.png": {
   "assetId": "127769854169253"
+ },
+ "vfx/abilities/tex/av_beam_electric.png": {
+  "assetId": "119326896863213"
+ },
+ "vfx/abilities/tex/av_beam_energy.png": {
+  "assetId": "73198675097201"
+ },
+ "vfx/abilities/tex/av_burst_rays.png": {
+  "assetId": "76492014223325"
+ },
+ "vfx/abilities/tex/av_burst_shock.png": {
+  "assetId": "107240195265778"
+ },
+ "vfx/abilities/tex/av_glitter.png": {
+  "assetId": "134818658429287"
+ },
+ "vfx/abilities/tex/av_lightning_2x2.png": {
+  "assetId": "123521025984319"
+ },
+ "vfx/abilities/tex/av_ring_glow.png": {
+  "assetId": "125411018069862"
+ },
+ "vfx/abilities/tex/av_ring_spiky.png": {
+  "assetId": "101992488517593"
+ },
+ "vfx/abilities/tex/av_ring_swirl.png": {
+  "assetId": "78766963528266"
+ },
+ "vfx/abilities/tex/av_ring_thin.png": {
+  "assetId": "132990049556506"
+ },
+ "vfx/abilities/tex/av_shield_broken.png": {
+  "assetId": "92092208397978"
+ },
+ "vfx/abilities/tex/av_shield_outline.png": {
+  "assetId": "123794242573968"
+ },
+ "vfx/abilities/tex/av_sig_chain.png": {
+  "assetId": "99662856194334"
+ },
+ "vfx/abilities/tex/av_sig_reticle.png": {
+  "assetId": "109075237795090"
+ },
+ "vfx/abilities/tex/av_swirl_teleport.png": {
+  "assetId": "124701630646682"
+ },
+ "vfx/abilities/tex/av_vortex.png": {
+  "assetId": "123196401903927"
+ },
+ "vfx/abilities/tex/av_smoke_toon.png": {
+  "assetId": "108094592142892"
+ },
+ "Assets/Icons/ab_decoy_512.png": {
+  "assetId": "111828043435034"
  }
 }

@@ -47,6 +47,21 @@ function Shared.fx(payload: { [string]: any })
 	Net.event("AbilityFx"):FireAllClients(payload)
 end
 
+-- ===== looks (HOS-VFX-001) =====
+-- Effects are drawn by each client (Controllers.AbilityVFX, templates in ReplicatedStorage.VFX.Abilities).
+-- vfx: a one-shot template played at a position (ground point for ground effects), facing `look`.
+function Shared.vfx(name: string, pos: Vector3, look: Vector3?)
+	Shared.fx({ kind = "vfx", name = name, pos = pos, look = look })
+end
+
+-- tagVfx: the server keeps its gameplay part (invisible) and every client dresses it with a lasting
+-- effect for as long as the part exists.
+function Shared.tagVfx(part: BasePart, name: string)
+	part.Transparency = 1
+	part:SetAttribute("VFX", name)
+	game:GetService("CollectionService"):AddTag(part, "EOS_AbilityVFX")
+end
+
 -- ===== species intros (VISUAL ONLY) =====
 -- How long each species' summon animation runs on the client (fly-in / run-in, then the flash).
 -- VISUAL ONLY, per Hunter on 17 Oct: every ability fires the instant the button is pressed and the

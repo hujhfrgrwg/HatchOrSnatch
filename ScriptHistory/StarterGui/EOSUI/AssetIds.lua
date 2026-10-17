@@ -6,7 +6,7 @@ return {
 	icons = {
 		["ab_brake"] = "rbxassetid://87260006153647",
 		["ab_dash"] = "rbxassetid://89185530845839",
-		["ab_decoy"] = "rbxassetid://104364330527636",
+		["ab_decoy"] = "rbxassetid://95918987919710", -- HOS-VFX-001: recoloured to Decoy orange-gold (was 104364330527636)
 		["ab_invis"] = "rbxassetid://104033063185781",
 		["ab_scout"] = "rbxassetid://115232370828703",
 		["ab_shield"] = "rbxassetid://115672617954489",
@@ -61,6 +61,16 @@ return {
 		["info"] = "rbxassetid://140075104471483",
 		["lock"] = "rbxassetid://93578022956827",
 		["music"] = "rbxassetid://89069864277464",
+		-- the game's own pets (renders of the real models, one per level; uploaded by ssported)
+		["pet_crow_t1"] = "rbxassetid://124965979564104",
+		["pet_crow_t2"] = "rbxassetid://92375971898358",
+		["pet_crow_t3"] = "rbxassetid://106659190754947",
+		["pet_kitsune_t1"] = "rbxassetid://116145648261188",
+		["pet_kitsune_t2"] = "rbxassetid://109271322678523",
+		["pet_kitsune_t3"] = "rbxassetid://83412949770371",
+		["pet_prism_chameleon_t1"] = "rbxassetid://109357740109007",
+		["pet_prism_chameleon_t2"] = "rbxassetid://103795403007957",
+		["pet_prism_chameleon_t3"] = "rbxassetid://109066423894370",
 		["pet_armored_rex_t1"] = "rbxassetid://132147695134999",
 		["pet_armored_rex_t2"] = "rbxassetid://102591614639013",
 		["pet_armored_rex_t3"] = "rbxassetid://127597449827341",

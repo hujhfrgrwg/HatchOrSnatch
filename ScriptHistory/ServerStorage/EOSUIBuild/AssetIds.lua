@@ -6,7 +6,7 @@ return {
 	icons = {
 		["ab_brake"] = "rbxassetid://87260006153647",
 		["ab_dash"] = "rbxassetid://89185530845839",
-		["ab_decoy"] = "rbxassetid://104364330527636",
+		["ab_decoy"] = "rbxassetid://95918987919710", -- HOS-VFX-001: recoloured to Decoy orange-gold (was 104364330527636)
 		["ab_invis"] = "rbxassetid://104033063185781",
 		["ab_scout"] = "rbxassetid://115232370828703",
 		["ab_shield"] = "rbxassetid://115672617954489",
