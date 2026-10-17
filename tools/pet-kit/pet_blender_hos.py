@@ -279,11 +279,12 @@ def run():
     bpy.data.libraries.write(os.path.join(SAVE_DIR, NAME + '_Pet.blend'), {scn}, fake_user=True, compress=True)
     # FBX in the bind pose: textures referenced by file name, found next to the .fbx by Studio's importer
     rig.data.pose_position = 'REST'
+    keep = {o.name for o in objs} | {rig.name}      # HOS: by name; object identity fails in headless Blender
     for o in bpy.context.view_layer.objects:
-        o.select_set(o in objs or o == rig)
+        o.select_set(o.name in keep)
     bpy.context.view_layer.objects.active = rig
     fp = os.path.join(SAVE_DIR, NAME + '_Pet.fbx')
-    bpy.ops.export_scene.fbx(filepath=fp, use_selection=True, object_types={'ARMATURE', 'MESH'}, add_leaf_bones=False,
+    bpy.ops.export_scene.fbx(filepath=fp, use_selection=False, object_types={'ARMATURE', 'MESH'}, add_leaf_bones=False,  # HOS: the scene holds only the pet
                              bake_anim=False, axis_forward='Z', axis_up='Y',
                              path_mode='STRIP', embed_textures=False)
     rig.data.pose_position = 'POSE'

@@ -16,7 +16,7 @@ from petkit import *   # noqa: F401,F403
 import numpy as np
 
 NAME = 'Toad'
-SHARP_ANGLE = 55
+SHARP_ANGLE = 80
 NORMAL_STRENGTH = 2.5
 TS = 1024
 ATLAS = Atlas({
@@ -203,7 +203,7 @@ def build():
         n = nrm(V(t * 0.7, -1, 0.1))
         s_ = _surface(head_tris, p, n)
         pts.append((s_ if s_ is not None else p) + n * 0.012)
-    tube(mb, 'mouth', pts, [(0.024, 0.014)] * len(pts), 4, [W_H] * len(pts), 'smile', start='flat', end='flat',
+    tube(mb, 'mouth', pts, [(0.016, 0.01)] * len(pts), 4, [W_H] * len(pts), 'smile', start='flat', end='flat',
          side_hint=V(0, 0, 1), anti=False)
     # yellow cheek dots near each mouth corner
     for x in (1, -1):
@@ -303,7 +303,6 @@ def paint_atlas(level):
     blue = grad((up + 1) / 2, [(0.0, NAVY), (0.35, BLUE_DK), (0.65, BLUE), (1.0, BLUE_HI)])
     belly = ss(-0.2, -0.55, up) * ss(0.66, 0.8, v)     # under the head: cream, blending into the throat mesh
     c = blue * (1 - belly[..., None]) + grad(np.clip((up + 1) * 1.3, 0, 1), [(0, 'eadbb0'), (1, CREAM)]) * belly[..., None]
-    c += grit(h, w, 3)[..., None] * 0.05
     marks = np.zeros((h, w), np.float32)
     # big star-burst bolts: down the back, on each flank, and on the top of the head
     marks = np.maximum(marks, _bolt_mask(h, w, 0.5 * w, 0.36 * h, 0.22 * w, 0.5 * h, 0.1))
@@ -322,8 +321,8 @@ def paint_atlas(level):
     ycol = grad(np.clip(marks, 0, 1), [(0, YEL_DK), (0.5, YEL), (0.97, YEL), (1.0, 'ffe866')])
     c = c * (1 - marks[..., None]) + ycol * marks[..., None]
     col[y0:y1, x0:x1] = c
-    hgt[y0:y1, x0:x1] = marks * 0.35 + spots * 0.3 + grit(h, w, 4) * 0.03
-    rgh[y0:y1, x0:x1] = 0.22 * (1 - belly) + 0.5 * belly
+    hgt[y0:y1, x0:x1] = marks * 0.25 + spots * 0.25
+    rgh[y0:y1, x0:x1] = 0.25 * (1 - belly) + 0.4 * belly
     glow[y0:y1, x0:x1] = np.clip(marks * 1.2, 0, 1)
     # --- jaw: cream, a soft lower shade
     y0, y1, x0, x1 = R['jaw']
@@ -331,8 +330,8 @@ def paint_atlas(level):
     v, u = np.mgrid[0:h, 0:w].astype(np.float32)
     u /= w
     up = np.cos((u - 0.5) * 2 * math.pi)
-    col[y0:y1, x0:x1] = grad((up + 1) / 2, [(0, 'e6cf92'), (0.55, CREAM), (1, 'fbeec4')]) + grit(h, w, 5)[..., None] * 0.02
-    rgh[y0:y1, x0:x1] = 0.45
+    col[y0:y1, x0:x1] = grad((up + 1) / 2, [(0, 'e6cf92'), (0.55, CREAM), (1, 'fbeec4')])
+    rgh[y0:y1, x0:x1] = 0.4
     # --- legs: blue with a bolt on the outer side, darker toward the feet
     y0, y1, x0, x1 = R['limb']
     h, w = y1 - y0, x1 - x0
@@ -343,9 +342,9 @@ def paint_atlas(level):
     lm = np.maximum(_bolt_mask(h, w, 0.25 * w, 0.4 * h, 0.13 * w, 0.52 * h, 0.1),
                     _bolt_mask(h, w, 0.75 * w, 0.4 * h, 0.13 * w, 0.52 * h, -0.1))
     lc = lc * (1 - lm[..., None]) + grad(lm, [(0, YEL_DK), (0.5, YEL), (1, YEL)]) * lm[..., None]
-    col[y0:y1, x0:x1] = lc + grit(h, w, 6)[..., None] * 0.04
+    col[y0:y1, x0:x1] = lc
     hgt[y0:y1, x0:x1] = lm * 0.3
-    rgh[y0:y1, x0:x1] = 0.24
+    rgh[y0:y1, x0:x1] = 0.25
     glow[y0:y1, x0:x1] = lm
     # --- brows / sockets: blue, glossy, darker inside
     y0, y1, x0, x1 = R['brow']
@@ -376,7 +375,7 @@ def paint_atlas(level):
     col[y0:y1, x0:x1] = hx(BLUE)
     # --- mouth: dark navy-red
     y0, y1, x0, x1 = R['mouth']
-    col[y0:y1, x0:x1] = hx('2a1a3a')
+    col[y0:y1, x0:x1] = hx('16308a')
     rgh[y0:y1, x0:x1] = 0.4
     # level saturation / brightness step
     if sat != 1.0:
@@ -392,29 +391,27 @@ def emissive_mask(level):
     return np.repeat(g[..., None], 3, -1)
 
 
-LID_Y, LID_SLANT = 0.4, 0.55
+LID_Y, LID_SLANT = 0.62, 0.95
 
 
 def face_texture(level, size=512):
-    """mat 1: one round eye (used by both discs): glossy yellow iris, dark rim, big round pupil, two highlights."""
+    """mat 1: one round eye (mirrored for the right eye): bright yellow iris fading to amber only at the rim, a
+    large centred pupil looking straight ahead, a big highlight at the upper outer edge + a small one, and a short
+    blue lid wedge clipping only the top INNER corner (the card's slight frown toward the nose; nose = -x)."""
     x, y = coords(size)
     r = np.sqrt(x * x + y * y)
     rgba = np.zeros((size, size, 4), np.float32)
-    iris = grad(np.clip(0.5 + y * 0.5, 0, 1), [(0, 'e09a12'), (0.6, 'ffcf2a'), (1, 'ffe873')])
-    iris = iris * (1 - 0.25 * ss(0.7, 1.0, r))[..., None]
-    rim = ss(0.86, 0.93, r)
-    c = iris * (1 - rim[..., None]) + hx('15204a') * rim[..., None]
-    py = y - 0.04
-    pupil = ss(0.47, 0.44, np.sqrt((x * 0.95) ** 2 + py ** 2))
+    iris = grad(np.clip(r / 0.92, 0, 1), [(0, 'ffe45a'), (0.55, YEL), (0.85, 'f2b52a'), (1, 'd98a12')])
+    c = iris
+    pupil = ss(0.5, 0.47, r)
     c = c * (1 - pupil[..., None]) + hx('0d0d16') * pupil[..., None]
-    for hx_, hy_, hr in ((-0.2, 0.26, 0.17), (0.2, -0.22, 0.07)):
+    for hx_, hy_, hr in ((0.2, 0.22, 0.17), (-0.17, -0.2, 0.07)):
         hl = ss(hr, hr * 0.75, np.sqrt((x - hx_) ** 2 + (y - hy_) ** 2))
         c = c * (1 - hl[..., None]) + hl[..., None]
-    lid = ss(-0.02, 0.04, y - (LID_Y + LID_SLANT * x))       # the brow lid edge slants down toward the nose
-    lidc = grad(np.clip(0.5 + y * 0.5, 0, 1), [(0, '1636a8'), (1, '3a7af0')])
-    edge = ss(0.07, 0.0, np.abs(y - (LID_Y + LID_SLANT * x))) * (1 - lid)
-    c = c * (1 - lid[..., None]) + lidc * lid[..., None]
-    c = c * (1 - 0.7 * edge[..., None]) + hx('0d1640') * 0.7 * edge[..., None]
+    lid = ss(-0.02, 0.03, y - (LID_Y + LID_SLANT * x))
+    c = c * (1 - lid[..., None]) + grad(np.clip(0.5 + y * 0.5, 0, 1), [(0, '1e55d8'), (1, '3a7af0')]) * lid[..., None]
+    rim = ss(0.9, 0.93, r)
+    c = c * (1 - rim[..., None]) + hx('0f1a40') * rim[..., None]
     rgba[..., :3] = c
     rgba[..., 3] = ss(1.0, 0.97, r)
     return rgba

@@ -175,3 +175,12 @@ Every pet and effect asset uploaded to Roblox (group 228184582) for Hatch or Sna
 | Thunder Toad v2-v8 (v8 = live, sheet touch-up) | `Toad_L3_rough_v8.png` | 84642311187331 | roughness map |
 | Thunder Toad v2-v8 (v8 = live, sheet touch-up) | `Toad_L3_v8.png` | 106881699917747 | colour map |
 | Thunder Toad v2-v8 (v8 = live, sheet touch-up) | `thunder_toad_v8.fbx` | 72829019761560 | model (FBX) |
+
+## Thunder Toad pet-kit rebuild (17 Oct, superseded, unused)
+These three upload sets were made during the pet-kit Toad rebuild. Hunter then stopped that reference ("use a different one"), so none of them is used in the place.
+
+| Set | Ids |
+|---|---|
+| ToadKit | Color 101467326431432, Color_L2 76210465570254, Color_L3 137100031745379, Emit 84505929169005, Emit_L2 95523590305352, Emit_L3 125027947401342, Face 94857521273900, Normal 95378954173153, Roughness 105053537572904. FBX failed: no mesh content (export bug, since fixed). |
+| ToadKit2 | Color 104768650802432, Color_L2 74945340270451, Color_L3 116400480782400, Emit 125453643435774, Emit_L2 79282442933040, Emit_L3 132815550266609, Face 84415364099206, Normal 123777542032990, Roughness 84684918119120. FBX failed (same bug). |
+| ToadKit3 | Color 78716210649134, Color_L2 121420675891480, Color_L3 120712343401689, Emit 121130685127797, Emit_L2 78945532064463, Emit_L3 109121741715085, Face 79806555780099, Normal 83511905558466, Roughness 118684075788168. FBX failed (same bug). |
