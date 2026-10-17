@@ -2,7 +2,7 @@
   "mcpServers": {
     "roblox": {
       "type": "http",
-      "url": "https://mutual-native-dispense.ngrok-free.dev/mcp",
+      "url": "${ROBLOX_MCP_URL:-https://mutual-native-dispense.ngrok-free.dev/mcp}",
       "headers": { "Authorization": "Bearer ${ROBLOX_MCP_TOKEN}" }
     }
   }
