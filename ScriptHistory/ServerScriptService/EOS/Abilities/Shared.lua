@@ -56,8 +56,10 @@ end
 
 -- tagVfx: the server keeps its gameplay part (invisible) and every client dresses it with a lasting
 -- effect for as long as the part exists.
-function Shared.tagVfx(part: BasePart, name: string)
-	part.Transparency = 1
+function Shared.tagVfx(part: BasePart, name: string, keepVisible: boolean?)
+	if not keepVisible then
+		part.Transparency = 1
+	end
 	part:SetAttribute("VFX", name)
 	game:GetService("CollectionService"):AddTag(part, "EOS_AbilityVFX")
 end
@@ -232,6 +234,9 @@ function Shared.consumeTagBlock(victim: any, hunter: any): boolean
 	local char = victim.Character
 	local r = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	Shared.fx({ userId = victim.UserId, family = b.archetype, kind = "blocked", pos = r and r.Position or nil, by = hunter and hunter.UserId })
+	if b.archetype == "Guardian" and r then
+		Shared.vfx("ShieldBreak", r.Position) -- the bubble shatters (HOS-VFX-002)
+	end
 	Analytics.log("AbilityTagBlocked", { userId = victim.UserId, by = hunter and hunter.UserId, family = b.archetype })
 	return true
 end
@@ -291,14 +296,27 @@ function Shared.slideTo(actor: any, to: Vector3, seconds: number)
 end
 
 -- a placeholder telegraph everyone sees: a neon bar between two bodies for `seconds` (prototype look)
-function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, width: number?)
+-- vfx (HOS-VFX-002): clients draw a real Beam between the two bodies instead (the part carries ObjectValues
+-- A and B pointing at them) and the server part stays invisible.
+function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, width: number?, vfx: string?)
 	local p = Instance.new("Part")
+	if vfx then
+		for k, v in pairs({ A = a, B = b }) do
+			local o = Instance.new("ObjectValue")
+			o.Name = k
+			o.Value = v
+			o.Parent = p
+		end
+	end
 	p.Name = "EOS_AbilityBeam"
 	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
 	p.Material = Enum.Material.Neon
 	p.Color = color
 	p.Transparency = 0.25
 	p.Parent = Shared.runtimeFolder("AbilityFx")
+	if vfx then
+		Shared.tagVfx(p, vfx)
+	end
 	local w = width or 0.35
 	local t0 = os.clock()
 	local conn
@@ -307,6 +325,9 @@ function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, w
 			conn:Disconnect()
 			p:Destroy()
 			return
+		end
+		if vfx then
+			return -- clients draw it from A and B; nothing to replicate every frame
 		end
 		local d = (b.Position - a.Position)
 		p.Size = Vector3.new(w, w, math.max(0.1, d.Magnitude))

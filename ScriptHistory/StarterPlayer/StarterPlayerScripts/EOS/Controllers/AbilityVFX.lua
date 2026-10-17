@@ -102,6 +102,46 @@ DRESS.Snare = function(part: BasePart): () -> ()
 	end
 end
 
+-- Guardian Catcher's tether (HOS-VFX-002): real Beams strung between the two bodies on this client (smooth,
+-- not a stretched part), and a hook glow on the Runner. The server part carries ObjectValues A and B.
+DRESS.TetherBeam = function(part: BasePart): () -> ()
+	local t = Templates:FindFirstChild("TetherBeam")
+	local a = part:WaitForChild("A", 1) :: ObjectValue?
+	local b = part:WaitForChild("B", 1) :: ObjectValue?
+	local ra = a and a.Value :: BasePart?
+	local rb = b and b.Value :: BasePart?
+	if not t or not ra or not rb then
+		return function() end
+	end
+	local made: { Instance } = {}
+	local a0 = Instance.new("Attachment")
+	a0.Name = "EOS_TetherFrom"
+	a0.Parent = ra
+	local a1 = Instance.new("Attachment")
+	a1.Name = "EOS_TetherTo"
+	a1.Parent = rb
+	table.insert(made, a0)
+	table.insert(made, a1)
+	for _, src in ipairs(t:GetDescendants()) do
+		if src:IsA("Beam") then
+			local bm = src:Clone()
+			bm.Attachment0 = a0
+			bm.Attachment1 = a1
+			bm.Parent = holder()
+			table.insert(made, bm)
+		elseif src:IsA("ParticleEmitter") then
+			local e = src:Clone()
+			e.Parent = a1
+			table.insert(made, e)
+		end
+	end
+	return function()
+		for _, x in ipairs(made) do
+			x:Destroy()
+		end
+	end
+end
+
 local function dress(part: Instance)
 	if not part:IsA("BasePart") or active[part] then
 		return

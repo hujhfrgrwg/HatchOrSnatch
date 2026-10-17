@@ -40,7 +40,7 @@ function Guardian.Runner(ctx: any): (boolean, string?)
 	b.Shape = Enum.PartType.Ball
 	b.Size = Vector3.new(6.5, 6.5, 6.5)
 	b.Material = Enum.Material.ForceField
-	b.Color = COLOR
+	b.Color = Color3.fromRGB(30, 150, 255) -- the Guardian blue, deeper so it reads on bright ground (HOS-VFX-002)
 	b.Transparency = 0.1
 	b.CanCollide, b.CanQuery, b.CanTouch, b.CastShadow, b.Massless = false, false, false, false, true
 	b.CFrame = root.CFrame
@@ -49,6 +49,8 @@ function Guardian.Runner(ctx: any): (boolean, string?)
 	w.Parent = b
 	b.Parent = char
 	bubbles[ctx.player] = b
+	Shared.tagVfx(b, "ShieldBubble", true) -- the bubble stays; clients add its rim and sparkles (HOS-VFX-002)
+	Shared.vfx("ShieldUp", root.Position)
 	-- the bubble goes when the shield is used up (EOS_TagBlock cleared) or runs out
 	local conn
 	conn = char:GetAttributeChangedSignal("EOS_TagBlock"):Connect(function()
@@ -90,7 +92,7 @@ function Guardian.Catcher(ctx: any): (boolean, string?)
 	end
 	local target = best
 	local tr = target.Character.HumanoidRootPart :: BasePart
-	Shared.beam(root, tr, COLOR, d.windup + 0.2)
+	Shared.beam(root, tr, COLOR, d.windup + 0.2, nil, "TetherBeam")
 	local me = ctx.player
 	local role = me:GetAttribute("EOS_Role")
 	task.delay(d.windup, function()
@@ -117,6 +119,7 @@ function Guardian.Catcher(ctx: any): (boolean, string?)
 			local dest = tr.Position + toMe.Unit * want * frac
 			if Shared.validPosition(target, dest) then
 				Shared.slideTo(target, dest, 0.15)
+				Shared.vfx("TetherYank", tr.Position, toMe.Unit) -- streaks fly towards the Catcher
 				return
 			end
 		end

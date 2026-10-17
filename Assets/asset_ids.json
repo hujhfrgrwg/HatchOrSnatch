@@ -184,5 +184,11 @@
  },
  "Assets/Icons/ab_decoy_512.png": {
   "assetId": "111828043435034"
+ },
+ "vfx/abilities/tex/av_beam_energy_v.png": {
+  "assetId": "84207895341779"
+ },
+ "vfx/abilities/tex/av_beam_electric_v.png": {
+  "assetId": "130553964429839"
  }
 }
