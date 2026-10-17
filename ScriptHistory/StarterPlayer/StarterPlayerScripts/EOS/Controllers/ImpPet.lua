@@ -1,0 +1,192 @@
+--!strict
+-- ImpPet (client): the Ring Imp (Rift Common), HOS-PET-017. Built in tools/pet-kit/imp/imp.py (the friend's pet kit).
+--  * follower: hovers behind your right shoulder like the Manta (floats, bobs, banks into turns, never touches the
+--    ground). Idle when you stop (head low, arms folded, tail whips), Walk / Run glides as it keeps up.
+--  * summon (every ability press, both roles; visual only, abilities fire on the press, Hunter 17 Oct):
+--    a small rift tears open at your front-right and the imp drops out of it, then plays its cast:
+--      Runner (Portal Relocation): the Ability clip, hurling its halo open and diving through;
+--      Catcher (Blink): the Blink clip, coiling and snapping everything wide.
+--    The level's flash (VFX.ImpSummon_L1-L3) fires at FLASH_AT, then it blinks into you (shrinks + fades).
+--  * poof: none (Rift has no decoy).
+-- Bones are driven by Shared/PetRig from ImpAnims. Everything here is local and never physical.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
+local PetModel = require(Shared:WaitForChild("PetModel"))
+local PetRig = require(Shared:WaitForChild("PetRig"))
+local GroundPet = require(script.Parent:WaitForChild("GroundPet"))
+
+local ImpPet = {}
+
+ImpPet.SPECIES = "Ring Imp"
+ImpPet.INTRO = 0.9 -- how long the summon plays (visual only)
+ImpPet.FLASH_AT = 0.42 -- seconds in: the halo is thrown open / the claws snap
+ImpPet.SCALE = 1.0
+ImpPet.SUMMON_SCALE = 1.4
+
+-- follower placement (studs, in the owner's frame): right, up from the root, behind
+ImpPet.SIDE = 2.2
+ImpPet.HEIGHT = 1.4
+ImpPet.BACK = 1.9
+
+export type Follower = {
+	model: Model,
+	rig: any,
+	pos: Vector3,
+	vel: Vector3,
+	yaw: number,
+	roll: number,
+	t: number,
+	level: number,
+	gait: string,
+}
+
+local function flat(v: Vector3): Vector3
+	return Vector3.new(v.X, 0, v.Z)
+end
+
+local function approachAngle(a: number, b: number, rate: number): number
+	local d = (b - a + math.pi) % (2 * math.pi) - math.pi
+	return a + d * rate
+end
+
+local function spotFor(f: Follower?, root: BasePart): Vector3
+	local cf = root.CFrame
+	local look = flat(cf.LookVector)
+	if look.Magnitude < 1e-3 then
+		look = Vector3.new(0, 0, -1)
+	end
+	look = look.Unit
+	local right = Vector3.new(-look.Z, 0, look.X)
+	local t = if f then f.t else 0
+	local bob = math.sin(t * 1.7) * 0.18
+	return root.Position + right * ImpPet.SIDE - look * ImpPet.BACK + Vector3.new(0, ImpPet.HEIGHT + bob, 0)
+end
+
+function ImpPet.newFollower(level: number, root: BasePart): Follower
+	local m = PetModel.build(ImpPet.SPECIES, ImpPet.SCALE, level)
+	m.Name = "EOS_Follower"
+	local rig = PetRig.new(m, ImpPet.SPECIES)
+	local f: Follower = {
+		model = m,
+		rig = rig,
+		pos = Vector3.zero,
+		vel = Vector3.zero,
+		yaw = GroundPet.yawOf(root.CFrame.LookVector, 0),
+		roll = 0,
+		t = math.random() * 6,
+		level = level,
+		gait = "idle",
+	}
+	f.pos = spotFor(f, root)
+	rig:play("Idle", 0, 1, math.random() * 60)
+	m:PivotTo(CFrame.new(f.pos) * CFrame.Angles(0, f.yaw, 0))
+	m.Parent = workspace.CurrentCamera -- local only
+	return f
+end
+
+function ImpPet.respawnFollower(f: Follower, root: BasePart)
+	f.pos = spotFor(f, root)
+	f.vel = Vector3.zero
+	f.roll = 0
+	f.gait = "idle"
+	f.rig:play("Idle", 0)
+end
+
+function ImpPet.updateFollower(f: Follower, root: BasePart, dt: number)
+	if dt <= 0 then
+		return
+	end
+	f.t += dt
+	local goal = spotFor(f, root)
+	local to = goal - f.pos
+	if to.Magnitude > 40 then
+		f.pos = goal -- lost (teleport / respawn / a Rift hop): pop back next to the owner
+		to = Vector3.zero
+	end
+	local prev = f.pos
+	local k = 1 - math.exp(-dt * (3.4 + math.min(to.Magnitude, 12) * 0.35))
+	f.pos = f.pos + to * k
+	local vel = (f.pos - prev) / dt
+	f.vel = f.vel:Lerp(vel, 1 - math.exp(-dt * 6))
+	local speed = flat(f.vel).Magnitude
+
+	local look = flat(root.CFrame.LookVector)
+	local wantYaw = if speed > 1.2 then GroundPet.yawOf(f.vel, f.yaw) else GroundPet.yawOf(look, f.yaw)
+	local oldYaw = f.yaw
+	f.yaw = approachAngle(f.yaw, wantYaw, 1 - math.exp(-dt * (if speed > 1.2 then 6 else 2.5)))
+	local yawRate = ((f.yaw - oldYaw + math.pi) % (2 * math.pi) - math.pi) / dt
+	f.roll += (math.clamp(-yawRate * 0.18, -0.45, 0.45) - f.roll) * (1 - math.exp(-dt * 5))
+
+	local g = if speed > 7 then "run" elseif speed > 1.6 or (f.gait ~= "idle" and speed > 0.9) then "walk" else "idle"
+	if g ~= f.gait then
+		f.gait = g
+		f.rig:play(if g == "run" then "Run" elseif g == "walk" then "Walk" else "Idle", 0.3)
+	end
+	if g ~= "idle" then
+		f.rig:setSpeed(math.clamp(speed / (if g == "run" then 12 else 5), 0.7, 1.6))
+	end
+	f.model:PivotTo(CFrame.new(f.pos) * CFrame.Angles(0, f.yaw, 0) * CFrame.Angles(0, 0, f.roll))
+	f.rig:step(dt)
+end
+
+function ImpPet.summon(who: Model, level: number)
+	local root = who:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then
+		return
+	end
+	level = math.clamp(math.floor(level), 1, 3)
+	local plr = Players:GetPlayerFromCharacter(who)
+	local clip = if plr and plr:GetAttribute("EOS_Role") == "Catcher" then "Blink" else "Ability"
+	local imp = PetModel.build(ImpPet.SPECIES, ImpPet.SUMMON_SCALE, level)
+	imp.Name = "EOS_ImpSummon"
+	local rig = PetRig.new(imp, ImpPet.SPECIES)
+	local INTRO = ImpPet.INTRO
+	local baseScale = imp:GetScale()
+	local yaw = GroundPet.yawOf(root.CFrame.LookVector, 0)
+	-- drops out of a rift at your front-right, facing the way you face
+	local function place(k: number)
+		local rcf = root.CFrame
+		local drop = math.min(1, k / 0.15)
+		local lp = Vector3.new(2.0, 1.6 - 1.2 * drop * (2 - drop), -1.3)
+		yaw = GroundPet.yawOf(rcf.LookVector, yaw)
+		imp:PivotTo(CFrame.new(rcf * lp) * CFrame.Angles(0, yaw, 0))
+		-- blinks into you over the last fifth
+		local m = math.clamp((k - 0.8) / 0.2, 0, 1)
+		if m > 0 then
+			imp:ScaleTo(baseScale * (1 - 0.75 * m))
+			GroundPet.fade(imp, m * 0.9)
+		end
+	end
+	place(0)
+	imp.Parent = workspace.CurrentCamera
+	GroundPet.playFx("ImpSummon_L" .. level, CFrame.new((root.CFrame * CFrame.new(2.0, 1.8, -1.3)).Position))
+	rig:play(clip, 0, rig:length(clip) / (INTRO * 0.8), 0)
+	local t0 = os.clock()
+	local flashed = false
+	local conn
+	conn = RunService.RenderStepped:Connect(function(dt)
+		local k = (os.clock() - t0) / INTRO
+		if not root.Parent or k >= 1 then
+			conn:Disconnect()
+			imp:Destroy()
+			return
+		end
+		if not flashed and os.clock() - t0 >= ImpPet.FLASH_AT then
+			flashed = true
+			local cf, size = imp:GetBoundingBox()
+			GroundPet.playFx("ImpSummon_L" .. level, CFrame.new(cf.Position + Vector3.new(0, size.Y * 0.2, 0)))
+		end
+		place(k)
+		rig:step(dt)
+	end)
+end
+
+function ImpPet.poof(_pos: Vector3, _level: number): boolean
+	return false
+end
+
+return ImpPet

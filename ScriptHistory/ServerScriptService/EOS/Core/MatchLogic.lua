@@ -67,6 +67,7 @@ export type Options = {
 	-- Studio solo test (one player, never rewarded): waves run their full time even with no Runners
 	-- left, so the one player can try both roles (time out as a Runner -> play the next waves as Catcher)
 	solo: boolean?,
+	soloWinEndsMatch: boolean?, -- HOS-PTS-001 (default true = the old rule)
 }
 
 local function sortedIds(t: { [number]: any }): { number }
@@ -89,6 +90,7 @@ function MatchLogic.new(opts: Options)
 	self.cleanStreakToWin = opts.cleanStreakToWin or 3
 	self.maxWaves = opts.maxWaves or 40
 	self.timeoutBreaksStreak = opts.timeoutBreaksStreak ~= false
+	self.soloWinEndsMatch = opts.soloWinEndsMatch ~= false -- HOS-PTS-001: false = the last Runner plays on (no early win)
 	self.cleanStreak = 0 -- clean crossings in a row so far
 	self.waveCaptures = 0 -- captures during the current crossing
 	self.conversionGrace = opts.conversionGrace or 1.5
@@ -223,6 +225,20 @@ function MatchLogic:markActivity(userId: number, distance: number)
 	if p and not p.disconnected and distance > 0 and distance < 1000 then
 		p.activeDistance += distance
 	end
+end
+
+-- HOS-GEMS-002: a Gem picked up on the field. Returns ok and this player's field Gems so far.
+function MatchLogic:addFieldGem(userId: number, cap: number): (boolean, number)
+	local p = self.participants[userId]
+	if self.phase ~= "ACTIVE" or not p or p.disconnected then
+		return false, 0
+	end
+	local n = (p :: any).fieldGems or 0
+	if n >= cap then
+		return false, n
+	end
+	(p :: any).fieldGems = n + 1
+	return true, n + 1
 end
 
 function MatchLogic:runnersRemaining(): number
@@ -459,7 +475,7 @@ function MatchLogic:endWave(now: number): any
 	if runners == 0 and not self.solo then
 		nextAction = "END"
 		self.endReason = "ALL_RUNNERS_GONE"
-	elseif lone and lone.role == "RUNNER" and lone.isSafeThisWave and not lone.disconnected then
+	elseif self.soloWinEndsMatch and lone and lone.role == "RUNNER" and lone.isSafeThisWave and not lone.disconnected then -- HOS-PTS-001 switch
 		-- the last Runner made their solo crossing: once is enough, they win
 		nextAction = "END"
 		self.endReason = "LAST_ONE_STANDING"
@@ -651,9 +667,18 @@ function MatchLogic:computeResults(now: number): any
 		-- GDD v0.4: Gold, Gems and one egg piece, from server-confirmed contributions only
 		local gold, goldParts, gems, material = 0, {}, 0, nil
 		if self.economy then
-			local outcome = { active = eligible, crossings = p.crossingsCompleted, captures = p.captureCount, win = win }
+			local outcome = { active = eligible, crossings = p.crossingsCompleted, captures = p.captureCount, win = win, fieldGems = (p :: any).fieldGems or 0 }
 			gold, goldParts = self.economy.goldFor(outcome)
-			gems = self.economy.gemsFor(outcome)
+			gems = self.economy.gemsFor(outcome) -- never touched by the Hero bonus
+			-- HOS-HOC-001: a Hero who got across alone pays extra crossings of Gold (own line on the card)
+			local heroExtra = p.heroBonusCrossings or 0
+			if heroExtra > 0 then
+				local withHero = (self.economy.goldFor({ active = eligible, crossings = p.crossingsCompleted + heroExtra, captures = p.captureCount, win = win }))
+				if withHero > gold then
+					table.insert(goldParts, { label = "HERO", amount = withHero - gold })
+					gold = withHero
+				end
+			end
 			material = if eligible then self.economy.materialForTier(secured) else nil
 		end
 		perPlayer[id] = {
@@ -661,6 +686,7 @@ function MatchLogic:computeResults(now: number): any
 			gold = gold,
 			goldParts = goldParts,
 			gems = gems,
+			fieldGems = (p :: any).fieldGems or 0,
 			material = material,
 			eligible = eligible,
 			disconnected = p.disconnected,
@@ -670,6 +696,7 @@ function MatchLogic:computeResults(now: number): any
 			matchShells = p.shells,
 			participationShells = if eligible then self.rewards.PARTICIPATION_SHELLS else 0,
 			crossings = p.crossingsCompleted,
+			heroBonus = p.heroBonusCrossings, -- HOS-HOC-001: extra crossings paid for Hero runs
 			captures = p.captureCount,
 			bestStolenTier = p.bestStolenTier,
 			earnedRunnerTier = p.earnedRunnerTier,
@@ -730,7 +757,7 @@ function MatchLogic:settlementFor(userId: number): any
 		-- left early: keep what was already earned in the match (crossings, a steal), no piece, no win
 		local gold, gems = 0, 0
 		if self.economy then
-			local outcome = { active = false, crossings = p.crossingsCompleted, captures = p.captureCount, win = false }
+			local outcome = { active = false, crossings = p.crossingsCompleted, captures = p.captureCount, win = false, fieldGems = (p :: any).fieldGems or 0 }
 			gold = (self.economy.goldFor(outcome))
 			gems = self.economy.gemsFor(outcome)
 		end

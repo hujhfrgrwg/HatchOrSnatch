@@ -1,0 +1,22 @@
+[
+ "docs/pets/veil_nekomata/build/neko/Neko_Pet.fbx",
+ "docs/pets/veil_nekomata/build/neko/Neko_Color.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L2.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L3.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Normal.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Roughness.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L2.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L3.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Face.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L2.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L3.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L2.png",
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L3.png",
+ "vfx/neko/out/NekoClaw.flipbook.png",
+ "vfx/neko/out/NekoEye.png",
+ "vfx/neko/out/NekoMist.flipbook.png",
+ "vfx/neko/out/NekoOnibi.flipbook.png",
+ "vfx/neko/out/NekoVeil.flipbook.png"
+]

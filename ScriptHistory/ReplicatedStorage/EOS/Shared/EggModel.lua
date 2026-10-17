@@ -8,6 +8,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TierConfig = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("TierConfig"))
+local EggConfig = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("EggConfig")) -- HOS-EGG-002
 
 local EggModel = {}
 
@@ -27,6 +28,16 @@ function EggModel.kindFor(tier: number): string
 	return "Golden"
 end
 
+-- HOS-EGG-002: the carried egg follows the egg plan's rarity levels (EggConfig.LEVEL 1 / 3 / 5 / 7) while the plan is
+-- on, matching the egg card's icons (Rare Shiny, Epic Cosmic, Legendary Golden); showcase eggs keep kindFor
+function EggModel.carriedKind(tier: number): string
+	if not EggConfig.ENABLED then
+		return EggModel.kindFor(tier)
+	end
+	local L = EggConfig.LEVEL
+	return if tier >= L.legendary then "Golden" elseif tier >= L.epic then "Cosmic" elseif tier >= L.rare then "Shiny" else "Basic"
+end
+
 local function libFolder(kind: string): Instance?
 	local lib = ReplicatedStorage:FindFirstChild(LIB) or ReplicatedStorage:WaitForChild(LIB, 5)
 	return lib and lib:FindFirstChild(kind)
@@ -43,7 +54,7 @@ function EggModel.build(tier: number, wearable: boolean, size: number?): Model
 	local model = Instance.new("Model")
 	model.Name = "EOS_Egg"
 	model:SetAttribute("EOS_Tier", tier)
-	local folder = libFolder(EggModel.kindFor(tier))
+	local folder = libFolder(if wearable then EggModel.carriedKind(tier) else EggModel.kindFor(tier))
 	local f = factor(tier, size)
 	local parts: { BasePart } = {}
 	local body: BasePart

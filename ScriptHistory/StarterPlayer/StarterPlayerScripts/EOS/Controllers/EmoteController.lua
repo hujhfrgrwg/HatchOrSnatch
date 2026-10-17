@@ -200,6 +200,13 @@ local function setSong(char: Model)
 	s.RollOffMode = Enum.RollOffMode.InverseTapered
 	s.RollOffMinDistance = 12
 	s.RollOffMaxDistance = EmoteConfig.MUSIC_RANGE
+	if char:GetAttribute("EOS_IsNpc") == true then
+		-- HOS-BOT-002: a lobby NPC's song is quieter and only heard close by (GameConfig.Npc.EMOTE_SOUND_*)
+		local NC = require(Shared:WaitForChild("GameConfig")).Npc
+		s.Volume *= NC.EMOTE_SOUND_VOLUME_SCALE or 0.35
+		s.RollOffMinDistance = NC.EMOTE_SOUND_ROLLOFF_MIN or 8
+		s.RollOffMaxDistance = NC.EMOTE_SOUND_ROLLOFF_MAX or 40
+	end
 	s:SetAttribute("Emote", id)
 	s.Parent = root
 	s:Play()
@@ -1093,6 +1100,16 @@ function EmoteController.init()
 	end)
 	for _, plr in ipairs(Players:GetPlayers()) do watchPlayer(plr) end
 	Players.PlayerAdded:Connect(watchPlayer)
+	-- HOS-BOT-002: lobby NPCs emote too (server-played clip): same song and prop construct
+	task.spawn(function()
+		local npcs = workspace:WaitForChild("EOS_Runtime", math.huge):WaitForChild("Npcs", math.huge)
+		for _, m in ipairs(npcs:GetChildren()) do
+			if m:IsA("Model") then watchCharacter(m) end
+		end
+		npcs.ChildAdded:Connect(function(m)
+			if m:IsA("Model") then watchCharacter(m) end
+		end)
+	end)
 	setTab("mine")
 end
 

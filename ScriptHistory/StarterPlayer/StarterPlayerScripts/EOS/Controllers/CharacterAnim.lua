@@ -420,6 +420,10 @@ local function applyArm(character: Model, aim: Vector3?, w: number)
 	if not m or not torso then
 		return
 	end
+	-- HOS-HOC-001: the lead Catcher's point (CatcherGesture sets this C0 on the server): leave it as replicated
+	if character:GetAttribute("EOS_ArmHeld") then
+		return
+	end
 	local base = baseShoulder[m]
 	if not base then
 		base = m.C0

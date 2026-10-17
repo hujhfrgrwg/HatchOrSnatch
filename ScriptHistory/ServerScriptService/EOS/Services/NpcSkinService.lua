@@ -1,4 +1,6 @@
--- NpcSkinService: every player sees the NPCs as their own friends.
+-- NpcSkinService: dresses the NPCs. HOS-BOT-001 (Npc.REAL_POOL): everyone sees the same made-up
+-- looks from RealPlayerPool. With Npc.FRIEND_FALLBACK (the old way, below): every player sees the
+-- NPCs as their own friends.
 -- For each player the server picks friends (then friends of friends when the list is short),
 -- builds their avatars as R6 models and puts them in that player's PlayerGui (EOS_FriendSkins),
 -- which only that player receives. The player's client (Controllers/NpcSkins) then dresses each
@@ -16,7 +18,7 @@ local NpcService = require(script.Parent.NpcService)
 local N = GameConfig.Npc
 local NpcSkinService = {}
 
-type Entry = { id: number, name: string }
+type Entry = { id: number, name: string, desc: HumanoidDescription? }
 local descCache: { [number]: HumanoidDescription } = {}
 local states: { [Player]: { list: { Entry }?, built: number, busy: boolean } } = {}
 local rng = Random.new()
@@ -62,6 +64,16 @@ local function friendsOf(userId: number, out: { Entry }, seen: { [number]: boole
 end
 
 local function buildList(plr: Player): { Entry }
+	if N.REAL_POOL and not N.FRIEND_FALLBACK then
+		-- HOS-BOT-001: everyone sees the same made-up people (RealPlayerPool), slot for slot.
+		-- FriendUserId gets the identity's opaque negative key (no headshot; no real UserId)
+		local Pool = require(script.Parent.RealPlayerPool)
+		local list: { Entry } = {}
+		for i, id in ipairs(Pool.list(N.MAX_SLOTS)) do
+			list[i] = { id = id.key, name = id.name, desc = Pool.description(id) }
+		end
+		return list
+	end
 	local seen: { [number]: boolean } = {}
 	for _, p in ipairs(Players:GetPlayers()) do
 		seen[p.UserId] = true -- people in this server are here for real; they're never NPC looks
@@ -109,7 +121,7 @@ local function container(plr: Player): ScreenGui?
 end
 
 local function buildSkin(entry: Entry, slot: number): Model?
-	local desc = descCache[entry.id]
+	local desc = entry.desc or descCache[entry.id]
 	if not desc then
 		local ok, d = pcall(function()
 			return Players:GetHumanoidDescriptionFromUserId(entry.id)
@@ -185,6 +197,8 @@ local function pump(plr: Player)
 					skin.Parent = g
 				end
 				st.built = slot
+			elseif entry.desc then
+				st.built = slot -- (made-up look won't build: that slot keeps the plain look and the same name)
 			else
 				table.remove(list, slot) -- that avatar won't load: next friend takes this slot
 			end

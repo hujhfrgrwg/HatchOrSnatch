@@ -211,6 +211,7 @@ local function swing(bot: any, at: Vector3?)
 		return
 	end
 	bot.swingReadyAt = now + GameConfig.Capture.TAG_COOLDOWN
+	require(script.Parent.PointsService).catcherAttacked(bot, "swing") -- HOS-PTS-001: a miss near a Runner is a juke
 	local t = bot.tracks.SwingJab
 	if t then
 		t:Play(0.04, 1, 1)
@@ -314,6 +315,11 @@ function NpcService.spawn(kind: string, at: Vector3?, lookAt: Vector3?): any?
 		brain = {},
 	}, BotMeta)
 	slots[slot] = bot
+	-- HOS-BOT-001: this slot's made-up identity (name, outfit; stats from real players), the same for everyone
+	bot.identity = if N.REAL_POOL then require(script.Parent.RealPlayerPool).take(slot) else nil
+	if bot.identity then
+		bot.Name, bot.DisplayName = bot.identity.name, bot.identity.name
+	end
 	local spot = at or Layout.Lobby.SPAWN
 	local target = spot + Vector3.new(0, 3, 0)
 	model:PivotTo(if lookAt then CFrame.lookAt(target, Vector3.new(lookAt.X, target.Y, lookAt.Z)) else CFrame.new(target))
@@ -324,7 +330,15 @@ function NpcService.spawn(kind: string, at: Vector3?, lookAt: Vector3?): any?
 	end)
 	-- lobby flavour for the overhead tag (best tier / wins line)
 	bot:SetAttribute("EOS_BestTier", rng:NextInteger(1, 3))
-	bot:SetAttribute("EOS_Wins", rng:NextInteger(0, 12))
+	local id = bot.identity
+	bot:SetAttribute("EOS_Wins", if id then id.wins else rng:NextInteger(0, 12))
+	if id then
+		bot:SetAttribute("EOS_Level", id.level)
+		bot:SetAttribute("EOS_PetFamily", id.petFamily)
+		bot:SetAttribute("EOS_PetSpecies", id.petSpecies)
+		bot:SetAttribute("EOS_PetRarity", id.petRarity)
+		bot:SetAttribute("EOS_PetLevel", id.petLevel)
+	end
 	CharacterService.applyRole(bot, "LOBBY")
 	loadTracks(bot)
 	table.insert(bots, bot)
@@ -339,6 +353,9 @@ function NpcService.despawn(bot: any)
 	end
 	if slots[bot.slot] == bot then
 		slots[bot.slot] = nil
+		if bot.identity then
+			require(script.Parent.RealPlayerPool).release(bot.slot)
+		end
 	end
 	bot.Parent = nil
 	if bot.Character then
@@ -506,6 +523,7 @@ local function lunge(bot: any, dir: Vector3): boolean
 		return false
 	end
 	bot.lungeReadyAt = now + LG.COOLDOWN
+	require(script.Parent.PointsService).catcherAttacked(bot, "lunge") -- HOS-PTS-001: a miss near a Runner is a juke
 	bot.dashDir = dir
 	bot.burstSpeed = LG.SPEED
 	bot.recoverTime = LG.RECOVER_TIME
@@ -1098,6 +1116,7 @@ function NpcService.init()
 			think(elapsed)
 		end
 	end)
+	require(script.Parent.NpcEmotes).init(NpcService) -- HOS-BOT-002 lobby NPC emotes (Npc.LOBBY_EMOTES)
 	Players.PlayerAdded:Connect(balanceLobby)
 	Players.PlayerRemoving:Connect(function()
 		task.defer(balanceLobby)

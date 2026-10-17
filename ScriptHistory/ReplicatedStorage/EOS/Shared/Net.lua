@@ -24,7 +24,9 @@ Net.TO_CLIENT = {
 	"ShopResult", -- { ok, reason, itemId, robux?, refunded? } or a Gem pack { ok, gems }
 	"AbilityFx", -- { userId, slot?, family, kind, ... } everyone: a pet's ability fired (telegraph)
 	"AbilityState", -- { family, readyAt, ok, reason } owner: cooldown / refusal
+	"FieldGemPicked", -- { id, position, userId, total, cap, full? } a field Gem was picked up (full = you're at the cap)
 	"ServerList", -- { servers = { { id, players, max, country, code, city, phase, ping } }, here, t } after RequestServers
+	"LastStanding", -- { userId, name, npcSlot, catchers, pos, from, finish } match players: the lone Runner's cut-scene
 }
 -- client -> server
 Net.TO_SERVER = {

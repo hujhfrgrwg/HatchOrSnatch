@@ -13,7 +13,7 @@ GameConfig.Timing = {
 	ROLE_REVEAL = 5, -- roles shown, gates closed
 	CROSSING = 30, -- one wave
 	WAVE_TRANSITION = 4, -- SAFE / level-up / flip sides
-	RESULTS = 11, -- results screen before the next intermission
+	RESULTS = 11, -- results screen before the next intermission (HOS-PTS-001: back to 11, the podium is off)
 	WATCHDOG_SLACK = 25, -- extra seconds beyond the planned match length before a forced end
 	CONVERSION_GRACE = 1.5, -- a converted Catcher cannot tag for this long
 	WAVE_START_PROTECTION = 0.75, -- Runners can't be tagged in the first moments of a wave
@@ -43,11 +43,32 @@ GameConfig.Match = {
 	CLEAN_STREAK_TO_WIN = 3,
 	TIMEOUT_BREAKS_STREAK = true, -- a Runner who doesn't make it in time also spoils the crossing
 	MAX_CROSSINGS_SAFETY = 40,
+	-- HOS-PTS-001: a match is FIXED_CROSSINGS crossings (nil = the open-ended clean-streak rule above). It ends early
+	-- only when no Runners are left; SOLO_WIN_ENDS_MATCH = true brings back "the last Runner's solo crossing wins it".
+	FIXED_CROSSINGS = 5 :: number?,
+	SOLO_WIN_ENDS_MATCH = false,
 	-- made it across = stays across (developer, Oct 15): once a safe Runner is this far inside the finish
 	-- zone, the zone's invisible wall closes behind them (for them only) until the next crossing; one who
 	-- steps back out before that (more than SAFE_ESCAPE_MARGIN into the field) is put back in the zone
 	SAFE_LOCK_DEPTH = 3, -- studs: clear of the wall (1.5 thick, on the zone's edge) so it never pushes them out
 	SAFE_ESCAPE_MARGIN = 1,
+}
+
+-- Field Gems (HOS-GEMS-002, 17 Oct; after the reference game Hunter showed): a few Gems lie on the field each
+-- crossing, more in later crossings. Runners who aren't safe yet pick one up by walking into it. Each is worth
+-- 1 Gem, paid with the match's Gems at settlement (EconomyConfig.GEMS.FIELD_CAP per match, inside CAP).
+GameConfig.FieldGems = {
+	ENABLED = true, -- kill switch
+	PER_CROSSING = { 1, 2, 2, 3 }, -- Gems on the field in crossing 1, 2, 3, 4+ (the last entry repeats)
+	FULL_AT_PLAYERS = 20, -- real players for the full count; fewer scale it down (never below 1)
+	RUNNERS_ONLY = true, -- Catchers can't take them (they'd camp the Gems instead of chasing)
+	PICKUP_RADIUS = 4, -- studs, flat, from the root
+	ZONE_INSET = 14, -- studs: never this close to a safe zone (no free Gems on the doorstep)
+	CENTER_GAP = 10, -- studs: never on the Catchers' start line
+	EDGE_INSET = 10, -- studs from the side walls
+	MIN_SPACING = 18, -- studs between two Gems
+	HOVER = 2, -- studs above the ground
+	TICK = 0.1,
 }
 
 -- Capture (tag) rules. Server validates everything; the client only sends hints.
@@ -247,6 +268,30 @@ GameConfig.Npc = {
 	RANDOM_DASH_PER_SEC = 0.05, -- unprovoked side slides now and then
 	-- friends as NPC looks
 	FRIEND_OF_FRIEND_LOOKUPS = 6, -- friend lists to borrow from when a player has too few friends
+	-- HOS-BOT-001: NPCs are made-up people (generated names, free catalog outfits) carrying real
+	-- players' stats (RealPlayerPool), the same for everyone in the server
+	REAL_POOL = true,
+	FRIEND_FALLBACK = false, -- true: each player sees the NPCs as their own friends again (the old looks)
+	LOBBY_CHAT = false, -- (not built yet)
+	LOBBY_EMOTES = true, -- HOS-BOT-002: lobby NPCs emote now and then (Services/NpcEmotes); false = never
+	-- (developer, Oct 17: uncommon, never in sync, quiet unless you're close)
+	EMOTE_INTERVAL_MIN = 150, -- seconds between one NPC's emotes (each NPC rolls its own)
+	EMOTE_INTERVAL_MAX = 360,
+	EMOTE_FIRST_MIN = 30, -- a new NPC's first emote
+	EMOTE_FIRST_MAX = 300,
+	EMOTE_MAX_AT_ONCE = 1, -- NPCs emoting at once, whole lobby
+	EMOTE_GAP = 20, -- seconds after any NPC's emote ends before another may start
+	EMOTE_CHEER_CHANCE = 0.15, -- when results end: chance an NPC cheers
+	EMOTE_CHEER_MAX = 1,
+	EMOTE_COPY_CHANCE = 0.08, -- a real player emotes: chance a standing NPC nearby joins in
+	EMOTE_COPY_RANGE = 20, -- studs
+	EMOTE_COPY_COOLDOWN = 180, -- seconds: each NPC copies at most once in this long
+	EMOTE_SOUND_VOLUME_SCALE = 0.35, -- x the player's emote song volume
+	EMOTE_SOUND_ROLLOFF_MIN = 8, -- studs (InverseTapered)
+	EMOTE_SOUND_ROLLOFF_MAX = 40,
+	POOL_CAP = 300, -- recorded players kept (newest first)
+	POOL_WRITE_INTERVAL = 60, -- seconds between this server's pool writes (batched)
+	POOL_STUDIO_SEED = true, -- Studio, memory-only data: make up a few stat lines so previews work
 }
 
 -- Feature flags: what's live. Nothing in the UI may pretend an OFF system works.
@@ -300,6 +345,17 @@ GameConfig.RateLimits = {
 	RequestEmoteWheel = { max = 6, window = 2 },
 	RequestServers = { max = 2, window = 3 },
 	RequestJoinServer = { max = 2, window = 5 },
+}
+
+-- HOS-CINE-002: cut-scenes (Controllers/Cinematic). Last One Standing plays in the break before a crossing
+-- that starts with a single Runner; that break gets LAST_STANDING_EXTRA seconds longer only then.
+GameConfig.Cinematic = {
+	LAST_STANDING_ENABLED = true, -- the switch: false = no cut-scene, the old "LAST ONE STANDING!" banner
+	LAST_STANDING_EXTRA = 1.6, -- seconds added to that WAVE_END
+	LAST_STANDING_SECONDS = 3.4, -- the moment's length on screen (shots 3.1 + bars out 0.3)
+	MAX_SECONDS = 4, -- hard cap: any cut-scene gives the camera back by then
+	BAR_HEIGHT = 0.11, -- letterbox bars, fraction of the screen height
+	BAR_TIME = 0.28, -- bars slide in / out
 }
 
 -- Practice area (low-population fallback, never rewards).

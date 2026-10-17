@@ -32,6 +32,14 @@ local TINT: { [string]: ColorSequence } = {
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 160, 230)),
 	}),
 	["Grim Ghost"] = ColorSequence.new(Color3.fromRGB(205, 180, 255)),
+	["Moonveil Moth"] = ColorSequence.new(Color3.fromRGB(255, 248, 225), Color3.fromRGB(190, 160, 255)), -- HOS-PET-023 moon dust
+	["Veil Nekomata"] = ColorSequence.new(Color3.fromRGB(225, 250, 255), Color3.fromRGB(60, 190, 255)), -- HOS-PET-028 onibi
+	["Pumpkin Wraith"] = ColorSequence.new(Color3.fromRGB(255, 220, 140), Color3.fromRGB(255, 110, 20)), -- HOS-HWN-001 embers
+	["Mirage Manta"] = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 205, 255)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(90, 150, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(235, 245, 255)),
+	}),
 }
 local DEFAULT_TINT = ColorSequence.new(Color3.fromRGB(235, 240, 255))
 

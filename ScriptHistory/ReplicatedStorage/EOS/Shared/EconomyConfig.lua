@@ -14,13 +14,15 @@ local EconomyConfig = {}
 -- Gold = min(90, 25 active + 12 x successful crossings + 10 x credited first theft + 15 x final victory)
 EconomyConfig.GOLD = { CAP = 90, ACTIVE = 25, PER_CROSSING = 12, FIRST_THEFT = 10, VICTORY = 15 }
 -- Gems = min(5, 1 active + 1 first crossing + 1 second crossing + 1 final victory + 1 credited first theft)
-EconomyConfig.GEMS = { CAP = 5, ACTIVE = 1, FIRST_CROSSING = 1, SECOND_CROSSING = 1, VICTORY = 1, FIRST_THEFT = 1 }
+-- + 1 per Gem picked up on the field (HOS-GEMS-002), at most FIELD_CAP a match, still inside CAP
+EconomyConfig.GEMS = { CAP = 5, ACTIVE = 1, FIRST_CROSSING = 1, SECOND_CROSSING = 1, VICTORY = 1, FIRST_THEFT = 1, FIELD_CAP = 2 }
 
 export type MatchOutcome = {
 	active: boolean, -- eligible (moved / crossed / tagged): no AFK presence rewards
 	crossings: number,
 	captures: number, -- credited captures (the first one counts once)
 	win: boolean,
+	fieldGems: number?, -- Gems picked up on the field
 }
 
 -- Returns gold, plus a breakdown for the results card
@@ -98,6 +100,7 @@ function EconomyConfig.gemsFor(o: MatchOutcome): number
 	if o.captures > 0 then
 		n += M.FIRST_THEFT
 	end
+	n += math.min(M.FIELD_CAP or 0, o.fieldGems or 0)
 	return math.min(M.CAP, n)
 end
 
@@ -134,13 +137,15 @@ end
 -- species are listed; LAUNCH_FAMILIES is what eggs hatch.
 local AbilityConfig = require(script.Parent:WaitForChild("AbilityConfig"))
 local AR = AbilityConfig.ARCHETYPES
-EconomyConfig.LAUNCH_FAMILIES = { "Decoy", "Invisibility" }
+-- HOS-PET-REDO (Hunter 17 Oct, "implement"): every roster pet hatches from its family at its SPECIES_RARITY rarity;
+-- the four Halloween shop pets stay shop-only (HalloweenShop.inject, never in these tables)
+EconomyConfig.LAUNCH_FAMILIES = { "Decoy", "Invisibility", "Guardian", "Tempest", "Rift" }
 EconomyConfig.FAMILIES = {
 	Decoy = {
 		ability = "DECOY",
 		short = "A running copy of you",
 		desc = "Sends a copy of you running ahead for 3 seconds. Catchers chasing it lose you.",
-		species = { common = "Mouse", rare = "Crow", epic = "Kitsune" },
+		species = { common = "Crow", rare = "Kitsune", epic = "Scroll Tanuki", legendary = "Eclipse Tengu" }, -- (Mouse retired: no model)
 		color = AR.Decoy.color,
 		cooldown = AR.Decoy.Runner.cooldown,
 		duration = AR.Decoy.Runner.duration,
@@ -151,15 +156,42 @@ EconomyConfig.FAMILIES = {
 		ability = "INVISIBLE",
 		short = "Fade from sight",
 		desc = "Turns you nearly invisible for 3 seconds: opponents only see a faint shimmer.",
-		species = { common = "Prism Chameleon", rare = "Prism Chameleon", epic = "Prism Chameleon" },
+		species = { common = "Prism Chameleon", rare = "Grim Ghost", epic = { "Mirage Manta", "Moonveil Moth" }, legendary = "Veil Nekomata" }, -- HOS-PET-018: the Grin Ghost is the Rare
 		color = AR.Invisibility.color,
 		cooldown = AR.Invisibility.Runner.cooldown,
 		duration = AR.Invisibility.Runner.duration,
 	},
+	Guardian = {
+		ability = "SHIELD",
+		short = "A shield that blocks one tag",
+		desc = "A shield round you for about a second that blocks the next tag.",
+		species = { common = "Bastion Beetle", rare = "Crystal Warden", epic = "Shrine Lion", legendary = "Aegis Kirin" },
+		color = AR.Guardian.color,
+		cooldown = AR.Guardian.Runner.cooldown,
+		duration = AR.Guardian.Runner.duration,
+	},
+	Tempest = {
+		ability = "PULSE",
+		short = "A blast that pushes Catchers away",
+		desc = "A shockwave round you that pushes nearby Catchers away.",
+		species = { common = "Thunder Toad", rare = "Riot Hound", epic = "Drum Oni", legendary = "Raiju" },
+		color = AR.Tempest.color,
+		cooldown = AR.Tempest.Runner.cooldown,
+		duration = AR.Tempest.Runner.duration,
+	},
+	Rift = {
+		ability = "PORTAL HOP",
+		short = "Hop through a portal",
+		desc = "Opens a portal and hops you through it to a spot ahead.",
+		species = { common = "Ring Imp", rare = "Compass Hare", epic = "Astral Djinn", legendary = "Void Seraph" },
+		color = AR.Rift.color,
+		cooldown = AR.Rift.Runner.cooldown,
+		duration = AR.Rift.Runner.duration,
+	},
 }
 
 -- the family a species belongs to (hatch tables above, plus the new rigged pets not in a table yet)
-EconomyConfig.EXTRA_SPECIES = { Crow = "Decoy", Kitsune = "Decoy", ["Bastion Beetle"] = "Guardian", ["Thunder Toad"] = "Tempest" } :: { [string]: string }
+EconomyConfig.EXTRA_SPECIES = { Mouse = "Decoy", Crow = "Decoy", Kitsune = "Decoy", ["Bastion Beetle"] = "Guardian", ["Thunder Toad"] = "Tempest", ["Ring Imp"] = "Rift", ["Crystal Warden"] = "Guardian", ["Riot Hound"] = "Tempest", ["Compass Hare"] = "Rift", ["Scroll Tanuki"] = "Decoy", ["Moonveil Moth"] = "Invisibility", ["Shrine Lion"] = "Guardian", ["Drum Oni"] = "Tempest", ["Astral Djinn"] = "Rift", ["Eclipse Tengu"] = "Decoy", ["Veil Nekomata"] = "Invisibility", ["Aegis Kirin"] = "Guardian", ["Raiju"] = "Tempest", ["Void Seraph"] = "Rift" } :: { [string]: string }
 
 -- HOS-PET-012: roster pets go by the names on Hunter's concept library sheet (docs/pets/concepts). Internal
 -- ids (a saved pet's `species`, attributes, asset folders) stay as they are, so no save migration is needed.
@@ -167,11 +199,12 @@ EconomyConfig.DISPLAY_NAMES = {
 	Crow = "Shadow Crow",
 	Kitsune = "Spirit Kitsune",
 	["Prism Chameleon"] = "Prism Chameleon",
+	["Mirage Manta"] = "Mirage Manta",
 	["Grim Ghost"] = "Grin Ghost",
 } :: { [string]: string }
 -- the roster rarity of each roster pet (cofounder handoff). The hatch tables above are not changed by this
 -- (HOS-PET-012: no hatch changes yet); a later ticket swaps roster pets into them.
-EconomyConfig.SPECIES_RARITY = { Crow = "common", Kitsune = "rare", ["Prism Chameleon"] = "common", ["Grim Ghost"] = "rare" } :: { [string]: string }
+EconomyConfig.SPECIES_RARITY = { Crow = "common", ["Bastion Beetle"] = "common", ["Thunder Toad"] = "common", ["Ring Imp"] = "common", Kitsune = "rare", ["Prism Chameleon"] = "common", ["Mirage Manta"] = "epic", ["Grim Ghost"] = "rare", ["Crystal Warden"] = "rare", ["Riot Hound"] = "rare", ["Compass Hare"] = "rare", ["Scroll Tanuki"] = "epic", ["Moonveil Moth"] = "epic", ["Shrine Lion"] = "epic", ["Drum Oni"] = "epic", ["Astral Djinn"] = "epic", ["Eclipse Tengu"] = "legendary", ["Veil Nekomata"] = "legendary", ["Aegis Kirin"] = "legendary", ["Raiju"] = "legendary", ["Void Seraph"] = "legendary" } :: { [string]: string }
 
 function EconomyConfig.displayName(species: string?): string
 	if type(species) ~= "string" or species == "" then
@@ -186,7 +219,7 @@ function EconomyConfig.familyOfSpecies(species: string): string?
 	end
 	for fam, def in pairs(EconomyConfig.FAMILIES) do
 		for _, sp in pairs(def.species) do
-			if sp == species then
+			if sp == species or (type(sp) == "table" and table.find(sp, species)) then -- a rarity can list several pets
 				return fam
 			end
 		end
@@ -196,7 +229,11 @@ end
 
 function EconomyConfig.speciesFor(family: string, rarity: string): string
 	local f = EconomyConfig.FAMILIES[family]
-	return f and f.species[rarity] or "Pet"
+	local sp = f and f.species[rarity]
+	if type(sp) == "table" then
+		sp = sp[1]
+	end
+	return sp or "Pet"
 end
 
 -- ===== shops (GDD 04 / 05, appendix C) =====
@@ -207,6 +244,7 @@ end
 --   "entrance" = permanent lobby spawn effect
 --   "trailPerm" = permanent egg trail (premium)
 --   "abilityFx" = permanent ability colour pack (same hitboxes and timings)
+--   "abilitySkin" = permanent look for one ability's effect, worn from cosmetics[slot] (HOS-VFX-RES-001)
 --   "hatchFx" = permanent hatching ceremony
 export type ShopItem = {
 	id: string,
@@ -218,6 +256,7 @@ export type ShopItem = {
 	color: Color3,
 	robux: number?, -- Gem items: the Robux price when bought outright
 	productId: number?, -- its developer product (nil = Gems only)
+	slot: string?, -- abilitySkin: the cosmetics slot it is worn from (Wear / Take off, like cases)
 }
 EconomyConfig.SHOP = {
 	{ id = "trail_spark", name = "Sparkle Trail", wallet = "gold", price = 40, kind = "trail", desc = "Your egg leaves sparkles. One match.", color = Color3.fromRGB(255, 236, 140) },
@@ -228,6 +267,10 @@ EconomyConfig.SHOP = {
 	{ id = "case_sunset", name = "Sunset Egg Case", wallet = "gold", price = 2400, kind = "case", desc = "This week's Gold colorway. Yours to keep.", color = Color3.fromRGB(255, 160, 96) },
 	{ id = "trailp_rainbow", name = "Rainbow Trail", wallet = "gems", price = 150, kind = "trailPerm", desc = "A rainbow trail on your egg in every match.", color = Color3.fromRGB(255, 120, 220), robux = 79, productId = 3718903405 },
 	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "Your pet's ability effects turn gold. Same timing and size.", color = Color3.fromRGB(255, 210, 58), robux = 119, productId = 3718903406 },
+	-- HOS-VFX-RES-001 Rift portal skins (from Hunter's resource place). Gems only until Hunter sets Robux prices.
+	{ id = "fx_rift_void", name = "Void Rift", wallet = "gems", price = 200, kind = "abilitySkin", slot = "riftSkin", desc = "Your Rift portals swirl violet. Same size and timing.", color = Color3.fromRGB(141, 75, 255) },
+	{ id = "fx_rift_inferno", name = "Inferno Rift", wallet = "gems", price = 200, kind = "abilitySkin", slot = "riftSkin", desc = "Your Rift portals burn orange. Same size and timing.", color = Color3.fromRGB(255, 92, 36) },
+	{ id = "fx_rift_frost", name = "Frost Rift", wallet = "gems", price = 200, kind = "abilitySkin", slot = "riftSkin", desc = "Your Rift portals glow icy blue. Same size and timing.", color = Color3.fromRGB(96, 206, 255) },
 	{ id = "hatch_royal", name = "Royal Hatching", wallet = "gems", price = 350, kind = "hatchFx", desc = "A bigger hatching ceremony at the incubator.", color = Color3.fromRGB(200, 150, 255), robux = 159, productId = 3718903407 },
 } :: { ShopItem }
 
@@ -248,7 +291,7 @@ end
 -- Gem items may also have robux + productId: bought outright with Robux (PurchaseService); no productId = Gems only.
 EconomyConfig.TAB_OF_KIND = {
 	trail = "trails", trailPerm = "trails", case = "cases",
-	burst = "effects", entrance = "effects", abilityFx = "effects", hatchFx = "effects",
+	burst = "effects", entrance = "effects", abilityFx = "effects", hatchFx = "effects", abilitySkin = "effects",
 }
 EconomyConfig.FEATURED = {
 	weekly = "case_sunset", -- this week's colourway (the card counts down to Monday 00:00 UTC)
@@ -282,4 +325,5 @@ EconomyConfig.GEM_PACKS = {
 	{ gems = 5000, robux = 1499, productId = 3718899961, tag = "BEST VALUE" },
 }
 
+require(script.Parent:WaitForChild("HalloweenShop")).inject(EconomyConfig) -- HOS-HWN-001 Halloween pets on the Featured page until Nov 1
 return EconomyConfig

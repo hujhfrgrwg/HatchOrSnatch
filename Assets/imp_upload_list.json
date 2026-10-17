@@ -1,0 +1,21 @@
+[
+ "docs/pets/ring_imp/build/imp/Imp_Pet.fbx",
+ "docs/pets/ring_imp/build/imp/Imp_Color.png",
+ "docs/pets/ring_imp/build/imp/Imp_Color_L2.png",
+ "docs/pets/ring_imp/build/imp/Imp_Color_L3.png",
+ "docs/pets/ring_imp/build/imp/Imp_Normal.png",
+ "docs/pets/ring_imp/build/imp/Imp_Roughness.png",
+ "docs/pets/ring_imp/build/imp/Imp_Emit.png",
+ "docs/pets/ring_imp/build/imp/Imp_Emit_L2.png",
+ "docs/pets/ring_imp/build/imp/Imp_Emit_L3.png",
+ "docs/pets/ring_imp/build/imp/Imp_Face.png",
+ "docs/pets/ring_imp/build/imp/Imp_Face_L2.png",
+ "docs/pets/ring_imp/build/imp/Imp_Face_L3.png",
+ "docs/pets/ring_imp/build/imp/Imp_FaceEmit.png",
+ "docs/pets/ring_imp/build/imp/Imp_FaceEmit_L2.png",
+ "docs/pets/ring_imp/build/imp/Imp_FaceEmit_L3.png",
+ "vfx/imp/tex/imp_runering.png",
+ "vfx/imp/tex/imp_voidswirl_4x4.png",
+ "vfx/imp/tex/imp_shard.png",
+ "vfx/imp/tex/imp_shard_jag.png"
+]

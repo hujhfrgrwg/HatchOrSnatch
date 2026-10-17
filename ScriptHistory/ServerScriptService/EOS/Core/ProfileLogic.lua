@@ -17,6 +17,7 @@ ProfileLogic.SCHEMA_VERSION = 3
 local TIER_KEYS = { "1", "2", "3", "4" } -- string keys: DataStore JSON keeps them stable
 local MATERIAL_KEYS = { "common", "rare", "epic", "crowned" } -- crowned: reserved (deferred tier)
 local LEGACY_TIER_TO_MATERIAL = { ["1"] = "common", ["2"] = "rare", ["3"] = "epic", ["4"] = "epic" }
+local IncubatorLogic = require(script.Parent:WaitForChild("IncubatorLogic")) -- HOS-EGG-002: the incubator egg (shards, hatch, focus)
 
 local function num(v: any, default: number): number
 	if type(v) ~= "number" or v ~= v or v == math.huge or v == -math.huge then
@@ -201,6 +202,7 @@ function ProfileLogic.migrate(raw: any): (any, boolean)
 	if type(p.dailyQuests.active) ~= "table" then
 		p.dailyQuests.active = {}
 	end
+	changed = IncubatorLogic.migrate(p) or changed -- HOS-EGG-002: the incubator egg; old pieces -> fill once (incubatorV1)
 	return p, changed
 end
 
@@ -306,6 +308,17 @@ function ProfileLogic.applySettlement(p: any, s: any, ctx: { utcDate: string, qu
 	else
 		material = nil
 	end
+	-- HOS-HOC-001: bonus egg pieces (a Hero who got across alone rolls one per Hero run), at most 5
+	local bonusMaterials = {}
+	if type(s.bonusMaterials) == "table" then
+		for i, m in ipairs(s.bonusMaterials) do
+			if i <= 5 and type(m) == "string" and p.materials[m] ~= nil and m ~= "crowned" then
+				p.materials[m] += 1
+				table.insert(bonusMaterials, m)
+			end
+		end
+	end
+	local shard = IncubatorLogic.applySettlement(p, s) -- HOS-EGG-002: the match's shard (s.shard) + match time (s.seconds)
 	local egg = s.eggTier
 	if not (type(egg) == "number" and egg >= 1 and egg <= #TIER_KEYS and egg == math.floor(egg)) then
 		egg = nil
@@ -346,7 +359,7 @@ function ProfileLogic.applySettlement(p: any, s: any, ctx: { utcDate: string, qu
 	while #p.awardedMatchIds > ctx.ledgerSize do
 		table.remove(p.awardedMatchIds, 1)
 	end
-	return true, { gold = gold, gems = gems, xp = xp, levelUps = levelUps, material = material, eggTier = egg, quests = questChanges }
+	return true, { gold = gold, gems = gems, xp = xp, levelUps = levelUps, material = material, bonusMaterials = bonusMaterials, eggTier = egg, quests = questChanges, shard = shard }
 end
 
 -- Claim a completed daily quest once (B11). Returns (ok, reason, reward).
@@ -448,6 +461,17 @@ function ProfileLogic.hatch(p: any, rarity: string, family: string?, ctx: any): 
 	}
 	p.nextPetId += 1
 	table.insert(p.pets, pet)
+	-- copies of the same family + rarity level the pet up (1..3 = the menu's mastery stars): its
+	-- level look (extra parts, colours, bigger ability effects) follows on every copy
+	local copies = {}
+	for _, q in ipairs(p.pets) do
+		if q.family == fam and q.rarity == rarity then
+			table.insert(copies, q)
+		end
+	end
+	for _, q in ipairs(copies) do
+		q.level = math.min(#copies, 3)
+	end
 	if rarity == "common" then
 		p.firstCommonFree = false
 	end
@@ -493,6 +517,7 @@ function ProfileLogic.buy(p: any, itemId: string, econ: any): (boolean, string?,
 	if not item then
 		return false, "UNKNOWN", nil
 	end
+	if item.kind == "pet" and econ.buyPet then return econ.buyPet(p, item) end -- HOS-HWN-001 Halloween pets (HalloweenShop)
 	local consumable = econ.isConsumable(item)
 	if not consumable and p.cosmetics.owned[itemId] then
 		return false, "OWNED", item
@@ -514,6 +539,8 @@ function ProfileLogic.buy(p: any, itemId: string, econ: any): (boolean, string?,
 		p.cosmetics.owned[itemId] = true
 		if item.kind == "case" then
 			p.cosmetics.case = itemId
+		elseif item.kind == "abilitySkin" and type(item.slot) == "string" then
+			p.cosmetics[item.slot] = itemId -- HOS-VFX-RES-001: a new skin is worn straight away
 		end
 	end
 	return true, nil, item
@@ -535,7 +562,7 @@ end
 
 -- Pick the egg case to show ("" = none) or the trail for the next match ("" = none).
 function ProfileLogic.setCosmetic(p: any, slot: string, itemId: string, econ: any): (boolean, string?)
-	if slot ~= "case" and slot ~= "trailNext" then
+	if slot ~= "case" and slot ~= "trailNext" and slot ~= "riftSkin" then
 		return false, "BAD_SLOT"
 	end
 	if itemId == "" then
@@ -550,6 +577,9 @@ function ProfileLogic.setCosmetic(p: any, slot: string, itemId: string, econ: an
 		return false, "NOT_OWNED"
 	end
 	if slot == "trailNext" and (item.kind ~= "trail" or (p.cosmetics.consumables[itemId] or 0) <= 0) then
+		return false, "NOT_OWNED"
+	end
+	if slot == "riftSkin" and (item.slot ~= "riftSkin" or not p.cosmetics.owned[itemId]) then
 		return false, "NOT_OWNED"
 	end
 	p.cosmetics[slot] = itemId
@@ -610,6 +640,7 @@ function ProfileLogic.grantItemPurchase(p: any, receiptId: string, itemId: strin
 	if not takeReceipt(p, receiptId, ledgerSize) then
 		return false, "DUPLICATE"
 	end
+	if item.kind == "pet" and econ.grantPetPurchase then return econ.grantPetPurchase(p, item) end -- HOS-HWN-001 Halloween pets (HalloweenShop)
 	if econ.isConsumable(item) then
 		p.cosmetics.consumables[itemId] = (p.cosmetics.consumables[itemId] or 0) + 1
 		if item.kind == "trail" then
@@ -736,6 +767,7 @@ function ProfileLogic.clientView(p: any, questConfig: any): any
 		gems = p.gems,
 		xp = num(p.xp, 0),
 		materials = deepCopy(p.materials),
+		incubator = IncubatorLogic.view(p), -- HOS-EGG-002
 		pets = deepCopy(p.pets),
 		equippedPet = p.equippedPet,
 		firstCommonFree = p.firstCommonFree,

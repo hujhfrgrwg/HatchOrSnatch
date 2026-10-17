@@ -11,6 +11,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = require(script.Parent.Shared)
 local AbilityConfig = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("AbilityConfig"))
+local AbilityCosmetics = require(ReplicatedStorage.EOS.Shared:WaitForChild("AbilityCosmetics"))
 
 local Rift = {}
 
@@ -52,8 +53,10 @@ local function teleport(ctx: any, dir: Vector3, showStart: boolean): (boolean, s
 	if showStart then
 		-- PORTAL HOP (HOS-VFX-004): a portal stands at each end for the windup, facing the way you go
 		endRing.Transparency = 1
-		Shared.vfx("RiftPortal", Shared.groundBelow(root.Position) + PORTAL_UP, dir, ctx.species)
-		Shared.vfx("RiftPortal", Shared.groundBelow(dest) + PORTAL_UP, dir, ctx.species)
+		-- HOS-VFX-RES-001: a worn Rift skin draws the portals, unless the pet has portals of its own
+		local look = if ctx.skin and AbilityCosmetics.vfx(ctx.species, "RiftPortal") == "RiftPortal" then ctx.skin else ctx.species
+		Shared.vfx("RiftPortal", Shared.groundBelow(root.Position) + PORTAL_UP, dir, look, ctx.level)
+		Shared.vfx("RiftPortal", Shared.groundBelow(dest) + PORTAL_UP, dir, look, ctx.level)
 	else
 		-- RIFT BLINK: clients draw the warning reticle on the ring
 		Shared.tagVfx(endRing, "RiftReticle", nil, ctx.species)
@@ -74,13 +77,13 @@ local function teleport(ctx: any, dir: Vector3, showStart: boolean): (boolean, s
 			return
 		end
 		if not showStart then
-			Shared.vfx("RiftArrive", Shared.groundBelow(root.Position), nil, ctx.species) -- where the Catcher left
+			Shared.vfx("RiftArrive", Shared.groundBelow(root.Position), nil, ctx.species, ctx.level) -- where the Catcher left
 		end
 		local rot = root.CFrame - root.Position
 		char:PivotTo(CFrame.new(now) * rot)
 		root.AssemblyLinearVelocity = Vector3.zero
 		plr:SetAttribute("EOS_TeleportedAt", os.clock())
-		Shared.vfx("RiftArrive", Shared.groundBelow(now), nil, ctx.species)
+		Shared.vfx("RiftArrive", Shared.groundBelow(now), nil, ctx.species, ctx.level)
 	end)
 	return true, nil
 end

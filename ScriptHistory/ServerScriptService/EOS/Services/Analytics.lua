@@ -21,6 +21,7 @@ Analytics.KNOWN = {
 	DuplicateGrantPrevented = true, QuestProgressed = true, QuestClaimed = true, AFKToggled = true,
 	MatchQuit = true, SessionEnd = true, PersistenceError = true, RemoteValidationRejected = true,
 	UnexpectedStateRecovery = true, RunnerEvolved = true, SessionStart = true,
+	FieldGemPicked = true, -- HOS-GEMS-002
 	-- GDD v0.4 appendix E
 	GoldSource = true, GoldSink = true, GemsSource = true, GemsSink = true, PieceAwarded = true,
 	PetCrafted = true, FocusUsed = true, AbilityUsed = true, CosmeticUsed = true, WaveEnded = true,

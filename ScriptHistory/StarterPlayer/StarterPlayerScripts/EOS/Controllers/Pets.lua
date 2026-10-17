@@ -351,7 +351,7 @@ function Pets.init()
 		elseif t.kind == "vfx" and type(t.name) == "string" and typeof(t.pos) == "Vector3" then
 			-- an ability's one-shot effect (Abilities.Shared.vfx), facing `look` when given
 			local look = if typeof(t.look) == "Vector3" and t.look.Magnitude > 0.01 then t.look else nil
-			AbilityVFX.play(t.name, if look then CFrame.lookAt(t.pos, t.pos + look) else CFrame.new(t.pos), t.species)
+			AbilityVFX.play(t.name, if look then CFrame.lookAt(t.pos, t.pos + look) else CFrame.new(t.pos), t.species, tonumber(t.level))
 		elseif t.kind == "blocked" and typeof(t.pos) == "Vector3" then
 			-- a "blocks one tag" charge stopped a tag: everyone sees where (archetype colour, never gold)
 			ring(t.pos - Vector3.new(0, 1.5, 0), AbilityCosmetics.resolve(nil, t.family).color)

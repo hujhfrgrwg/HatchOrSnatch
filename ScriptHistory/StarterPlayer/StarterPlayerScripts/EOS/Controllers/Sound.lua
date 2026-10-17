@@ -33,11 +33,13 @@ local SFX: { [string]: { any } } = {
 	go = { 9118113825, 0.74, 0.08, 0 }, -- Referee Whistle 2 (crossing starts)
 	role = { 15675043410, 0.5, 0, 0 }, -- Roblox_UI_Tonal_Stinger (role reveal)
 	alert = { 15675085146, 0.83, 0, 0 }, -- Roblox_UI_Indicator (last one standing)
+	impact = { 9125402735, 1.0, 0, 0 }, -- Boom Impact Deep Distant Thumping Hits Booming 1 (Last One Standing title slam)
 	swing = { 9120704978, 1.7, 0.05, 0.06 }, -- Whooshes Fast Wipes Quick Airy Slices 3 (tag)
 	dash = { 9126229255, 0.27, 0, 0.05 }, -- Whoosh By Fast Airy Swooshing Whipping Thuds
 	caught = { 9113518281, 0.88, 0, 0 }, -- Body Hits Thuds 1 (you got caught)
 	capture = { 9113482967, 0.67, 0, 0.06 }, -- Body Grabs 8 (a steal; 3D for everyone else's)
 	evolve = { 9119447936, 3.75, 0.55, 0 }, -- Sparkle Bell Tree Wind Chimes 1 (safe / egg levels up)
+	gem = { 9114596112, 1.3, 0.1, 0.03 }, -- Glass Clinks 11 (Pro Sound Effects): field Gem pickup (HOS-GEMS-002)
 	-- pets and hatching
 	crack = { 9113958649, 0.93, 0.18, 0.05 }, -- Crack Egg Crunchy 2 (egg shaking)
 	reveal = { 9119448154, 2.1, 1.8, 0 }, -- Sparkle Bell Tree Wind Chimes 2 (new pet)

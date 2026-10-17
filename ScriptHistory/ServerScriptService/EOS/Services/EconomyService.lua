@@ -171,7 +171,12 @@ local function confetti(at: BasePart)
 	att.Position = Vector3.new(0, 3, 0)
 	att.Parent = at
 	local e = Instance.new("ParticleEmitter")
-	e.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	-- HOS-VFX-RES-001: tumbling paper-confetti flipbook (IxJoke's upload, not ours) instead of sparkles
+	e.Texture = "rbxassetid://11137599166"
+	e.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+	e.FlipbookMode = Enum.ParticleFlipbookMode.Loop
+	e.FlipbookFramerate = NumberRange.new(16, 24)
+	e.FlipbookStartRandom = true
 	e.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 96, 160)),
 		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(255, 214, 72)),
@@ -271,35 +276,46 @@ function EconomyService.endMatch(plr: Player)
 	matchTrail[plr] = nil
 end
 
+-- HOS-VFX-RES-001 (Hunter, 17 Oct: use the UNSORTED OS RESOURCES place where it beats ours): textured trail
+-- layers instead of flat colour strips. Not our uploads (realkilometers' Stardust, Arisu Club's wisp,
+-- BloxenRBLX's ember); if one is ever deleted that layer just draws blank. Swap in our own when we draw them.
+local TRAIL_LAYERS = {
+	trail_spark = { { tex = "rbxassetid://18568183566", width = 1, life = 0.5 }, { tex = "rbxassetid://18568048335", width = 0.6, life = 0.35 } },
+	trail_ember = { { tex = "rbxassetid://70464235210468", width = 1, life = 0.4 } },
+	trailp_rainbow = { { tex = "rbxassetid://99421661918040", width = 1, life = 0.55 }, { tex = "rbxassetid://18568048335", width = 0.7, life = 0.4 } },
+}
+local RAINBOW = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
+	ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 214, 72)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(110, 236, 120)),
+	ColorSequenceKeypoint.new(0.75, Color3.fromRGB(90, 170, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 120, 255)),
+})
+
 local function trailOn(base: BasePart, item: any)
-	local a0 = Instance.new("Attachment")
-	a0.Name = "TrailTop"
-	a0.Position = Vector3.new(0, 0.9, 0)
-	a0.Parent = base
 	local a1 = Instance.new("Attachment")
 	a1.Name = "TrailBottom"
 	a1.Position = Vector3.new(0, 0.1, 0)
 	a1.Parent = base
-	local t = Instance.new("Trail")
-	t.Attachment0 = a0
-	t.Attachment1 = a1
-	t.Lifetime = 0.45
-	t.MinLength = 0.1
-	t.LightEmission = 0.6
-	t.FaceCamera = true
-	t.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.15), NumberSequenceKeypoint.new(1, 1) })
-	if item.id == "trailp_rainbow" then
-		t.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
-			ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 214, 72)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(110, 236, 120)),
-			ColorSequenceKeypoint.new(0.75, Color3.fromRGB(90, 170, 255)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 120, 255)),
-		})
-	else
-		t.Color = ColorSequence.new(item.color)
+	local layers = TRAIL_LAYERS[item.id] or { { tex = "", width = 1, life = 0.45 } }
+	for i, layer in ipairs(layers) do
+		local a0 = Instance.new("Attachment")
+		a0.Name = "TrailTop" .. i
+		a0.Position = Vector3.new(0, 0.1 + 0.8 * layer.width, 0)
+		a0.Parent = base
+		local t = Instance.new("Trail")
+		t.Attachment0 = a0
+		t.Attachment1 = a1
+		t.Texture = layer.tex
+		t.TextureMode = Enum.TextureMode.Stretch
+		t.Lifetime = layer.life
+		t.MinLength = 0.1
+		t.LightEmission = 0.6
+		t.FaceCamera = true
+		t.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, if i == 1 then 0.1 else 0.35), NumberSequenceKeypoint.new(1, 1) })
+		t.Color = if item.id == "trailp_rainbow" then RAINBOW else ColorSequence.new(item.color)
+		t.Parent = base
 	end
-	t.Parent = base
 	if item.id == "trail_spark" or item.id == "trail_ember" then
 		local e = Instance.new("ParticleEmitter")
 		e.Texture = "rbxasset://textures/particles/sparkles_main.dds"
@@ -397,6 +413,7 @@ function EconomyService.init()
 	Net.event("RequestUseItem").OnServerEvent:Connect(onUse)
 	Net.event("RequestSetCosmetic").OnServerEvent:Connect(onSetCosmetic)
 	CharacterService.onEggBuilt(decorateEgg)
+	require(script.Parent.EggService).init({ tryUpdate = tryUpdate, toast = toast }) -- HOS-EGG-002: incubator remotes, egg watch
 	MatchService.onPlayerMatchStart(EconomyService.startMatch)
 	MatchService.onPlayerMatchEnd(EconomyService.endMatch)
 	local function hook(plr: Player)

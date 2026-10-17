@@ -103,6 +103,8 @@ local function onMatchStart(plr: Player)
 		species = pet.species,
 		rarity = pet.rarity,
 		gold = p.cosmetics.owned.fx_gold == true,
+		-- HOS-VFX-RES-001: a worn Rift skin (Void / Inferno / Frost portals); looks only
+		skin = if pet.family == "Rift" and type(p.cosmetics.riftSkin) == "string" and p.cosmetics.owned[p.cosmetics.riftSkin] then "skin:" .. p.cosmetics.riftSkin else nil,
 		readyAt = 0,
 		level = petLevel(pet),
 	}
@@ -174,6 +176,7 @@ local function onRequest(plr: Player, moveDir: any)
 	if Net.state():GetAttribute("Phase") ~= "CROSSING" and not sandbox then
 		return refuse("WAIT")
 	end
+	if plr.Character and plr.Character:GetAttribute("EOS_LineFrozen") then return refuse("WAIT") end -- HOS-HOC-001: held on the line
 	if isStartingCatcher(plr) then
 		return refuse("STARTER")
 	end
@@ -211,6 +214,7 @@ local function onRequest(plr: Player, moveDir: any)
 		species = lo.species,
 		level = lo.level,
 		gold = lo.gold,
+		skin = lo.skin,
 		moveDir = dir,
 		root = r,
 		-- HOS-PET-010: an ability that fizzles after its windup (its landing spot went bad) gives the
@@ -286,6 +290,19 @@ function AbilityService.init()
 	if RunService:IsStudio() then
 		local function tag(plr: Player)
 			local sp, lv = studioTest()
+			-- optional EOS_TestPetIds ("id,id"): only those users get the test pet (others keep theirs)
+			local ids = workspace:GetAttribute("EOS_TestPetIds")
+			if sp and type(ids) == "string" and ids ~= "" then
+				local listed = false
+				for id in string.gmatch(ids, "%d+") do
+					if tonumber(id) == plr.UserId then
+						listed = true
+					end
+				end
+				if not listed then
+					sp = nil
+				end
+			end
 			if sp then
 				plr:SetAttribute("EOS_TestPet", sp)
 				plr:SetAttribute("EOS_TestPetLevel", math.max(lv, 1))

@@ -13,6 +13,26 @@ PetRig.MODULES = {
 	["Prism Chameleon"] = "ChameleonAnims",
 	["Bastion Beetle"] = "BeetleAnims", -- HOS-PET-013 (tools/pets/bastion_beetle.py)
 	["Thunder Toad"] = "ToadAnims", -- HOS-PET-014 (tools/pets/thunder_toad.py)
+	["Mirage Manta"] = "MantaAnims", -- Invisibility (models/pets/src/manta/manta.py)
+	["Ring Imp"] = "ImpAnims", -- HOS-PET-017 Rift (tools/pet-kit/imp/imp.py)
+	["Grim Ghost"] = "GhostAnims", -- HOS-PET-018 Grin Ghost, Invisibility (tools/pet-kit/ghost/ghost.py)
+	["Crystal Warden"] = "WardenAnims", -- HOS-PET-019 Guardian Rare (tools/pet-kit/warden/warden.py)
+	["Riot Hound"] = "HoundAnims", -- HOS-PET-020 Tempest Rare (tools/pet-kit/hound/hound.py)
+	["Compass Hare"] = "HareAnims", -- HOS-PET-021 Compass Hare, Rift Rare (tools/pet-kit/hare/hare.py)
+	["Scroll Tanuki"] = "TanukiAnims", -- HOS-PET-022 Scroll Tanuki, Decoy Epic (tools/pet-kit/tanuki/tanuki.py)
+	["Moonveil Moth"] = "MothAnims", -- HOS-PET-023 Moonveil Moth, Invisibility Epic (tools/pet-kit/moth/moth.py)
+	["Shrine Lion"] = "LionAnims", -- HOS-PET-024 Shrine Lion, Guardian Epic (tools/pet-kit/lion/lion.py)
+	["Drum Oni"] = "OniAnims", -- HOS-PET-025 Drum Oni, Tempest Epic (tools/pet-kit/oni/oni.py)
+	["Astral Djinn"] = "DjinnAnims", -- HOS-PET-026 Astral Djinn, Rift Epic (tools/pet-kit/djinn/djinn.py)
+	["Eclipse Tengu"] = "TenguAnims", -- HOS-PET-027 Eclipse Tengu, Decoy Legendary (tools/pet-kit/tengu/tengu.py)
+	["Veil Nekomata"] = "NekoAnims", -- HOS-PET-028 Veil Nekomata, Invisibility Legendary (tools/pet-kit/neko/neko.py)
+	["Aegis Kirin"] = "KirinAnims", -- HOS-PET-029 Aegis Kirin, Guardian Legendary (tools/pet-kit/kirin/kirin.py)
+	["Raiju"] = "RaijuAnims", -- HOS-PET-030 Raiju, Tempest Legendary (tools/pet-kit/raiju/raiju.py)
+	["Void Seraph"] = "SeraphAnims", -- HOS-PET-031 Void Seraph, Rift Legendary (tools/pet-kit/seraph/seraph.py)
+	["Pumpkin Wraith"] = "WraithAnims", -- HOS-HWN-001 Halloween Pumpkin Wraith
+	["Witch's Cat"] = "WitchCatAnims", -- HOS-HWN-001 Halloween Witch's Cat
+	["Mummy"] = "MummyAnims", -- HOS-HWN-001 Halloween Mummy
+	["Bone Dragon"] = "DragonAnims", -- HOS-HWN-001 Halloween Bone Dragon
 } :: { [string]: string }
 
 local animCache: { [string]: any } = {}

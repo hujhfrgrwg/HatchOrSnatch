@@ -15,6 +15,7 @@ local UIController = require(Controllers.UIController)
 local NpcSkins = require(Controllers.NpcSkins)
 local Pets = require(Controllers.Pets)
 local SlideFX = require(Controllers.SlideFX)
+local FieldGems = require(Controllers.FieldGems)
 local Outlines = require(Controllers.Outlines)
 local FacePlayer = require(Controllers.FacePlayer)
 local EmoteController = require(Controllers.EmoteController)
@@ -33,11 +34,16 @@ NpcSkins.init()
 Pets.init()
 EmoteController.init() -- Emotes panel (My Emotes, wheel, Emote Crate), the G wheel, lobby dances and their songs
 ServersController.init() -- Servers panel: live server list, join by teleport
+task.spawn(require(Controllers.TopbarHover).init) -- HOS-TOPBAR-001: top-bar buttons rest as icon squares, grow to the pill on hover
 SpectateController.init() -- SPECTATE: watch the match from the lobby (follow / free cam)
 ChatTags.init() -- [VIP] in chat for VIP pass holders
+require(Controllers.LastStanding).init() -- HOS-CINE-002: the lone Runner's cut-scene + the solo-crossing pill
 UIController.spectating = SpectateController.isActive
 UIController.startSpectate = SpectateController.start
+task.spawn(require(Controllers.RetentionController).init, UIController) -- HOS-RET-001
+task.spawn(require(Controllers.LeadCatcherController).init) -- HOS-LEAD-001: the paid Lead Catcher card in the lobby wait
 SlideFX.init() -- streaks on the floor and in the air for every slide (yours, other players', NPCs')
+FieldGems.init() -- field Gems: spin, sparkle, pickup burst, "+1"
 Outlines.init() -- Catchers / downed red, Runner teammates blue; per viewer, hidden behind walls
 FacePlayer.init() -- lobby leaderboards swivel to face you
 Ragdoll.bindLocal() -- caught = your body ragdolls (the server builds the joints, your client simulates)

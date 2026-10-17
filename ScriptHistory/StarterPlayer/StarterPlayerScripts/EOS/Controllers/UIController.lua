@@ -84,7 +84,7 @@ local FAMILY = { -- the design's families (HOS-ABIL-001); EconomyConfig / Abilit
 local PET_ART = {
 	DoubleDash = { "shades_shark", "surfer_dog", "thunder_wolf" },
 	Decoy = { "gamer_axolotl", "crow", "kitsune" }, -- rare Crow, epic Kitsune (the game's own pets)
-	Invisibility = { "prism_chameleon", "prism_chameleon", "prism_chameleon" },
+	Invisibility = { "prism_chameleon", "prism_chameleon", "mirage_manta" }, -- epic Mirage Manta
 	Wall = { "sand_crab", "robo_crab", "armored_rex" },
 	Shield = { "pebble_frog", "puffer_pup", "hermit_knight" },
 	PetTackle = { "viking_walrus", "cozy_lion", "narwhal_calf" },
@@ -107,9 +107,10 @@ local LOBBY_ONLY = { Incubator = true, Shop = true, Pets = true, Emotes = true, 
 local SHOP_ICON = {
 	trail_spark = "trail", trail_ember = "trail_ember", burst_confetti = "burst", case_frost = "case_frost",
 	entrance_bolt = "entrance", case_sunset = "case_sunset", trailp_rainbow = "trail_rainbow", fx_gold = "abilityfx_gold",
-	hatch_royal = "hatchfx",
+	hatch_royal = "hatchfx", hwn_wraith = "rbxassetid://96536209861678", hwn_cat = "rbxassetid://107962292207270", hwn_mummy = "rbxassetid://90853167732351", hwn_dragon = "rbxassetid://89039949824796", -- HOS-HWN-001
+	fx_rift_void = "ab_blink", fx_rift_inferno = "ab_blink", fx_rift_frost = "ab_blink", -- HOS-VFX-RES-001
 }
-local KIND_WORDS = { trail = "One match", burst = "Lobby, once", case = "Keep forever", entrance = "Keep forever", trailPerm = "Keep forever", abilityFx = "Keep forever", hatchFx = "Keep forever" }
+local KIND_WORDS = { trail = "One match", burst = "Lobby, once", case = "Keep forever", entrance = "Keep forever", trailPerm = "Keep forever", abilityFx = "Keep forever", hatchFx = "Keep forever", abilitySkin = "Keep forever" }
 local QUEST_TEXT = {
 	cross1 = { "Make it across to the safe zone as a Runner.", "Each crossing that ends safe counts." },
 	cross3 = { "Make it across to the safe zone as a Runner.", "Each crossing that ends safe counts." },
@@ -536,30 +537,73 @@ function UIC.toast(text: string, kind: string?, force: boolean?)
 	end)
 end
 
-function UIC.feed(rich: string, icon: string?)
-	local feed = S.MatchHUD and S.MatchHUD:FindFirstChild("Feed")
-	if not feed then return end
-	-- shift lines down: 3 <- 2 <- 1, newest in 1
-	for i = 3, 2, -1 do
-		local a, b = feed:FindFirstChild("Feed" .. i), feed:FindFirstChild("Feed" .. (i - 1))
-		if a and b then
-			local lb = b:FindFirstChild("FeedText")
-			setRich(a, "FeedText", if lb then lb.Text else "")
-			local ib = b:FindFirstChild("FeedIcon")
-			if ib then setIcon(a, "FeedIcon", ib.Image) end
-			a.Visible = b.Visible
-			a:SetAttribute("At", b:GetAttribute("At"))
+-- match feed (HOS-FEED-001): each line is a clone of the hidden Feed1 row. It eases in from the right while
+-- fading up, holds, then eases out; the stack glides to its new slots whenever a line arrives or leaves.
+do -- (one block: keeps UIController under Luau's 200 top-level locals; only UIC.feed uses these)
+local FEED_HOLD, FEED_MAX = 8, 3
+local FEED_MOVE = TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local FEED_OUT = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+local FADE_PROPS = { Frame = "BackgroundTransparency", ImageLabel = "ImageTransparency", TextLabel = "TextTransparency", UIStroke = "Transparency" }
+local feedRows: { GuiObject } = {} -- newest first
+local feedStep = 50
+
+-- a = 0 puts every part of the row back at its own look, a = 1 makes it fully clear
+local function fadeRow(row: Instance, a: number, info: TweenInfo?)
+	for _, d in row:GetDescendants() do
+		local p = FADE_PROPS[d.ClassName]
+		if p then
+			local base = d:GetAttribute("FadeBase")
+			if base == nil then
+				base = d[p]
+				d:SetAttribute("FadeBase", base)
+			end
+			local v = base + (1 - base) * a
+			if info then TweenService:Create(d, info, { [p] = v }):Play() else d[p] = v end
 		end
 	end
-	local f1 = feed:FindFirstChild("Feed1")
-	if f1 then
-		setRich(f1, "FeedText", rich)
-		setIcon(f1, "FeedIcon", icon or "steal")
-		f1.Visible = true
-		f1:SetAttribute("At", os.clock())
-		UI.slideIn(f1, 80, 0, 0, 0.3)
+end
+
+local function feedReflow()
+	for i, row in feedRows do
+		TweenService:Create(row, FEED_MOVE, { Position = UDim2.fromOffset(0, (i - 1) * feedStep) }):Play()
 	end
 end
+
+-- overflow lines sink below the stack as they fade; expired lines slide off to the right
+local function feedDrop(row: GuiObject, overflow: boolean?)
+	local i = table.find(feedRows, row)
+	if not i then return end
+	table.remove(feedRows, i)
+	fadeRow(row, 1, FEED_OUT)
+	local goal = if overflow then UDim2.fromOffset(0, FEED_MAX * feedStep) else row.Position + UDim2.fromOffset(60, 0)
+	local t = TweenService:Create(row, FEED_OUT, { Position = goal })
+	t.Completed:Once(function() row:Destroy() end)
+	t:Play()
+	feedReflow()
+end
+
+function UIC.feed(rich: string, icon: string?)
+	local feed = S.MatchHUD and S.MatchHUD:FindFirstChild("Feed")
+	local template = feed and feed:FindFirstChild("Feed1")
+	if not template then return end
+	local f2 = feed:FindFirstChild("Feed2")
+	if f2 then feedStep = f2.Position.Y.Offset - template.Position.Y.Offset end
+	local row = template:Clone()
+	row.Name = "FeedLine"
+	setRich(row, "FeedText", rich)
+	for _, d in row:GetDescendants() do if d:IsA("TextLabel") and (d.Name == "FeedText" or d.Name == "FeedTextShadow") then d.TextWrapped = false d.TextScaled = true d.Size -= UDim2.fromOffset(14, 0) local c = d:FindFirstChild("UIFitCap") if c then c.MinTextSize = math.min(10, c.MaxTextSize) end end end -- HOS-PTS-001: one line, shrinks to fit ("stole Mia's Legendary egg")
+	setIcon(row, "FeedIcon", icon or "steal")
+	fadeRow(row, 1)
+	row.Position = UDim2.fromOffset(80, 0)
+	row.Visible = true
+	row.Parent = feed
+	table.insert(feedRows, 1, row)
+	while #feedRows > FEED_MAX do feedDrop(feedRows[#feedRows], true) end
+	feedReflow()
+	fadeRow(row, 0, FEED_MOVE)
+	task.delay(FEED_HOLD, feedDrop, row)
+end
+end -- feed block
 
 local bannerQueue: { () -> () } = {}
 local bannerBusy = false
@@ -741,7 +785,7 @@ local function lobbyStatus()
 		subl = player:GetAttribute("EOS_LoadStatus") or "Getting your save ready"
 	elseif phase == "WAITING" then
 		head = "Waiting for players"
-		subl = ("%d / %d ready"):format(state:GetAttribute("Ready") or 0, state:GetAttribute("Needed") or 1)
+		subl = if (state:GetAttribute("Needed") or 1) == math.huge then "Knife test: no matches here" else ("%d / %d ready"):format(state:GetAttribute("Ready") or 0, state:GetAttribute("Needed") or 1) -- HOS-LOBBY-001: sandbox Needed = math.huge
 	elseif phase == "INTERMISSION" then
 		head = "Next match in " .. Format.time(math.ceil(phaseLeft()))
 		local n = state:GetAttribute("Ready") or 0
@@ -829,6 +873,16 @@ local function eggCard()
 	egg:SetAttribute("Role", r)
 	setIcon(egg, "Icon", eggSlug(level))
 	setText(egg, "EggTitle", if r == "RUNNER" then "YOUR EGG" else "BEST EGG")
+	local PC = require(Shared:WaitForChild("PointsConfig")) -- HOS-PTS-001: egg ladder on = the card names the rarity and the piece it really pays
+	if PC.Ladder and PC.Ladder.Enabled then
+		local rar = PC.rarityForLevel(level)
+		setText(egg, "EggLevel", string.upper(rar))
+		setColor(egg, "EggLevel", RARITY_COLOR[if rar == "legendary" then "crowned" else rar] or Color3.new(1, 1, 1))
+		local piece = PC.pieceFor(rar)
+		setIcon(egg, "PaysIcon", "piece_" .. piece)
+		setText(egg, "PaysText", materialName(piece))
+		setColor(egg, "PaysText", RARITY_COLOR[piece] or Color3.new(1, 1, 1))
+	else
 	setText(egg, "EggLevel", "LEVEL " .. level)
 	local tc = TierConfig.get(level)
 	if tc and tc.text then setColor(egg, "EggLevel", tc.text) end
@@ -836,10 +890,11 @@ local function eggCard()
 	setIcon(egg, "PaysIcon", "piece_" .. m)
 	setText(egg, "PaysText", materialName(m))
 	setColor(egg, "PaysText", RARITY_COLOR[m] or Color3.new(1, 1, 1))
+	end -- HOS-PTS-001
 	for i = 1, 4 do
 		local pip = egg:FindFirstChild("LevelPip" .. i)
 		if pip then
-			local on = i <= math.min(level, 4)
+			local on = i <= (if PC.Ladder and PC.Ladder.Enabled then (table.find({ "common", "rare", "epic", "legendary" }, PC.rarityForLevel(level)) or 1) else math.min(level, 4)) -- HOS-PTS-001: one diamond per rarity
 			local g = pip:FindFirstChildOfClass("UIGradient")
 			if g then g.Enabled = on end
 			pip.BackgroundColor3 = if on then Color3.new(1, 1, 1) else Color3.fromRGB(44, 44, 48)
@@ -1123,16 +1178,7 @@ local function updateHUD()
 		matchStatus()
 		eggCard()
 		touchButtons()
-		-- fade old feed lines
-		local feed = hudGroup("MatchHUD", "Feed")
-		if feed then
-			for i = 1, 3 do
-				local f = feed:FindFirstChild("Feed" .. i)
-				if f and f.Visible and os.clock() - (f:GetAttribute("At") or 0) > 8 then
-					f.Visible = false
-				end
-			end
-		end
+		-- feed lines time themselves out (UIC.feed)
 	else
 		lobbyStatus()
 		railToggles()
@@ -1683,8 +1729,8 @@ local function itemState(it: any): string
 		return if wallet >= it.price then "ok" else "poor"
 	end
 	if owned then
-		if it.kind == "case" then
-			return if c.case == it.id then "takeoff" else "wear"
+		if it.kind == "case" or it.slot then -- HOS-VFX-RES-001: skins wear from their own slot
+			return if c[it.slot or "case"] == it.id then "takeoff" else "wear"
 		end
 		return "owned"
 	end
@@ -1727,9 +1773,9 @@ local function shopAction(it: any, st: string)
 		local hdr = find(S.Shop, "HeaderInfo")
 		if hdr then UI.shake(hdr, 7, 0.3) end
 	elseif st == "wear" then
-		Net.event("RequestSetCosmetic"):FireServer("case", it.id)
+		Net.event("RequestSetCosmetic"):FireServer(it.slot or "case", it.id)
 	elseif st == "takeoff" then
-		Net.event("RequestSetCosmetic"):FireServer("case", "")
+		Net.event("RequestSetCosmetic"):FireServer(it.slot or "case", "")
 	elseif st == "use" then
 		Net.event("RequestUseItem"):FireServer(it.id)
 	end
@@ -1745,7 +1791,7 @@ buyItem = function(it: any)
 		UIC.confirm({
 			title = "Are you sure?",
 			body1 = ("Buy %s for %s %s?"):format(it.name, Format.full(it.price), if it.wallet == "gems" then "Gems" else "Gold"),
-			body2 = "Yours to keep. Looks only.",
+			body2 = if it.kind == "pet" then "Yours to keep, with its ability." else "Yours to keep. Looks only.", -- HOS-HWN-001
 			yes = "BUY",
 			no = "CANCEL",
 		}, go)
@@ -1760,7 +1806,7 @@ local COS_FILTERS = { all = "FilterAll", trails = "FilterTrails", cases = "Filte
 local COS_ORDER = { trails = 1, cases = 2, effects = 3 }
 local cosFilter = "all"
 local TAG_WORDS = { trail = "ONE MATCH", burst = "LOBBY, ONCE" } -- everything else keeps forever
-local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CASE", burst = "LOBBY EFFECT", entrance = "ENTRANCE", abilityFx = "ABILITY FX", hatchFx = "HATCH FX" }
+local SUB_WORDS = { trail = "EGG TRAIL", trailPerm = "EGG TRAIL", case = "EGG CASE", burst = "LOBBY EFFECT", entrance = "ENTRANCE", abilityFx = "ABILITY FX", hatchFx = "HATCH FX", abilitySkin = "RIFT SKIN" }
 
 ----------------------------------------------------------------------------------------------- Reward reveal
 -- Every buy gets its moment (Hunter, 16 Oct): a shop item (Gold, Gems or Robux) or a Gem pack opens the
@@ -2114,7 +2160,7 @@ local function refreshShop()
 	setText(sc, "GoldText", Format.full(profile.gold or 0))
 	setText(sc, "GemsText", Format.full(profile.gems or 0))
 	if shopTab == "featured" then
-		for slot, key in pairs({ FeatA = "weekly", FeatB = "spotlight" }) do
+		for slot, key in pairs(require(script.Parent.HalloweenShopUI).slots(sc)) do -- HOS-HWN-001: Halloween cards until Nov 1, else FeatA / FeatB
 			local card = find(sc, slot)
 			local it = EconomyConfig.item(EconomyConfig.FEATURED[key])
 			if card and it then
@@ -2348,6 +2394,7 @@ local function showResults(data: any)
 			if uid and uid > 0 then
 				setIcon(tile, "Icon", ("rbxthumb://type=AvatarHeadShot&id=%d&w=150&h=150"):format(uid))
 			end
+			require(script.Parent:WaitForChild("BotHeadshot")).fill(tile:FindFirstChild("Icon", true), if uid and uid > 0 then nil else entry.npcSlot) -- HOS-BOT-001: an NPC shows its own look
 			setText(step, "Place", ({ "1st", "2nd", "3rd" })[place])
 			setText(step, "PlayerName", name or "?")
 		end
@@ -3060,9 +3107,17 @@ local function connectEvents()
 		if who then WorldFX.evolve(who, TierConfig.get(t.newTier).shell) end
 		if t.userId == player.UserId then
 			Sound.play("evolve")
+			local PC = require(Shared:WaitForChild("PointsConfig")) -- HOS-PTS-001: only say the egg grew when it did (ladder: by rarity)
+			if PC.Ladder and PC.Ladder.Enabled then
+				local was, now = PC.rarityForLevel(t.prevTier or t.newTier), PC.rarityForLevel(t.newTier)
+				UIC.banner("Safe", "SAFE!", if was ~= now then ("Your shard grew to %s!"):format(now:sub(1, 1):upper() .. now:sub(2)) else "You made it across", eggSlug(t.newTier), 1.4)
+			else
 			UIC.banner("Safe", "SAFE!", ("Your egg grew to Level %d"):format(t.newTier), eggSlug(t.newTier), 1.4)
+			end -- HOS-PTS-001
 		else
-			UIC.feed(("%s %s with Level %d"):format(npcName(t.slot, t.name), font(Color3.fromRGB(184, 255, 74), "is safe"), t.newTier), "safe")
+			local PC = require(Shared:WaitForChild("PointsConfig")) -- HOS-PTS-001: ladder on = "with a Rare egg" (rarity in its colour)
+			local rar = if PC.Ladder and PC.Ladder.Enabled then PC.rarityForLevel(t.newTier) else nil
+			UIC.feed(("%s %s with %s"):format(npcName(t.slot, t.name), font(Color3.fromRGB(184, 255, 74), "is safe"), if rar then ("%s %s shard"):format(if rar == "epic" then "an" else "a", font(RARITY_COLOR[if rar == "legendary" then "crowned" else rar] or Color3.new(1, 1, 1), rar:sub(1, 1):upper() .. rar:sub(2))) else ("Level %d"):format(t.newTier)), "safe")
 		end
 	end)
 	Net.event("CaptureFeedback").OnClientEvent:Connect(function(t)
@@ -3074,7 +3129,9 @@ local function connectEvents()
 			Sound.playAt("capture", t.position, 0.7)
 		end
 		local hunter, victim = npcName(t.hunterSlot, t.hunterName), npcName(t.victimSlot, t.victimName)
-		UIC.feed(("%s %s %s's Lv %d egg"):format(hunter, font(Color3.fromRGB(255, 90, 90), "stole"), victim, t.stolenTier or 1), "steal")
+		local PC = require(Shared:WaitForChild("PointsConfig")) -- HOS-PTS-001: ladder on = "stole Mia's Rare egg" (rarity in its colour)
+		local rar = if PC.Ladder and PC.Ladder.Enabled then PC.rarityForLevel(t.stolenTier or 1) else nil
+		UIC.feed(("%s %s %s's %s shard"):format(hunter, font(Color3.fromRGB(255, 90, 90), "stole"), victim, if rar then font(RARITY_COLOR[if rar == "legendary" then "crowned" else rar] or Color3.new(1, 1, 1), rar:sub(1, 1):upper() .. rar:sub(2)) else ("Lv %d"):format(t.stolenTier or 1)), "steal")
 		if t.hunterId == player.UserId then
 			UIC.banner("Stole", "STOLEN!", ("You took %s's Level %d egg"):format(victim, t.stolenTier or 1), "steal", 1.4)
 			CameraFX.shake(0.6, 0.2)
@@ -3086,7 +3143,10 @@ local function connectEvents()
 			Sound.play("go")
 			if t.lastStanding == player.UserId then
 				Sound.play("alert")
-				UIC.banner("Last", "LAST ONE STANDING!", "Make it across alone to win it for the Runners", "crown", 1.8)
+				-- HOS-CINE-002: with the cut-scene on, the top pill (Controllers/LastStanding) replaces this pop
+				if not (GameConfig.Cinematic and GameConfig.Cinematic.LAST_STANDING_ENABLED) then
+					UIC.banner("Last", "LAST ONE STANDING!", "Make it across alone to win it for the Runners", "crown", 1.8)
+				end
 			end
 		elseif t.phase == "WAVE_END" then
 			local justFinished = t.finishSide or "B"
@@ -3395,6 +3455,7 @@ function UIC.init()
 			warn("[EOSUI] " .. tostring(err))
 		end
 	end)
+	task.spawn(require(script.Parent.EggUIController).init, UIC) -- HOS-EGG-002: the egg card, incubator egg, roll and shard UI (EggUI)
 	local lastDevice = deviceClass()
 	Net.event("RequestProfile"):FireServer(lastDevice)
 	UserInputService.LastInputTypeChanged:Connect(function()

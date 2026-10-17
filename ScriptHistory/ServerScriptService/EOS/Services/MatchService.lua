@@ -35,6 +35,7 @@ local PassService = require(script.Parent.PassService)
 local CharacterService = require(script.Parent.CharacterService)
 local NpcService = require(script.Parent.NpcService)
 local MapService = require(script.Parent.MapService)
+local HeroChickenService = require(script.Parent.HeroChickenService) -- HOS-HOC-001
 
 local T = GameConfig.Timing
 local C = GameConfig.Capture
@@ -46,7 +47,7 @@ local MatchService = {}
 
 -- match XP for a settlement (EconomyConfig.xpFor) plus the VIP / 2x XP pass bonuses
 local function settleXp(plr: Player, s: any, outcome: any): (number, { any })
-	local xp, extra = PassService.boostXp(plr, EconomyConfig.xpFor(outcome))
+	local xp, extra = PassService.boostXp(plr, require(script.Parent.PointsService).xpFor(plr) or EconomyConfig.xpFor(outcome)) -- HOS-PTS-001: XP = points
 	s.xp = xp
 	return xp, extra
 end
@@ -85,6 +86,19 @@ local function catcherAttacked(plr: Player, kind: string)
 		local ok, err = pcall(fn, plr, kind)
 		if not ok then
 			warn("[EOS] catcher attack hook: " .. tostring(err))
+		end
+	end
+end
+-- HOS-GEMS-002: crossings start and end (field Gems). fn(c, event: "start" | "end" | "match", wave)
+local crossingHooks: { (any, string, number) -> () } = {}
+function MatchService.onCrossing(fn: (any, string, number) -> ())
+	table.insert(crossingHooks, fn)
+end
+local function crossingEvent(c: any, event: string, wave: number)
+	for _, fn in ipairs(crossingHooks) do
+		local ok, err = pcall(fn, c, event, wave)
+		if not ok then
+			warn("[EOS] crossing hook: " .. tostring(err))
 		end
 	end
 end
@@ -394,6 +408,24 @@ local function lineUp(c: Current, startSide: string, finishSide: string)
 	end
 end
 
+-- HOS-HOC-001: Catchers only, back on the centre line and held (the group's turn after a Hero run)
+local function lineUpCatchers(c: Current)
+	local catchers = {}
+	for _, plr in ipairs(participantsOf(c)) do
+		local p = c.logic:get(plr.UserId)
+		if p and p.role == "CATCHER" then
+			table.insert(catchers, plr)
+		end
+	end
+	catchers = byZ(catchers)
+	local cs = catcherLine(#catchers, c.startSide)
+	local startX = Layout.Zones[c.startSide].center.X
+	for i, plr in ipairs(catchers) do
+		CharacterService.teleport(plr, cs[i], Vector3.new(startX, cs[i].Y, cs[i].Z))
+		CharacterService.setHold(plr, true)
+	end
+end
+
 local function releaseCatchers(c: Current)
 	for _, plr in ipairs(participantsOf(c)) do
 		local p = c.logic:get(plr.UserId)
@@ -668,6 +700,7 @@ local function tick(c: Current)
 					if not p.isSafeThisWave and Layout.inBox(pos, Layout.Zones[c.finishSide]) then
 						local ok, _, info = c.logic:finishCrossing(uid, t)
 						if ok then
+							info = require(script.Parent.EggService).onSafe(c, uid, info) -- HOS-EGG-002: charge + the roll at safety (EggLadder when EggConfig.ENABLED is off)
 							CharacterService.applyRole(plr, "RUNNER", info.newTier)
 							syncPlayer(c, plr)
 							fireMatch(c, "RunnerEvolved", { userId = uid, name = plr.DisplayName, slot = slotOf(plr), prevTier = info.prevTier, newTier = info.newTier, shells = info.shells, crossings = info.crossings })
@@ -783,14 +816,15 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 		tiers = TierConfig,
 		rewards = RewardConfig,
 		economy = EconomyConfig,
-		cleanStreakToWin = GameConfig.Match.CLEAN_STREAK_TO_WIN,
+		cleanStreakToWin = GameConfig.Match.CLEAN_STREAK_TO_WIN, -- HOS-PTS-001: streak win back with the 5 fixed crossings (Hunter 17 Oct: 3 clean in a row ends it early)
 		timeoutBreaksStreak = GameConfig.Match.TIMEOUT_BREAKS_STREAK,
-		maxWaves = GameConfig.Match.MAX_CROSSINGS_SAFETY,
+		maxWaves = GameConfig.Match.FIXED_CROSSINGS or GameConfig.Match.MAX_CROSSINGS_SAFETY, -- HOS-PTS-001
 		conversionGrace = T.CONVERSION_GRACE,
 		waveStartProtection = T.WAVE_START_PROTECTION,
 		minActiveDistance = GameConfig.Match.MIN_ACTIVE_DISTANCE,
 		isTest = isTest,
 		solo = solo,
+		soloWinEndsMatch = GameConfig.Match.SOLO_WIN_ENDS_MATCH ~= false, -- HOS-PTS-001
 	})
 	-- fair initial Catcher(s)
 	local candidates = {}
@@ -833,6 +867,7 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 		local catcherCount = if solo then (if volunteers(roster[1]) then 1 else 0) else GameConfig.initialCatchersFor(#roster)
 		catcherIds = MatchLogic.pickInitialCatchers(candidates, catcherCount, rng)
 	end
+	catcherIds = require(script.Parent.LeadCatcherService).assign(catcherIds, roster, solo, matchId) -- HOS-LEAD-001 paid Lead Catcher replaces one pick (same count)
 	local isCatcher = {}
 	for _, id in ipairs(catcherIds) do
 		isCatcher[id] = true
@@ -867,11 +902,12 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 		end
 	end
 	current = c
+	require(script.Parent.LeadCatcherService).matchStarted(c) -- HOS-LEAD-001 c.hcLead = the buyer
 	NpcService.setMatch(c)
 	state:SetAttribute("MatchId", matchId)
 	state:SetAttribute("IsTest", isTest)
 	state:SetAttribute("IsSolo", solo)
-	state:SetAttribute("MaxWaves", if solo then logic.maxCrossings else 0) -- 0 = no fixed number of crossings
+	state:SetAttribute("MaxWaves", if solo then logic.maxCrossings else (GameConfig.Match.FIXED_CROSSINGS or 0)) -- 0 = no fixed number of crossings (HOS-PTS-001)
 	state:SetAttribute("CleanStreak", 0)
 	state:SetAttribute("StreakToWin", logic.cleanStreakToWin)
 	state:SetAttribute("LastClean", nil)
@@ -882,7 +918,7 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 	Analytics.log("MatchStarted", { matchId = matchId, players = #roster, npcs = #actors - #roster, catchers = #catcherIds, test = isTest })
 
 	-- watchdog (A22): the match can never run past its planned length + slack
-	local deadline = os.clock() + GameConfig.plannedMatchSeconds(if solo then logic.maxCrossings else logic.maxWaves) + T.WATCHDOG_SLACK
+	local deadline = os.clock() + GameConfig.plannedMatchSeconds(if solo then logic.maxCrossings else GameConfig.Match.MAX_CROSSINGS_SAFETY) + T.WATCHDOG_SLACK -- HOS-PTS-001: 5 crossings + Hero runs outlast a 5-crossing plan
 	task.spawn(function()
 		while current == c do
 			if os.clock() > deadline then
@@ -930,6 +966,11 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 
 	-- WAVES
 	while not c.abort do
+		-- HOS-HOC-001: the lead Catcher picks a Runner: HERO (crosses alone first) or CHICKEN
+		HeroChickenService.runPick(c)
+		if c.abort then
+			break
+		end
 		local ok = logic:startWave(now())
 		if not ok then
 			break
@@ -946,6 +987,8 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 		end
 		setGates(false)
 		setPhase("CROSSING", T.CROSSING)
+		HeroChickenService.crossingStarted(c) -- HOS-HOC-001: a Hero run: the group waits on the line
+		crossingEvent(c, "start", logic.wave)
 		forwardEvents(c)
 		-- Catchers go a moment after the Runners, never before
 		local waveNo = logic.wave
@@ -957,13 +1000,21 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 		local endsAt = os.clock() + T.CROSSING
 		while os.clock() < endsAt and not c.abort do
 			tick(c)
+			-- HOS-HOC-001: the group's clock starts when it is let go after a Hero run
+			local heroExtra = HeroChickenService.step(c)
+			if heroExtra > 0 then
+				endsAt += heroExtra
+				state:SetAttribute("PhaseEndsAt", (state:GetAttribute("PhaseEndsAt") or now()) + heroExtra)
+			end
 			if logic:waveComplete() then
 				break
 			end
 			task.wait(T.TICK)
 		end
+		HeroChickenService.crossingEnded(c)
 		-- end of wave: timeouts become Catchers and keep their tier
 		local res = logic:endWave(now())
+		crossingEvent(c, "end", logic.wave)
 		setGates(true)
 		if res.ok then
 			state:SetAttribute("CleanStreak", res.cleanStreak)
@@ -998,14 +1049,17 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 		waitPhase(c, 1.2)
 		local nextStart, nextFinish = MatchLogic.sidesForWave(logic.wave + 1)
 		lineUp(c, nextStart, nextFinish) -- side by side again for the next crossing
-		waitPhase(c, T.WAVE_TRANSITION - 1.2)
+		local extra = require(script.Parent.LastStandingService).moment(c, nextFinish) -- HOS-CINE-002: one Runner left = their cut-scene, a longer break
+		waitPhase(c, T.WAVE_TRANSITION - 1.2 + extra)
 	end
 
+	HeroChickenService.matchEnded(c) -- HOS-HOC-001: nobody stays frozen on the line
 	-- RESULTS + SETTLEMENT (exactly once)
 	if logic.phase == "ACTIVE" then
 		logic:endWave(now()) -- abort mid-wave: resolve it the normal way
 	end
 	logic:forceEnd(c.abortReason or logic.endReason or "END")
+	crossingEvent(c, "match", logic.wave)
 	local results = logic:computeResults(now())
 	forwardEvents(c)
 	local payload = buildResultsPayload(c, results)
@@ -1017,7 +1071,13 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 			local applied, xp, extra = false, 0, {}
 			if s then
 				local m = results.perPlayer[uid] or {}
-				xp, extra = settleXp(plr, s, { active = m.eligible == true, crossings = m.crossings or 0, captures = m.captures or 0, win = m.win == true })
+				-- HOS-HOC-001: a Hero who got across pays extra crossings of XP (Gold is in the results) and bonus pieces
+				local hero = HeroChickenService.bonusFor(c, uid)
+				xp, extra = settleXp(plr, s, { active = m.eligible == true, crossings = (m.crossings or 0) + (if hero then hero.crossings else 0), captures = m.captures or 0, win = m.win == true })
+				if hero and m.eligible then
+					s.bonusMaterials = hero.pieces
+				end
+				require(script.Parent.EggService).settle(c, uid, s) -- HOS-EGG-002: shard + match time; no piece / Hero piece roll while on
 				applied = DataService.settle(plr, s)
 			end
 			rewards[uid] = { applied = applied, xp = xp, xpExtra = extra }
@@ -1044,8 +1104,10 @@ local function runMatch(roster: { Player }, isTest: boolean, solo: boolean)
 				xp = rewards[plr.UserId] and rewards[plr.UserId].xp or 0,
 				xpExtra = rewards[plr.UserId] and rewards[plr.UserId].xpExtra or nil,
 				gems = mine.gems,
-				material = mine.material,
+				material = if require(script.Parent.EggService).on() then nil else mine.material, -- HOS-EGG-002: a shard replaces the piece
+				shard = require(script.Parent.EggService).shardOf(c, plr.UserId), -- HOS-EGG-002
 				crossings = mine.crossings,
+				heroBonus = mine.heroBonus, -- HOS-HOC-001
 				captures = mine.captures,
 				runnerPlace = mine.runnerPlace,
 				win = mine.win,
@@ -1083,6 +1145,7 @@ local function lobbyLoop()
 			continue
 		end
 		-- a new arena map for every match (MapService), swapped while nobody is on the field
+		if require(script.Parent.MapVoteService).open() then playedSinceRotate = false end -- HOS-MAPVOTE-001 a vote picks the next map (no rotation)
 		if playedSinceRotate then
 			playedSinceRotate = false
 			local before = MapService.current()
@@ -1109,6 +1172,7 @@ local function lobbyLoop()
 			continue
 		end
 		forceStartFlag = false
+		require(script.Parent.MapVoteService).close() -- HOS-MAPVOTE-001 the winning map goes live before the match
 		local roster = eligiblePlayers()
 		-- Studio solo test with NPCs switched off (EOS_DevMinPlayers = 1, one player): a practice match
 		-- of one, never rewarded. With NPCs on, a lone player gets a full NPC-filled match instead.
@@ -1232,6 +1296,8 @@ function MatchService.init()
 	setGates(true)
 	Net.event("RequestTag").OnServerEvent:Connect(onRequestTag)
 	Net.event("RequestLunge").OnServerEvent:Connect(onRequestLunge)
+	HeroChickenService.init() -- HOS-HOC-001
+	HeroChickenService.bind({ lineUpCatchers = lineUpCatchers, releaseCatchers = releaseCatchers, catcherLine = catcherLine, onPlayerMatchEnd = MatchService.onPlayerMatchEnd })
 	DataService.onLeaving(onLeaving)
 	Players.PlayerAdded:Connect(function(plr)
 		plr:SetAttribute("EOS_InMatch", false)

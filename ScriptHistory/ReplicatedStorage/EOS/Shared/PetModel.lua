@@ -146,7 +146,7 @@ PetModel.SPECS = {
 -- Newer pets (Shared/PetRig): RigScale (the template's own Model scale), Prefix (mesh name prefix);
 -- meshes <Prefix>Body / Face / L2 / L3 and a Looks folder with SurfaceAppearances Body1..3 / Face1..3.
 -- Level 1 shows Body + Face; level 2 adds L2; level 3 adds L3 (each level has its own colour + face maps).
-PetModel.RIGGED = { Crow = true, Kitsune = true, ["Prism Chameleon"] = true, ["Bastion Beetle"] = true } :: { [string]: boolean }
+PetModel.RIGGED = { Crow = true, Kitsune = true, ["Prism Chameleon"] = true, ["Bastion Beetle"] = true, ["Thunder Toad"] = true, ["Mirage Manta"] = true, ["Ring Imp"] = true, ["Grim Ghost"] = true, ["Crystal Warden"] = true, ["Riot Hound"] = true, ["Compass Hare"] = true, ["Scroll Tanuki"] = true, ["Moonveil Moth"] = true, ["Shrine Lion"] = true, ["Drum Oni"] = true, ["Astral Djinn"] = true, ["Eclipse Tengu"] = true, ["Veil Nekomata"] = true, ["Aegis Kirin"] = true, ["Raiju"] = true, ["Void Seraph"] = true, ["Pumpkin Wraith"] = true, ["Witch's Cat"] = true, ["Mummy"] = true, ["Bone Dragon"] = true } :: { [string]: boolean }
 
 function PetModel.isRigged(species: string): boolean
 	return PetModel.RIGGED[species] == true
@@ -175,10 +175,12 @@ local function applyLevelLook(model: Model, prefix: string, level: number)
 		end
 	end
 	if looks then
-		for _, nm in ipairs({ "Body", "L2", "L3", "Face" }) do
+		for _, nm in ipairs({ "Body", "L2", "L3", "Face", "Veil" }) do
 			local p = model:FindFirstChild(prefix .. nm)
-			-- the L2 / L3 add-on meshes can have their own look ("Extra<level>", e.g. glowing crystals)
-			local look = (nm == "L2" or nm == "L3") and looks:FindFirstChild("Extra" .. level)
+			-- the L2 / L3 add-on meshes can have their own look ("Extra<level>", e.g. glowing crystals);
+			-- a "Veil" mesh (the manta's translucent fins) always uses Extra<level>
+			-- (a pet whose L2 / L3 meshes have separate atlases gives each its own: "Extra<level>_<mesh>", e.g. Extra3_L2)
+			local look = (nm == "L2" or nm == "L3" or nm == "Veil") and (looks:FindFirstChild("Extra" .. level .. "_" .. nm) or looks:FindFirstChild("Extra" .. level))
 				or looks:FindFirstChild((if nm == "Face" then "Face" else "Body") .. level)
 			if p and look then
 				local old = p:FindFirstChildOfClass("SurfaceAppearance")

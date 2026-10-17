@@ -30,12 +30,14 @@ end
 
 -- the template for effect `key` used by `species` (HOS-VFX-OVR): the species' override from
 -- AbilityCosmetics if it has one and the template exists, else the archetype default (`key`)
-function AbilityVFX.template(key: string, species: any): Instance?
+-- `level` (2 / 3): the species' per-level look <override>_L2 / _L3 when it has one (Ring Imp portals)
+function AbilityVFX.template(key: string, species: any, level: number?): Instance?
 	local name = AbilityCosmetics.vfx(species, key)
 	if name == AbilityCosmetics.NONE then
 		return nil -- the species' own effect covers this one
 	end
-	return (if name ~= key then Templates:FindFirstChild(name) else nil) or Templates:FindFirstChild(key)
+	local lv = if name ~= key and type(level) == "number" and level >= 2 then Templates:FindFirstChild(name .. "_L" .. math.min(math.floor(level), 3)) else nil
+	return lv or (if name ~= key then Templates:FindFirstChild(name) else nil) or Templates:FindFirstChild(key)
 end
 
 -- ===== sounds (HOS-SFX-001) =====
@@ -94,9 +96,9 @@ function AbilityVFX.sound(key: string, at: Vector3 | Instance, species: any?, vf
 end
 
 -- plays a one-shot effect at a CFrame (`species`: whose ability it is, for its override), with its sound
-function AbilityVFX.play(name: string, cf: CFrame, species: any?)
+function AbilityVFX.play(name: string, cf: CFrame, species: any?, level: number?)
 	AbilityVFX.sound(name, cf.Position, species)
-	local t = AbilityVFX.template(name, species)
+	local t = AbilityVFX.template(name, species, level)
 	if not t then
 		return
 	end
@@ -320,7 +322,7 @@ local function dress(part: Instance)
 	end
 	local fn = DRESS[name]
 	local species = part:GetAttribute("VFXSpecies")
-	local t = AbilityVFX.template(name, species) -- HOS-VFX-OVR
+	local t = AbilityVFX.template(name, species, tonumber(part:GetAttribute("VFXLevel"))) -- HOS-VFX-OVR (+ per-level look)
 	local ok, cleanup = pcall(function()
 		return if fn then fn(part, t) else follow(part, t)
 	end)

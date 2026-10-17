@@ -51,18 +51,20 @@ end
 -- Effects are drawn by each client (Controllers.AbilityVFX, templates in ReplicatedStorage.VFX.Abilities).
 -- vfx: a one-shot template played at a position (ground point for ground effects), facing `look`.
 -- `species` (the user's pet) lets clients draw that species' override (AbilityCosmetics.vfx, HOS-VFX-OVR).
-function Shared.vfx(name: string, pos: Vector3, look: Vector3?, species: string?)
-	Shared.fx({ kind = "vfx", name = name, pos = pos, look = look, species = species })
+-- `level` (1..3, optional): a species may have per-level looks (<Template>_L2 / _L3, e.g. the Ring Imp's portals)
+function Shared.vfx(name: string, pos: Vector3, look: Vector3?, species: string?, level: number?)
+	Shared.fx({ kind = "vfx", name = name, pos = pos, look = look, species = species, level = level })
 end
 
 -- tagVfx: the server keeps its gameplay part (invisible) and every client dresses it with a lasting
 -- effect for as long as the part exists.
-function Shared.tagVfx(part: BasePart, name: string, keepVisible: boolean?, species: string?)
+function Shared.tagVfx(part: BasePart, name: string, keepVisible: boolean?, species: string?, level: number?)
 	if not keepVisible then
 		part.Transparency = 1
 	end
 	part:SetAttribute("VFX", name)
 	part:SetAttribute("VFXSpecies", species) -- whose ability: clients draw its override if it has one
+	part:SetAttribute("VFXLevel", level) -- and its per-level look (_L2 / _L3) when it has one
 	game:GetService("CollectionService"):AddTag(part, "EOS_AbilityVFX")
 end
 
@@ -71,7 +73,7 @@ end
 -- VISUAL ONLY, per Hunter on 17 Oct: every ability fires the instant the button is pressed and the
 -- entrance plays over it. Species never change timing, so don't wait on these in a handler (the old
 -- afterIntro delay was removed on purpose). Client modules: CrowPet, KitsunePet, ChameleonPet, GhostPet.
-Shared.INTRO = { Crow = 0.5, Kitsune = 1.25, ["Prism Chameleon"] = 0.7, ["Grim Ghost"] = 0.55 } :: { [string]: number }
+Shared.INTRO = { Crow = 0.5, Kitsune = 1.25, ["Prism Chameleon"] = 0.7, ["Mirage Manta"] = 1.2, ["Grim Ghost"] = 0.55 } :: { [string]: number }
 
 function Shared.introFor(species: any): number
 	return if type(species) == "string" then Shared.INTRO[species] or 0 else 0
@@ -175,7 +177,7 @@ end
 -- contact retries every tick, so without it the next touch would tag you a moment after the block).
 -- Keyed by actor (a Player or an NPC bot). The body carries EOS_TagBlock (charges left) for clients.
 
-type Block = { charges: number, untilT: number, archetype: string, immunity: number, graceUntil: number, species: string? }
+type Block = { charges: number, untilT: number, archetype: string, immunity: number, graceUntil: number, species: string?, level: number? }
 local blocks: { [any]: Block } = {}
 
 local function show(actor: any, n: number?)
@@ -185,7 +187,7 @@ local function show(actor: any, n: number?)
 	end
 end
 
-function Shared.grantTagBlock(actor: any, charges: number, seconds: number, archetype: string, immunity: number?, species: string?)
+function Shared.grantTagBlock(actor: any, charges: number, seconds: number, archetype: string, immunity: number?, species: string?, level: number?)
 	local b = {
 		charges = math.max(1, math.floor(charges)),
 		untilT = os.clock() + seconds,
@@ -193,6 +195,7 @@ function Shared.grantTagBlock(actor: any, charges: number, seconds: number, arch
 		immunity = immunity or 0,
 		graceUntil = 0,
 		species = species, -- for its ShieldBreak override (HOS-VFX-OVR)
+		level = level, -- and its per-level look (_L2 / _L3)
 	}
 	blocks[actor] = b
 	show(actor, b.charges)
@@ -238,7 +241,7 @@ function Shared.consumeTagBlock(victim: any, hunter: any): boolean
 	local r = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	Shared.fx({ userId = victim.UserId, family = b.archetype, kind = "blocked", pos = r and r.Position or nil, by = hunter and hunter.UserId })
 	if b.archetype == "Guardian" and r then
-		Shared.vfx("ShieldBreak", r.Position, nil, b.species) -- the bubble shatters (HOS-VFX-002)
+		Shared.vfx("ShieldBreak", r.Position, nil, b.species, b.level) -- the bubble shatters (HOS-VFX-002)
 	end
 	Analytics.log("AbilityTagBlocked", { userId = victim.UserId, by = hunter and hunter.UserId, family = b.archetype })
 	return true
@@ -301,7 +304,7 @@ end
 -- a placeholder telegraph everyone sees: a neon bar between two bodies for `seconds` (prototype look)
 -- vfx (HOS-VFX-002): clients draw a real Beam between the two bodies instead (the part carries ObjectValues
 -- A and B pointing at them) and the server part stays invisible.
-function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, width: number?, vfx: string?, species: string?)
+function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, width: number?, vfx: string?, species: string?, level: number?)
 	local p = Instance.new("Part")
 	if vfx then
 		for k, v in pairs({ A = a, B = b }) do
@@ -318,7 +321,7 @@ function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, w
 	p.Transparency = 0.25
 	p.Parent = Shared.runtimeFolder("AbilityFx")
 	if vfx then
-		Shared.tagVfx(p, vfx, nil, species) -- the species' own tether look (HOS-PET-013)
+		Shared.tagVfx(p, vfx, nil, species, level) -- the species' own tether look (HOS-PET-013)
 	end
 	local w = width or 0.35
 	local t0 = os.clock()

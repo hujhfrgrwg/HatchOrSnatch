@@ -60,10 +60,18 @@ local function place(plr: Player)
 	if not SandboxService.enabled() or not plr.Parent then
 		return
 	end
+	-- user ids in workspace EOS_LobbyIds ("id,id") skip the sandbox and play the normal lobby
+	local skip = workspace:GetAttribute("EOS_LobbyIds")
+	if type(skip) == "string" and table.find(string.split((skip:gsub("%s", "")), ","), tostring(plr.UserId)) then
+		return
+	end
 	ensureWorld()
 	plr:SetAttribute(ATTRIBUTE, true)
 	plr:SetAttribute("EOS_InMatch", true) -- the match camera, head look and Catcher controls
-	CharacterService.applyRole(plr, "CATCHER")
+	-- user ids in workspace EOS_TestRunnerIds ("id,id") spawn here as a Runner instead of a Catcher
+	local ids = workspace:GetAttribute("EOS_TestRunnerIds")
+	local runner = type(ids) == "string" and table.find(string.split((ids:gsub("%s", "")), ","), tostring(plr.UserId)) ~= nil
+	CharacterService.applyRole(plr, if runner then "RUNNER" else "CATCHER")
 	-- pet tests (workspace EOS_TestPet) start on the pet lab baseplate instead
 	local lab = workspace:FindFirstChild("EOS_PetLab")
 	local labCenter = lab and lab:GetAttribute("Center")

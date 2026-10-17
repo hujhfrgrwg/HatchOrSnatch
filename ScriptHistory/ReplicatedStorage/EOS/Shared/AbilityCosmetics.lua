@@ -39,6 +39,7 @@ AbilityCosmetics.SPECIES = {
 	Kitsune = { sound = "poof", vfx = { DecoySplit = "None" } }, -- its run-in summon is the split
 	["Grim Ghost"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own glints (Controllers.Invisibility)
 	["Prism Chameleon"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own prism glints
+	["Mirage Manta"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own blue star glints
 	-- HOS-PET-013c, Hunter's model sheet: Shell Shield (Runner) = cyan hex crystal dome, Horn Tether (Catcher) =
 	-- jagged cyan crystal spear from the horn
 	["Bastion Beetle"] = {
@@ -65,12 +66,175 @@ AbilityCosmetics.SPECIES = {
 		},
 		sfx = { PulseCharge = "ToadCroak" }, -- the croak as the throat sac swells
 	},
+	-- HOS-PET-017 Ring Imp: magenta-gold rune portals (Runner) and a violet flash + ring burst (Blink in / out).
+	-- Same size and timing as the defaults; the Blink warning reticle stays default so opponents still read it.
+	["Ring Imp"] = {
+		vfx = { RiftPortal = "ImpRiftPortal", RiftArrive = "ImpRiftArrive" },
+	},
+	-- HOS-PET-019 Crystal Warden: sapphire / violet crystal versions of the Guardian effects with prism facet
+	-- shards (gold at L2, rainbow at L3). The dome keeps its size and blue so opponents still read it.
+	["Crystal Warden"] = {
+		vfx = {
+			ShieldUp = "WardenShieldUp",
+			ShieldBubble = "WardenShieldBubble",
+			ShieldBreak = "WardenShieldBreak",
+			TetherBeam = "WardenTetherBeam",
+			TetherYank = "WardenTetherYank",
+		},
+	},
+	-- HOS-PET-020 Riot Hound: gold shockwave with navy shadows (Runner) and a blue electric Storm Ball wrapped in
+	-- gold lightning (Catcher), from the card. Same size, speed and gold floor scorch as the Toad so opponents read
+	-- them; L2 adds blue lightning, L3 cyan arcs.
+	["Riot Hound"] = {
+		vfx = {
+			PulseCharge = "HoundPulseCharge",
+			PulseBlast = "HoundPulseBlast",
+			KnockHit = "HoundKnockHit",
+			StormBall = "HoundStormBall",
+			StormBounce = "HoundStormBounce",
+			StormHit = "HoundStormHit",
+		},
+	},
+	-- HOS-PET-021 Compass Hare, Rift Rare (tools/pet-kit/hare/hare.py)
+	["Compass Hare"] = {
+		vfx = {
+			RiftArrive = "HareRiftArrive",
+			RiftPortal = "HareRiftPortal",
+		},
+	},
+	-- HOS-PET-022 Scroll Tanuki, Decoy Epic (tools/pet-kit/tanuki/tanuki.py)
+	["Scroll Tanuki"] = {
+		vfx = {
+			DecoyPoof = "TanukiDecoyPoof",
+			DecoySplit = "TanukiDecoySplit",
+			SnareTrigger = "TanukiSnareTrigger",
+		},
+	},
+	-- HOS-PET-023 Moonveil Moth, Invisibility Epic (tools/pet-kit/moth/moth.py)
+	["Moonveil Moth"] = {
+		vfx = {
+			InvisShimmer = "None",
+		},
+	},
+	-- HOS-PET-024 Shrine Lion, Guardian Epic (tools/pet-kit/lion/lion.py)
+	["Shrine Lion"] = {
+		vfx = {
+			ShieldBreak = "LionShieldBreak",
+			ShieldBubble = "LionShieldBubble",
+			ShieldUp = "LionShieldUp",
+			TetherBeam = "LionTetherBeam",
+			TetherYank = "LionTetherYank",
+		},
+	},
+	-- HOS-PET-025 Drum Oni, Tempest Epic (tools/pet-kit/oni/oni.py)
+	["Drum Oni"] = {
+		vfx = {
+			KnockHit = "OniKnockHit",
+			PulseBlast = "OniPulseBlast",
+			PulseCharge = "OniPulseCharge",
+			StormBall = "OniStormBall",
+			StormBounce = "OniStormBounce",
+			StormHit = "OniStormHit",
+		},
+	},
+	-- HOS-PET-026 Astral Djinn, Rift Epic (tools/pet-kit/djinn/djinn.py)
+	["Astral Djinn"] = {
+		vfx = {
+			RiftArrive = "DjinnRiftArrive",
+			RiftPortal = "DjinnRiftPortal",
+		},
+	},
+	-- HOS-PET-027 Eclipse Tengu, Decoy Legendary (tools/pet-kit/tengu/tengu.py)
+	["Eclipse Tengu"] = {
+		vfx = {
+			DecoyPoof = "TenguDecoyPoof",
+			DecoySplit = "TenguDecoySplit",
+			SnareTrigger = "TenguSnareTrigger",
+		},
+	},
+	-- HOS-PET-028 Veil Nekomata, Invisibility Legendary (tools/pet-kit/neko/neko.py)
+	["Veil Nekomata"] = {
+		vfx = {
+			InvisShimmer = "None",
+		},
+	},
+	-- HOS-PET-029 Aegis Kirin, Guardian Legendary (tools/pet-kit/kirin/kirin.py)
+	["Aegis Kirin"] = {
+		vfx = {
+			ShieldBreak = "KirinShieldBreak",
+			ShieldBubble = "KirinShieldBubble",
+			ShieldUp = "KirinShieldUp",
+			TetherBeam = "KirinTetherBeam",
+			TetherYank = "KirinTetherYank",
+		},
+	},
+	-- HOS-PET-030 Raiju, Tempest Legendary (tools/pet-kit/raiju/raiju.py)
+	["Raiju"] = {
+		vfx = {
+			KnockHit = "RaijuKnockHit",
+			PulseBlast = "RaijuPulseBlast",
+			PulseCharge = "RaijuPulseCharge",
+			StormBall = "RaijuStormBall",
+			StormBounce = "RaijuStormBounce",
+			StormHit = "RaijuStormHit",
+		},
+	},
+	-- HOS-PET-031 Void Seraph, Rift Legendary (tools/pet-kit/seraph/seraph.py)
+	["Void Seraph"] = {
+		vfx = {
+			RiftArrive = "SeraphRiftArrive",
+			RiftPortal = "SeraphRiftPortal",
+		},
+	},
+	-- HOS-HWN-001 Halloween Pumpkin Wraith
+	["Pumpkin Wraith"] = {
+		vfx = {
+			InvisShimmer = "None",
+		},
+	},
+	-- HOS-HWN-001 Halloween Witch's Cat
+	["Witch's Cat"] = {
+		vfx = {
+			DecoyPoof = "CatDecoyPoof",
+			DecoySplit = "CatDecoySplit",
+			SnareTrigger = "CatSnareTrigger",
+		},
+	},
+	-- HOS-HWN-001 Halloween Mummy
+	["Mummy"] = {
+		vfx = {
+			ShieldBreak = "MummyShieldBreak",
+			ShieldBubble = "MummyShieldBubble",
+			ShieldUp = "MummyShieldUp",
+			TetherBeam = "MummyTetherBeam",
+			TetherYank = "MummyTetherYank",
+		},
+	},
+	-- HOS-HWN-001 Halloween Bone Dragon
+	["Bone Dragon"] = {
+		vfx = {
+			KnockHit = "DragonKnockHit",
+			PulseBlast = "DragonPulseBlast",
+			PulseCharge = "DragonPulseCharge",
+			StormBall = "DragonStormBall",
+			StormBounce = "DragonStormBounce",
+			StormHit = "DragonStormHit",
+		},
+	},
+} :: { [string]: { [string]: any } }
+
+-- Bought ability skins (HOS-VFX-RES-001), keyed by shop item id. The server passes "skin:<id>" in place of
+-- the species for the effects a skin covers; the same size, timing and readability rules apply.
+AbilityCosmetics.SKINS = {
+	fx_rift_void = { vfx = { RiftPortal = "SkinVoidRiftPortal" } },
+	fx_rift_inferno = { vfx = { RiftPortal = "SkinInfernoRiftPortal" } },
+	fx_rift_frost = { vfx = { RiftPortal = "SkinFrostRiftPortal" } },
 } :: { [string]: { [string]: any } }
 
 -- the effect to draw for `key` when `species` uses its ability: the species' override, else the default
 -- (`key` itself). Effects with no species (or an unknown one) always get the default.
 function AbilityCosmetics.vfx(species: any, key: string): string
-	local entry = if type(species) == "string" then AbilityCosmetics.SPECIES[species] else nil
+	local entry = if type(species) == "string" then (if species:sub(1, 5) == "skin:" then AbilityCosmetics.SKINS[species:sub(6)] else AbilityCosmetics.SPECIES[species]) else nil
 	local o = entry and entry.vfx
 	local v = if type(o) == "table" then o[key] else nil
 	return if type(v) == "string" and v ~= "" then v else key

@@ -1,0 +1,21 @@
+[
+ "docs/pets/grin_ghost/build/ghost/Ghost_Pet.fbx",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Color.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Color_L2.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Color_L3.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Normal.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Roughness.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Emit.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Emit_L2.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Emit_L3.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Face.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Face_L2.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_Face_L3.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_FaceEmit.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_FaceEmit_L2.png",
+ "docs/pets/grin_ghost/build/ghost/Ghost_FaceEmit_L3.png",
+ "vfx/ghost/tex/ghost_smoke_4x4.png",
+ "vfx/ghost/tex/ghost_wisp_4x4.png",
+ "vfx/ghost/tex/ghost_grin.png",
+ "vfx/ghost/tex/ghost_eyes.png"
+]

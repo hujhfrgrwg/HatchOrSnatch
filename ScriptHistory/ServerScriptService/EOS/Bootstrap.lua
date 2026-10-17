@@ -22,12 +22,14 @@ local SandboxService = require(Services.SandboxService)
 local EconomyService = require(Services.EconomyService)
 local EmoteService = require(Services.EmoteService)
 local AbilityService = require(Services.AbilityService)
+local FieldGemService = require(Services.FieldGemService)
 local ServerListService = require(Services.ServerListService)
 local PurchaseService = require(Services.PurchaseService)
 local PassService = require(Services.PassService)
 
 CharacterService.init()
 MapService.init() -- before anything reads arena numbers: points Layout at the live map
+require(Services.RealPlayerPool).init() -- HOS-BOT-001: NPC identities (before the first NPC spawns)
 NpcService.init()
 NpcSkinService.init()
 DataService.init()
@@ -36,9 +38,13 @@ PlayerService.init()
 EconomyService.init()
 EmoteService.init()
 AbilityService.init()
+FieldGemService.init() -- HOS-GEMS-002: Gems on the field each crossing
 ServerListService.init() -- the Servers panel: this server in the shared list, join by teleport
 PurchaseService.init() -- Robux Gem packs: ProcessReceipt grants once, after the save
+require(Services.LeadCatcherService).init() -- HOS-LEAD-001 one paid Lead Catcher per match
 PassService.init() -- VIP and 2x Gold game passes: ownership -> EOS_VIP / EOS_Gold2x
+require(Services.RetentionService).init() -- HOS-RET-001 welcome back gift, favorite / event / starter prompts
+require(Services.ReviveService).init(MatchService, require(Services.PointsService).init(MatchService)) -- HOS-PTS-001 points, revive (PointsConfig switches)
 LobbyService.init()
 PracticeService.init()
 SandboxService.init() -- Studio only: workspace attribute EOS_Sandbox = knife test baseplate

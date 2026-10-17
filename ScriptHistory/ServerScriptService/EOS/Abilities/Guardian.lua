@@ -33,7 +33,7 @@ function Guardian.Runner(ctx: any): (boolean, string?)
 		return false, "NO_CHARACTER"
 	end
 	local d = ctx.def
-	Shared.grantTagBlock(ctx.player, d.charges or 1, d.duration, "Guardian", d.immunity or 0.5, ctx.species)
+	Shared.grantTagBlock(ctx.player, d.charges or 1, d.duration, "Guardian", d.immunity or 0.5, ctx.species, ctx.level)
 	dropBubble(ctx.player)
 	local b = Instance.new("Part")
 	b.Name = "EOS_GuardianShield"
@@ -49,8 +49,8 @@ function Guardian.Runner(ctx: any): (boolean, string?)
 	w.Parent = b
 	b.Parent = char
 	bubbles[ctx.player] = b
-	Shared.tagVfx(b, "ShieldBubble", true, ctx.species) -- the bubble stays; clients add its rim and sparkles (HOS-VFX-002)
-	Shared.vfx("ShieldUp", root.Position, nil, ctx.species)
+	Shared.tagVfx(b, "ShieldBubble", true, ctx.species, ctx.level) -- the bubble stays; clients add its rim and sparkles (HOS-VFX-002)
+	Shared.vfx("ShieldUp", root.Position, nil, ctx.species, ctx.level)
 	-- the bubble goes when the shield is used up (EOS_TagBlock cleared) or runs out
 	local conn
 	conn = char:GetAttributeChangedSignal("EOS_TagBlock"):Connect(function()
@@ -92,7 +92,7 @@ function Guardian.Catcher(ctx: any): (boolean, string?)
 	end
 	local target = best
 	local tr = target.Character.HumanoidRootPart :: BasePart
-	Shared.beam(root, tr, COLOR, d.windup + 0.2, nil, "TetherBeam", ctx.species)
+	Shared.beam(root, tr, COLOR, d.windup + 0.2, nil, "TetherBeam", ctx.species, ctx.level)
 	local me = ctx.player
 	local role = me:GetAttribute("EOS_Role")
 	task.delay(d.windup, function()
@@ -119,7 +119,7 @@ function Guardian.Catcher(ctx: any): (boolean, string?)
 			local dest = tr.Position + toMe.Unit * want * frac
 			if Shared.validPosition(target, dest) then
 				Shared.slideTo(target, dest, 0.15)
-				Shared.vfx("TetherYank", tr.Position, toMe.Unit, ctx.species) -- streaks fly towards the Catcher
+				Shared.vfx("TetherYank", tr.Position, toMe.Unit, ctx.species, ctx.level) -- streaks fly towards the Catcher
 				return
 			end
 		end

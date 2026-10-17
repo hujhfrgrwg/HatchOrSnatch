@@ -1,0 +1,102 @@
+--!strict
+-- KirinPet (client): the Aegis Kirin (Guardian Legendary), HOS-PET-029. Built in tools/pet-kit/kirin/kirin.py.
+--  * follower: GroundPet (paces behind your right side; Walk / Run / Hop / Idle from KirinAnims, halo turning at L3)
+--  * summon (every ability press, both roles; visual only, abilities fire on the press): it springs up at your
+--    front-right; Runner (Shield) plays Ability (rears high, stamps both hooves), Catcher (Long Reach) plays Reach
+--    (levels its antlers like a lance and thrusts). VFX.KirinSummon_L1-L3 (its own kirin fire, scale shards, cloud
+--    curls and aegis seal) flashes at FLASH_AT, then it shrinks into you. The shield / tether are the Kirin* templates.
+--  * poof: none.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
+local PetModel = require(Shared:WaitForChild("PetModel"))
+local PetRig = require(Shared:WaitForChild("PetRig"))
+local GroundPet = require(script.Parent:WaitForChild("GroundPet"))
+
+local KirinPet = {}
+
+KirinPet.SPECIES = "Aegis Kirin"
+KirinPet.INTRO = 0.9 -- how long the summon plays (visual only)
+KirinPet.FLASH_AT = 0.48 -- seconds in: the cast peaks
+KirinPet.SUMMON_SCALE = 1.15
+
+KirinPet.PARAMS = {
+	species = "Aegis Kirin",
+	scale = 1.0,
+	walkStride = 0.6,
+	runStride = 1.0,
+	runAt = 1.5,
+	maxSpeed = 3,
+	side = 2.4,
+	back = 2.2,
+} :: GroundPet.Params
+
+function KirinPet.newFollower(level: number, root: BasePart)
+	return GroundPet.newFollower(KirinPet.PARAMS, level, root)
+end
+KirinPet.respawnFollower = GroundPet.respawnFollower
+KirinPet.updateFollower = GroundPet.updateFollower
+
+function KirinPet.summon(who: Model, level: number)
+	local root = who:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then
+		return
+	end
+	level = math.clamp(math.floor(level), 1, 3)
+	local plr = Players:GetPlayerFromCharacter(who)
+	local role = plr and plr:GetAttribute("EOS_Role")
+	local catcher = type(role) == "string" and string.upper(role) == "CATCHER" -- EOS_Role is "CATCHER" / "RUNNER"
+	local clip = if catcher then "Reach" else "Ability"
+	local beast = PetModel.build(KirinPet.SPECIES, KirinPet.SUMMON_SCALE, level)
+	beast.Name = "EOS_KirinSummon"
+	local rig = PetRig.new(beast, KirinPet.SPECIES)
+	local INTRO = KirinPet.INTRO
+	local baseScale = beast:GetScale()
+	local yaw = GroundPet.yawOf(root.CFrame.LookVector, 0)
+	-- at your front-right, facing the way you face
+	local function place(k: number)
+		local rcf = root.CFrame
+		local feet = GroundPet.feetY(who, root)
+		local pop = math.min(1, k / 0.15) -- springs up out of the ground
+		local lp = Vector3.new(2.1, -0.6 * (1 - pop), -1.2)
+		local wp = Vector3.new(0, feet - rcf.Position.Y, 0) + rcf * lp
+		yaw = GroundPet.yawOf(rcf.LookVector, yaw)
+		beast:PivotTo(CFrame.new(wp) * CFrame.Angles(0, yaw, 0))
+		-- shrinks into you over the last fifth
+		local m = math.clamp((k - 0.8) / 0.2, 0, 1)
+		if m > 0 then
+			beast:ScaleTo(baseScale * (1 - 0.7 * m))
+			GroundPet.fade(beast, m * 0.85)
+		end
+	end
+	place(0)
+	beast.Parent = workspace.CurrentCamera
+	rig:play(clip, 0, rig:length(clip) / (INTRO * 0.8), 0)
+	local t0 = os.clock()
+	local flashed = false
+	local conn
+	conn = RunService.RenderStepped:Connect(function(dt)
+		local k = (os.clock() - t0) / INTRO
+		if not root.Parent or k >= 1 then
+			conn:Disconnect()
+			beast:Destroy()
+			return
+		end
+		if not flashed and os.clock() - t0 >= KirinPet.FLASH_AT then
+			flashed = true
+			local cf, size = beast:GetBoundingBox()
+			GroundPet.playFx("KirinSummon_L" .. level, CFrame.new(cf.Position + Vector3.new(0, size.Y * 0.3, 0)))
+		end
+		place(k)
+		rig:step(dt)
+	end)
+end
+
+function KirinPet.poof(_pos: Vector3, _level: number): boolean
+	return false
+end
+
+return KirinPet

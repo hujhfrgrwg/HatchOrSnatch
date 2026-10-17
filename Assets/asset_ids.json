@@ -191,21 +191,6 @@
  "vfx/abilities/tex/av_beam_electric_v.png": {
   "assetId": "130553964429839"
  },
- "docs/pets/bastion_beetle/bastion_beetle.fbx": {
-  "assetId": "130339517779916"
- },
- "docs/pets/bastion_beetle/tex/Beetle_Body.png": {
-  "assetId": "86007629644295"
- },
- "docs/pets/bastion_beetle/tex/Beetle_Face.png": {
-  "assetId": "127080626185058"
- },
- "docs/pets/bastion_beetle/tex/Beetle_L2.png": {
-  "assetId": "137302667352860"
- },
- "docs/pets/bastion_beetle/tex/Beetle_L3.png": {
-  "assetId": "93698340908920"
- },
  "docs/pets/bastion_beetle/upload/bastion_beetle_v2.fbx": {
   "assetId": "112661861588387"
  },
@@ -811,5 +796,2438 @@
  },
  "docs/pets/thunder_toad/kit_build/upload3/ToadKit3_Roughness.png": {
   "assetId": "118684075788168"
+ },
+ "vfx/hero-chicken/tex/hc_confetti.png": {
+  "assetId": "114250128044960"
+ },
+ "Assets/Meshes/EOS_FieldGem_v1.fbx": {
+  "assetId": "139204871437737"
+ },
+ "Assets/Meshes/EOS_FieldGem_v2.fbx": {
+  "assetId": "90263717964962"
+ },
+ "Assets/Meshes/EOS_FieldGem_v3.fbx": {
+  "assetId": "90791601606721"
+ },
+ "Assets/UI/field_gems/FieldGems_max_plate.png": {
+  "assetId": "132114391537874"
+ },
+ "ui_points/rbx/out/upload/a04d7626ccc.png": {
+  "assetId": "84593315919215"
+ },
+ "ui_points/rbx/out/upload/a16dab9b808.png": {
+  "assetId": "77276190603989"
+ },
+ "ui_points/rbx/out/upload/a1b89665bec.png": {
+  "assetId": "81633132634349"
+ },
+ "ui_points/rbx/out/upload/a1dd998a684.png": {
+  "assetId": "70926770763320"
+ },
+ "ui_points/rbx/out/upload/a349e3899fc.png": {
+  "assetId": "73159796890573"
+ },
+ "ui_points/rbx/out/upload/a51486f6232.png": {
+  "assetId": "122972708700748"
+ },
+ "ui_points/rbx/out/upload/a61223bae87.png": {
+  "assetId": "80257247576373"
+ },
+ "ui_points/rbx/out/upload/a88f9b78de0.png": {
+  "assetId": "73877754763661"
+ },
+ "ui_points/rbx/out/upload/a913ec61d8e.png": {
+  "assetId": "96784852971863"
+ },
+ "ui_points/rbx/out/upload/aa191c527fe.png": {
+  "assetId": "75879628080706"
+ },
+ "ui_points/rbx/out/upload/ae4ec2cf3eb.png": {
+  "assetId": "73585764266672"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Pet.fbx": {
+  "assetId": "111944236975096"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Color.png": {
+  "assetId": "123883350868230"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Color_L2.png": {
+  "assetId": "111474750927683"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Color_L3.png": {
+  "assetId": "137328254188087"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Normal.png": {
+  "assetId": "135610173719776"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Roughness.png": {
+  "assetId": "131202377789597"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Emit.png": {
+  "assetId": "93194714031439"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Emit_L2.png": {
+  "assetId": "78565407354961"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Emit_L3.png": {
+  "assetId": "128443805678762"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Face.png": {
+  "assetId": "86103515929023"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Face_L2.png": {
+  "assetId": "86854976286154"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_Face_L3.png": {
+  "assetId": "130352407638023"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_FaceEmit.png": {
+  "assetId": "91547171729769"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_FaceEmit_L2.png": {
+  "assetId": "113747895103217"
+ },
+ "docs/pets/ring_imp/build/imp/Imp_FaceEmit_L3.png": {
+  "assetId": "71613386836722"
+ },
+ "vfx/imp/tex/imp_runering.png": {
+  "assetId": "106935941471995"
+ },
+ "vfx/imp/tex/imp_voidswirl_4x4.png": {
+  "assetId": "140318531886405"
+ },
+ "vfx/imp/tex/imp_shard.png": {
+  "assetId": "83860120770994"
+ },
+ "vfx/imp/tex/imp_shard_jag.png": {
+  "assetId": "83542189200242"
+ },
+ "Assets/UI/laststanding/a104737e886.png": {
+  "assetId": "103525761331933"
+ },
+ "Assets/UI/laststanding/a415ab46844.png": {
+  "assetId": "139770661792960"
+ },
+ "Assets/UI/laststanding/a42961ae396.png": {
+  "assetId": "95755091036879"
+ },
+ "Assets/UI/laststanding/a75e227c407.png": {
+  "assetId": "97457757518886"
+ },
+ "Assets/UI/laststanding/a910dceb070.png": {
+  "assetId": "118048583941503"
+ },
+ "Assets/UI/laststanding/a9a32127224.png": {
+  "assetId": "82913342035356"
+ },
+ "Assets/UI/laststanding/abce97d62a1.png": {
+  "assetId": "122883921988694"
+ },
+ "Assets/UI/laststanding/aefa6c83889.png": {
+  "assetId": "115635286384299"
+ },
+ "Assets/UI/laststanding/af54f684da5.png": {
+  "assetId": "95906630382927"
+ },
+ "Assets/UI/laststanding/af641234384.png": {
+  "assetId": "112517372301678"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L3_L2.png": {
+  "assetId": "112502131275953"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L3_emit_L2.png": {
+  "assetId": "98989502029975"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Pet.fbx": {
+  "assetId": "135100162634572"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Color.png": {
+  "assetId": "134889526440040"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Color_L2.png": {
+  "assetId": "73271499388339"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Color_L3.png": {
+  "assetId": "130654301080601"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Normal.png": {
+  "assetId": "120716932546712"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Roughness.png": {
+  "assetId": "74920864283334"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Emit.png": {
+  "assetId": "114989211278707"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Emit_L2.png": {
+  "assetId": "138627474036555"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Emit_L3.png": {
+  "assetId": "97121630360735"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Face.png": {
+  "assetId": "140729672493851"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Face_L2.png": {
+  "assetId": "132420451338611"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_Face_L3.png": {
+  "assetId": "71995702855518"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_FaceEmit.png": {
+  "assetId": "131994978175992"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_FaceEmit_L2.png": {
+  "assetId": "88267417948270"
+ },
+ "docs/pets/grin_ghost/build/ghost/Ghost_FaceEmit_L3.png": {
+  "assetId": "115596560191684"
+ },
+ "vfx/ghost/tex/ghost_smoke_4x4.png": {
+  "assetId": "106220365197407"
+ },
+ "vfx/ghost/tex/ghost_wisp_4x4.png": {
+  "assetId": "80416556292422"
+ },
+ "vfx/ghost/tex/ghost_grin.png": {
+  "assetId": "73133622045395"
+ },
+ "vfx/ghost/tex/ghost_eyes.png": {
+  "assetId": "121246256049007"
+ },
+ "Assets/UI/HOS-PTS-001/ad92fc49b48.png": {
+  "assetId": "78481517955908"
+ },
+ "Assets/UI/HOS-PTS-001/adcef75dd54.png": {
+  "assetId": "80674517862267"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Pet.fbx": {
+  "assetId": "121537163189491"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Color.png": {
+  "assetId": "93461761670271"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Color_L2.png": {
+  "assetId": "128791841740281"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Color_L3.png": {
+  "assetId": "90831505032635"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Normal.png": {
+  "assetId": "85582219074517"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Roughness.png": {
+  "assetId": "131742466516136"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Emit.png": {
+  "assetId": "92016445754567"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Emit_L2.png": {
+  "assetId": "80217172457897"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Emit_L3.png": {
+  "assetId": "133754037661946"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Face.png": {
+  "assetId": "106896856632298"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Face_L2.png": {
+  "assetId": "140458860017441"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_Face_L3.png": {
+  "assetId": "102656877678703"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_FaceEmit.png": {
+  "assetId": "107004430815772"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_FaceEmit_L2.png": {
+  "assetId": "76598238864304"
+ },
+ "docs/pets/riot_hound/build/hound/Hound_FaceEmit_L3.png": {
+  "assetId": "112312465520317"
+ },
+ "vfx/tanuki/tex/tanuki_leaf.png": {
+  "assetId": "101346935205127"
+ },
+ "vfx/tanuki/tex/tanuki_ofuda.png": {
+  "assetId": "95460297419747"
+ },
+ "vfx/moth/tex/moth_crescent.png": {
+  "assetId": "122320413845527"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Pet.fbx": {
+  "assetId": "99103848708260"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Color.png": {
+  "assetId": "84180153037290"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Color_L2.png": {
+  "assetId": "132129789987981"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Color_L3.png": {
+  "assetId": "101525216292506"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Normal.png": {
+  "assetId": "79875415283192"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Roughness.png": {
+  "assetId": "106859273637735"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Emit.png": {
+  "assetId": "136107153239585"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Emit_L2.png": {
+  "assetId": "88937894744707"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Emit_L3.png": {
+  "assetId": "134610711965752"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Face.png": {
+  "assetId": "112616069113417"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Face_L2.png": {
+  "assetId": "78124826611619"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_Face_L3.png": {
+  "assetId": "102289761035237"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_FaceEmit.png": {
+  "assetId": "109096875983608"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_FaceEmit_L2.png": {
+  "assetId": "123512671617891"
+ },
+ "docs/pets/eclipse_tengu/build/tengu/Tengu_FaceEmit_L3.png": {
+  "assetId": "134063790029106"
+ },
+ "ui_egg/rbx/out/upload/a0ab89382d8.png": {
+  "assetId": "76468696761980"
+ },
+ "ui_egg/rbx/out/upload/a10cddee71b.png": {
+  "assetId": "79067813693263"
+ },
+ "ui_egg/rbx/out/upload/a1649ef7a74.png": {
+  "assetId": "101154257148626"
+ },
+ "ui_egg/rbx/out/upload/a1b7c24652b.png": {
+  "assetId": "76100636013267"
+ },
+ "ui_egg/rbx/out/upload/a23b45f6e4f.png": {
+  "assetId": "94998476033445"
+ },
+ "ui_egg/rbx/out/upload/a29347218b0.png": {
+  "assetId": "126621093019525"
+ },
+ "ui_egg/rbx/out/upload/a2b01c34251.png": {
+  "assetId": "129994999998056"
+ },
+ "ui_egg/rbx/out/upload/a2c1f4a7ae9.png": {
+  "assetId": "119652278698067"
+ },
+ "ui_egg/rbx/out/upload/a2d92cebc28.png": {
+  "assetId": "122361698655068"
+ },
+ "ui_egg/rbx/out/upload/a392c9f3e78.png": {
+  "assetId": "127315320886057"
+ },
+ "ui_egg/rbx/out/upload/a3b5d98db55.png": {
+  "assetId": "118606460576704"
+ },
+ "ui_egg/rbx/out/upload/a3d418a3231.png": {
+  "assetId": "87904049598450"
+ },
+ "ui_egg/rbx/out/upload/a3ec3d0e113.png": {
+  "assetId": "121068436069798"
+ },
+ "ui_egg/rbx/out/upload/a3efa8666c7.png": {
+  "assetId": "138575707016316"
+ },
+ "ui_egg/rbx/out/upload/a40e1129321.png": {
+  "assetId": "137783526291241"
+ },
+ "ui_egg/rbx/out/upload/a4e4c88f162.png": {
+  "assetId": "83188120291841"
+ },
+ "ui_egg/rbx/out/upload/a59f981891f.png": {
+  "assetId": "93667131497617"
+ },
+ "ui_egg/rbx/out/upload/a6c5d117ebf.png": {
+  "assetId": "89396389788785"
+ },
+ "ui_egg/rbx/out/upload/a6eed08c7b4.png": {
+  "assetId": "85124042004811"
+ },
+ "ui_egg/rbx/out/upload/a7446fd5082.png": {
+  "assetId": "104348638063672"
+ },
+ "ui_egg/rbx/out/upload/a79bb88c5bc.png": {
+  "assetId": "70462423688148"
+ },
+ "ui_egg/rbx/out/upload/a7dab47c122.png": {
+  "assetId": "113077130250246"
+ },
+ "ui_egg/rbx/out/upload/a816339b750.png": {
+  "assetId": "84963411328923"
+ },
+ "ui_egg/rbx/out/upload/a871ab37377.png": {
+  "assetId": "81689378564064"
+ },
+ "ui_egg/rbx/out/upload/a89fbd9f7dd.png": {
+  "assetId": "93405836652899"
+ },
+ "ui_egg/rbx/out/upload/a8cdeb477dd.png": {
+  "assetId": "115463264237675"
+ },
+ "ui_egg/rbx/out/upload/aa882ce735d.png": {
+  "assetId": "92731799158745"
+ },
+ "ui_egg/rbx/out/upload/aaa596613b5.png": {
+  "assetId": "75924850573898"
+ },
+ "ui_egg/rbx/out/upload/aaa81cc4520.png": {
+  "assetId": "76028873215534"
+ },
+ "ui_egg/rbx/out/upload/ab6d68cc066.png": {
+  "assetId": "109976755583853"
+ },
+ "ui_egg/rbx/out/upload/abe062f6b8e.png": {
+  "assetId": "84101552685773"
+ },
+ "ui_egg/rbx/out/upload/ac3ef6b9cd2.png": {
+  "assetId": "77060306899971"
+ },
+ "ui_egg/rbx/out/upload/aca44be6640.png": {
+  "assetId": "87036145241854"
+ },
+ "ui_egg/rbx/out/upload/ad9165eb6bd.png": {
+  "assetId": "76272780747706"
+ },
+ "ui_egg/rbx/out/upload/adae0618dc6.png": {
+  "assetId": "80026047887292"
+ },
+ "ui_egg/rbx/out/upload/ae7befac0ef.png": {
+  "assetId": "115518475889935"
+ },
+ "ui_egg/rbx/out/upload/aed9878fd72.png": {
+  "assetId": "128801797735089"
+ },
+ "ui_egg/rbx/out/upload/af019556938.png": {
+  "assetId": "70943041982753"
+ },
+ "ui_egg/rbx/out/upload/af5596cb626.png": {
+  "assetId": "98517444968710"
+ },
+ "ui_egg/rbx/out/upload/af832e528c0.png": {
+  "assetId": "77686071831417"
+ },
+ "ui_egg/rbx/out/upload/afbd7c6d23f.png": {
+  "assetId": "122919254814199"
+ },
+ "ui_egg/rbx/out/upload/aff3cd8a764.png": {
+  "assetId": "113225971211029"
+ },
+ "vfx/tengu/out/TenguCorona.png": {
+  "assetId": "134387552800407"
+ },
+ "vfx/tengu/out/TenguFeather.png": {
+  "assetId": "126686435678427"
+ },
+ "vfx/tengu/out/TenguGust.flipbook.png": {
+  "assetId": "109528318561845"
+ },
+ "vfx/tengu/out/TenguSmoke.flipbook.png": {
+  "assetId": "138952740113679"
+ },
+ "vfx/tengu/out/TenguSunDisc.png": {
+  "assetId": "93018663064303"
+ },
+ "vfx/tengu/out/TenguWisp.flipbook.png": {
+  "assetId": "111834193250914"
+ },
+ "vfx/neko/out/NekoClaw.flipbook.png": {
+  "assetId": "125182373823969"
+ },
+ "vfx/neko/out/NekoEye.png": {
+  "assetId": "131853005030155"
+ },
+ "vfx/neko/out/NekoMist.flipbook.png": {
+  "assetId": "88948568933634"
+ },
+ "vfx/neko/out/NekoOnibi.flipbook.png": {
+  "assetId": "111454293538662"
+ },
+ "vfx/neko/out/NekoVeil.flipbook.png": {
+  "assetId": "90507688876286"
+ },
+ "vfx/kirin/out/KirinBeam.png": {
+  "assetId": "75640989253432"
+ },
+ "vfx/kirin/out/KirinCloud.flipbook.png": {
+  "assetId": "108127130542603"
+ },
+ "vfx/kirin/out/KirinEruption.flipbook.png": {
+  "assetId": "102225081200525"
+ },
+ "vfx/kirin/out/KirinFlame.flipbook.png": {
+  "assetId": "87379438088414"
+ },
+ "vfx/kirin/out/KirinScale.png": {
+  "assetId": "111901611479556"
+ },
+ "vfx/kirin/out/KirinSeal.png": {
+  "assetId": "110754910341185"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Pet.fbx": {
+  "assetId": "94966021066790"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Color.png": {
+  "assetId": "118681770884602"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Color_L2.png": {
+  "assetId": "77367960848475"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Color_L3.png": {
+  "assetId": "89882912433809"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Normal.png": {
+  "assetId": "99950493745333"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Roughness.png": {
+  "assetId": "98899632867551"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Emit.png": {
+  "assetId": "113885011819259"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Emit_L2.png": {
+  "assetId": "101213136240163"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Emit_L3.png": {
+  "assetId": "135791042375726"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Face.png": {
+  "assetId": "134807326401799"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Face_L2.png": {
+  "assetId": "125358388989753"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_Face_L3.png": {
+  "assetId": "81525099266490"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_FaceEmit.png": {
+  "assetId": "134358916383696"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_FaceEmit_L2.png": {
+  "assetId": "89976541924195"
+ },
+ "docs/pets/pumpkin_wraith/build/wraith/Wraith_FaceEmit_L3.png": {
+  "assetId": "90428685939804"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Pet.fbx": {
+  "assetId": "97547829917932"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Color.png": {
+  "assetId": "103895519827401"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Color_L2.png": {
+  "assetId": "114768451766572"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Color_L3.png": {
+  "assetId": "89014671565703"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Normal.png": {
+  "assetId": "135438443331991"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Roughness.png": {
+  "assetId": "96071036801989"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Emit.png": {
+  "assetId": "136607900452079"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Emit_L2.png": {
+  "assetId": "71423071074927"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Emit_L3.png": {
+  "assetId": "83156622150307"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Face.png": {
+  "assetId": "86217031498130"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Face_L2.png": {
+  "assetId": "121001129836865"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_Face_L3.png": {
+  "assetId": "129456750954082"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_FaceEmit.png": {
+  "assetId": "71600698372057"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_FaceEmit_L2.png": {
+  "assetId": "122558237983798"
+ },
+ "docs/pets/witch_cat/build/witchcat/WitchCat_FaceEmit_L3.png": {
+  "assetId": "73375308461017"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Pet.fbx": {
+  "assetId": "77092492393405"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Color.png": {
+  "assetId": "130160369460681"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Color_L2.png": {
+  "assetId": "99120676710200"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Color_L3.png": {
+  "assetId": "86761911718002"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Normal.png": {
+  "assetId": "119969621030364"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Roughness.png": {
+  "assetId": "83142025712832"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Emit.png": {
+  "assetId": "127940483651658"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Emit_L2.png": {
+  "assetId": "95006508217868"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Emit_L3.png": {
+  "assetId": "134566478766771"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Face.png": {
+  "assetId": "107932509789574"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Face_L2.png": {
+  "assetId": "129861108715533"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_Face_L3.png": {
+  "assetId": "99460488157601"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_FaceEmit.png": {
+  "assetId": "93065646677686"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_FaceEmit_L2.png": {
+  "assetId": "120295619882297"
+ },
+ "docs/pets/mummy/build/mummy/Mummy_FaceEmit_L3.png": {
+  "assetId": "124045489150777"
+ },
+ "vfx/raiju/out/RaijuBeam.png": {
+  "assetId": "99829815444339"
+ },
+ "vfx/raiju/out/RaijuBurst.flipbook.png": {
+  "assetId": "88628810923929"
+ },
+ "vfx/raiju/out/RaijuManeFire.flipbook.png": {
+  "assetId": "78667061485570"
+ },
+ "vfx/raiju/out/RaijuRing.png": {
+  "assetId": "109991688736400"
+ },
+ "vfx/raiju/out/RaijuStrike.flipbook.png": {
+  "assetId": "133458670455967"
+ },
+ "vfx/seraph/out/SeraphAccretion.png": {
+  "assetId": "72722811748445"
+ },
+ "vfx/seraph/out/SeraphFeather.png": {
+  "assetId": "85547318171774"
+ },
+ "vfx/seraph/out/SeraphHalo.png": {
+  "assetId": "71938950091169"
+ },
+ "vfx/seraph/out/SeraphVoid.flipbook.png": {
+  "assetId": "134855931040651"
+ },
+ "vfx/seraph/out/SeraphWings.flipbook.png": {
+  "assetId": "83739502181639"
+ },
+ "ui_hwn/rbx/out/upload/a6bf28f3fe7.png": {
+  "assetId": "130238402645506"
+ },
+ "ui_hwn/rbx/out/upload/a80c38407af.png": {
+  "assetId": "132585446586881"
+ },
+ "ui_hwn/rbx/out/upload/ad37e0dbcae.png": {
+  "assetId": "119237556086713"
+ },
+ "ui_hwn/rbx/out/upload/ad4f88e5737.png": {
+  "assetId": "85661896979633"
+ },
+ "ui_hwn/rbx/out/upload/ae3b3ecb45c.png": {
+  "assetId": "128038767204666"
+ },
+ "ui_hwn/rbx/out/upload/afabac57dfd.png": {
+  "assetId": "125882797879460"
+ },
+ "UI/set/icons/pet_mummy_t1.png": {
+  "assetId": "132436612150285"
+ },
+ "UI/set/icons/pet_pumpkin_wraith_t1.png": {
+  "assetId": "120270675349477"
+ },
+ "UI/set/icons/pet_witch_cat_t1.png": {
+  "assetId": "108227640761371"
+ },
+ "vfx/tanuki2/out/TanukiScroll.flipbook.png": {
+  "assetId": "124506595585754"
+ },
+ "vfx/tanuki2/out/TanukiSeal.png": {
+  "assetId": "132551583796848"
+ },
+ "vfx/tanuki2/out/TanukiShiftPuff.flipbook.png": {
+  "assetId": "89674810993390"
+ },
+ "vfx/moth2/out/MothDust.flipbook.png": {
+  "assetId": "138611999191753"
+ },
+ "vfx/moth2/out/MothEyespot.png": {
+  "assetId": "97559253639388"
+ },
+ "vfx/moth2/out/MothWingFlash.flipbook.png": {
+  "assetId": "107708834894360"
+ },
+ "vfx/lion2/out/LionBell.png": {
+  "assetId": "88745814070008"
+ },
+ "vfx/lion2/out/LionCurls.flipbook.png": {
+  "assetId": "115948578699750"
+ },
+ "vfx/lion2/out/LionRope.png": {
+  "assetId": "89515541384449"
+ },
+ "vfx/lion2/out/LionRopeRing.png": {
+  "assetId": "101003329880650"
+ },
+ "vfx/lion2/out/LionShide.png": {
+  "assetId": "72327124292052"
+ },
+ "vfx/warden2/out/WardenCrest.png": {
+  "assetId": "88987044999610"
+ },
+ "vfx/warden2/out/WardenPrism.png": {
+  "assetId": "80078471966737"
+ },
+ "vfx/warden2/out/WardenShard.png": {
+  "assetId": "128703359555789"
+ },
+ "vfx/warden2/out/WardenSpires.flipbook.png": {
+  "assetId": "125414763919352"
+ },
+ "vfx/halloween/out/WraithGrin.png": {
+  "assetId": "123668411696054"
+ },
+ "vfx/halloween/out/WraithEmberSwirl.flipbook.png": {
+  "assetId": "124926292392815"
+ },
+ "vfx/halloween/out/WraithCinder.png": {
+  "assetId": "119602304449003"
+ },
+ "vfx/halloween/out/CatBubble.png": {
+  "assetId": "78843630267355"
+ },
+ "vfx/halloween/out/CatHexSigil.png": {
+  "assetId": "128820932309534"
+ },
+ "vfx/halloween/out/CatSmokePuff.flipbook.png": {
+  "assetId": "131357784026383"
+ },
+ "vfx/halloween/out/MummyStrip.png": {
+  "assetId": "136656013988119"
+ },
+ "vfx/halloween/out/MummyWrapSwirl.flipbook.png": {
+  "assetId": "123813385002119"
+ },
+ "vfx/halloween/out/MummyBandage.png": {
+  "assetId": "100871343041378"
+ },
+ "vfx/oni2/out/OniBeat.flipbook.png": {
+  "assetId": "116017770464493"
+ },
+ "vfx/oni2/out/OniCord.png": {
+  "assetId": "139681051164972"
+ },
+ "vfx/oni2/out/OniEmber.flipbook.png": {
+  "assetId": "122138871787064"
+ },
+ "vfx/oni2/out/OniRim.png": {
+  "assetId": "83773664423560"
+ },
+ "vfx/oni2/out/OniTomoe.png": {
+  "assetId": "74984975639479"
+ },
+ "vfx/hound2/out/HoundBolt.png": {
+  "assetId": "98240571320441"
+ },
+ "vfx/hound2/out/HoundHowl.flipbook.png": {
+  "assetId": "85738715498881"
+ },
+ "vfx/hound2/out/HoundJaws.flipbook.png": {
+  "assetId": "131930737718159"
+ },
+ "vfx/hound2/out/HoundPaw.png": {
+  "assetId": "79325326163343"
+ },
+ "vfx/hound2/out/HoundRuff.png": {
+  "assetId": "137320685283504"
+ },
+ "vfx/hare2/out/HareGlobe.png": {
+  "assetId": "93373762088624"
+ },
+ "vfx/hare2/out/HareNeedle.png": {
+  "assetId": "131909444022958"
+ },
+ "vfx/hare2/out/HareRose.png": {
+  "assetId": "106043664020403"
+ },
+ "vfx/hare2/out/HareRoute.flipbook.png": {
+  "assetId": "101801690411994"
+ },
+ "vfx/djinn2/out/DjinnConst.png": {
+  "assetId": "115295583551149"
+ },
+ "vfx/djinn2/out/DjinnSeal.png": {
+  "assetId": "76673963006684"
+ },
+ "vfx/djinn2/out/DjinnSmoke.flipbook.png": {
+  "assetId": "106607241176678"
+ },
+ "vfx/djinn2/out/DjinnTwinkle.png": {
+  "assetId": "97167836830357"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "129307707843957"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "85489254015776"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "85354535975736"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "88283834141946"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Normal.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "86346437339574"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Roughness.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "112602366706196"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "131671835254368"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "119492243048652"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "128467993115152"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "130877009073223"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "86622643908308"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "93864770861014"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "117466512195253"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "129044956576967"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "94449460101912"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "124936825921861"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "89596188104214"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Color.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "116226715260520"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Color_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "88509726049890"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Color_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "134089455600437"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Normal.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "118930465520765"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Roughness.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "119128453774766"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Emit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "82096559584672"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Emit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "110947643378976"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Emit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "131222047695937"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Face.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "121278002611314"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Face_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "86579743436249"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Face_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "86993242764969"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_FaceEmit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "137569118688817"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_FaceEmit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "108684644178825"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_FaceEmit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "70980274203668"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Pet.fbx": {
+  "assetId": "117350042048570"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Color.png": {
+  "assetId": "139181939220499"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Color_L2.png": {
+  "assetId": "105650965967374"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Color_L3.png": {
+  "assetId": "116129189537164"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Normal.png": {
+  "assetId": "76319390723203"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Roughness.png": {
+  "assetId": "139462437120663"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Emit.png": {
+  "assetId": "130655816724943"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Emit_L2.png": {
+  "assetId": "113981795387031"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Emit_L3.png": {
+  "assetId": "82666438169171"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Face.png": {
+  "assetId": "128367475859681"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Face_L2.png": {
+  "assetId": "131334572447670"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_Face_L3.png": {
+  "assetId": "81869077217335"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_FaceEmit.png": {
+  "assetId": "85377677552156"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_FaceEmit_L2.png": {
+  "assetId": "73250924534655"
+ },
+ "docs/pets/aegis_kirin/build/kirin/Kirin_FaceEmit_L3.png": {
+  "assetId": "140709763694547"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "90668553513882"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Color.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "138470289074781"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Color_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "102252749737942"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Color_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "83687689482709"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Normal.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "117355505442469"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Roughness.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "99163443149122"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Emit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "95288745525946"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Emit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "102413065415162"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Emit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "121244962798814"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Face.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "110488403657365"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Face_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "77261706907343"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Face_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "106340330715216"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_FaceEmit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "99213297290378"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_FaceEmit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "102848241930698"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_FaceEmit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "106616242818589"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Pet.fbx": {
+  "assetId": "84617415892057"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Color.png": {
+  "assetId": "87188277363424"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Color_L2.png": {
+  "assetId": "107016570057725"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Color_L3.png": {
+  "assetId": "116267733965176"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Normal.png": {
+  "assetId": "133058049561793"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Roughness.png": {
+  "assetId": "117642282391357"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Emit.png": {
+  "assetId": "78084396891934"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Emit_L2.png": {
+  "assetId": "96777626834978"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Emit_L3.png": {
+  "assetId": "130995220668126"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Face.png": {
+  "assetId": "109532405890779"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Face_L2.png": {
+  "assetId": "110851681041939"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_Face_L3.png": {
+  "assetId": "101237558389010"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_FaceEmit.png": {
+  "assetId": "79390681855526"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_FaceEmit_L2.png": {
+  "assetId": "75084880352123"
+ },
+ "docs/pets/shrine_lion/build/lion/Lion_FaceEmit_L3.png": {
+  "assetId": "111500475637278"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "135828292760159"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "102107005037806"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "73948147004758"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "121771680928272"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Normal.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "95934659942927"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Roughness.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "140736390940328"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "86782834599217"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "78234628991208"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "121128731418859"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "117353931054790"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "85862314456470"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "108389040127921"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "91684399239713"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "76729595888449"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "115503040097378"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "97902333210496"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "129817478482350"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Color.png": {
+  "assetId": "81967008914850"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Color_L2.png": {
+  "assetId": "81020250720987"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Color_L3.png": {
+  "assetId": "99770500755861"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Normal.png": {
+  "assetId": "125539320345607"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Roughness.png": {
+  "assetId": "71545927927336"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Emit.png": {
+  "assetId": "128898024498670"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Emit_L2.png": {
+  "assetId": "93955612377855"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Emit_L3.png": {
+  "assetId": "102935678824058"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Face.png": {
+  "assetId": "101114923802020"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Face_L2.png": {
+  "assetId": "80444792853945"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Face_L3.png": {
+  "assetId": "119074086580808"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_FaceEmit.png": {
+  "assetId": "71646689533172"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_FaceEmit_L2.png": {
+  "assetId": "116803135121579"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_FaceEmit_L3.png": {
+  "assetId": "111639599601831"
+ },
+ "docs/pets/compass_hare/build/hare/Hare_Pet.fbx": {
+  "assetId": "131159917868536"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "97483318702255"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "135140424357503"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Pet.fbx": {
+  "assetId": "95744581149909"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Color.png": {
+  "assetId": "139663980516142"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Color_L2.png": {
+  "assetId": "131016180575623"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Color_L3.png": {
+  "assetId": "88537593084375"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Normal.png": {
+  "assetId": "76927940807402"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Roughness.png": {
+  "assetId": "82317483137201"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Emit.png": {
+  "assetId": "104051565866791"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Emit_L2.png": {
+  "assetId": "91168941220404"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Emit_L3.png": {
+  "assetId": "125396739183963"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Face.png": {
+  "assetId": "72623178129703"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Face_L2.png": {
+  "assetId": "83614879463059"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_Face_L3.png": {
+  "assetId": "129645251976009"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_FaceEmit.png": {
+  "assetId": "78339937178885"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_FaceEmit_L2.png": {
+  "assetId": "125574457347428"
+ },
+ "docs/pets/pumpkin_wraith/build_v3/wraith/Wraith_FaceEmit_L3.png": {
+  "assetId": "97560239687501"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Pet.fbx": {
+  "assetId": "103913666192994"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Color.png": {
+  "assetId": "86607330877161"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Color_L2.png": {
+  "assetId": "93329215646884"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Color_L3.png": {
+  "assetId": "74647697349028"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Normal.png": {
+  "assetId": "110838598133351"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Roughness.png": {
+  "assetId": "123048503164587"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Emit.png": {
+  "assetId": "139177744843246"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Emit_L2.png": {
+  "assetId": "81567172623663"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Emit_L3.png": {
+  "assetId": "76668845562423"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Face.png": {
+  "assetId": "128454246477739"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Face_L2.png": {
+  "assetId": "99982885536558"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_Face_L3.png": {
+  "assetId": "82137678539993"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_FaceEmit.png": {
+  "assetId": "112777239109966"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_FaceEmit_L2.png": {
+  "assetId": "128981673491988"
+ },
+ "docs/pets/bone_dragon/build/dragon/Dragon_FaceEmit_L3.png": {
+  "assetId": "112846927519989"
+ },
+ "vfx/halloween/out/DragonShard.png": {
+  "assetId": "129258939699766"
+ },
+ "vfx/halloween/out/DragonShardRing.png": {
+  "assetId": "98376769882383"
+ },
+ "vfx/halloween/out/DragonSoulFire.flipbook.png": {
+  "assetId": "86103367541719"
+ },
+ "vfx/halloween/out/DragonSkull.png": {
+  "assetId": "135527830668221"
+ },
+ "UI/set/icons/pet_jack_o_lantern_t1.png": {
+  "assetId": "97037096398674"
+ },
+ "UI/set/icons/pet_bone_dragon_t1.png": {
+  "assetId": "97122685014049"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Pet.fbx#superseded-HOS-PET-RESHAPE-2": {
+  "assetId": "125628708340354"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "87521170292382"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "90220500952358"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "81984737178687"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Normal.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "119426542799306"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Roughness.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "120812486373069"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "73084416722923"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "73134097098099"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "137770648120335"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "129962059190913"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "95689809285162"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "107179850280408"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "135887343784869"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "114631343168137"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "120622594166346"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Pet.fbx#superseded-HOS-PET-RESHAPE": {
+  "assetId": "82803533268817"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "104508961393681"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "86532246988610"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "103505607957562"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Normal.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "136686528438356"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Roughness.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "119651023331477"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "139758210611510"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "120252183556890"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "138263162999115"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "74721371468052"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "90600703810958"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "126493310643992"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "103056221245836"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit_L2.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "95664813206410"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit_L3.png#superseded-HOS-PET-RESHAPE": {
+  "assetId": "97418279390959"
+ },
+ "ui_hwn/rbx/out/upload/a0dd0e989e9.png": {
+  "assetId": "93156736657537"
+ },
+ "ui_hwn/rbx/out/upload/a39f3d39ef9.png": {
+  "assetId": "123429840360509"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "119486282803488"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "94361310958207"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "125738794894725"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "122195296692750"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "138266774930402"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "97537674784745"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "73857403901983"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "95201898425090"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "85296481318930"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "112301692163823"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "73388921197768"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "70965581902075"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "120131920937366"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "115413978038609"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "117635690109332"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Pet.fbx": {
+  "assetId": "101082867047263"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color.png": {
+  "assetId": "121983565872547"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color_L2.png": {
+  "assetId": "99189230860449"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Color_L3.png": {
+  "assetId": "87929714182316"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Normal.png": {
+  "assetId": "75976853127647"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Roughness.png": {
+  "assetId": "136492391294378"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit.png": {
+  "assetId": "89418801624346"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit_L2.png": {
+  "assetId": "107385496326322"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Emit_L3.png": {
+  "assetId": "96883331250275"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face.png": {
+  "assetId": "133429354635624"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face_L2.png": {
+  "assetId": "134638881675713"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_Face_L3.png": {
+  "assetId": "123893020075580"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit.png": {
+  "assetId": "102777812557064"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit_L2.png": {
+  "assetId": "71772932673574"
+ },
+ "docs/pets/raiju/build/raiju/Raiju_FaceEmit_L3.png": {
+  "assetId": "118163731588057"
+ },
+ "ui_hwn/rbx/out/upload/a4fc7ee0028.png": {
+  "assetId": "80978031082325"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "103348228208630"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "117674738581285"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "102640022093879"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "98862366511552"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "80742840739229"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "80243211546977"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "108109614033061"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "118995394699420"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "103899656655721"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "71295533352923"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "82204956212986"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "124901604767888"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "132301096813676"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "123006011507291"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "116991586355390"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Pet.fbx": {
+  "assetId": "98531776354909"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Color.png": {
+  "assetId": "111567384387762"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Color_L2.png": {
+  "assetId": "91048134042561"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Color_L3.png": {
+  "assetId": "123437743606238"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Normal.png": {
+  "assetId": "77644964525660"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Roughness.png": {
+  "assetId": "74772989906371"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Emit.png": {
+  "assetId": "81828574555198"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Emit_L2.png": {
+  "assetId": "111828018413621"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Emit_L3.png": {
+  "assetId": "96591900078356"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Face.png": {
+  "assetId": "129727471892171"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Face_L2.png": {
+  "assetId": "119390121276436"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_Face_L3.png": {
+  "assetId": "109741499419572"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_FaceEmit.png": {
+  "assetId": "133707666140509"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_FaceEmit_L2.png": {
+  "assetId": "88623735021694"
+ },
+ "docs/pets/void_seraph/build/seraph/Seraph_FaceEmit_L3.png": {
+  "assetId": "108772387788867"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "109762501690177"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "94992334595898"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "108081665740079"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "85851421001335"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "117529400397385"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "76296994900800"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "115415129405586"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "105956407942092"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "72251108769917"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "83200754330076"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "138577102828972"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "117794751415747"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "89469863695798"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "133717404975200"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "133498205978018"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Pet.fbx": {
+  "assetId": "135269893646090"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color.png": {
+  "assetId": "120423952799692"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L2.png": {
+  "assetId": "95397990774492"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Color_L3.png": {
+  "assetId": "104110068152967"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Normal.png": {
+  "assetId": "111870504610074"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Roughness.png": {
+  "assetId": "138236526394863"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit.png": {
+  "assetId": "94661127851707"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L2.png": {
+  "assetId": "130111460083070"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Emit_L3.png": {
+  "assetId": "112589935287177"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face.png": {
+  "assetId": "120894488471845"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L2.png": {
+  "assetId": "97702326663837"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_Face_L3.png": {
+  "assetId": "74287681525492"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit.png": {
+  "assetId": "115529319359446"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L2.png": {
+  "assetId": "138473513200718"
+ },
+ "docs/pets/veil_nekomata/build/neko/Neko_FaceEmit_L3.png": {
+  "assetId": "119369084541984"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "125157554087738"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "94440130429793"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "72714333956122"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "94070185156189"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "91100491939841"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "85065594759928"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "118539188984517"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "87979256074805"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "119649416215446"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "105240855933210"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "83257022125154"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "72827953105065"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "131356707559093"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "74608045088076"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "operation": "operations/a0706ed1-56d0-460c-ac85-26fb3dfd57cf"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Pet.fbx": {
+  "assetId": "138167711908925"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color.png": {
+  "assetId": "131147938638748"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color_L2.png": {
+  "assetId": "128024233814151"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Color_L3.png": {
+  "assetId": "90931274598115"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Normal.png": {
+  "assetId": "133047276776638"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Roughness.png": {
+  "assetId": "116133367063926"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit.png": {
+  "assetId": "81338512884736"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit_L2.png": {
+  "assetId": "132102605923267"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Emit_L3.png": {
+  "assetId": "132874153078847"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face.png": {
+  "assetId": "130210016643628"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face_L2.png": {
+  "assetId": "121481877759876"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_Face_L3.png": {
+  "assetId": "98682438188727"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit.png": {
+  "assetId": "76143593122668"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit_L2.png": {
+  "assetId": "106915132097406"
+ },
+ "docs/pets/moonveil_moth/build/moth/Moth_FaceEmit_L3.png": {
+  "assetId": "100574477266402"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "105121854295584"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "80101201196194"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "74239220712415"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "110660416668422"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "135823188957954"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "71750606085452"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "74738906755609"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "125796300481866"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "124936690270653"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "113018593901662"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "106648233885198"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "123039873624404"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "121916837728725"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "135215799040186"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "78849901973213"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Pet.fbx": {
+  "assetId": "136739202792019"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color.png": {
+  "assetId": "116824375243491"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color_L2.png": {
+  "assetId": "117525349358948"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Color_L3.png": {
+  "assetId": "140121526784412"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Normal.png": {
+  "assetId": "108713591225262"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Roughness.png": {
+  "assetId": "102929926259125"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit.png": {
+  "assetId": "83727939856466"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit_L2.png": {
+  "assetId": "108508828027130"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Emit_L3.png": {
+  "assetId": "106426842063883"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face.png": {
+  "assetId": "81209326514254"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face_L2.png": {
+  "assetId": "129224889513879"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_Face_L3.png": {
+  "assetId": "127687549536125"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit.png": {
+  "assetId": "104104967403183"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit_L2.png": {
+  "assetId": "77876010519190"
+ },
+ "docs/pets/scroll_tanuki/build/tanuki/Tanuki_FaceEmit_L3.png": {
+  "assetId": "102302175122534"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "111057892559303"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "118334115669354"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "86321163122008"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "84108755705577"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "79776887179056"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "91385436591836"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "72041674654944"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "81027097036971"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "133996576912253"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "98005926487161"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "135806008510805"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "132869618345499"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "133311244077335"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "131459623777507"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "79364227740508"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Pet.fbx": {
+  "assetId": "78041546026328"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Color.png": {
+  "assetId": "71095116824988"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Color_L2.png": {
+  "assetId": "123161780289098"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Color_L3.png": {
+  "assetId": "116788707032241"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Normal.png": {
+  "assetId": "136958603038061"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Roughness.png": {
+  "assetId": "109406734779455"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Emit.png": {
+  "assetId": "127153416129681"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Emit_L2.png": {
+  "assetId": "76182397215710"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Emit_L3.png": {
+  "assetId": "118994944764623"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Face.png": {
+  "assetId": "124236045048855"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Face_L2.png": {
+  "assetId": "75815715657744"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_Face_L3.png": {
+  "assetId": "123196716355203"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_FaceEmit.png": {
+  "assetId": "89541184100607"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_FaceEmit_L2.png": {
+  "assetId": "103821664703473"
+ },
+ "docs/pets/crystal_warden/build/warden/Warden_FaceEmit_L3.png": {
+  "assetId": "116022533469295"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "111540774959978"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "88964150367373"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "92679521909343"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "108277301745734"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "108639435856631"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "82548049990573"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "97041140487508"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "131836890734572"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "103912985372284"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "117340307255704"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "106483949678444"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "86276959643284"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "131842827249447"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "139688526802314"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "96441959542053"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Pet.fbx": {
+  "assetId": "75526310777255"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Color.png": {
+  "assetId": "108345169028804"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Color_L2.png": {
+  "assetId": "138219085808433"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Color_L3.png": {
+  "assetId": "96273464419499"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Normal.png": {
+  "assetId": "133811562825163"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Roughness.png": {
+  "assetId": "73633782394758"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Emit.png": {
+  "assetId": "95766857126204"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Emit_L2.png": {
+  "assetId": "99755176193736"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Emit_L3.png": {
+  "assetId": "97916297686752"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Face.png": {
+  "assetId": "87605851452502"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Face_L2.png": {
+  "assetId": "130974693428200"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_Face_L3.png": {
+  "assetId": "135706262943886"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_FaceEmit.png": {
+  "assetId": "121328399927624"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_FaceEmit_L2.png": {
+  "assetId": "138548524475869"
+ },
+ "docs/pets/drum_oni/build/oni/Oni_FaceEmit_L3.png": {
+  "assetId": "98115229300931"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Pet.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "128975787570154"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Color.png#superseded-HOS-PET-REDO": {
+  "assetId": "124489681987815"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Color_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "115308960555244"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Color_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "105750925537099"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Normal.png#superseded-HOS-PET-REDO": {
+  "assetId": "121150584484172"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Roughness.png#superseded-HOS-PET-REDO": {
+  "assetId": "84975544426927"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Emit.png#superseded-HOS-PET-REDO": {
+  "assetId": "100875908253217"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "122683399093480"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "95479399794102"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "80711495291665"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Face_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "91089458379939"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Face_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "73517118563916"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_FaceEmit.png#superseded-HOS-PET-REDO": {
+  "assetId": "129826231723537"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_FaceEmit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "85253640612811"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_FaceEmit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "113930656676603"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Pet.fbx": {
+  "assetId": "102635132814406"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Color.png": {
+  "assetId": "122905045757616"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Color_L2.png": {
+  "assetId": "75803752274007"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Color_L3.png": {
+  "assetId": "86240037270264"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Normal.png": {
+  "assetId": "115052589995692"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Roughness.png": {
+  "assetId": "125297757949808"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Emit.png": {
+  "assetId": "123706269696795"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Emit_L2.png": {
+  "assetId": "84279965738181"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Emit_L3.png": {
+  "assetId": "112813418439855"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Face.png": {
+  "assetId": "71305736025189"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Face_L2.png": {
+  "assetId": "107410552662114"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_Face_L3.png": {
+  "assetId": "73338890128792"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_FaceEmit.png": {
+  "assetId": "77013121633409"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_FaceEmit_L2.png": {
+  "assetId": "118655662099938"
+ },
+ "docs/pets/astral_djinn/build/djinn/Djinn_FaceEmit_L3.png": {
+  "assetId": "90563059585850"
+ },
+ "Assets/Images/ShopPreview/HOS_ShopBackdrop_violet.png": {
+  "assetId": "135086809110169"
+ },
+ "Assets/Images/ShopPreview/HOS_ShopBackdrop_orange.png": {
+  "assetId": "131828555997919"
+ },
+ "Assets/Images/ShopPreview/HOS_ShopBackdrop_sky.png": {
+  "assetId": "78758244667084"
+ },
+ "Assets/Images/ShopPreview/HOS_ShopBackdrop_lime.png": {
+  "assetId": "130821017799037"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Pet.fbx": {
+  "assetId": "76801918406612"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Color.png": {
+  "assetId": "107191396247381"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Color_L2.png": {
+  "assetId": "92375092618828"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Color_L3.png": {
+  "assetId": "81336122071639"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Normal.png": {
+  "assetId": "73421265647493"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Roughness.png": {
+  "assetId": "100386569005492"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Emit.png": {
+  "assetId": "81747354918361"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Emit_L2.png": {
+  "assetId": "92283656092703"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Emit_L3.png": {
+  "assetId": "118373207302758"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Face.png": {
+  "assetId": "118901348893844"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Face_L2.png": {
+  "assetId": "112213742917857"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_Face_L3.png": {
+  "assetId": "115352398601097"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_FaceEmit.png": {
+  "assetId": "124951242511176"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_FaceEmit_L2.png": {
+  "assetId": "82522314389297"
+ },
+ "docs/pets/thunder_toad/build/toad/Toad_FaceEmit_L3.png": {
+  "assetId": "86672380362431"
+ },
+ "docs/pets/bastion_beetle/bastion_beetle.fbx#superseded-HOS-PET-REDO": {
+  "assetId": "130339517779916"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Body.png#superseded-HOS-PET-REDO": {
+  "assetId": "86007629644295"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Face.png#superseded-HOS-PET-REDO": {
+  "assetId": "127080626185058"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "137302667352860"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "93698340908920"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "116338135185128"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "75797682440200"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "90809185525659"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "117014718069650"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "130909089679009"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "94721231386840"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_emit_L2.png#superseded-HOS-PET-REDO": {
+  "assetId": "120671433934106"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "99253383729989"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L3_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "135379361188949"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L3_emit_L3.png#superseded-HOS-PET-REDO": {
+  "assetId": "71676584264219"
+ },
+ "docs/pets/bastion_beetle/bastion_beetle.fbx": {
+  "assetId": "110638009824673"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Body.png": {
+  "assetId": "135243557559060"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Body_normal.png": {
+  "assetId": "77445857381526"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Body_rough.png": {
+  "assetId": "126664663361589"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Body_metal.png": {
+  "assetId": "94532567925839"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Body_emit.png": {
+  "assetId": "93720066409627"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Face.png": {
+  "assetId": "86684776244809"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Face_normal.png": {
+  "assetId": "75693290487829"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Face_rough.png": {
+  "assetId": "115208471135586"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Face_metal.png": {
+  "assetId": "99360845720953"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_Face_emit.png": {
+  "assetId": "135443836533748"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L2.png": {
+  "assetId": "80377138092085"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L2_normal.png": {
+  "assetId": "81783172510408"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L2_rough.png": {
+  "assetId": "80480493413130"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L2_metal.png": {
+  "assetId": "108941393759878"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L2_emit.png": {
+  "assetId": "126277750180204"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L3.png": {
+  "assetId": "77953086893208"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L3_normal.png": {
+  "assetId": "84960404494153"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L3_rough.png": {
+  "assetId": "70389049590362"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L3_metal.png": {
+  "assetId": "128025526329998"
+ },
+ "docs/pets/bastion_beetle/tex/Beetle_L3_emit.png": {
+  "assetId": "122191517142202"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_L2.png": {
+  "assetId": "113162817489391"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_L3.png": {
+  "assetId": "128582721132986"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_emit_L2.png": {
+  "assetId": "130634070944382"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_Body_emit_L3.png": {
+  "assetId": "129702398975795"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_L2.png": {
+  "assetId": "122012296792855"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_L3.png": {
+  "assetId": "111721095356375"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_emit_L2.png": {
+  "assetId": "132658063208629"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L2_emit_L3.png": {
+  "assetId": "127209605941237"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L3_L3.png": {
+  "assetId": "97768818032658"
+ },
+ "docs/pets/bastion_beetle/tex/levels/Beetle_L3_emit_L3.png": {
+  "assetId": "124577523492913"
+ },
+ "ui_points/rbx/out/upload/a0cc37d3d27.png": {
+  "assetId": "76296626562795"
+ },
+ "ui_points/rbx/out/upload/a21291e4736.png": {
+  "assetId": "117707584761085"
+ },
+ "ui_points/rbx/out/upload/a47e55aef0d.png": {
+  "assetId": "135948823415968"
+ },
+ "ui_points/rbx/out/upload/a5436228ae5.png": {
+  "assetId": "85990861890411"
+ },
+ "ui_points/rbx/out/upload/a68aed5c48e.png": {
+  "assetId": "119254988040518"
+ },
+ "ui_points/rbx/out/upload/a6fe60a52cc.png": {
+  "assetId": "79752142668600"
+ },
+ "ui_points/rbx/out/upload/a72b14a2bb8.png": {
+  "assetId": "103482398647770"
+ },
+ "ui_points/rbx/out/upload/a80e063ff36.png": {
+  "assetId": "91499610026234"
+ },
+ "ui_points/rbx/out/upload/a89f2ede8b8.png": {
+  "assetId": "126945731536572"
+ },
+ "ui_points/rbx/out/upload/a946ab850fc.png": {
+  "assetId": "111634608738804"
+ },
+ "ui_points/rbx/out/upload/aa1de4f507b.png": {
+  "assetId": "85965134982222"
+ },
+ "ui_points/rbx/out/upload/aa58c8c15da.png": {
+  "assetId": "101709205282586"
+ },
+ "ui_points/rbx/out/upload/aa662ceab65.png": {
+  "assetId": "139280839195599"
+ },
+ "ui_points/rbx/out/upload/aa755e8143f.png": {
+  "assetId": "71494907981091"
+ },
+ "ui_points/rbx/out/upload/ab27ff1ed89.png": {
+  "assetId": "136737866555071"
+ },
+ "ui_points/rbx/out/upload/ab9ca144609.png": {
+  "assetId": "111022575505778"
+ },
+ "ui_points/rbx/out/upload/ad96a78b5f6.png": {
+  "assetId": "82390081678117"
+ },
+ "ui_points/rbx/out/upload/aedf1d45e70.png": {
+  "assetId": "113939720391009"
+ },
+ "ui_points/rbx/out/upload/a27b8f6a203.png": {
+  "assetId": "105629214280219"
+ },
+ "ui_lead/rbx/out/upload/a3903a2601a.png": {
+  "assetId": "122446221463573"
+ },
+ "ui_lead/rbx/out/upload/a4552481057.png": {
+  "assetId": "111695842194365"
+ },
+ "ui_lead/rbx/out/upload/a477d4a2d2d.png": {
+  "assetId": "83711933187120"
+ },
+ "ui_lead/rbx/out/upload/acfbc1c5f08.png": {
+  "assetId": "76054286048489"
+ },
+ "ui_lead/rbx/out/upload/ad83641dc8a.png": {
+  "assetId": "112582702357318"
+ },
+ "ui_lead/rbx/out/upload/ae9eba1bf12.png": {
+  "assetId": "92249463413839"
+ },
+ "ui_egg/rbx/out/upload/a04b716faff.png": {
+  "assetId": "104006052880495"
+ },
+ "ui_egg/rbx/out/upload/a3a92dfb4f1.png": {
+  "assetId": "84207804901182"
+ },
+ "ui_egg/rbx/out/upload/a88b32e5092.png": {
+  "assetId": "76692813211494"
+ },
+ "ui_egg/rbx/out/upload/a976d8cb6e5.png": {
+  "assetId": "128929810004293"
+ },
+ "ui_egg/rbx/out/upload/ac96d611136.png": {
+  "assetId": "121902248740984"
+ },
+ "ui_egg/rbx/out/upload/af973abccdf.png": {
+  "assetId": "140082419622271"
+ },
+ "ui_mapvote/rbx/out/upload/a5746f44aaa.png": {
+  "assetId": "111830599929416"
+ },
+ "ui_mapvote/rbx/out/upload/ab827116af9.png": {
+  "assetId": "126401310046520"
+ },
+ "ui_mapvote/rbx/out/upload/a07c198db35.png": {
+  "assetId": "93236059159052"
+ },
+ "ui_mapvote/rbx/out/upload/a6a721945f3.png": {
+  "assetId": "99740653322932"
+ },
+ "ui_mapvote/rbx/out/upload/a7e3459bab0.png": {
+  "assetId": "129728727365366"
+ },
+ "ui_mapvote/rbx/out/upload/aa7384b847b.png": {
+  "assetId": "80692798999322"
+ },
+ "ui_mapvote/rbx/out/upload/ae01e65b8fb.png": {
+  "assetId": "135131154499976"
+ },
+ "ui_egg/rbx/out/upload/a1bf63d2a8c.png": {
+  "assetId": "128262036799240"
+ },
+ "ui_egg/rbx/out/upload/a2fe73ea4f4.png": {
+  "assetId": "119695030160612"
+ },
+ "ui_egg/rbx/out/upload/a5a0f5cbabe.png": {
+  "assetId": "114284375215732"
+ },
+ "ui_mapvote/rbx/out/upload/a07161d4730.png": {
+  "assetId": "118126131172164"
+ },
+ "ui_mapvote/rbx/out/upload/a303e3db4d3.png": {
+  "assetId": "106229441186040"
+ },
+ "ui_mapvote/rbx/out/upload/a3f4b703b0b.png": {
+  "assetId": "118861325066483"
+ },
+ "ui_mapvote/rbx/out/upload/a4471f406dc.png": {
+  "assetId": "115331536892603"
+ },
+ "ui_mapvote/rbx/out/upload/ab37e57d4aa.png": {
+  "assetId": "82440178016420"
+ },
+ "ui_points/rbx/out/upload/a0520053ef4.png": {
+  "assetId": "96894183556674"
+ },
+ "ui_points/rbx/out/upload/a5f80b2aba0.png": {
+  "assetId": "127962814604374"
+ },
+ "ui_points/rbx/out/upload/a6c4bd1173e.png": {
+  "assetId": "139332829737685"
+ },
+ "ui_points/rbx/out/upload/a77ff491b3e.png": {
+  "assetId": "85672896999225"
+ },
+ "ui_points/rbx/out/upload/aa71cef3313.png": {
+  "assetId": "99499708290338"
+ },
+ "tools/shard/out/Shard.fbx": {
+  "assetId": "74627171410790"
+ },
+ "tools/shard/out/shard_common.png": {
+  "assetId": "124040108834453"
+ },
+ "tools/shard/out/shard_rare.png": {
+  "assetId": "128961222073155"
+ },
+ "tools/shard/out/shard_epic.png": {
+  "assetId": "118538014498357"
+ },
+ "tools/shard/out/shard_legendary.png": {
+  "assetId": "74574149439771"
+ },
+ "ui_mapvote/rbx/out/reup/leadbtn_grey.png": {
+  "assetId": "132939558944175"
+ },
+ "docs/HOS-MAPVOTE-001/photos/map_sunnycove.png": {
+  "assetId": "136215383770519"
+ },
+ "docs/HOS-MAPVOTE-001/photos/map_frostypass.png": {
+  "assetId": "140559077954337"
+ },
+ "docs/HOS-MAPVOTE-001/photos/map_farm.png": {
+  "assetId": "78157372628290"
+ },
+ "docs/HOS-MAPVOTE-001/photos/map_stadium.png": {
+  "assetId": "120727112886321"
  }
 }

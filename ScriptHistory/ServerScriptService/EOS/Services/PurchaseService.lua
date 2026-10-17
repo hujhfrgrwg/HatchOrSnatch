@@ -53,6 +53,7 @@ end
 
 -- items and crates: same exact-once ledger, same "granted only after the save" rule
 local function processOther(info: any, plr: Player): Enum.ProductPurchaseDecision?
+	local egg = require(script.Parent.EggService).processReceipt(info, plr) if egg then return egg end -- HOS-EGG-002: hatch boost products (nil = not ours)
 	local receipt = tostring(info.PurchaseId)
 	local item = itemByProduct[info.ProductId]
 	if item then
@@ -101,6 +102,7 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 		-- not here (or the save is still loading): Roblox retries, including when they next join
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
+	if require(script.Parent.LeadCatcherService).owns(info.ProductId) then return require(script.Parent.LeadCatcherService).processReceipt(info, plr) end -- HOS-LEAD-001
 	local pack = packByProduct[info.ProductId]
 	if not pack then
 		local other = processOther(info, plr)

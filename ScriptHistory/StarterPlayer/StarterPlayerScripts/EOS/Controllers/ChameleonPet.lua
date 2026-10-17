@@ -5,7 +5,8 @@
 --    melts into their body; the level's flash fires as it melts in, the moment the server makes the
 --    user invisible (AbilityService waits INTRO seconds).
 --    L1 white flash; L2 chromatic accents + spectrum shimmer; L3 a stronger spectrum flash and a
---    spectrum wash wrapping the user's body just before they vanish.
+--    spectrum wash wrapping the user's body just before they vanish. Every level: the body flakes
+--    away in prism shards as it turns invisible (ChameleonPet.flake).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -68,6 +69,102 @@ local function spectrumWrap(who: Model, dur: number)
 	end)
 end
 
+-- the body flakes away in prism shards as it turns invisible: every body part sheds rainbow shards
+-- (plus a few glints) from its surface, sweeping from the head down to the feet, drifting up and out.
+-- More and bigger shards per level. Runs for everyone who sees the summon.
+local SHARD = "rbxassetid://99368678393143" -- 2x2 sheet of prism shards
+local RAINBOW = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.new(1, 0.25, 0.5)),
+	ColorSequenceKeypoint.new(0.2, Color3.new(1, 0.6, 0.15)),
+	ColorSequenceKeypoint.new(0.4, Color3.new(0.75, 1, 0.25)),
+	ColorSequenceKeypoint.new(0.6, Color3.new(0.15, 1, 0.8)),
+	ColorSequenceKeypoint.new(0.8, Color3.new(0.25, 0.5, 1)),
+	ColorSequenceKeypoint.new(1, Color3.new(0.75, 0.3, 1)),
+})
+ChameleonPet.FLAKE_TIME = 0.45 -- seconds each part sheds for
+ChameleonPet.FLAKE_SWEEP = 0.18 -- head-to-feet delay across the body
+ChameleonPet.FLAKE_KEEP = 1 -- seconds the emitters stay after shedding (their shards finish)
+
+function ChameleonPet.flake(who: Model, level: number)
+	local parts: { BasePart } = {}
+	local top, bottom = -math.huge, math.huge
+	for _, d in who:GetDescendants() do
+		if d:IsA("BasePart") and d.Name ~= "HumanoidRootPart" and d.Transparency < 0.9 then
+			table.insert(parts, d)
+			top = math.max(top, d.Position.Y)
+			bottom = math.min(bottom, d.Position.Y)
+		end
+	end
+	local span = math.max(top - bottom, 1)
+	local mul = 1 + 0.4 * (level - 1)
+	for _, part in parts do
+		local sz = part.Size
+		local area = 2 * (sz.X * sz.Y + sz.Y * sz.Z + sz.X * sz.Z)
+		local shards = Instance.new("ParticleEmitter")
+		shards.Name = "EOS_PrismFlake"
+		shards.Texture = SHARD
+		shards.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid2x2
+		shards.FlipbookMode = Enum.ParticleFlipbookMode.Random
+		shards.Shape = Enum.ParticleEmitterShape.Box
+		shards.ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface
+		shards.ShapeInOut = Enum.ParticleEmitterShapeInOut.Outward
+		shards.Lifetime = NumberRange.new(0.5, 0.9)
+		shards.Speed = NumberRange.new(1.5, 4)
+		shards.Drag = 2.5
+		shards.Acceleration = Vector3.new(0, 4, 0)
+		shards.Rotation = NumberRange.new(0, 360)
+		shards.RotSpeed = NumberRange.new(-300, 300)
+		shards.Color = RAINBOW
+		shards.LightEmission = 0.35
+		shards.LightInfluence = 0
+		shards.Brightness = 1.6
+		local s = 0.22 + 0.05 * level
+		shards.Size = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, s),
+			NumberSequenceKeypoint.new(0.6, s * 0.8),
+			NumberSequenceKeypoint.new(1, 0),
+		})
+		shards.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(0.7, 0.1),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		shards.ZOffset = 0.5
+		shards.Rate = 0
+		shards.Parent = part
+		local glints = Instance.new("ParticleEmitter")
+		glints.Name = "EOS_PrismGlint"
+		glints.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		glints.Shape = Enum.ParticleEmitterShape.Box
+		glints.ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface
+		glints.Lifetime = NumberRange.new(0.25, 0.45)
+		glints.Speed = NumberRange.new(0.5, 2)
+		glints.Acceleration = Vector3.new(0, 3, 0)
+		glints.Color = RAINBOW
+		glints.LightEmission = 1
+		glints.LightInfluence = 0
+		glints.Brightness = 4
+		glints.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 0) })
+		glints.ZOffset = 0.6
+		glints.Rate = 0
+		glints.Parent = part
+		-- hats and hair are big boxes: they shed less so the body reads, not the accessories
+		local acc = part:FindFirstAncestorWhichIsA("Accessory") ~= nil
+		local rate = math.clamp(area * 7, 10, 70) * mul * (if acc then 0.35 else 1)
+		local delay = (top - part.Position.Y) / span * ChameleonPet.FLAKE_SWEEP
+		task.delay(delay, function()
+			shards.Rate = rate
+			glints.Rate = rate * 0.3
+			task.wait(ChameleonPet.FLAKE_TIME)
+			shards.Rate = 0
+			glints.Rate = 0
+			task.wait(ChameleonPet.FLAKE_KEEP)
+			shards:Destroy()
+			glints:Destroy()
+		end)
+	end
+end
+
 function ChameleonPet.summon(who: Model, level: number)
 	local root = who:FindFirstChild("HumanoidRootPart") :: BasePart?
 	if not root then
@@ -125,7 +222,7 @@ function ChameleonPet.summon(who: Model, level: number)
 	place(0)
 	cham.Parent = workspace.CurrentCamera
 	local t0 = os.clock()
-	local fxStarted, wrapped = false, false
+	local fxStarted, wrapped, flaked = false, false, false
 	local fxHandle: any = nil
 	local conn
 	conn = RunService.RenderStepped:Connect(function(dt)
@@ -134,6 +231,11 @@ function ChameleonPet.summon(who: Model, level: number)
 			conn:Disconnect()
 			cham:Destroy()
 			return
+		end
+		-- starts just before you vanish and sweeps down your body as you go
+		if not flaked and k >= 1 - 0.12 / INTRO then
+			flaked = true
+			ChameleonPet.flake(who, level)
 		end
 		if level >= 3 and not wrapped and k >= T_HOP then
 			wrapped = true

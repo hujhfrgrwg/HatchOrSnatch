@@ -1,0 +1,250 @@
+--!strict
+-- PodiumService (HOS-PTS-001, 17 Oct 2026): the end-of-match podium. Started by PointsService.init (no Bootstrap line).
+--   * "match" (before anyone is sent back to the lobby): copies of the top-3 point scorers' bodies are made now,
+--     while NPC bodies still exist (a player who left is copied from what was there, standing still).
+--   * RESULTS (MatchService.onResults): ServerStorage.HOS_Podium goes into the lobby, the copies stand on their
+--     steps with their favourite emote (or PointsConfig.Podium.DEFAULT_EMOTE) as the attribute EOS_Emote, which
+--     clients play (Controllers/PointsController). After RESULTS everything goes back to ServerStorage.
+--   * Favourite emote: one per player, saved in its own DataStore (FAV_STORE; Studio memory-only unless the
+--     workspace attribute UseDataStore is on, like DataService). Remote EOS_Points.SetFav(emoteId | "").
+-- Switch: PointsConfig.Podium.Enabled (and PointsConfig.Enabled). The model is built by roblox/game/points/BuildPodium.
+
+local DataStoreService = game:GetService("DataStoreService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
+local PointsConfig = require(Shared:WaitForChild("PointsConfig"))
+local EmoteConfig = require(Shared:WaitForChild("EmoteConfig"))
+local GameConfig = require(Shared:WaitForChild("GameConfig"))
+local DataService = require(script.Parent.DataService)
+
+local PD = PointsConfig.Podium
+local FAV_STORE = "HOS_FavEmote_v1"
+local MODEL = "HOS_Podium"
+
+local PodiumService = {}
+
+local MatchService: any = nil
+local PointsService: any = nil
+local favs: { [number]: string } = {}
+local store: DataStore? = nil
+local stage: { model: Model?, figures: { Model }, token: number } = { model = nil, figures = {}, token = 0 }
+local pending: { [number]: Model } = {} -- place -> body copy made at "match"
+
+local function enabled(): boolean
+	return PointsConfig.Enabled and PD.Enabled
+end
+
+local function useStore(): boolean
+	if not RunService:IsStudio() then
+		return true
+	end
+	return workspace:GetAttribute(GameConfig.Data.STUDIO_USE_DATASTORE_ATTRIBUTE) == true
+end
+
+-- ===== favourites =====
+local function loadFav(plr: Player)
+	if not store then
+		return
+	end
+	local ok, v = pcall(function()
+		return (store :: DataStore):GetAsync("fav_" .. plr.UserId)
+	end)
+	if ok and type(v) == "string" and EmoteConfig.get(v) then
+		favs[plr.UserId] = v
+		plr:SetAttribute("EOS_FavEmote", v)
+	end
+end
+
+local function owns(plr: Player, id: string): boolean
+	local p = DataService.get(plr)
+	return p ~= nil and type(p.emotes) == "table" and p.emotes[id] == true
+end
+
+local lastSet: { [number]: number } = {}
+local function onSetFav(plr: Player, id: any)
+	if type(id) ~= "string" or #id > 32 or os.clock() - (lastSet[plr.UserId] or 0) < 0.5 then
+		return
+	end
+	lastSet[plr.UserId] = os.clock()
+	if id ~= "" and (not EmoteConfig.get(id) or not owns(plr, id)) then
+		return
+	end
+	favs[plr.UserId] = if id == "" then nil else id
+	plr:SetAttribute("EOS_FavEmote", if id == "" then nil else id)
+	if store then
+		task.spawn(function()
+			pcall(function()
+				(store :: DataStore):SetAsync("fav_" .. plr.UserId, id)
+			end)
+		end)
+	end
+end
+
+-- ===== the stage =====
+local function bodyCopy(actor: any): Model?
+	local char = actor and actor.Character :: Model?
+	if not char then
+		return nil
+	end
+	local was = char.Archivable
+	char.Archivable = true
+	local ok, copy = pcall(function()
+		return char:Clone()
+	end)
+	char.Archivable = was
+	if not ok or not copy then
+		return nil
+	end
+	local m = copy :: Model
+	for _, d in ipairs(m:GetDescendants()) do
+		if d:IsA("Script") or d:IsA("LocalScript") or d:IsA("ProximityPrompt") or d:IsA("BillboardGui") or d:IsA("ParticleEmitter")
+			or d:IsA("BallSocketConstraint") or (d.Name == "EOS_Ragdoll" and d:IsA("Folder")) or d.Name == "EOS_Pose" then
+			d:Destroy() -- (a body caught last crossing is still ragdolled: joints back, ragdoll rig gone)
+		elseif d:IsA("Motor6D") then
+			d.Enabled = true
+		elseif d:IsA("BasePart") then
+			d.Anchored = false
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CanTouch = false
+		end
+	end
+	for _, k in ipairs({ "EOS_Ragdoll", "EOS_RagdollFrozen", "EOS_Held", "EOS_LineFrozen", "EOS_DownedUntil", "EOS_Emote" }) do
+		m:SetAttribute(k, nil)
+	end
+	local hum = m:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+		hum.PlatformStand = false
+		hum.WalkSpeed = 0
+	end
+	m.Name = "Winner"
+	return m
+end
+
+local function clearStage()
+	stage.token += 1
+	for _, f in ipairs(stage.figures) do
+		f:Destroy()
+	end
+	stage.figures = {}
+	if stage.model then
+		stage.model.Parent = ServerStorage
+		stage.model:SetAttribute("Enabled", false)
+		stage.model = nil
+	end
+end
+
+-- "match": copy the top 3 now (NPCs leave with the match; players are sent to the lobby right after)
+local function onMatchEnd(c: any)
+	for _, m in pairs(pending) do
+		m:Destroy()
+	end
+	pending = {}
+	local board = c.ptsBoard
+	if not board then
+		return
+	end
+	for place, uid in ipairs(board.podium or {}) do
+		local actor = c.roster[uid]
+		local copy = bodyCopy(actor)
+		if copy then
+			local isPlayer = typeof(actor) == "Instance" and actor:IsA("Player")
+			copy:SetAttribute("Place", place)
+			copy:SetAttribute("UserId", uid)
+			copy:SetAttribute("NpcSlot", if not isPlayer then actor.slot else nil)
+			copy:SetAttribute("Left", actor.Parent == nil)
+			copy.Parent = ServerStorage -- held until RESULTS
+			pending[place] = copy
+		end
+	end
+end
+
+local function onResults(_payload: any)
+	clearStage()
+	local m = ServerStorage:FindFirstChild(MODEL) :: Model?
+	if not m or not next(pending) then
+		return
+	end
+	m.Parent = workspace
+	m:SetAttribute("Enabled", true)
+	stage.model = m
+	for place, copy in pairs(pending) do
+		local step = m:FindFirstChild("Step" .. place)
+		local spot = step and step:FindFirstChild("Spot") :: BasePart?
+		if spot then
+			local uid = copy:GetAttribute("UserId") :: number
+			local plr = Players:GetPlayerByUserId(uid)
+			local left = plr == nil and copy:GetAttribute("NpcSlot") == nil
+			copy:SetAttribute("Left", left)
+			-- feet on the step top, facing the front (-Z) where the cameras are
+			local _, size = copy:GetBoundingBox()
+			local feetY = spot.Position.Y - 0.1
+			copy:PivotTo(CFrame.lookAt(Vector3.new(spot.Position.X, feetY + size.Y / 2, spot.Position.Z), Vector3.new(spot.Position.X, feetY + size.Y / 2, spot.Position.Z - 10)))
+			local root = copy:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if root then
+				root.Anchored = true
+			end
+			if not left then
+				copy:SetAttribute("EOS_Emote", (plr and favs[uid]) or PD.DEFAULT_EMOTE)
+			end
+			copy.Parent = m
+			table.insert(stage.figures, copy)
+		else
+			copy:Destroy()
+		end
+	end
+	pending = {}
+	local token = stage.token
+	task.delay(GameConfig.Timing.RESULTS + 1, function()
+		if stage.token == token then
+			clearStage()
+		end
+	end)
+end
+
+function PodiumService.init(matchService: any, pointsService: any)
+	MatchService = matchService
+	PointsService = pointsService
+	local folder = ReplicatedStorage:WaitForChild("EOS_Points")
+	local setFav = folder:FindFirstChild("SetFav") :: RemoteEvent
+	if not setFav then
+		setFav = Instance.new("RemoteEvent")
+		setFav.Name = "SetFav"
+		setFav.Parent = folder
+	end
+	if not PointsConfig.Enabled then
+		return
+	end
+	if useStore() then
+		local ok, s = pcall(function()
+			return DataStoreService:GetDataStore(FAV_STORE)
+		end)
+		store = if ok then s else nil
+	end
+	setFav.OnServerEvent:Connect(onSetFav)
+	Players.PlayerAdded:Connect(loadFav)
+	for _, plr in ipairs(Players:GetPlayers()) do
+		task.spawn(loadFav, plr)
+	end
+	Players.PlayerRemoving:Connect(function(plr)
+		favs[plr.UserId] = nil
+		lastSet[plr.UserId] = nil
+	end)
+	-- HOS-PTS-001: favourites (above) feed the results screen's emote podium; the podium cutscene below stays off
+	if not enabled() then
+		return
+	end
+	MatchService.onCrossing(function(c: any, event: string)
+		if event == "match" then
+			onMatchEnd(c) -- runs after PointsService's own "match" hook (registered first), so c.ptsBoard is set
+		end
+	end)
+	MatchService.onResults(onResults)
+end
+
+return PodiumService
