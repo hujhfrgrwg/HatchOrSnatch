@@ -350,7 +350,17 @@ local function familyShort(f: string): string
 	local ef = EconomyConfig.FAMILIES[f]
 	return (ef and ef.short) or (FAMILY[f] and FAMILY[f].blurb) or ""
 end
-local function familyIcon(f: string?): string
+local function familyIcon(f: string?, r: string?): string
+	-- HOS-PET-003: in a match, the icon for your role (AbilityConfig); a role icon that isn't uploaded yet
+	-- falls back to the archetype's Runner icon, then to the design's family icon
+	local rd = f and r and AbilityConfig.forRole(f, r)
+	if rd and rd.icon and iconId(rd.icon) ~= "" then
+		return rd.icon
+	end
+	local run = f and AbilityConfig.forRole(f, "Runner")
+	if run and run.icon and iconId(run.icon) ~= "" then
+		return run.icon
+	end
 	return (f and FAMILY[f] and FAMILY[f].icon) or "pets"
 end
 
@@ -858,7 +868,7 @@ local function abilityCard()
 			if card:GetAttribute("Fam") ~= fam .. rarity .. (cr or "") then
 				card:SetAttribute("Fam", fam .. rarity .. (cr or ""))
 				setText(card, "AbilityName", familyAbility(fam, cr))
-				setIcon(card, "AbilityIcon", familyIcon(fam))
+				setIcon(card, "AbilityIcon", familyIcon(fam, cr))
 				setIcon(card, "PetIcon", art)
 			end
 			local key = card:FindFirstChild("Key")
@@ -939,9 +949,9 @@ local function touchButtons()
 	if abB then
 		local fam = Pets.family() or "" -- hidden for the starting Catcher
 		abB.Visible = fam ~= ""
-		if abB:GetAttribute("Fam") ~= fam then
-			abB:SetAttribute("Fam", fam)
-			setIcon(abB, "Icon", familyIcon(fam))
+		if abB:GetAttribute("Fam") ~= fam .. r then
+			abB:SetAttribute("Fam", fam .. r)
+			setIcon(abB, "Icon", familyIcon(fam, r))
 		end
 	end
 	local function shade(b: Instance?, frac: number, secs: number)

@@ -16,6 +16,7 @@ local AbilityConfig = {}
 export type RoleDef = {
 	built: boolean,
 	name: string, -- the ability card's title in this role
+	icon: string, -- HOS-PET-003: the icon slug in this role (UI falls back to the Runner icon until it is uploaded)
 	text: string, -- one line for this role (incubator / pets panel)
 	cooldown: number,
 	duration: number,
@@ -24,7 +25,7 @@ export type RoleDef = {
 }
 export type Archetype = {
 	title: string,
-	color: Color3, -- the default effect colour (summon ring etc.), equally visible to everyone
+	color: Color3, -- the default effect colour (summon ring etc.), equally visible to everyone; one colour for both roles
 	Runner: RoleDef,
 	Catcher: RoleDef,
 }
@@ -38,6 +39,7 @@ AbilityConfig.ARCHETYPES = {
 		Runner = {
 			built = true,
 			name = "DECOY",
+			icon = "ab_decoy",
 			text = "a running copy of you fools chasers",
 			cooldown = 20,
 			duration = 3,
@@ -47,6 +49,7 @@ AbilityConfig.ARCHETYPES = {
 		Catcher = {
 			built = false,
 			name = "SNARE",
+			icon = "ab_snare",
 			text = "drop a snare that roots the first Runner in",
 			cooldown = 20,
 			duration = 8,
@@ -59,6 +62,7 @@ AbilityConfig.ARCHETYPES = {
 		Runner = {
 			built = true,
 			name = "INVISIBLE",
+			icon = "ab_invis",
 			text = "fade to a shimmer; you can still be tagged",
 			cooldown = 20,
 			duration = 3,
@@ -67,6 +71,7 @@ AbilityConfig.ARCHETYPES = {
 		Catcher = {
 			built = false,
 			name = "TETHER",
+			icon = "ab_tether",
 			text = "pull the nearest Runner in front towards you",
 			cooldown = 20,
 			duration = 0,
@@ -79,6 +84,7 @@ AbilityConfig.ARCHETYPES = {
 		Runner = {
 			built = false,
 			name = "SHIELD",
+			icon = "ab_shield",
 			text = "a shield that blocks one tag",
 			cooldown = 20,
 			duration = 3,
@@ -87,6 +93,7 @@ AbilityConfig.ARCHETYPES = {
 		Catcher = {
 			built = false,
 			name = "LONG REACH",
+			icon = "ab_reach",
 			text = "your next stab or lunge reaches further",
 			cooldown = 18,
 			duration = 3,
@@ -99,6 +106,7 @@ AbilityConfig.ARCHETYPES = {
 		Runner = {
 			built = false,
 			name = "PULSE",
+			icon = "ab_tempest",
 			text = "push nearby Catchers away",
 			cooldown = 22,
 			duration = 0,
@@ -107,6 +115,7 @@ AbilityConfig.ARCHETYPES = {
 		Catcher = {
 			built = false,
 			name = "STORM BALL",
+			icon = "ab_stormball",
 			text = "roll a storm ball that slows a Runner",
 			cooldown = 18,
 			duration = 0,
@@ -119,6 +128,7 @@ AbilityConfig.ARCHETYPES = {
 		Runner = {
 			built = false,
 			name = "PORTAL HOP",
+			icon = "ab_rift",
 			text = "hop a short way through a portal",
 			cooldown = 20,
 			duration = 0,
@@ -127,6 +137,7 @@ AbilityConfig.ARCHETYPES = {
 		Catcher = {
 			built = false,
 			name = "RIFT BLINK",
+			icon = "ab_blink",
 			text = "blink forward after a visible warning ring",
 			cooldown = 20,
 			duration = 0,
