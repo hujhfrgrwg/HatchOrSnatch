@@ -1,0 +1,255 @@
+<roblox version="4">
+  <Item class="ModuleScript" referent="RBX0">
+    <Properties>
+      <string name="Name">MapVoteController</string>
+      <ProtectedString name="Source"><![CDATA[--!strict
+-- MapVoteController (HOS-MAPVOTE-001, 17 Oct): the NEXT MAP vote panel under the round header in the lobby countdown.
+-- The panel is a roblox-ui-maker template (ReplicatedStorage.MapVoteUITemplates.MapVotePanel, from UI/build.py
+-- vote_panel / s_mapvote_templates, export workspace ui_mapvote/). Driven by MapVoteService's attributes on
+-- ReplicatedStorage (MapVoteState / A / B / TitleA / TitleB / CountA / CountB / VotersA / VotersB / EndsAt / Winner)
+-- and EOS_State.Phase. Click a map or press 1 / 2 (EOS_Remotes.RequestMapVote); you can switch until 0:00.
+-- Started by Controllers.LeadCatcherController (whose card docks centred under this panel while it shows).
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local Fit = require(script.Parent.Fit)
+
+local MapVoteController = {}
+
+local player = Players.LocalPlayer
+local TAGS = { SunnyCove = "SAND + PALMS", FrostyPass = "ICE + SNOW", Farm = "THE CLASSIC", Stadium = "BIG CROWD" }
+local PANEL_Y = 150 -- design px from the top: under the round header
+MapVoteController.PANEL_H = 372
+
+local holder: Frame? = nil
+local panel: GuiObject? = nil
+local myVote: number? = nil
+local shownChanged = Instance.new("BindableEvent")
+MapVoteController.ShownChanged = shownChanged.Event
+local wasShown = false
+
+local function templates(): Instance?
+	return ReplicatedStorage:FindFirstChild("MapVoteUITemplates") or script:FindFirstChild("Templates")
+end
+
+local function setText(root: Instance, name: string, text: string)
+	for _, n in ipairs({ name, name .. "Shadow" }) do
+		local l = root:FindFirstChild(n, true)
+		if l and l:IsA("TextLabel") then
+			l.Text = text
+		end
+	end
+end
+
+local function show(root: Instance?, name: string, on: boolean)
+	if not root then
+		return
+	end
+	for _, n in ipairs({ name, name .. "Shadow" }) do
+		local g = root:FindFirstChild(n)
+		if g and g:IsA("GuiObject") then
+			g.Visible = on
+		end
+	end
+end
+
+function MapVoteController.isShown(): boolean
+	local st = ReplicatedStorage:GetAttribute("MapVoteState")
+	local phase = ReplicatedStorage:FindFirstChild("EOS_State") and ReplicatedStorage.EOS_State:GetAttribute("Phase")
+	return (st == "open" and phase == "INTERMISSION") or st == "result"
+end
+
+local function vote(choice: number)
+	if ReplicatedStorage:GetAttribute("MapVoteState") ~= "open" then
+		return
+	end
+	myVote = choice
+	local ev = ReplicatedStorage:WaitForChild("EOS_Remotes"):FindFirstChild("RequestMapVote") :: RemoteEvent?
+	if ev then
+		ev:FireServer(choice)
+	end
+end
+
+local function fillTile(p: GuiObject, idx: number, side: string)
+	local tile = p:FindFirstChild("Tile" .. idx, true)
+	if not tile then
+		return
+	end
+	local key = ReplicatedStorage:GetAttribute("MapVote" .. side) :: string?
+	local title = (ReplicatedStorage:GetAttribute("MapVoteTitle" .. side) :: string?) or key or ""
+	local count = (ReplicatedStorage:GetAttribute("MapVoteCount" .. side) :: number?) or 0
+	setText(tile, "MapName", string.upper(title))
+	setText(tile, "Tag", if key then TAGS[key] or "" else "")
+	setText(tile, "VotesText", tostring(count))
+	local art = tile:FindFirstChild("Art")
+	local folder = templates()
+	local ids = folder and folder:FindFirstChild("AssetIds")
+	if key and art and art:IsA("ImageLabel") and ids and ids:IsA("ModuleScript") then
+		local icons = (require(ids) :: any).icons
+		local img = icons and icons["map_" .. string.lower(key)]
+		if img then
+			art.Image = img
+		end
+	end
+	-- voter heads, newest first (the server sends up to 8 ids)
+	local ok, voters = pcall(HttpService.JSONDecode, HttpService, (ReplicatedStorage:GetAttribute("MapVoteVoters" .. side) :: string?) or "[]")
+	voters = if ok and type(voters) == "table" then voters else {}
+	for k = 1, 5 do
+		local head = tile:FindFirstChild("Head" .. k)
+		local uid = voters[k]
+		if head and head:IsA("GuiObject") then
+			head.Visible = uid ~= nil
+			local img = head:FindFirstChild("Img")
+			if uid and img and img:IsA("ImageLabel") then
+				img.Image = ("rbxthumb://type=AvatarHeadShot&id=%d&w=48&h=48"):format(uid)
+			end
+		end
+	end
+	local more = count - math.min(count, 5)
+	show(tile, "More", more > 0)
+	setText(tile, "MoreText", "+" .. more)
+	-- your vote / the winner / the loser
+	local st = ReplicatedStorage:GetAttribute("MapVoteState")
+	local winner = ReplicatedStorage:GetAttribute("MapVoteWinner")
+	local result = st == "result" and winner ~= nil
+	show(tile, "RingMine", not result and myVote == idx)
+	show(tile, "MineTag", not result and myVote == idx)
+	show(tile, "RingWin", result and winner == idx)
+	show(tile, "WinTag", result and winner == idx)
+	show(tile, "Dim", result and winner ~= idx)
+end
+
+local function refresh()
+	local h = holder
+	if not h then
+		return
+	end
+	local on = MapVoteController.isShown()
+	if on and not panel then
+		local folder = templates()
+		local t = folder and folder:FindFirstChild("MapVotePanel")
+		if t and t:IsA("GuiObject") then
+			local p = t:Clone()
+			p.Position = UDim2.fromOffset(0, 0)
+			p.Visible = true
+			p.Parent = h
+			panel = p
+			for idx = 1, 2 do
+				local tile = p:FindFirstChild("Tile" .. idx, true)
+				if tile and tile:IsA("GuiObject") then
+					local hit = Instance.new("TextButton") -- invisible hit area over the whole tile
+					hit.Name = "Hit"
+					hit.BackgroundTransparency = 1
+					hit.Text = ""
+					hit.Size = UDim2.fromScale(1, 1)
+					hit.ZIndex = 50
+					hit.Parent = tile
+					hit.Activated:Connect(function()
+						vote(idx)
+					end)
+				end
+			end
+		end
+	end
+	h.Visible = on and panel ~= nil
+	local p = panel
+	if p then
+		fillTile(p, 1, "A")
+		fillTile(p, 2, "B")
+		local st = ReplicatedStorage:GetAttribute("MapVoteState")
+		local winner = ReplicatedStorage:GetAttribute("MapVoteWinner")
+		if st == "result" and winner then
+			local title = ReplicatedStorage:GetAttribute(if winner == 1 then "MapVoteTitleA" else "MapVoteTitleB")
+			setText(p, "Footer", ("%s wins! Get ready"):format(tostring(title)))
+		elseif myVote then
+			setText(p, "Footer", "Vote counted. Tap the other map to switch")
+		else
+			setText(p, "Footer", "Click a map or press 1 / 2")
+		end
+	end
+	if on ~= wasShown then
+		wasShown = on
+		if not on then
+			myVote = nil
+		end
+		shownChanged:Fire(on)
+	end
+end
+
+function MapVoteController.init()
+	local g = Instance.new("ScreenGui")
+	g.Name = "MapVoteHUD"
+	g.ResetOnSpawn = false
+	g.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	g.DisplayOrder = 4
+	local h = Instance.new("Frame")
+	h.Name = "MapVote"
+	h.BackgroundTransparency = 1
+	h.Size = UDim2.fromOffset(920, MapVoteController.PANEL_H)
+	h.Visible = false
+	local s = Instance.new("UIScale")
+	s.Name = "Fit"
+	s.Parent = h
+	h.Parent = g
+	g.Parent = player:WaitForChild("PlayerGui")
+	holder = h
+	Fit.setDesignPosition(h, Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, PANEL_Y))
+	Fit.track(g)
+	for _, a in ipairs({ "MapVoteState", "MapVoteA", "MapVoteB", "MapVoteCountA", "MapVoteCountB", "MapVoteVotersA", "MapVoteVotersB", "MapVoteWinner" }) do
+		ReplicatedStorage:GetAttributeChangedSignal(a):Connect(refresh)
+	end
+	ReplicatedStorage:GetAttributeChangedSignal("MapVoteA"):Connect(function()
+		myVote = nil -- a new vote
+	end)
+	local stateObj = ReplicatedStorage:WaitForChild("EOS_State", 30)
+	if stateObj then
+		stateObj:GetAttributeChangedSignal("Phase"):Connect(refresh)
+	end
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed or not MapVoteController.isShown() then
+			return
+		end
+		if input.KeyCode == Enum.KeyCode.One or input.KeyCode == Enum.KeyCode.KeypadOne then
+			vote(1)
+			refresh()
+		elseif input.KeyCode == Enum.KeyCode.Two or input.KeyCode == Enum.KeyCode.KeypadTwo then
+			vote(2)
+			refresh()
+		end
+	end)
+	refresh()
+	-- timer + bar
+	RunService.Heartbeat:Connect(function()
+		local p = panel
+		if not p or not wasShown then
+			return
+		end
+		local ends = ReplicatedStorage:GetAttribute("MapVoteEndsAt")
+		local left = if type(ends) == "number" then math.max(0, ends - workspace:GetServerTimeNow()) else 0
+		if ReplicatedStorage:GetAttribute("MapVoteState") == "result" then
+			left = 0
+		end
+		local secs = math.ceil(left)
+		setText(p, "TimerText", ("%d:%02d"):format(secs // 60, secs % 60))
+		local bar = p:FindFirstChild("TimeBar", true)
+		local fill = bar and bar:FindFirstChild("F")
+		if fill and fill:IsA("GuiObject") then
+			fill.Size = UDim2.new(math.clamp(left / 15, 0, 1), 0, fill.Size.Y.Scale, fill.Size.Y.Offset)
+		end
+	end)
+end
+
+-- the Lead Catcher card docks here (design px, under the panel's centre)
+function MapVoteController.dockPosition(): UDim2
+	return UDim2.new(0.5, 0, 0, PANEL_Y + MapVoteController.PANEL_H + 16)
+end
+
+return MapVoteController
+]]></ProtectedString>
+    </Properties>
+  </Item>
+</roblox>

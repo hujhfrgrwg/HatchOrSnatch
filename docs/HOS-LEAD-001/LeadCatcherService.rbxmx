@@ -1,0 +1,373 @@
+<roblox version="4">
+  <Item class="ModuleScript" referent="RBX0">
+    <Properties>
+      <string name="Name">LeadCatcherService</string>
+      <ProtectedString name="Source"><![CDATA[--!strict
+-- LeadCatcherService (HOS-LEAD-001, 17 Oct, Hunter: "we need a way to prevent multiple people from purchasing
+-- lead catcher"): a paid Lead Catcher, ONE per match. The buyer is that match's starting Catcher and the
+-- Hero or Chicken lead for the whole match, at normal strength (no buffs).
+--  * one slot per server: free / reserved (one player, 30 s while their Robux prompt is open) / taken (a
+--    credit holder). Only the server opens the prompt, and only for the player holding the reservation, so
+--    two people can never both pay for the same match
+--  * a receipt ALWAYS grants +1 leadCatcherCredits (exact-once by PurchaseId, in the shared p.receipts
+--    ledger, granted only after the save). It is never refused for slot reasons: a late or second receipt
+--    (the match already started, another server) is a saved pass for a later match
+--  * a player who already holds a credit takes a free slot without buying; several holders = earliest credit
+--  * buying is open only between matches (WAITING / INTERMISSION / RESULTS); closed once roles are assigned
+--  * at role assignment (MatchService hook) the holder replaces one normal Catcher pick (the count is
+--    unchanged) and one credit is spent; leaving before that keeps the credit
+-- Replicated for the UI: ReplicatedStorage attributes LeadCatcherState ("free" | "reserved" | "taken" |
+-- "closed" | "off"), LeadCatcherOwner (userId), LeadCatcherOwnerName, LeadCatcherPrice, LeadCatcherUntil
+-- (server time the reservation ends); player attribute EOS_LeadCredits (their saved passes).
+-- Remote: EOS_Remotes.RequestLeadCatcher (RemoteFunction) () -> { ok, reason }.
+-- Hooks into MatchService / PurchaseService / Bootstrap: docs\HOS-LEAD-001\hooks.md (not wired yet).
+
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
+local Net = require(Shared:WaitForChild("Net"))
+local Analytics = require(script.Parent.Analytics)
+local DataService = require(script.Parent.DataService)
+
+local LeadCatcherService = {}
+
+-- Price: 29 R$ (Hunter, 17 Oct). PRODUCT_ID nil = not for sale: requests are refused and
+-- the button reads "off", but saved credits still work.
+LeadCatcherService.PRODUCT_ID = nil :: number?
+LeadCatcherService.ROBUX = 29
+LeadCatcherService.RESERVE_SECONDS = 30
+LeadCatcherService.PAID_GRACE = 30 -- extra wait for the receipt after the prompt says "purchased"
+
+local RECEIPT_LEDGER = 200 -- same bound as PurchaseService (the shared p.receipts list)
+local USE_LEDGER = 20
+local OPEN_PHASES = { WAITING = true, INTERMISSION = true, RESULTS = true }
+
+type Slot = { kind: "free" } | { kind: "reserved", userId: number, expires: number } | { kind: "taken", userId: number }
+
+local slot: Slot = { kind = "free" }
+local open = true
+local lastAsk: { [number]: number } = {}
+local matchLead: number? = nil -- the holder written into this match by assign()
+local started = false
+
+local function credits(p: any): number
+	local n = p and p.leadCatcherCredits
+	return if type(n) == "number" and n > 0 then math.floor(n) else 0
+end
+
+local function creditsOf(plr: Player): number
+	return credits(DataService.get(plr))
+end
+
+local function creditAt(plr: Player): number
+	local p = DataService.get(plr)
+	local t = p and p.leadCatcherCreditAt
+	return if type(t) == "number" then t else math.huge
+end
+
+local function toast(plr: Player, text: string, kind: string?)
+	Net.event("Toast"):FireClient(plr, { text = text, kind = kind or "info" })
+end
+
+local function publish()
+	local holder = if slot.kind ~= "free" then (slot :: any).userId else nil
+	local plr = holder and Players:GetPlayerByUserId(holder)
+	local state = if not open then "closed" elseif slot.kind ~= "free" then slot.kind elseif LeadCatcherService.PRODUCT_ID then "free" else "off"
+	ReplicatedStorage:SetAttribute("LeadCatcherState", state)
+	ReplicatedStorage:SetAttribute("LeadCatcherOwner", holder)
+	ReplicatedStorage:SetAttribute("LeadCatcherOwnerName", plr and plr.DisplayName or nil)
+	ReplicatedStorage:SetAttribute("LeadCatcherPrice", LeadCatcherService.ROBUX)
+	ReplicatedStorage:SetAttribute("LeadCatcherUntil", if slot.kind == "reserved" then workspace:GetServerTimeNow() + (slot.expires - os.clock()) else nil)
+	for _, p in ipairs(Players:GetPlayers()) do
+		p:SetAttribute("EOS_LeadCredits", if DataService.isLoaded(p) then creditsOf(p) else nil)
+	end
+end
+
+-- a free slot goes to the in-server player holding the earliest saved credit (no purchase needed)
+local function settleSlot()
+	if slot.kind == "taken" then
+		local plr = Players:GetPlayerByUserId(slot.userId)
+		if not plr or creditsOf(plr) <= 0 then
+			slot = { kind = "free" }
+		end
+	end
+	if slot.kind == "free" and open then
+		local best, bestAt = nil, math.huge
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if DataService.isLoaded(plr) and creditsOf(plr) > 0 then
+				local at = creditAt(plr)
+				if at < bestAt or (at == bestAt and best and plr.UserId < best.UserId) then
+					best, bestAt = plr, at
+				end
+			end
+		end
+		if best then
+			slot = { kind = "taken", userId = best.UserId }
+			toast(best, "You're Lead Catcher next match!", "reward")
+		end
+	end
+	publish()
+end
+
+local function release(userId: number)
+	if slot.kind == "reserved" and slot.userId == userId then
+		slot = { kind = "free" }
+		settleSlot()
+	end
+end
+
+-- RemoteFunction: ask for the slot. Only a free slot (open window, nobody here holding a credit) is
+-- reserved; then the server itself opens the Robux prompt for that one player.
+local function request(plr: Player): any
+	local t = os.clock()
+	if t - (lastAsk[plr.UserId] or 0) < 1 then
+		return { ok = false, reason = "SLOW_DOWN" }
+	end
+	lastAsk[plr.UserId] = t
+	if not LeadCatcherService.PRODUCT_ID then
+		return { ok = false, reason = "NOT_FOR_SALE" }
+	end
+	if not open then
+		return { ok = false, reason = "CLOSED" } -- roles are assigned: next match
+	end
+	if not DataService.isLoaded(plr) then
+		return { ok = false, reason = "LOADING" }
+	end
+	settleSlot()
+	if slot.kind == "taken" and slot.userId == plr.UserId then
+		return { ok = true, reason = "HAVE_CREDIT" }
+	end
+	if slot.kind ~= "free" then
+		return { ok = false, reason = "TAKEN" }
+	end
+	slot = { kind = "reserved", userId = plr.UserId, expires = os.clock() + LeadCatcherService.RESERVE_SECONDS }
+	publish()
+	local ok = pcall(MarketplaceService.PromptProductPurchase, MarketplaceService, plr, LeadCatcherService.PRODUCT_ID :: number)
+	if not ok then
+		release(plr.UserId)
+		return { ok = false, reason = "PROMPT_FAILED" }
+	end
+	return { ok = true, reason = "RESERVED" }
+end
+
+-- PurchaseService.processOther hook: true for this product.
+function LeadCatcherService.owns(productId: any): boolean
+	return LeadCatcherService.PRODUCT_ID ~= nil and productId == LeadCatcherService.PRODUCT_ID
+end
+
+-- Receipt: +1 credit, exact-once per PurchaseId, PurchaseGranted only after the save. Never refused for
+-- slot reasons; the credit then decides the slot (a late one waits for a later match).
+function LeadCatcherService.processReceipt(info: any, plr: Player): Enum.ProductPurchaseDecision
+	local receipt = tostring(info.PurchaseId)
+	local granted = false
+	local saved = DataService.commit(plr, "receipt:" .. receipt, function(p)
+		if type(p.receipts) ~= "table" then
+			p.receipts = {}
+		end
+		if table.find(p.receipts, receipt) then
+			return
+		end
+		table.insert(p.receipts, receipt)
+		while #p.receipts > RECEIPT_LEDGER do
+			table.remove(p.receipts, 1)
+		end
+		if credits(p) == 0 then
+			p.leadCatcherCreditAt = os.time()
+		end
+		p.leadCatcherCredits = credits(p) + 1
+		granted = true
+	end)
+	if not saved then
+		Analytics.warn("PersistenceError", "receipt" .. receipt, "Lead Catcher receipt not saved yet; Roblox will retry", { userId = plr.UserId, reason = "RECEIPT_NOT_SAVED" })
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	if granted then
+		Analytics.log("LeadCatcherBought", { userId = plr.UserId, robux = info.CurrencySpent, productId = info.ProductId, purchaseId = receipt })
+		if slot.kind == "reserved" and slot.userId == plr.UserId then
+			slot = { kind = "taken", userId = plr.UserId }
+			toast(plr, "You're Lead Catcher next match!", "reward")
+		elseif not (slot.kind == "taken" and slot.userId == plr.UserId) then
+			-- paid, but the slot is someone else's or the match has started: saved for a later match
+			toast(plr, "Lead Catcher pass saved: it's yours in a later match.", "reward")
+		end
+		settleSlot()
+	end
+	return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+
+-- MatchService hook, right after the normal Catcher pick: the slot holder (in the roster, holding a
+-- credit) replaces one pick, so the number of starting Catchers never changes. Spends one credit.
+-- Returns the (possibly changed) catcherIds. Solo Studio tests are left alone.
+function LeadCatcherService.assign(catcherIds: { number }, roster: { Player }, solo: boolean, matchId: any): { number }
+	matchLead = nil
+	open = false
+	if slot.kind == "reserved" then
+		slot = { kind = "free" } -- unpaid when roles were assigned; a receipt now is a saved pass
+	end
+	settleSlot() -- a reserved player whose receipt landed is "taken" by now
+	if solo or #catcherIds == 0 or slot.kind ~= "taken" then
+		publish()
+		return catcherIds
+	end
+	local uid = slot.userId
+	local buyer: Player? = nil
+	for _, plr in ipairs(roster) do
+		if plr.UserId == uid then
+			buyer = plr
+		end
+	end
+	if not buyer or creditsOf(buyer) <= 0 then
+		slot = { kind = "free" }
+		publish()
+		return catcherIds
+	end
+	local out = table.clone(catcherIds)
+	local at = table.find(out, uid)
+	if at then
+		table.remove(out, at)
+		table.insert(out, 1, uid)
+	else
+		-- replace an NPC Catcher if there is one (real volunteers keep their turn), else the last pick
+		local swap = #out
+		for i = #out, 1, -1 do
+			if out[i] < 0 or not Players:GetPlayerByUserId(out[i]) then
+				swap = i
+				break
+			end
+		end
+		table.remove(out, swap)
+		table.insert(out, 1, uid)
+	end
+	matchLead = uid
+	local useId = "lead:" .. tostring(matchId)
+	local plr = buyer :: Player
+	task.spawn(function()
+		DataService.commit(plr, useId, function(p)
+			if type(p.leadCatcherUses) ~= "table" then
+				p.leadCatcherUses = {}
+			end
+			if table.find(p.leadCatcherUses, useId) or credits(p) <= 0 then
+				return
+			end
+			table.insert(p.leadCatcherUses, useId)
+			while #p.leadCatcherUses > USE_LEDGER do
+				table.remove(p.leadCatcherUses, 1)
+			end
+			p.leadCatcherCredits = credits(p) - 1
+			if p.leadCatcherCredits > 0 then
+				p.leadCatcherCreditAt = os.time() -- the next pass queues behind other holders
+			end
+		end)
+		publish()
+	end)
+	Analytics.log("LeadCatcherUsed", { userId = uid, matchId = matchId })
+	slot = { kind = "taken", userId = uid } -- shown as this match's Lead Catcher until RESULTS
+	publish()
+	return out
+end
+
+-- MatchService hook, once the match table exists: the sticky Hero or Chicken lead starts as the buyer.
+-- HeroChickenService.leadCatcher keeps c.hcLead only while they're a live, connected CATCHER, else it
+-- falls back to the normal pick.
+function LeadCatcherService.matchStarted(c: any)
+	local uid = matchLead
+	if not uid or not c or not c.roster or not c.roster[uid] then
+		return
+	end
+	local p = c.logic and c.logic:get(uid)
+	if p and p.role == "CATCHER" and not p.disconnected then
+		c.hcLead = uid
+	end
+end
+
+function LeadCatcherService.leadOf(): number?
+	return matchLead
+end
+
+local function onPhase()
+	local phase = Net.state():GetAttribute("Phase")
+	local nowOpen = phase == nil or OPEN_PHASES[phase] == true
+	if nowOpen and not open then
+		-- the match is over: its Lead Catcher slot is spent, the next one is up for grabs
+		open = true
+		matchLead = nil
+		slot = { kind = "free" }
+		settleSlot()
+	elseif not nowOpen and open then
+		open = false -- roles were assigned without the hook (e.g. not wired yet): no buying mid-match
+		if slot.kind == "reserved" then
+			slot = { kind = "free" }
+		end
+		publish()
+	end
+end
+
+function LeadCatcherService.init()
+	if started then
+		return
+	end
+	started = true
+	local remotes = ReplicatedStorage:WaitForChild("EOS_Remotes")
+	local fn = remotes:FindFirstChild("RequestLeadCatcher") :: RemoteFunction?
+	if not fn then
+		local f = Instance.new("RemoteFunction")
+		f.Name = "RequestLeadCatcher"
+		f.Parent = remotes
+		fn = f
+	end
+	(fn :: RemoteFunction).OnServerInvoke = request
+
+	MarketplaceService.PromptProductPurchaseFinished:Connect(function(userId: number, productId: number, purchased: boolean)
+		if not LeadCatcherService.owns(productId) or slot.kind ~= "reserved" or slot.userId ~= userId then
+			return
+		end
+		if purchased then
+			slot = { kind = "reserved", userId = userId, expires = os.clock() + LeadCatcherService.PAID_GRACE }
+			publish() -- the receipt turns this into "taken"
+		else
+			release(userId)
+		end
+	end)
+	DataService.Loaded:Connect(function()
+		settleSlot()
+	end)
+	Players.PlayerRemoving:Connect(function(plr)
+		lastAsk[plr.UserId] = nil
+		release(plr.UserId)
+		if slot.kind == "taken" and slot.userId == plr.UserId and open then
+			slot = { kind = "free" } -- they keep the credit
+			task.defer(settleSlot)
+		end
+	end)
+	Net.state():GetAttributeChangedSignal("Phase"):Connect(onPhase)
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			if slot.kind == "reserved" and os.clock() > slot.expires then
+				release(slot.userId)
+			end
+		end
+	end)
+	onPhase()
+	publish()
+end
+
+-- tests
+LeadCatcherService._request = request
+function LeadCatcherService._slot(): any
+	return slot
+end
+function LeadCatcherService._reset()
+	slot = { kind = "free" }
+	open = true
+	matchLead = nil
+	publish()
+end
+
+return LeadCatcherService
+]]></ProtectedString>
+    </Properties>
+  </Item>
+</roblox>

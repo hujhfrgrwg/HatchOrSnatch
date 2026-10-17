@@ -1,0 +1,14 @@
+HOS-TOPBAR-001: Stats hover tween sampled every frame in the playtest client (RenderStepped, 1920x1080).
+t = seconds since hover, w = plate width px, lbl = label TextTransparency, servers.x = Servers button right edge
+0.001 w=66 lbl=1.00 servers.x=514
+0.018 w=88 lbl=1.00 servers.x=492
+0.035 w=110 lbl=1.00 servers.x=470
+0.052 w=129 lbl=0.80 servers.x=451
+0.069 w=145 lbl=0.60 servers.x=435
+0.085 w=159 lbl=0.44 servers.x=421
+0.102 w=171 lbl=0.30 servers.x=409
+0.118 w=180 lbl=0.19 servers.x=400
+0.135 w=187 lbl=0.10 servers.x=393
+0.152 w=192 lbl=0.04 servers.x=388
+0.169 w=195 lbl=0.01 servers.x=385
+0.185 w=196 lbl=0.00 servers.x=384

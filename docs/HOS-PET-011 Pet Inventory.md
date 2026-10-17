@@ -126,21 +126,21 @@ Build one pet at a time, rotating through the archetypes. Each pet is finished f
 |---|---|---|---|
 | 1 | Bastion Beetle | Guardian, Common | done (HOS-PET-013c + full PBR) |
 | 2 | Thunder Toad | Tempest, Common | done (HOS-PET-016, model sheet + texture standard) |
-| 3 | Ring Imp | Rift, Common | next |
-| 4 | Grin Ghost | Invisibility, Rare | |
-| 5 | Crystal Warden | Guardian, Rare | |
-| 6 | Riot Hound | Tempest, Rare | |
-| 7 | Compass Hare | Rift, Rare | |
-| 8 | Scroll Tanuki | Decoy, Epic | |
-| 9 | Moonveil Moth | Invisibility, Epic | |
-| 10 | Shrine Lion | Guardian, Epic | |
-| 11 | Drum Oni | Tempest, Epic | |
-| 12 | Astral Djinn | Rift, Epic | |
-| 13 | Eclipse Tengu | Decoy, Legendary | |
-| 14 | Veil Nekomata | Invisibility, Legendary | |
-| 15 | Aegis Kirin | Guardian, Legendary | |
-| 16 | Raiju | Tempest, Legendary | |
-| 17 | Void Seraph | Rift, Legendary | |
+| 3 | Ring Imp | Rift, Common | done (HOS-PET-017) |
+| 4 | Grin Ghost | Invisibility, Rare | done (HOS-PET-018, installed; docs/pets/grin_ghost) |
+| 5 | Crystal Warden | Guardian, Rare | done (HOS-PET-019, installed; docs/pets/crystal_warden) |
+| 6 | Riot Hound | Tempest, Rare | done (HOS-PET-020, installed; docs/pets/riot_hound) |
+| 7 | Compass Hare | Rift, Rare | done (HOS-PET-021, installed; docs/pets/compass_hare) |
+| 8 | Scroll Tanuki | Decoy, Epic | done (HOS-PET-022, installed; docs/pets/scroll_tanuki) |
+| 9 | Moonveil Moth | Invisibility, Epic | done (HOS-PET-023, installed; docs/pets/moonveil_moth) |
+| 10 | Shrine Lion | Guardian, Epic | done (HOS-PET-024, installed; docs/pets/shrine_lion) |
+| 11 | Drum Oni | Tempest, Epic | done (HOS-PET-025, installed; docs/pets/drum_oni) |
+| 12 | Astral Djinn | Rift, Epic | done (HOS-PET-026, installed; docs/pets/astral_djinn) |
+| 13 | Eclipse Tengu | Decoy, Legendary | done (HOS-PET-027, installed; docs/pets/eclipse_tengu) |
+| 14 | Veil Nekomata | Invisibility, Legendary | done (HOS-PET-028, installed; docs/pets/veil_nekomata) |
+| 15 | Aegis Kirin | Guardian, Legendary | done (HOS-PET-029, installed; docs/pets/aegis_kirin) |
+| 16 | Raiju | Tempest, Legendary | done (HOS-PET-030, installed; docs/pets/raiju) |
+| 17 | Void Seraph | Rift, Legendary | done (HOS-PET-031, installed; docs/pets/void_seraph) |
 
 **Standard for every pet (Hunter, 17 Oct, "premium"):**
 - Each MeshPart's SurfaceAppearance carries the full PBR set: colour, normal (baked from a smoothed copy, so plates shade rounded), roughness and metalness maps.
