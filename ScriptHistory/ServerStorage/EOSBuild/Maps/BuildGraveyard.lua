@@ -5,8 +5,9 @@
 -- zones are the glowing lanes past the field (purple A, orange B); past them is out-of-bounds paving.
 -- No chalk lines, flags or tall back walls: the zone edge is where the field block ends.
 -- Scenery only outside the fence: candle pillars in the fence, hanging-lantern posts, gravestones,
--- wooden crosses, jack-o'-lanterns, candle clusters, a glowing purple pool (lobby side), a red-roofed
--- shrine (back-left), a bubbling cauldron (east) and loose fence pieces to move around.
+-- wooden crosses, jack-o'-lanterns, candle clusters, stone ruins, a red-roofed shrine (back-left), a
+-- bubbling cauldron (east) and loose fence pieces to move around. (The lobby-side glow pool was
+-- removed on 17 Oct at Matthew's request.)
 -- Trees, sky and anything off the island are placed by hand (Matthew).
 local Kit = require(script.Parent.Parent.WorldKit)
 local Frame = require(script.Parent.ArenaFrame)
@@ -32,9 +33,10 @@ local G = {
 	shrineRed = rgb(184, 52, 52), shrineRed2 = rgb(150, 40, 46), shrineWall = rgb(96, 58, 54),
 	brew = rgb(176, 84, 255), pot = rgb(48, 42, 60),
 }
--- field patches: mostly orange, some purple, a few dull green (as in the concept)
+-- field patches: mostly orange, some purple, a few dull green (as in the concept). The oranges are
+-- muted toward the field (Matthew, 17 Oct) so they tint the floor instead of popping off it.
 local PATCH = {
-	rgb(196, 108, 64), rgb(196, 108, 64), rgb(214, 128, 70), rgb(214, 128, 70),
+	rgb(146, 84, 66), rgb(146, 84, 66), rgb(136, 78, 68), rgb(156, 92, 68),
 	rgb(122, 78, 176), rgb(104, 60, 120), rgb(72, 100, 84),
 }
 
@@ -505,34 +507,6 @@ return function(world: Instance, def)
 	local scen = Kit.model(arena, "Scenery")
 	local graves = Kit.model(scen, "Graveyard")
 	local toCam = Vector3.new(0, 0, 1) -- the concept camera (and the lobby) is on the +Z side
-
-	-- ===== glowing purple pool on the lobby side: stone rim, a broken fence and candles in it =====
-	local pool = Kit.model(scen, "GlowPool")
-	local px0, px1, pz0, pz1 = X + 8, X + 88, fen.z1 + 5, fen.z1 + 17
-	Kit.box(pool, "Water", px0 + 1, px1 - 1, 0, 0.1, pz0 + 1, pz1 - 1, G.laneA, { Pattern = "Studs" })
-	Kit.box(pool, "GlowN", px0 + 1, px1 - 1, 0.1, 0.16, pz0 + 1, pz0 + 1.4, G.glowA, glowOpts())
-	Kit.box(pool, "GlowS", px0 + 1, px1 - 1, 0.1, 0.16, pz1 - 1.4, pz1 - 1, G.glowA, glowOpts())
-	local x = px0
-	local k = 0
-	while x < px1 - 0.5 do
-		k += 1
-		local w = math.min(rng:NextNumber(3, 5), px1 - x)
-		local h = 0.5 + (k % 2) * 0.1
-		Kit.box(pool, "RimN", x, x + w, 0, h, pz0, pz0 + 1, if k % 2 == 0 then G.stone else G.stone2, { Pattern = "Weld" })
-		Kit.box(pool, "RimS", x, x + w, 0, h + 0.0001, pz1 - 1, pz1, if k % 2 == 0 then G.stone2 else G.stone, { Pattern = "Weld" })
-		x += w
-	end
-	Kit.box(pool, "RimW", px0, px0 + 1, 0, 0.55, pz0 + 1, pz1 - 1, G.stone2, { Pattern = "Weld" })
-	Kit.box(pool, "RimE", px1 - 1, px1, 0, 0.55, pz0 + 1, pz1 - 1, G.stone2, { Pattern = "Weld" })
-	looseFence(pool, Vector3.new(px0 + 18, 0.1, pz1 - 2.6), Vector3.new(px0 + 25, 0.1, pz1 - 2.6), rng, true)
-	candles(pool, Vector3.new(px0 + 34, 0.1, pz1 - 2.4), 4, rng, 0.6)
-	for zz = pz0 - 1.5, pz1 + 2, 2 do
-		takeLine(Vector3.new(px0 - 2, 0, zz), Vector3.new(px1 + 2, 0, zz), 1.2)
-	end
-	lanternPost(lamps, Vector3.new(px1 + 3, 0, (pz0 + pz1) / 2), Vector3.new(-1, 0, 0))
-	take(px1 + 3, (pz0 + pz1) / 2, 1.5)
-	crossGrave(graves, Vector3.new(px0 - 3.5, 0, (pz0 + pz1) / 2 + 2), toCam, rng)
-	take(px0 - 3.5, (pz0 + pz1) / 2, 2.8)
 
 	-- ===== set pieces: shrine (back-left corner, door to the arena side) and cauldron (east) =====
 	local scx, scz = X - 138, Z - 88
