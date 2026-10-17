@@ -18,7 +18,7 @@ return {
 		["ab_tempest"] = "rbxassetid://108468538791427",
 		-- HOS-PET-004 (17 Oct): Catcher-side ability icons, added by hand like ab_rift / ab_tempest
 		["ab_snare"] = "rbxassetid://76188862683171",
-		["ab_tether"] = "rbxassetid://104994377640480",
+		["ab_tether"] = "rbxassetid://102315690393104", -- HOS-PET-005: recoloured to Guardian blue
 		["ab_stormball"] = "rbxassetid://123701685229353",
 		["ab_blink"] = "rbxassetid://138344437907055",
 		["abilityfx"] = "rbxassetid://123506725390433",
