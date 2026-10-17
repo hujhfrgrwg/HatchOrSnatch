@@ -22,6 +22,7 @@ Arena maps are built from code: `ServerStorage.EOSBuild.Maps` (`MapDefs` plus on
 
 ## Lobby
 - **Floating-island underside** (HOS-MAP-002, Matthew): cliff columns under the Halloween lobby, sloping in to a point. See [[HOS-MAP-002 Lobby underside]].
+- **Pro altar** (HOS-LOBBY-002, Matthew): small trophy altar in the middle of the plaza (`Workspace.CentralAltar.ProAltar`), rebuildable from `tools/build/HOS-LOBBY-002_pro_altar.lua`. See [[HOS-LOBBY-002 Pro altar]].
 - **Edge walls** (HOS-LOBBY-001, Matthew): invisible walls flush with the island's outer edge (`Workspace.LobbyEdgeWalls`) so players can walk to the edge without falling. See [[HOS-LOBBY-001 Lobby edge walls]].
 - **Leaderboards** (HOS-LB-001, Matthew): the four Halloween boards in `Workspace.Leaderboards` show live this-server stats and turn to face each player. See [[HOS-LB-001 Halloween leaderboards]].
 
