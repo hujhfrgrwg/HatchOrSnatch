@@ -133,6 +133,7 @@ local WORDS = {
 	STARTER = "The starting Catcher has no pet ability",
 	NOT_BUILT = "This ability isn't ready yet",
 	NO_TARGET = "No Runner in range in front of you",
+	FIZZLED = "Can't go there",
 	-- Shared.validPosition refusals
 	OFF_MAP = "Can't go there", SAFE_ZONE = "Can't go there", ZONE_LOCKED = "Can't go there",
 	BLOCKED = "Can't go there", NO_ROOM = "Can't go there", NO_GROUND = "Can't go there",
@@ -212,6 +213,19 @@ local function onRequest(plr: Player, moveDir: any)
 		gold = lo.gold,
 		moveDir = dir,
 		root = r,
+		-- HOS-PET-010: an ability that fizzles after its windup (its landing spot went bad) gives the
+		-- cooldown back and tells the player why
+		refund = function(reason: string?)
+			if loadouts[plr] == lo then
+				lo.readyAt = 0
+			end
+			Net.event("AbilityState"):FireClient(plr, { ok = false, reason = reason or "FIZZLED" })
+			local w = WORDS[reason or "FIZZLED"]
+			if w then
+				Net.event("Toast"):FireClient(plr, { text = w, kind = "info" })
+			end
+			Analytics.log("AbilityRefused", { userId = plr.UserId, family = lo.family, role = role, reason = reason or "FIZZLED" })
+		end,
 	}
 	local okCall, ok, why = pcall(handler, ctx)
 	if not okCall then

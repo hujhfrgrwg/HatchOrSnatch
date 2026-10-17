@@ -145,22 +145,24 @@ AbilityConfig.ARCHETYPES = {
 		title = "Rift",
 		color = Color3.fromRGB(255, 110, 220),
 		Runner = {
-			built = false,
+			built = true, -- HOS-PET-010 prototype
 			name = "PORTAL HOP",
 			icon = "ab_rift",
 			text = "hop a short way through a portal",
 			cooldown = 20,
 			duration = 0,
 			windup = 0.35,
+			distance = 12, -- studs the way you're moving
 		},
 		Catcher = {
-			built = false,
+			built = true, -- HOS-PET-010 prototype
 			name = "RIFT BLINK",
 			icon = "ab_blink",
 			text = "blink forward after a visible warning ring",
 			cooldown = 20,
 			duration = 0,
-			windup = 0.5,
+			windup = 0.5, -- the warning ring shows this long first
+			distance = 10, -- studs ahead of where you face
 		},
 	},
 } :: { [string]: Archetype }

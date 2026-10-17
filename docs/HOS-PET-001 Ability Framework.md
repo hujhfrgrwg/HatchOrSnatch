@@ -45,3 +45,18 @@ Backups: `docs/backups/HOS-PET-001_2026-10-16/`.
 - The incubator's 3x3 grid has two hidden tiles (gaps) until a UI pass.
 - When Guardian is built: contact tags retry every tick, so a blocked tag is followed by another ~0.1 s later unless the shield adds a short immunity.
 - Placeholder colours for Guardian / Tempest / Rift in AbilityConfig.
+
+## Prototypes (HOS-PET-006 to 010, 17 Oct)
+All ten abilities now work as prototypes (placeholder looks: neon parts in the archetype colour). Every number is in `AbilityConfig`. Abilities fire on the press (Hunter, 17 Oct); `Abilities.Shared.INTRO` is visual-only timing.
+
+| Archetype | Runner | Catcher |
+|---|---|---|
+| Decoy | DECOY: running copy, 3 s | SNARE: ring r4 for 8 s, first Runner in is rooted 1.2 s (speed 0, no dash) |
+| Invisibility | INVISIBLE: 3 s shimmer | INVISIBLE: 2 s; Runners farther than 15 studs see nothing; ends on a stab or lunge |
+| Guardian | SHIELD: blocks one tag for 3 s, then 0.5 s immunity | TETHER: nearest Runner within 25 studs / 60 degrees in front, 0.4 s beam, pulled 6 studs |
+| Tempest | PULSE: 0.3 s ring, Catchers within 10 pushed 12; 3 s push immunity | STORM BALL: 40 studs/s for 50, walls stop it, first Runner hit at 50% for 1 s |
+| Rift | PORTAL HOP: 12 studs, 0.35 s portals | RIFT BLINK: 10 studs ahead, 0.5 s warning ring |
+
+Checked in local playtests (2 players + bots): shield blocks exactly one tag then the next lands after the 0.5 s immunity; push immunity holds for 3 s; Rift refuses safe zone, wall, box and zone-locked spots on the press with no cooldown, and fizzles with a refund if the spot goes bad during the windup; hops can't climb onto walls or boxes (fixed during testing). Catcher-side tests used a test helper to convert the player (a 2-player test match ends or converts people too early to stage naturally).
+
+New hooks: `MatchService.onCatcherAttack` (stab / lunge), `ctx.refund` (AbilityService), `Shared.actorsInRole / slideTo / beam / ring / groundBelow`.
