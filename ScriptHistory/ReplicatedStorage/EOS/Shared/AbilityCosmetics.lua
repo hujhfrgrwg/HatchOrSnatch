@@ -36,6 +36,8 @@ AbilityCosmetics.NONE = "None" -- a vfx value: draw nothing for this effect (the
 AbilityCosmetics.SPECIES = {
 	Crow = { sound = "poof", vfx = { DecoySplit = "None" } }, -- its swoop-in summon is the split
 	Kitsune = { sound = "poof", vfx = { DecoySplit = "None" } }, -- its run-in summon is the split
+	["Grim Ghost"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own glints (Controllers.Invisibility)
+	["Prism Chameleon"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own prism glints
 } :: { [string]: { [string]: any } }
 
 -- the effect to draw for `key` when `species` uses its ability: the species' override, else the default

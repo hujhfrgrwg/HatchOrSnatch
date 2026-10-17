@@ -62,14 +62,14 @@ Checked in local playtests (2 players + bots): shield blocks exactly one tag the
 New hooks: `MatchService.onCatcherAttack` (stab / lunge), `ctx.refund` (AbilityService), `Shared.actorsInRole / slideTo / beam / ring / groundBelow`.
 
 ## VFX polish (HOS-VFX-001+)
-Decoy, Guardian, Tempest and Rift done; previews in `docs/ability-vfx/<archetype>/`. Storm Ball now bounces once (`bounces = 1`, built in HOS-VFX-003); its v2 look (energy orb, lightning cage, floor arcs, scorch trail) is HOS-VFX-003b.
+Decoy, Guardian, Tempest, Rift and Invisibility done; previews in `docs/ability-vfx/<archetype>/`. Storm Ball now bounces once (`bounces = 1`, built in HOS-VFX-003); its v2 look (energy orb, lightning cage, floor arcs, scorch trail) is HOS-VFX-003b.
 
 ### Per-pet ability VFX (HOS-VFX-OVR, Hunter 17 Oct)
 Every pet will get its own ability VFX one day. The archetype effects are the defaults for pets that have none of their own. Pets that already have their own effects (Crow, Kitsune, Grim Ghost, and Prism Chameleon's summon) keep them exactly as built, and no default plays on top of them.
 
 **Effect keys.** Each effect has a key: the default template's name in `ReplicatedStorage.VFX.Abilities`.
 - One-shots: DecoySplit, DecoyPoof, SnareTrigger, ShieldUp, ShieldBreak, TetherYank, PulseBlast, KnockHit, StormBounce, StormHit, RiftPortal, RiftArrive, RiftFizzle.
-- Lasting effects: Snare, Rooted, ShieldBubble, TetherBeam, PulseCharge, StormBall, Slowed, RiftReticle.
+- Lasting effects: Snare, Rooted, ShieldBubble, TetherBeam, PulseCharge, StormBall, Slowed, RiftReticle, InvisShimmer (the invisibility cloak; Grim Ghost and Prism Chameleon map it to NONE and keep their own glints).
 - `Summon`: the pet's entrance over the user, for pets without a rigged entrance.
 
 **Add an override for a species:**
