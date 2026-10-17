@@ -41,3 +41,9 @@ crest) above the head.
 A Beam wraps its texture so the image's vertical axis runs along the beam. Horizontal strip textures (most
 "beam/trail" pack strips are drawn lying down) show as stripes across the beam: rotate them 90 degrees before
 upload.
+
+## §4 Clean up every playtest (17 Oct, Hunter: "is there supposed to be this many tabs open")
+- Every local-server test (`multiplayer_playtest start`) opens a Server window plus one Player window per client. Stop it with `multiplayer_playtest action=end` as soon as you've read its results, so no Server or Player windows are left open between tasks.
+- If a start returns an error, the test may still have launched under another instance id. Run `get_connected_instances`, and stop any stray `server`/`client` group with `multiplayer_playtest action=end` on that id. Check the taskbar with `Get-Process | ? MainWindowTitle` (titles `Server - Roblox Studio`, `Place1 - Roblox Studio`).
+- Force-close a test window only if a proper stop fails, and then choose "Don't Save".
+- Never close or reload the place's edit window (it holds unsaved work), and never touch other games' windows.
