@@ -51,6 +51,20 @@ AbilityCosmetics.SPECIES = {
 		},
 		sfx = { ShieldUp = "BeetleShieldUp" },
 	},
+	-- HOS-PET-014, the concept card: Shockwave (Runner) = yellow burst with blue-white lightning and croak
+	-- ripples; Electric Ball (Catcher) = blue-white crackling shell round a yellow glowing core, lightning trail.
+	-- The ball keeps its size, speed and yellow floor scorch so opponents still read it; Slowed stays default.
+	["Thunder Toad"] = {
+		vfx = {
+			PulseCharge = "ToadPulseCharge",
+			PulseBlast = "ToadPulseBlast",
+			KnockHit = "ToadKnockHit",
+			StormBall = "ToadStormBall",
+			StormBounce = "ToadStormBounce",
+			StormHit = "ToadStormHit",
+		},
+		sfx = { PulseCharge = "ToadCroak" }, -- the croak as the throat sac swells
+	},
 } :: { [string]: { [string]: any } }
 
 -- the effect to draw for `key` when `species` uses its ability: the species' override, else the default

@@ -43,6 +43,7 @@ AbilitySounds.SOUNDS = {
 	InvisOff = { id = 9114159111, volume = 0.6, length = 1.2 }, -- Doppler Whooshes Crackly Airy Bursts 1
 	-- per-pet sounds (AbilityCosmetics SPECIES[x].sfx)
 	BeetleShieldUp = { id = 9116524438, volume = 0.75 }, -- Metal Box Hits Bumps Second Has Clang 2 (the shell closes)
+	ToadCroak = { id = 9113859723, volume = 0.8 }, -- Comic Frog Croaks Ribbit 41 (Pro Sound Effects): the Thunder Toad's croak
 } :: { [string]: { [string]: any } }
 
 -- lasting effects that sound when they appear (the rest of the lasting keys are silent)

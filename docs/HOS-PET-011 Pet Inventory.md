@@ -125,8 +125,8 @@ Build one pet at a time, rotating through the archetypes. Each pet is finished f
 | # | Pet | Archetype, rarity | Status |
 |---|---|---|---|
 | 1 | Bastion Beetle | Guardian, Common | done (HOS-PET-013c + full PBR) |
-| 2 | Thunder Toad | Tempest, Common | in progress (HOS-PET-014) |
-| 3 | Ring Imp | Rift, Common | |
+| 2 | Thunder Toad | Tempest, Common | done (HOS-PET-016, model sheet + texture standard) |
+| 3 | Ring Imp | Rift, Common | next |
 | 4 | Grin Ghost | Invisibility, Rare | |
 | 5 | Crystal Warden | Guardian, Rare | |
 | 6 | Riot Hound | Tempest, Rare | |

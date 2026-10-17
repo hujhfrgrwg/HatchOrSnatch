@@ -159,7 +159,7 @@ EconomyConfig.FAMILIES = {
 }
 
 -- the family a species belongs to (hatch tables above, plus the new rigged pets not in a table yet)
-EconomyConfig.EXTRA_SPECIES = { Crow = "Decoy", Kitsune = "Decoy", ["Bastion Beetle"] = "Guardian" } :: { [string]: string }
+EconomyConfig.EXTRA_SPECIES = { Crow = "Decoy", Kitsune = "Decoy", ["Bastion Beetle"] = "Guardian", ["Thunder Toad"] = "Tempest" } :: { [string]: string }
 
 -- HOS-PET-012: roster pets go by the names on Hunter's concept library sheet (docs/pets/concepts). Internal
 -- ids (a saved pet's `species`, attributes, asset folders) stay as they are, so no save migration is needed.

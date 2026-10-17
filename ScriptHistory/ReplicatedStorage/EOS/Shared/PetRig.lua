@@ -12,6 +12,7 @@ PetRig.MODULES = {
 	Kitsune = "KitsuneAnims",
 	["Prism Chameleon"] = "ChameleonAnims",
 	["Bastion Beetle"] = "BeetleAnims", -- HOS-PET-013 (tools/pets/bastion_beetle.py)
+	["Thunder Toad"] = "ToadAnims", -- HOS-PET-014 (tools/pets/thunder_toad.py)
 } :: { [string]: string }
 
 local animCache: { [string]: any } = {}
