@@ -1460,6 +1460,197 @@ def s_compare():
     return out
 
 
+# ================================================================== Welcome back gift + favorites prompt (HOS-RET-001)
+GIFT_GOLD, GIFT_GEMS = 250, 2   # proposed daily welcome-back gift (economy decisions: ~2,700 Gold/h, ~30 Gems/h); Hunter to confirm
+
+
+def gift_card(state='claim', x=410, y=300, scale=1.0):
+    """One card, two states (like the reference): 'claim' = a returning player's gift is ready (CLAIM);
+    'wait' = first visit, or just claimed: 'come back tomorrow' with the countdown to the next gift."""
+    w, h = 1100, 520
+    claim = state == 'claim'
+    chip = row(icn('clock', 44), T('Next gift in 23:51:10' if not claim else 'Ready now!', 30, 's', '' if not claim else 'f-lime', name='TimerText'), gap=8)
+    b = ''
+    # left: the gift itself (reference: the item tile with its rarity word)
+    b += slot(50, 56, 300, 'gold' if claim else 'locked', 'gift', label='FREE GIFT', name='GiftTile', art_pad=.12, label_size=30)
+    # right: what's inside + the action
+    if claim:
+        b += at(400, 52, T('Thanks for coming back!', 44, 'l', name='Head'))
+        b += at(402, 112, T("Here's your free gift for today.", 28, 's', 'f-dim', name='Sub'))
+    else:
+        b += at(400, 52, T('Come back tomorrow', 44, 'l', name='Head'))
+        b += at(402, 112, T('for another FREE gift!', 44, 'l', 'f-gold', name='Sub'))
+    b += slot(400, 178, 136, 'gold', 'gold', f'x{GIFT_GOLD}', 'Gold', name='GoldSlot')
+    b += slot(552, 178, 136, 'lime', 'gem', f'x{GIFT_GEMS}', 'Gems', name='GemsSlot')
+    if claim:
+        b += btn(720, 196, 320, 100, 'lime', bl('CLAIM', 44), name='BtnClaim')
+    else:
+        b += btn(720, 196, 320, 100, 'grey', bl('COME BACK LATER', 28), name='BtnLater', cls='off')
+    b += at(400, 334, T('One free gift every day you play.', 24, 'xs', 'f-dim', name='Note'))
+    title = 'Welcome back!' if claim else 'Free gift'
+    p = panel_sport('GiftCard', 'gold', title, 'gift', b, x, y, w, h, right=chip, title_size=58)
+    if scale != 1.0:
+        p = p.replace("data-a='C' style='", f"data-a='C' style='transform:scale({scale});transform-origin:960px 560px;", 1)
+    return p
+
+
+def fav_prompt(x=760, y=330):
+    """Roblox's own favorite dialog (AvatarEditorService:PromptSetFavorite). Drawn here only to show where and when it
+    appears; Roblox draws it and we can't restyle it."""
+    st = ("position:absolute;left:{x}px;top:{y}px;width:400px;height:370px;background:#232527;border-radius:14px;"
+          "box-shadow:0 12px 40px rgba(0,0,0,.55);z-index:100;font-family:Arial,Helvetica,sans-serif;color:#fff;text-align:center").format(x=x, y=y)
+    inner = "<div style='padding:18px 0 12px;font-size:20px;font-weight:700;border-bottom:1px solid #3a3d40'>Favorite Item</div>"
+    inner += "<div style='padding:16px 30px 0;font-size:16px;line-height:22px;color:#e2e4e6'>Do you want to add Hatch or Snatch to favorites?</div>"
+    inner += "<img src='bg_lobby.jpg' style='display:block;margin:14px auto 0;width:150px;height:150px;object-fit:cover;object-position:60% 60%;border-radius:6px'>"
+    inner += ("<div style='position:absolute;left:16px;right:16px;bottom:18px;display:flex;gap:12px'>"
+              "<div style='flex:1;height:36px;line-height:36px;border:1px solid #6b6e72;border-radius:8px;font-size:15px'>No</div>"
+              "<div style='flex:1;height:36px;line-height:36px;background:#fff;color:#111;border-radius:8px;font-size:15px;font-weight:700'>Yes</div></div>")
+    return f"<div style='{st}'>{inner}</div>"
+
+
+def s_gift(state='claim'):
+    out = world('bg_lobby_blur.jpg', False) + dim(.5)
+    return out + gift_card(state)
+
+
+def s_first_visit():
+    """First visit, back in the lobby after the player's first finished match: the 'come back tomorrow' card,
+    with Roblox's favorite prompt on top (the reference shows both together)."""
+    out = world('bg_lobby_blur.jpg', False) + dim(.5) + gift_card('wait')
+    out += "<div class='abs fill' style='background:rgba(0,0,0,.35);z-index:99'></div>" + fav_prompt()
+    out += at(960, 868, T("Roblox's own favorite prompt on top: shown once ever, never mid-match", 28, 's'), w=1200, align='center', style='z-index:100')
+    return out
+
+
+def s_gift_phone():
+    """Phone (844 x 390 landscape): the card grows 1.3x so CLAIM is a big thumb target; Roblox's top bar kept clear."""
+    out = world('bg_lobby_blur.jpg', False) + dim(.5) + topbar() + gift_card('claim', scale=1.3)
+    return out
+
+
+def flow_card(x, y, w, h, color, head, lines):
+    inner = f"<div class='ch a-{color}' style='height:84px'><div class='sweep'></div><div class='lbl'>{T(head, 34, 'l')}</div></div>"
+    for i, ln in enumerate(lines):
+        inner += at(28, 104 + i * 40, T(ln, 24, 's', 'f-dim' if ln.startswith('(') else ''))
+    return f"<div class='cp a-{color}' style='left:{x}px;top:{y}px;width:{w}px;height:{h}px'>{inner}</div>"
+
+
+def s_gift_flow():
+    out = "<div class='abs fill' style='background:linear-gradient(#3a1a66,#1e0a3e)'></div>"
+    out += cap(40, 24, 'When each one shows: lobby only, never mid-match, one at a time, 3+ minutes apart (the waiting card is the only one in a match)')
+    cards = [
+        ('gold', '0. You rejoin', ['A new day (UTC) since your', 'last gift: WELCOME BACK!', 'a few seconds after you', 'spawn in the lobby. You tap', 'CLAIM (never auto-claimed),', 'the card flips to the', 'countdown.', '(Same day again: nothing.)']),
+        ('pink', '1. First match done', ['Back in the lobby after', 'your first finished match:', '"Come back tomorrow" card', 'with Roblox\'s favorite', 'prompt on top.', '', '(Favorite: once ever.)', '(No reward for a favorite.)']),
+        ('sky', '2. Next lobby break', ["Roblox's Join Event prompt", 'for the next event, if one', 'is set up in config.', '', '', '', '(Once per event.)', '(No event set: skipped.)']),
+        ('lime', '3. After your first pet', ['Starter pack offer, once.', 'Economy rule 33: no shop', 'prompts before the first', 'pet. The 48 h timer is real', 'and kept on the server.', '', '(Not wired to a purchase', 'until you set the offer.)']),
+    ]
+    for i, (c, head, lines) in enumerate(cards):
+        out += flow_card(40 + i * 465, 80, 440, 450, c, head, lines)
+    out += cap(40, 570, 'Proposed daily gift (for Hunter to confirm)')
+    out += slot(40, 620, 200, 'gold', 'gold', f'x{GIFT_GOLD}', 'Gold')
+    out += slot(260, 620, 200, 'lime', 'gem', f'x{GIFT_GEMS}', 'Gems')
+    out += at(500, 630, col(T(f'{GIFT_GOLD} Gold + {GIFT_GEMS} Gems a day', 40, 'l'),
+                            T('About 6 minutes of normal play (2,700 Gold and ~30 Gems an hour).', 26, 's', 'f-dim'),
+                            T('Small on purpose: no big Gem gifts (economy decisions 30-31).', 26, 's', 'f-dim'), gap=8, align='flex-start'))
+    out += cap(40, 860, 'Starter pack: what you need to decide')
+    out += at(40, 910, col(T('Contents and Robux price. Robux buys looks only (decision 32): Gems, a trail, an emote, an egg case.', 26, 's', 'f-dim'),
+                           T('The timer is a real 48 h window from when it first shows; no made-up "was" price.', 26, 's', 'f-dim'), gap=8, align='flex-start'))
+    return out
+
+
+def rsvp_prompt(x=760, y=170):
+    """Roblox's own event RSVP dialog (SocialService:PromptRsvpToEventAsync). Placeholder event; only shown when an
+    event id is set in config."""
+    st = ("position:absolute;left:{x}px;top:{y}px;width:400px;height:540px;background:#232527;border-radius:14px;"
+          "box-shadow:0 12px 40px rgba(0,0,0,.55);z-index:100;font-family:Arial,Helvetica,sans-serif;color:#fff").format(x=x, y=y)
+    inner = "<div style='padding:18px 0 14px;font-size:20px;font-weight:700;text-align:center;border-bottom:1px solid #3a3d40'>Join Event</div>"
+    inner += ("<div style='position:relative;margin:18px 24px 0;height:190px;border-radius:8px;overflow:hidden'>"
+              "<img src='bg_lobby.jpg' style='width:100%;height:100%;object-fit:cover'>"
+              "<div style='position:absolute;left:10px;top:10px;background:#fff;color:#111;font-size:13px;padding:5px 10px;border-radius:12px'>[Event date and time]</div></div>")
+    inner += "<div style='margin:16px 24px 0;font-size:17px;font-weight:700'>[Event title, e.g. Update 2]</div>"
+    inner += ("<div style='margin:10px 24px 0;font-size:15px;line-height:22px;color:#e2e4e6'>[Event description from the Creator Dashboard: "
+              "what's new, written by you when you create the event.]</div>")
+    inner += ("<div style='position:absolute;left:24px;right:24px;bottom:24px;height:36px;line-height:36px;text-align:center;"
+              "background:#335fff;border-radius:8px;font-size:15px'>Notify Me</div>")
+    return f"<div style='{st}'>{inner}</div>"
+
+
+def s_event_rsvp():
+    out = world('bg_lobby_blur.jpg', False) + dim(.5) + rsvp_prompt(760, 220)
+    out += at(960, 840, T("Roblox's own Join Event prompt: once per event, only when one is set up", 28, 's'), w=1300, align='center', style='z-index:100')
+    out += at(960, 884, T('Event image, date and text come from the Creator Dashboard (placeholders here)', 24, 'xs', 'f-dim'), w=1300, align='center', style='z-index:100')
+    return out
+
+
+STARTER = [  # placeholders only: Hunter sets the real contents and price (Robux buys looks only, decision 32)
+    ('gem', 'lime', 'Gems', 'x??'),
+    ('trail_rainbow', 'sky', 'Trail', '??'),
+    ('emote', 'epic', 'Emote', '??'),
+    ('case', 'gold', 'Egg Case', '??'),
+]
+
+
+def starter_card(scale=1.0):
+    x, y, w, h = 360, 250, 1200, 600
+    chip = row(icn('clock', 44), T('Offer ends in 47:59:12', 30, 's', 'f-gold', name='TimerText'), gap=8)
+    b = at(60, 26, T('A one-time bundle of looks for new players.', 30, 's', 'f-dim', name='Sub'))
+    for i, (ic, r, lab, cnt) in enumerate(STARTER):
+        b += slot(70 + i * 270, 80, 230, r, ic, cnt, lab, name=f'Item{i + 1}', label_size=30)
+    b += at(70, 326, T('PLACEHOLDER CONTENTS AND PRICE: Hunter sets the real offer', 24, 'xs', 'f-orange', name='Note'))
+    b += btn(70, 372, 360, 96, 'grey', bl('NO THANKS', 32), name='BtnNo')
+    b += btn(690, 372, 440, 96, 'lime', row(icn('robux', 54), T('???', 48, 'l', name='PriceText'), gap=10), name='BtnBuy')
+    b += tag(950, 318, 'ONE TIME ONLY', 'pink', 22, 40, name='Tag')
+    p = panel_sport('StarterPack', 'pink', 'Starter pack', 'shop', b, x, y, w, h, right=chip, title_size=58)
+    if scale != 1.0:
+        p = p.replace("data-a='C' style='", f"data-a='C' style='transform:scale({scale});transform-origin:960px 560px;", 1)
+    return p
+
+
+def s_starter():
+    return world('bg_lobby_blur.jpg', False) + dim(.5) + starter_card()
+
+
+WAIT_OFFERS = [  # rotate every ~8 s while you wait out a Hero run. Looks and XP only (decision 32): no abilities, eggs or focus.
+    ('vip', 'VIP', 'crown', 'gold', '499', ['+25% match XP', 'VIP tag over your head', 'Stacks with 2x XP']),
+    ('xp2', '2x XP', 'star', 'sky', '199', ['Double XP every match', 'Level up twice as fast', 'Yours forever']),
+    ('starter', 'Starter Pack', 'shop', 'pink', '???', ['Gems x??, a trail', 'An emote, an egg case', 'PLACEHOLDER offer']),
+]
+
+
+def wait_offer(o, x=1300, y=700, dot=0):
+    key, title, icon, acc, price, lines = o
+    w, h = 580, 230
+    inner = box(0, 0, w, h, '', f'cs r-{acc}', 'border-radius:16px', name='Card')
+    inner += I(icon, 24, 18, 130, name='Icon')
+    inner += btn(14, 152, 156, 62, 'lime', row(icn('robux', 38), T(price, 30, 'l', name='PriceText'), gap=6), name='BtnBuy')
+    for i, ln in enumerate(lines):
+        inner += at(196, 34 + i * 52, T(ln, 28, 's', 'f-orange' if ln.startswith('PLACEHOLDER') else '', name=f'Line{i + 1}'))
+    inner += at(w // 2 + 90, 196, row(*[f"<span style='display:inline-block;width:12px;height:12px;border-radius:6px;background:{'#fff' if i == dot else 'rgba(255,255,255,.35)'}'></span>" for i in range(len(WAIT_OFFERS))], gap=8), w=200, align='center', name='Dots')
+    inner += f"<div class='cx' data-n='CloseButton' data-btn=1 style='left:{w - 46}px;top:-30px;transform:scale(.62);transform-origin:0 0'>{T('X', 48, 'l')}</div>"
+    inner += at(w // 2, -64, T(title, 56, 'xl', name='Title'), w=w, align='center')
+    return grp(f'WaitOffer_{key}', box(x, y, w, h, inner, name='WaitOffer'), 'BR')
+
+
+def s_wait_offer():
+    out = world() + topbar()
+    out += hv_topcenter('HERO RUN', 'Mia is crossing alone!', T('Round 1  ·  0:19  ·  you are waiting', 22, 'xs', name='SublineText'))
+    out += wait_offer(WAIT_OFFERS[0])
+    out += at(960, 1020, T('Only while you wait out a Hero run. Never while you play a crossing.', 26, 's'), w=1400, align='center')
+    return out
+
+
+def s_wait_offers():
+    out = "<div class='abs fill' style='background:linear-gradient(#3a1a66,#1e0a3e)'></div>"
+    out += cap(40, 24, 'The card cycles these every 8 s (VIP and 2x XP prices come from the shop pass config; the starter pack is a placeholder)')
+    for i, o in enumerate(WAIT_OFFERS):
+        out += wait_offer(o, 60 + (i % 3) * 620, 170, dot=i)
+    out += cap(40, 470, 'Left out on purpose')
+    out += at(40, 520, col(T("The reference's Catcher Pack sells an ability and Gems. We don't sell abilities (economy decision 32).", 28, 's', 'f-dim'),
+                           T('No offer before your first pet (decision 33). X hides the card for the rest of the session.', 28, 's', 'f-dim'),
+                           T('Never shown to the Hero, to anyone crossing, or while a first-visit prompt is up.', 28, 's', 'f-dim'), gap=12, align='flex-start'))
+    return out
+
+
 # ================================================================== page shell
 JS = """
 <script>
@@ -1524,6 +1715,15 @@ SCREENS = [  # (file, title, description, fn, height)
     ('hatch.html', 'Hatch reveal', 'New pet moment', s_hatch, 1080),
     ('reward.html', 'Reward', 'You got it: a shop item (Gold, Gems or Robux)', s_reward, 1080),
     ('reward_gems.html', 'Reward (Gems)', 'A Gem pack bought with Robux', lambda: s_reward('gems'), 1080),
+    ('gift_claim.html', 'Welcome back (gift ready)', 'A returning player gets a free daily gift: CLAIM', lambda: s_gift('claim'), 1080),
+    ('gift_wait.html', 'Come back tomorrow', 'After claiming, or on a first visit: countdown to the next gift', lambda: s_gift('wait'), 1080),
+    ('gift_first_visit.html', 'First visit + favorite', "After the first match: come-back card with Roblox's favorite prompt on top", s_first_visit, 1080),
+    ('event_rsvp.html', 'Join event', "Roblox's Notify Me prompt for the next event (only when one is set up)", s_event_rsvp, 1080),
+    ('starter_pack.html', 'Starter pack', 'One-time bundle of looks, placeholder contents and price', s_starter, 1080),
+    ('wait_offer.html', 'Waiting offer (Hero run)', 'Corner offer card while you wait out a Hero run', s_wait_offer, 1080),
+    ('wait_offers.html', 'Waiting offers (all)', 'The three offers the card cycles, and what is left out', s_wait_offers, 1080),
+    ('gift_phone.html', 'Welcome back (phone)', 'Same card 1.3x on a phone', s_gift_phone, 1080),
+    ('gift_flow.html', 'When they show', 'Order and timing of all four prompts, the proposed gift', s_gift_flow, 1080),
     ('templates.html', 'Banners + toasts + confirm', 'Runtime templates', s_templates, 1120),
     ('states.html', 'All states', 'Every element in every state', s_states, 1080),
     ('compare.html', 'Before', 'Current lobby HUD', s_compare, 1080),
