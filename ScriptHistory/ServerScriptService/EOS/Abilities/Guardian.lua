@@ -92,7 +92,7 @@ function Guardian.Catcher(ctx: any): (boolean, string?)
 	end
 	local target = best
 	local tr = target.Character.HumanoidRootPart :: BasePart
-	Shared.beam(root, tr, COLOR, d.windup + 0.2, nil, "TetherBeam")
+	Shared.beam(root, tr, COLOR, d.windup + 0.2, nil, "TetherBeam", ctx.species)
 	local me = ctx.player
 	local role = me:GetAttribute("EOS_Role")
 	task.delay(d.windup, function()

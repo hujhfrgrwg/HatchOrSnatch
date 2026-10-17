@@ -41,6 +41,8 @@ AbilitySounds.SOUNDS = {
 	-- Invisibility (the default cloak only)
 	InvisOn = { id = 9113069659, volume = 0.6, length = 1.4 }, -- Air Fingers Short Swooshing Bursts Sucking 1
 	InvisOff = { id = 9114159111, volume = 0.6, length = 1.2 }, -- Doppler Whooshes Crackly Airy Bursts 1
+	-- per-pet sounds (AbilityCosmetics SPECIES[x].sfx)
+	BeetleShieldUp = { id = 9116524438, volume = 0.75 }, -- Metal Box Hits Bumps Second Has Clang 2 (the shell closes)
 } :: { [string]: { [string]: any } }
 
 -- lasting effects that sound when they appear (the rest of the lasting keys are silent)

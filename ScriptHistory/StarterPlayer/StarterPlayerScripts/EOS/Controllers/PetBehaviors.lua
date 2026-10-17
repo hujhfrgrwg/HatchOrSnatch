@@ -9,6 +9,7 @@ PetBehaviors.MODULES = {
 	Crow = "CrowPet",
 	Kitsune = "KitsunePet",
 	["Prism Chameleon"] = "ChameleonPet",
+	["Bastion Beetle"] = "BeetlePet", -- HOS-PET-013
 } :: { [string]: string }
 
 local cache: { [string]: any } = {}

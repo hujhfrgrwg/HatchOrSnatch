@@ -39,6 +39,17 @@ AbilityCosmetics.SPECIES = {
 	Kitsune = { sound = "poof", vfx = { DecoySplit = "None" } }, -- its run-in summon is the split
 	["Grim Ghost"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own glints (Controllers.Invisibility)
 	["Prism Chameleon"] = { vfx = { InvisShimmer = "None" } }, -- keeps its own prism glints
+	-- HOS-PET-013, Hunter's concept sheet: Shell Shield (Runner) and Horn Tether (Catcher), gold and blue
+	["Bastion Beetle"] = {
+		vfx = {
+			ShieldUp = "BeetleShieldUp",
+			ShieldBubble = "BeetleShieldBubble",
+			ShieldBreak = "BeetleShieldBreak",
+			TetherBeam = "BeetleTetherBeam",
+			TetherYank = "BeetleTetherYank",
+		},
+		sfx = { ShieldUp = "BeetleShieldUp" },
+	},
 } :: { [string]: { [string]: any } }
 
 -- the effect to draw for `key` when `species` uses its ability: the species' override, else the default

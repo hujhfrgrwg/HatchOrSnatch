@@ -301,7 +301,7 @@ end
 -- a placeholder telegraph everyone sees: a neon bar between two bodies for `seconds` (prototype look)
 -- vfx (HOS-VFX-002): clients draw a real Beam between the two bodies instead (the part carries ObjectValues
 -- A and B pointing at them) and the server part stays invisible.
-function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, width: number?, vfx: string?)
+function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, width: number?, vfx: string?, species: string?)
 	local p = Instance.new("Part")
 	if vfx then
 		for k, v in pairs({ A = a, B = b }) do
@@ -318,7 +318,7 @@ function Shared.beam(a: BasePart, b: BasePart, color: Color3, seconds: number, w
 	p.Transparency = 0.25
 	p.Parent = Shared.runtimeFolder("AbilityFx")
 	if vfx then
-		Shared.tagVfx(p, vfx)
+		Shared.tagVfx(p, vfx, nil, species) -- the species' own tether look (HOS-PET-013)
 	end
 	local w = width or 0.35
 	local t0 = os.clock()

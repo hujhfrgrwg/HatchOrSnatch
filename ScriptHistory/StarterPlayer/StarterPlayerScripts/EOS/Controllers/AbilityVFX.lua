@@ -182,6 +182,11 @@ DRESS.TetherBeam = function(part: BasePart, t: Instance?): () -> ()
 	local made: { Instance } = {}
 	local a0 = Instance.new("Attachment")
 	a0.Name = "EOS_TetherFrom"
+	-- a species' tether can start somewhere else on the Catcher (the Bastion Beetle's: its summoned horn)
+	local from = t:GetAttribute("FromOffset")
+	if typeof(from) == "Vector3" then
+		a0.Position = from
+	end
 	a0.Parent = ra
 	local a1 = Instance.new("Attachment")
 	a1.Name = "EOS_TetherTo"

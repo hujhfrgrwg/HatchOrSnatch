@@ -146,7 +146,7 @@ PetModel.SPECS = {
 -- Newer pets (Shared/PetRig): RigScale (the template's own Model scale), Prefix (mesh name prefix);
 -- meshes <Prefix>Body / Face / L2 / L3 and a Looks folder with SurfaceAppearances Body1..3 / Face1..3.
 -- Level 1 shows Body + Face; level 2 adds L2; level 3 adds L3 (each level has its own colour + face maps).
-PetModel.RIGGED = { Crow = true, Kitsune = true, ["Prism Chameleon"] = true } :: { [string]: boolean }
+PetModel.RIGGED = { Crow = true, Kitsune = true, ["Prism Chameleon"] = true, ["Bastion Beetle"] = true } :: { [string]: boolean }
 
 function PetModel.isRigged(species: string): boolean
 	return PetModel.RIGGED[species] == true
@@ -177,7 +177,9 @@ local function applyLevelLook(model: Model, prefix: string, level: number)
 	if looks then
 		for _, nm in ipairs({ "Body", "L2", "L3", "Face" }) do
 			local p = model:FindFirstChild(prefix .. nm)
-			local look = looks:FindFirstChild((if nm == "Face" then "Face" else "Body") .. level)
+			-- the L2 / L3 add-on meshes can have their own look ("Extra<level>", e.g. glowing crystals)
+			local look = (nm == "L2" or nm == "L3") and looks:FindFirstChild("Extra" .. level)
+				or looks:FindFirstChild((if nm == "Face" then "Face" else "Body") .. level)
 			if p and look then
 				local old = p:FindFirstChildOfClass("SurfaceAppearance")
 				if old then
@@ -205,6 +207,14 @@ local function buildRigged(species: string, s: number, level: number): Model?
 	model.Name = "EOS_Pet"
 	model:SetAttribute("Species", species)
 	model:SetAttribute("Level", level)
+	-- level effects baked into the template (particles, lights...) carry a MinLevel attribute:
+	-- they only stay on pets at that level or higher
+	for _, d in model:GetDescendants() do
+		local min = d:GetAttribute("MinLevel")
+		if type(min) == "number" and level < min then
+			d:Destroy()
+		end
+	end
 	local eyes = model:FindFirstChild("Crow_Eyes")
 	local l3 = tpl:GetAttribute("EyeL3")
 	if level >= 3 and eyes and eyes:IsA("MeshPart") and type(l3) == "string" then
