@@ -20,6 +20,7 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 - **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
 - **Uploads:** `tools\upload\upload_assets.py` (Open Cloud; key and creator from the environment). On the PC, Hunter's `ROBLOX_OPEN_CLOUD_API_KEY` works for the group (pass it as `HOS_ROBLOX_API_KEY` for the one process, group 228184582). Open Cloud returns Decal ids: resolve the Image id with `InsertService:LoadAsset(decalId)` before using it in a GUI.
 - **Skills and research:** [[RoClicks Index]].
+- **Game-Blueprint (Hunter's playbook):** `C:\Users\hunte\OneDrive\Documents\Game-Blueprint`, read-only. Use it whenever it applies; start with [[Game-Blueprint Digest]] (what's there, what applies, conflicts with his decisions).
 
 ## Design
 - [[Emote Light Constructs]]: Destiny-style glowing props for the 13 emotes that mime one (scythe, surfboard, toilet, cart, ...). In the place since 2026-10-16: templates `ReplicatedStorage.EOS_EmoteFX`, client `Controllers.EmoteFX`; playtest owed.
