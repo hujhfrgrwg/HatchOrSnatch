@@ -127,6 +127,7 @@ function Decoy.Runner(ctx: any): (boolean, string?)
 	if not ctx.root then
 		return false, "NO_CHARACTER"
 	end
+	-- on the press (Hunter, 17 Oct): the species' fly-in plays over the copy and never delays it
 	decoy(ctx.player, ctx.moveDir, ctx.def.duration, ctx.def.spread or 145, ctx.species, ctx.level)
 	return true, nil
 end

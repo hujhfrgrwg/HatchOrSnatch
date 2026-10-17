@@ -607,11 +607,16 @@ type Ctx = {
 	claims: { [number]: number }, -- Runner uid -> NPC Catchers going after them
 }
 
+-- HOS-PET-006: an invisible Catcher is only noticed inside its reveal radius (none = never)
+local function unseen(c: any, d: number): boolean
+	return c.hidden and (type(c.reveal) ~= "number" or d > c.reveal)
+end
+
 local function nearestCatcher(ctx: Ctx, pos: Vector3): (any?, number)
 	local best, bestD = nil, math.huge
 	for _, c in ipairs(ctx.catchers) do
 		local d = flat(c.pos - pos).Magnitude
-		if d < bestD then
+		if d < bestD and not unseen(c, d) then
 			best, bestD = c, d
 		end
 	end
@@ -697,7 +702,7 @@ local function runnerThink(bot: any, b: any, ctx: Ctx, now: number, dt: number)
 	for _, c in ipairs(ctx.catchers) do
 		local off = flat(pos - c.pos)
 		local d = off.Magnitude
-		if d > 0.01 and d < N.EVADE_RADIUS then
+		if d > 0.01 and d < N.EVADE_RADIUS and not unseen(c, d) then
 			dir += off.Unit * ((1 - d / N.EVADE_RADIUS) ^ 2) * N.EVADE_WEIGHT
 		end
 	end
@@ -937,7 +942,7 @@ local function matchContext(m: any): Ctx?
 		local char = actor.Character
 		local hrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 		if p and not p.disconnected and hrp then
-			local entry = { uid = uid, pos = hrp.Position, vel = flat(hrp.AssemblyLinearVelocity), human = not NpcService.isBot(actor), safe = p.isSafeThisWave, fakedUntil = 0, hidden = char:GetAttribute("EOS_Invisible") == true }
+			local entry = { uid = uid, pos = hrp.Position, vel = flat(hrp.AssemblyLinearVelocity), human = not NpcService.isBot(actor), safe = p.isSafeThisWave, fakedUntil = 0, hidden = char:GetAttribute("EOS_Invisible") == true, reveal = char:GetAttribute("EOS_InvisibleReveal") }
 			if p.role == "RUNNER" then
 				-- mid-dash (much faster than a run): Catchers on this Runner get faked out for a moment
 				local now = os.clock()

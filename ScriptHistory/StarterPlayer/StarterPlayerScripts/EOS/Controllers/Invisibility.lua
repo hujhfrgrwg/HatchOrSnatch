@@ -69,8 +69,21 @@ local function shimmerFor(model: Model, st: State): ParticleEmitter?
 	return e
 end
 
+-- HOS-PET-006: a Catcher's invisibility carries EOS_InvisibleReveal (studs). A Runner farther away than
+-- that sees nothing at all; closer, the usual shimmer. Other Catchers always see the shimmer.
+local function tooFar(model: Model): boolean
+	local reveal = model:GetAttribute("EOS_InvisibleReveal")
+	if type(reveal) ~= "number" or player:GetAttribute("EOS_Role") == "CATCHER" then
+		return false
+	end
+	local me = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local r = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	return not me or not r or (me.Position - r.Position).Magnitude > reveal
+end
+
 local function apply(model: Model, st: State, isSelf: boolean)
-	local a = st.amount * (if isSelf then Invisibility.SELF else Invisibility.OTHERS)
+	local far = not isSelf and tooFar(model)
+	local a = st.amount * (if isSelf then Invisibility.SELF elseif far then 1 else Invisibility.OTHERS)
 	local hidden = st.amount > 0.5
 	for _, d in ipairs(model:GetDescendants()) do
 		if d:IsA("BasePart") or d:IsA("Decal") then
@@ -91,7 +104,7 @@ local function apply(model: Model, st: State, isSelf: boolean)
 		end
 		local sh = if hidden then shimmerFor(model, st) else st.shimmer
 		if sh then
-			sh.Enabled = hidden
+			sh.Enabled = hidden and not far
 		end
 	end
 end

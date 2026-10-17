@@ -75,6 +75,19 @@ local captureGuards: { (any, any, string) -> string? } = {}
 function MatchService.addCaptureGuard(fn: (any, any, string) -> string?)
 	table.insert(captureGuards, fn)
 end
+-- HOS-PET-006: a Catcher stabbed or lunged (told as it starts, hit or miss). fn(plr, kind: "swing" | "lunge")
+local attackHooks: { (Player, string) -> () } = {}
+function MatchService.onCatcherAttack(fn: (Player, string) -> ())
+	table.insert(attackHooks, fn)
+end
+local function catcherAttacked(plr: Player, kind: string)
+	for _, fn in ipairs(attackHooks) do
+		local ok, err = pcall(fn, plr, kind)
+		if not ok then
+			warn("[EOS] catcher attack hook: " .. tostring(err))
+		end
+	end
+end
 
 -- the running match (nil in the lobby)
 type Current = {
@@ -556,6 +569,7 @@ local function onRequestLunge(plr: Player, dir: any)
 	end
 	local started = os.clock()
 	c.lastLunge[plr.UserId] = started
+	catcherAttacked(plr, "lunge")
 	task.delay(LG.BURST_TIME, function()
 		if current == c and c.lastLunge[plr.UserId] == started and plr:GetAttribute("EOS_Role") == "CATCHER" then
 			CharacterService.slowFor(plr, LG.SLOW_FACTOR, LG.SLOW_TIME) -- the lunge's price
@@ -586,6 +600,9 @@ local function onRequestTag(plr: Player, target: any, kind: any, aim: any)
 	local me = c.logic:get(plr.UserId)
 	if not me or me.role ~= "CATCHER" then
 		return
+	end
+	if kind == "swing" or kind == "lunge" then
+		catcherAttacked(plr, kind)
 	end
 	local victim: any = nil
 	if target then

@@ -47,6 +47,17 @@ function Shared.fx(payload: { [string]: any })
 	Net.event("AbilityFx"):FireAllClients(payload)
 end
 
+-- ===== species intros (VISUAL ONLY) =====
+-- How long each species' summon animation runs on the client (fly-in / run-in, then the flash).
+-- VISUAL ONLY, per Hunter on 17 Oct: every ability fires the instant the button is pressed and the
+-- entrance plays over it. Species never change timing, so don't wait on these in a handler (the old
+-- afterIntro delay was removed on purpose). Client modules: CrowPet, KitsunePet, ChameleonPet, GhostPet.
+Shared.INTRO = { Crow = 0.5, Kitsune = 1.25, ["Prism Chameleon"] = 0.7, ["Grim Ghost"] = 0.55 } :: { [string]: number }
+
+function Shared.introFor(species: any): number
+	return if type(species) == "string" then Shared.INTRO[species] or 0 else 0
+end
+
 -- ===== stubs =====
 
 function Shared.stub(archetype: string, roleKey: string)

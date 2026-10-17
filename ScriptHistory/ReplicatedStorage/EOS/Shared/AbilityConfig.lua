@@ -70,7 +70,7 @@ AbilityConfig.ARCHETYPES = {
 		},
 		-- 17 Oct (Hunter): the Catcher side is invisibility too, with tighter limits
 		Catcher = {
-			built = false,
+			built = true, -- HOS-PET-006 prototype
 			name = "INVISIBLE",
 			icon = "ab_invis",
 			text = "fade out to sneak up; any stab or lunge shows you",

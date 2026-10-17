@@ -257,6 +257,14 @@ function AbilityService.init()
 		end
 		return nil
 	end)
+	-- a Catcher's stab or lunge: abilities that end on an attack hear it (Invisibility.onAttack)
+	MatchService.onCatcherAttack(function(plr: Player, kind: string)
+		for _, mod in pairs(ARCH) do
+			if mod.onAttack then
+				mod.onAttack(plr, kind)
+			end
+		end
+	end)
 	Players.PlayerRemoving:Connect(function(plr)
 		onMatchEnd(plr)
 	end)
