@@ -11,3 +11,11 @@ This folder is Hatch or Snatch, a Roblox game. It is separate from Faceoff (the 
 - Uploads (sounds, images, models) run on Hunter's PC with `tools\upload\upload_assets.py`, using `HOS_ROBLOX_API_KEY` and `HOS_ROBLOX_GROUP_ID` / `HOS_ROBLOX_USER_ID` from his environment.
 - Audio: Hunter rejects synthesised and AI-generated sound effects. Use real recordings (CC0 packs, Roblox's licensed library) unless he says otherwise.
 - Skills in `.claude/skills/` include third-party ones from RoClicks and others (list and setup in `Research/RoClicks/RoClicks Index.md`). `studify` and `roblox-ui-maker` default to stud style. Until Hatch or Snatch has its own style guide, ask Hunter before committing to a look; once it has one, its look rules override theirs. Keep their process and checks.
+
+## Matthew's sessions: branch rules (agreed with Hunter, Oct 17 2026)
+
+- Matthew works on the `matthew` branch, made off `main`. Do all of Matthew's work there.
+- Never push to `main`, never merge into `main` and never open-and-merge a pull request into `main`. Commit and push only to `matthew` (or another branch Matthew names that isn't `main`).
+- Before starting, check you're on `matthew` (`git branch --show-current`). If a session starts on `main`, switch with `git checkout matthew` before editing anything.
+- To pick up Hunter's newer work, Matthew can ask to merge `main` into `matthew`; that only changes `matthew`.
+- Matthew's cloud sessions reach the Studio connector on Matthew's PC through his own ngrok tunnel (`ROBLOX_MCP_URL` and `ROBLOX_MCP_TOKEN` in his cloud environment; see `tools/mcp/README.md`), not Hunter's. The same Studio rules apply: call `get_connected_instances` first and pick the Hatch or Snatch place.
