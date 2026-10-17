@@ -467,3 +467,50 @@ def paint_material(mat, style, scale=1.0, strength=1.0):
         b.inputs["Distance"].default_value = 0.02
         L.new(bump_h, b.inputs["Height"])
         L.new(b.outputs["Normal"], bsdf.inputs["Normal"])
+
+
+# ===== painted eyes (HOS-PET-016: round pupils + highlights painted as true circles, never hex geometry) =====
+def paint_eyes(mat, cx, cz, size, front_y, iris_rim=None, pupil=(0.055, 0.055, 0.086, 1), mirror=True):
+    """Paint round pupils and a large + small highlight onto an eye material in object space. The eye centre is
+    (±cx, front_y, cz) (mirrored in x), radius `size`; front_y is where the eye's front surface begins."""
+    nt = mat.node_tree
+    N, L = nt.nodes, nt.links
+    bsdf = next(n for n in N if n.type == "BSDF_PRINCIPLED")
+    base = tuple(bsdf.inputs["Base Color"].default_value)[:4]
+    tc = N.new("ShaderNodeTexCoord")
+    sep = N.new("ShaderNodeSeparateXYZ")
+    L.new(tc.outputs["Object"], sep.inputs["Vector"])
+    ax = N.new("ShaderNodeMath"); ax.operation = "ABSOLUTE" if mirror else "ADD"
+    L.new(sep.outputs["X"], ax.inputs[0])
+    if not mirror:
+        ax.inputs[1].default_value = 0.0
+
+    def disc(dcx, dcz, r, soft=0.008):
+        dx = N.new("ShaderNodeMath"); dx.operation = "SUBTRACT"; L.new(ax.outputs[0], dx.inputs[0]); dx.inputs[1].default_value = dcx
+        dz = N.new("ShaderNodeMath"); dz.operation = "SUBTRACT"; L.new(sep.outputs["Z"], dz.inputs[0]); dz.inputs[1].default_value = dcz
+        c = N.new("ShaderNodeCombineXYZ"); L.new(dx.outputs[0], c.inputs["X"]); L.new(dz.outputs[0], c.inputs["Y"])
+        ln = N.new("ShaderNodeVectorMath"); ln.operation = "LENGTH"; L.new(c.outputs[0], ln.inputs[0])
+        m = N.new("ShaderNodeMapRange"); m.inputs["From Min"].default_value = r - soft; m.inputs["From Max"].default_value = r + soft
+        m.inputs["To Min"].default_value, m.inputs["To Max"].default_value = 1.0, 0.0
+        L.new(ln.outputs["Value"], m.inputs["Value"])
+        front = N.new("ShaderNodeMath"); front.operation = "LESS_THAN"; L.new(sep.outputs["Y"], front.inputs[0]); front.inputs[1].default_value = front_y
+        both = N.new("ShaderNodeMath"); both.operation = "MULTIPLY"; L.new(m.outputs["Result"], both.inputs[0]); L.new(front.outputs[0], both.inputs[1])
+        return both.outputs[0]
+
+    def mix(a, color, fac):
+        mm = N.new("ShaderNodeMix"); mm.data_type = "RGBA"
+        L.new(fac, mm.inputs["Factor"])
+        if isinstance(a, tuple):
+            mm.inputs[6].default_value = a
+        else:
+            L.new(a, mm.inputs[6])
+        mm.inputs[7].default_value = tuple(color)[:4]
+        return mm.outputs[2]
+    col = base
+    if iris_rim:
+        col = mix(col, iris_rim, disc(cx, cz, size * 0.9, size * 0.2))
+        col = mix(col, base, disc(cx, cz, size * 0.66, size * 0.17))
+    col = mix(col, pupil, disc(cx, cz, size * 0.5))
+    col = mix(col, (1, 1, 1, 1), disc(cx + size * 0.15, cz + size * 0.28, size * 0.17))
+    col = mix(col, (1, 1, 1, 1), disc(cx - size * 0.24, cz - size * 0.27, size * 0.07))
+    L.new(col, bsdf.inputs["Base Color"])
