@@ -232,5 +232,50 @@
  },
  "vfx/abilities/tex/av_beam_strands_v_alpha.png": {
   "assetId": "72973681248777"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_Body_emit_v3.png": {
+  "assetId": "125124402509775"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_Body_v3.png": {
+  "assetId": "130920859999276"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_Face_emit_v3.png": {
+  "assetId": "87526503961006"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_Face_v3.png": {
+  "assetId": "103541314880955"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_L2_emit_v3.png": {
+  "assetId": "137293283533197"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_L2_v3.png": {
+  "assetId": "101800600287820"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_L3_emit_v3.png": {
+  "assetId": "121854295964230"
+ },
+ "docs/pets/bastion_beetle/upload_v3/Beetle_L3_v3.png": {
+  "assetId": "123555067617039"
+ },
+ "docs/pets/bastion_beetle/upload_v3/bastion_beetle_v3.fbx": {
+  "assetId": "105439147577643"
+ },
+ "docs/ability-vfx/beetle_v3/upload/bb_crackle_strip.png": {
+  "assetId": "79128370414029"
+ },
+ "docs/ability-vfx/beetle_v3/upload/bb_crystal_spear_strip.png": {
+  "assetId": "72563609347563"
+ },
+ "docs/ability-vfx/beetle_v3/upload/bb_hex_lines.png": {
+  "assetId": "125531663053545"
+ },
+ "docs/ability-vfx/beetle_v3/upload/bb_okshard.png": {
+  "assetId": "129175569947780"
+ },
+ "docs/ability-vfx/beetle_v3/upload/bb_spike_shard.png": {
+  "assetId": "76230772574709"
+ },
+ "docs/ability-vfx/beetle_v3/upload/beetle_shield_meshes.fbx": {
+  "assetId": "124416136733506"
  }
 }

@@ -83,8 +83,11 @@ def armature(bones):
 
 
 # ===== baked colour texture =====
-def bake_textures(obs, outdir, size=512, ao_strength=0.55):
-    """Smart-UV each mesh and bake base colour x ambient occlusion into tex/<object>.png (Cycles, CPU)."""
+def bake_textures(obs, outdir, size=512, ao_strength=0.55, sheen=None, ao_distance=None, sizes=None, emissive=None):
+    """Smart-UV each mesh and bake base colour x ambient occlusion into tex/<object>.png (Cycles, CPU).
+    sheen = (highlight linear rgb, {material name: strength}, light dir (Blender model axes)): a soft baked
+    highlight on the faces of those materials that point toward the light, so armour reads as polished
+    even under flat in-game light."""
     import numpy as np
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
@@ -93,10 +96,18 @@ def bake_textures(obs, outdir, size=512, ao_strength=0.55):
         sc.cycles.device = "CPU"
     except Exception:
         pass
+    if ao_distance:  # contact shadows only, so far-off parts don't smudge big flat plates
+        if not sc.world:
+            sc.world = bpy.data.worlds.new("BakeWorld")
+        sc.world.light_settings.distance = ao_distance
     texdir = os.path.join(outdir, "tex")
     os.makedirs(texdir, exist_ok=True)
     out = {}
-    for ob in obs:
+    for oi, ob in enumerate(obs):
+        # later meshes in the list are higher-level add-ons (L2, L3): keep them out of this mesh's shadows
+        later = [o for o in obs[oi + 1:] if not o.hide_render]
+        for o in later:
+            o.hide_render = True
         bpy.ops.object.select_all(action="DESELECT")
         ob.select_set(True)
         bpy.context.view_layer.objects.active = ob
@@ -104,7 +115,7 @@ def bake_textures(obs, outdir, size=512, ao_strength=0.55):
         bpy.ops.mesh.select_all(action="SELECT")
         bpy.ops.uv.smart_project(angle_limit=math.radians(60), island_margin=0.03)
         bpy.ops.object.mode_set(mode="OBJECT")
-        res = size if "Face" not in ob.name else size // 2
+        res = (sizes or {}).get(ob.name) or (size if "Face" not in ob.name else size // 2)
         imgs = {}
         for kind in ("DIFFUSE", "AO"):
             img = bpy.data.images.new(f"{ob.name}_{kind}", res, res, float_buffer=True)  # linear pixels
@@ -123,6 +134,35 @@ def bake_textures(obs, outdir, size=512, ao_strength=0.55):
         ao = np.array(imgs["AO"].pixels[:]).reshape(-1, 4)[:, :1]
         shade = (1 - ao_strength) + ao_strength * ao
         rgb = col[:, :3] * shade
+        if sheen and any(m.name in sheen[1] for m in ob.data.materials):
+            hl, strengths, ldir = sheen
+            nimg = bpy.data.images.new(f"{ob.name}_N", res, res, float_buffer=True)
+            mimg = bpy.data.images.new(f"{ob.name}_M", res, res, float_buffer=True)
+            saved = []
+            for m in ob.data.materials:
+                bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+                saved.append((bsdf, tuple(bsdf.inputs["Emission Color"].default_value), bsdf.inputs["Emission Strength"].default_value))
+                k = strengths.get(m.name, 0.0)
+                bsdf.inputs["Emission Color"].default_value = (k, k, k, 1)
+                bsdf.inputs["Emission Strength"].default_value = 1.0
+            for img, kind in ((nimg, "NORMAL"), (mimg, "EMIT")):
+                for m in ob.data.materials:
+                    m.node_tree.nodes["BakeTarget"].image = img
+                    m.node_tree.nodes.active = m.node_tree.nodes["BakeTarget"]
+                if kind == "NORMAL":
+                    bpy.ops.object.bake(type="NORMAL", normal_space="OBJECT", margin=4)
+                else:
+                    bpy.ops.object.bake(type="EMIT", margin=4)
+            for bsdf, c, st in saved:
+                bsdf.inputs["Emission Color"].default_value = c
+                bsdf.inputs["Emission Strength"].default_value = st
+            n = np.array(nimg.pixels[:]).reshape(-1, 4)[:, :3] * 2 - 1
+            mask = np.array(mimg.pixels[:]).reshape(-1, 4)[:, :1]
+            L = np.array(ldir, dtype=float)
+            L = L / np.linalg.norm(L)
+            d = np.clip((n @ L)[:, None], 0, 1)
+            h = mask * np.clip((d - 0.45) / 0.55, 0, 1) ** 1.6
+            rgb = rgb * (1 - h) + np.array(hl)[None, :] * h
         # linear -> sRGB for the PNG Roblox reads
         rgb = np.where(rgb <= 0.0031308, rgb * 12.92, 1.055 * np.power(np.clip(rgb, 0, 1), 1 / 2.4) - 0.055)
         final = bpy.data.images.new(f"{ob.name}_tex", res, res)
@@ -133,10 +173,36 @@ def bake_textures(obs, outdir, size=512, ao_strength=0.55):
         final.file_format = "PNG"
         final.save()
         out[ob.name] = path
+        if emissive and any(m.name in emissive for m in ob.data.materials):
+            # a grayscale glow mask for SurfaceAppearance.EmissiveMaskContent: tex/<object>_emit.png
+            eimg = bpy.data.images.new(f"{ob.name}_E", res, res, float_buffer=True)
+            saved = []
+            for m in ob.data.materials:
+                bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+                saved.append((bsdf, tuple(bsdf.inputs["Emission Color"].default_value), bsdf.inputs["Emission Strength"].default_value))
+                k = emissive.get(m.name, 0.0)
+                bsdf.inputs["Emission Color"].default_value = (k, k, k, 1)
+                bsdf.inputs["Emission Strength"].default_value = 1.0
+                m.node_tree.nodes["BakeTarget"].image = eimg
+                m.node_tree.nodes.active = m.node_tree.nodes["BakeTarget"]
+            bpy.ops.object.bake(type="EMIT", margin=4)
+            for bsdf, c, st in saved:
+                bsdf.inputs["Emission Color"].default_value = c
+                bsdf.inputs["Emission Strength"].default_value = st
+            e = np.clip(np.array(eimg.pixels[:]).reshape(-1, 4)[:, :1], 0, 1)
+            em = bpy.data.images.new(f"{ob.name}_emit", res, res)
+            em.colorspace_settings.name = "Non-Color"
+            em.pixels[:] = np.concatenate([e, e, e, np.ones_like(e)], axis=1).ravel()
+            em.filepath_raw = os.path.join(texdir, ob.name + "_emit.png")
+            em.file_format = "PNG"
+            em.save()
+            out[ob.name + "_emit"] = em.filepath_raw
         for m in ob.data.materials:
             n = m.node_tree.nodes.get("BakeTarget")
             if n:
                 m.node_tree.nodes.remove(n)
+        for o in later:
+            o.hide_render = False
     return out
 
 
