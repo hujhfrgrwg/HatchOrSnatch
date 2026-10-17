@@ -24,4 +24,10 @@ if (-not $listening) {
 
 $host.UI.RawUI.WindowTitle = "ngrok tunnel for Roblox Studio (leave open)"
 Write-Host "Tunnel: https://$Domain  ->  localhost:58741"
-ngrok http --url=$Domain 58741
+# ngrok 3.16+ calls the flag --url; older versions (winget can install 3.3.x) only know --domain
+$help = (ngrok http --help 2>&1 | Out-String)
+if ($help -match '--url string') {
+    ngrok http --url=$Domain 58741
+} else {
+    ngrok http --domain=$Domain 58741
+}
