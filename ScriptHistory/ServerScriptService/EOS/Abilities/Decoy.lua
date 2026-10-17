@@ -132,10 +132,66 @@ function Decoy.Runner(ctx: any): (boolean, string?)
 	return true, nil
 end
 
-Decoy.Catcher = Shared.stub("Decoy", "Catcher")
+-- ===== SNARE (Catcher, HOS-PET-008 prototype) =====
+-- A ring at your feet everyone can see, `radius` studs, for `duration` seconds. The first Runner whose
+-- body enters it is rooted for `root` seconds (top speed 0, so no running and no dash) and the snare is
+-- used up. One snare per Catcher: a new one replaces the old.
+local CharacterService = require(script.Parent.Parent.Services.CharacterService)
+local AbilityConfig = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("AbilityConfig"))
+local SNARE_COLOR = AbilityConfig.ARCHETYPES.Decoy.color
+local snares: { [Player]: { part: BasePart, conn: RBXScriptConnection } } = {}
+
+local function clearSnare(plr: Player)
+	local s = snares[plr]
+	snares[plr] = nil
+	if s then
+		s.conn:Disconnect()
+		s.part:Destroy()
+	end
+end
+
+function Decoy.Catcher(ctx: any): (boolean, string?)
+	local root = ctx.root :: BasePart?
+	if not root then
+		return false, "NO_CHARACTER"
+	end
+	if Shared.inSafeZone(root.Position) then
+		return false, "SAFE_ZONE"
+	end
+	local d = ctx.def
+	local plr = ctx.player
+	clearSnare(plr)
+	local ground = Shared.groundBelow(root.Position)
+	local center = ground + Vector3.new(0, 0.12, 0)
+	local part = Shared.ring(center, d.radius, SNARE_COLOR, 0, 0.3)
+	part.Name = "EOS_Snare"
+	local t0 = os.clock()
+	local conn
+	conn = RunService.Heartbeat:Connect(function()
+		if os.clock() - t0 > d.duration or not part.Parent then
+			if snares[plr] and snares[plr].part == part then
+				clearSnare(plr)
+			end
+			return
+		end
+		for _, r in ipairs(Shared.actorsInRole("RUNNER", true)) do
+			local rr = r.Character.HumanoidRootPart :: BasePart
+			local off = rr.Position - center
+			if Vector3.new(off.X, 0, off.Z).Magnitude <= d.radius and math.abs(off.Y) < 6 then
+				CharacterService.slowFor(r, 0, d.root)
+				Shared.ring(Shared.groundBelow(rr.Position) + Vector3.new(0, 0.15, 0), 2.2, SNARE_COLOR, d.root, 0.1)
+				clearSnare(plr)
+				return
+			end
+		end
+	end)
+	snares[plr] = { part = part, conn = conn }
+	return true, nil
+end
 
 -- the match is over for this player: their copies go
 function Decoy.cleanup(plr: Player)
+	clearSnare(plr)
 	local f = workspace:FindFirstChild("EOS_Runtime")
 	local decoys = f and f:FindFirstChild("Decoys")
 	if decoys then

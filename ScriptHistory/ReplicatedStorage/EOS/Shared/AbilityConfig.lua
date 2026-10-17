@@ -47,13 +47,15 @@ AbilityConfig.ARCHETYPES = {
 			spread = 145, -- degrees: the copy runs off at a random angle inside this cone around your heading
 		},
 		Catcher = {
-			built = false,
+			built = true, -- HOS-PET-008 prototype
 			name = "SNARE",
 			icon = "ab_snare",
 			text = "drop a snare that roots the first Runner in",
 			cooldown = 20,
-			duration = 8,
+			duration = 8, -- seconds the snare lies there
 			windup = 0,
+			radius = 4, -- studs
+			root = 1.2, -- seconds the first Runner in is stuck
 		},
 	},
 	Invisibility = {
