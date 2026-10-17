@@ -59,5 +59,5 @@ Not built, by request: trees, the sky, moon, castle and clouds, other off-island
 - **Rotation:** the map isn't in the game yet. To add it, `BuildAll` needs `"Graveyard"` in its maps list (it then builds `Arena_Graveyard` into `ServerStorage.EOS_Maps`, and `MapService` and `MapVoteService` pick it up). That's a one-line change in a shared build script, so it's left for the owner to decide.
 - **Out-of-bounds ground:** it's stone paving to match the concept. For grass instead, change `G.pave` and `G.pave2` in `BuildGraveyard`.
 - **PetLab overlap:** `EOS_PetLab` floats about 18 studs above the island's south-east corner. Fine for a preview, but move one of them if it gets in the way.
-- **ScriptHistory:** only this ticket's two scripts (`BuildGraveyard`, `MapDefs`) were snapshotted. The full-place snapshot (440 scripts, about 6 MB) was too big to pull through the Studio connection in this session, so it's still owed.
+- **ScriptHistory:** this ticket snapshotted `BuildGraveyard` and `MapDefs`. The full-place snapshot was taken afterwards under HOS-LB-001.
 - **Backups:** the pre-edit `MapDefs` and the builder from before the pool was removed are in `docs/backups/HOS-MAP-001_2026-10-17/`.
