@@ -62,7 +62,7 @@ Checked in local playtests (2 players + bots): shield blocks exactly one tag the
 New hooks: `MatchService.onCatcherAttack` (stab / lunge), `ctx.refund` (AbilityService), `Shared.actorsInRole / slideTo / beam / ring / groundBelow`.
 
 ## VFX polish (HOS-VFX-001+)
-Decoy, Guardian and Tempest done; previews in `docs/ability-vfx/<archetype>/`. Storm Ball now bounces once (`bounces = 1`, built in HOS-VFX-003).
+Decoy, Guardian, Tempest and Rift done; previews in `docs/ability-vfx/<archetype>/`. Storm Ball now bounces once (`bounces = 1`, built in HOS-VFX-003).
 
 ## Queued for the polish pass
 - **Storm Ball** (17 Oct): reference Mad Maggie's Wrecking Ball (Apex Legends), Hunter's pick. Mechanics decided: bounces off a wall **once**, same 50-stud total range; no speed pads (would make Catchers stronger); no detonation (keeps "slow the first Runner hit"). Build the bounce in the Storm Ball polish ticket, not before.

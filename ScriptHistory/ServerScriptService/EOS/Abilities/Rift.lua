@@ -24,6 +24,7 @@ end
 -- may be a little higher or lower (a step, a slope), but never a climb onto a wall or a box: anything more
 -- than MAX_UP above your ground keeps your height, so the validity check refuses the blocked spot.
 local MAX_UP, MAX_DOWN = 3, 6
+local PORTAL_UP = Vector3.new(0, 3.2, 0) -- portal centre above the ground (VFX.Abilities.RiftPortal is 6.4 across)
 local function spotAhead(root: BasePart, dir: Vector3, dist: number): Vector3
 	local here = Shared.groundBelow(root.Position)
 	local lift = root.Position.Y - here.Y
@@ -49,7 +50,13 @@ local function teleport(ctx: any, dir: Vector3, showStart: boolean): (boolean, s
 	local endRing = Shared.ring(Shared.groundBelow(dest) + Vector3.new(0, 0.12, 0), radius, COLOR, d.windup + 0.15, 0.2)
 	endRing.Name = "EOS_RiftTarget"
 	if showStart then
-		Shared.ring(Shared.groundBelow(root.Position) + Vector3.new(0, 0.12, 0), radius, COLOR, d.windup + 0.15, 0.2)
+		-- PORTAL HOP (HOS-VFX-004): a portal stands at each end for the windup, facing the way you go
+		endRing.Transparency = 1
+		Shared.vfx("RiftPortal", Shared.groundBelow(root.Position) + PORTAL_UP, dir)
+		Shared.vfx("RiftPortal", Shared.groundBelow(dest) + PORTAL_UP, dir)
+	else
+		-- RIFT BLINK: clients draw the warning reticle on the ring
+		Shared.tagVfx(endRing, "RiftReticle")
 	end
 	local role = plr:GetAttribute("EOS_Role")
 	local char = plr.Character
@@ -62,15 +69,18 @@ local function teleport(ctx: any, dir: Vector3, showStart: boolean): (boolean, s
 		local ok2, why2 = Shared.validPosition(plr, now)
 		if not ok2 then
 			ctx.refund("FIZZLED")
-			Shared.ring(Shared.groundBelow(root.Position) + Vector3.new(0, 0.12, 0), 1.5, Color3.new(0.6, 0.6, 0.6), 0.3, 0.3)
+			Shared.vfx("RiftFizzle", Shared.groundBelow(root.Position))
 			print(("[EOS] Rift %s fizzled: %s"):format(ctx.roleKey, tostring(why2)))
 			return
+		end
+		if not showStart then
+			Shared.vfx("RiftArrive", Shared.groundBelow(root.Position)) -- where the Catcher left
 		end
 		local rot = root.CFrame - root.Position
 		char:PivotTo(CFrame.new(now) * rot)
 		root.AssemblyLinearVelocity = Vector3.zero
 		plr:SetAttribute("EOS_TeleportedAt", os.clock())
-		Shared.ring(Shared.groundBelow(now) + Vector3.new(0, 0.12, 0), radius + 1, COLOR, 0.3, 0.1)
+		Shared.vfx("RiftArrive", Shared.groundBelow(now))
 	end)
 	return true, nil
 end
