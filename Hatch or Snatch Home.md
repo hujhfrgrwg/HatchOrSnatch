@@ -20,6 +20,9 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 Arena maps are built from code: `ServerStorage.EOSBuild.Maps` (`MapDefs` plus one `Build<Map>` per map on the shared `ArenaFrame`). Previews sit side by side in `Workspace._MapPreview` along z −390.
 - **Haunted Graveyard** (HOS-MAP-001, Matthew): halloween arena, preview only and not in rotation yet. See [[HOS-MAP-001 Haunted Graveyard map]].
 
+## Lobby
+- **Leaderboards** (HOS-LB-001, Matthew): the four Halloween boards in `Workspace.Leaderboards` show live this-server stats and turn to face each player. See [[HOS-LB-001 Halloween leaderboards]].
+
 ## Setup
 - **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
 - **Uploads:** `tools\upload\upload_assets.py` (Open Cloud; key and creator from the environment).
