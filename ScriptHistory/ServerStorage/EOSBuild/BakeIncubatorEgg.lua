@@ -31,6 +31,7 @@ function Bake.obj(): string
 	for i, info in list do
 		local em, mid = info.em, info.mid
 		table.insert(out, "o Piece" .. i)
+		table.insert(out, "g Piece" .. i) -- the 3D Importer splits parts by group
 		local vIndex, tIndex, nIndex = {}, {}, {}
 		for _, v in em:GetVertices() do
 			local p = em:GetPosition(v) + mid
