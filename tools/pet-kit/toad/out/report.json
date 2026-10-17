@@ -1,0 +1,48 @@
+{
+ "total": 1536,
+ "by_mat": {
+  "0": 1460,
+  "1": 28,
+  "2": 24,
+  "3": 24
+ },
+ "by_part": {
+  "body": 252,
+  "jaw": 96,
+  "socketL": 60,
+  "socketR": 60,
+  "frontL": 120,
+  "backL": 120,
+  "pad": 432,
+  "frontR": 120,
+  "backR": 120,
+  "tail": 48,
+  "spike": 32,
+  "eye": 28,
+  "L2": 24,
+  "L3": 24
+ },
+ "bones": 18,
+ "open_edges_body": {
+  "socketL": 12,
+  "socketR": 12
+ },
+ "bbox_min": [
+  -1.228,
+  -1.31,
+  0.0
+ ],
+ "bbox_max": [
+  1.228,
+  1.18,
+  1.86
+ ],
+ "tris_per_level": {
+  "1": 1488,
+  "2": 1512,
+  "3": 1536
+ },
+ "lowest_z": 0.0,
+ "clip": [],
+ "issues": []
+}
