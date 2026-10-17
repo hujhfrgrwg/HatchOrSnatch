@@ -3,11 +3,11 @@
 -- jagged crack lines into COUNT pieces that fit together exactly: a bottom cap, three rings of pieces (5, 6, 5) and a
 -- top cap. Each piece is a curved shell with thickness, UV-mapped to the egg shard atlas (ReplicatedStorage.EggShardKit
 -- SA_<rarity>: outer face top-left, inner face top-right, rim band below) so it wears the same rarity look as the
--- shards. A thin crack is left between neighbours, so the core glows through.
+-- shards. A thin crack is left between neighbours.
 -- The meshes are baked once in Studio (ServerStorage.EOSBuild.BakeIncubatorEgg uploads them and stores the MeshParts
 -- in ReplicatedStorage.IncubatorEggPieces): EditableMesh is too memory-hungry to build 18 of on a player's device.
 -- Without the baked folder, each piece is drawn from wedge parts in the rarity's colour instead.
--- Pieces come back in fill order (bottom up). All positions are relative to the egg's centre (the core).
+-- Pieces come back in fill order (bottom up). All positions are relative to the egg's centre (A09_EggCentre).
 local AssetService = game:GetService("AssetService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -16,7 +16,7 @@ Pieces.COUNT = 18
 Pieces.BAKED = "IncubatorEggPieces" -- ReplicatedStorage folder: MeshParts Piece1..Piece18, attributes Centre and Mid
 
 local TAU = math.pi * 2
-local H, R, BULGE, YC = 2.2, 1.78, 0.08, -0.12 -- half-height, waist radius, wider bottom, egg middle below the core
+local H, R, BULGE, YC = 2.2, 1.78, 0.08, -0.12 -- half-height, waist radius, wider bottom, egg middle below the centre
 local TH = 0.16 -- shell thickness
 local GAP = 0.025 -- half the crack between neighbours (studs)
 local RINGS = { -- crack rings: angle from the bottom pole, zigzag knots, zigzag size (radians)
@@ -291,7 +291,8 @@ local function quiet(p: BasePart)
 end
 
 -- builds the egg. Returns { model, baked = true when the baked meshes were used, pieces = { {
---   parts = { BasePart }, locals = { CFrame (relative to the egg centre) }, centre = Vector3, out = Vector3 } } }
+--   parts = { BasePart }, locals = { CFrame (relative to the egg centre) }, holo = { BasePart } (its ForceField
+--   hologram), holoLocals, centre = Vector3, out = Vector3 } } }
 -- partsOnly skips the baked meshes (to check the fallback).
 function Pieces.build(parent: Instance?, partsOnly: boolean?): any
 	local regions = layout()
@@ -339,6 +340,17 @@ function Pieces.build(parent: Instance?, partsOnly: boolean?): any
 					table.insert(piece.locals, w.cf)
 				end
 			end
+		end
+		-- its hologram: a ForceField copy (a hair larger, so it never flickers against the piece as they cross-fade)
+		piece.holo, piece.holoLocals = {}, {}
+		for k, p in piece.parts do
+			local h = p:Clone()
+			h.Name = "Holo" .. i
+			h.Material = Enum.Material.ForceField
+			if baked then h.Size = p.Size * 1.01 end
+			h.Parent = model
+			piece.holo[k] = h
+			piece.holoLocals[k] = piece.locals[k]
 		end
 		piece.out = piece.centre.Unit
 		res.pieces[i] = piece

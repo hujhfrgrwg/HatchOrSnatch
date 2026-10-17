@@ -22,8 +22,8 @@ The lobby incubator (`Workspace.Incubator.Incubator`) is now animated and wired 
 - **Your egg:**
   - The egg is cut along jagged crack lines into 18 pieces that fit together: a bottom cap, rings of 5, 6 and 5 pieces, and a top cap.
   - Pieces are placed bottom up, one per 1/18 of fill. Each piece wears the rarity of the shard that filled it, using the same texture atlas as the egg shards (`EggShardKit` `SA_<rarity>`).
-  - Until the egg is whole, a lavender hologram egg (the model's wedge shell, in ForceField) shows what's being built, and the core glows brighter as it fills.
-  - A full egg drops the hologram and glows gold.
+  - Every piece that isn't placed yet shows as a ForceField hologram of its own curved mesh. An empty egg is a whole hologram egg with the crack lines showing, and it fills in solid piece by piece.
+  - A full egg is solid and glows gold.
 - **Shards flying in:** shards earned since the last visit fly from the player's back to the egg one by one when they walk up. As each one lands, its pieces appear just outside the egg and snap into place, with a pulse and a sound. After that the server's list of unseen shards is cleared.
 - **Hatch:** the pieces burst outward, tumbling and fading, and the next egg starts.
 
@@ -64,8 +64,17 @@ Without the folder, the egg falls back to wedge parts in flat rarity colours.
 - **Hatch:** a pet was granted, every piece part was thrown more than 3 studs out mid-burst, then 0 pieces showed and the hologram came back.
 - **No errors** from IncubatorWorld in the logs.
 - **Mesh pieces:** checked in edit mode, both whole and half built, and in game after the import: 18 baked MeshParts with rarity textures, 7 of 18 shown at fill 7, all 18 when ready, all 18 thrown out by the hatch.
-- **Core glow:** the incubator's neon core glows through the cracks as the egg fills (transparency 0.85 → 0.3) and hides once the egg is whole. It's taller than the egg and poked out of the top.
+- **Hologram:** at fill 7, 7 pieces are solid and 11 are hologram. A full egg is 18 solid and 0 hologram. After a hatch, 0 are solid and 18 are hologram again.
 - **EggTests:** 75 passed, 0 failed. G04 and E03 also print FAIL lines; they did before this ticket too (old pieces path).
+
+## Old egg removed (17 Oct, Matthew: "we just need a curved hologram mesh and the new fragments")
+- **Removed:** the model's faceted egg shell `A09_EggShards` (160 parts, the first hologram) and its neon core `A09_EggCore` (6 discs).
+- **Backups:** the originals are in `ServerStorage._Backups.HOS-INC-001_2026-10-17_IncubatorOldEgg`, and a part dump is in `docs/backups/HOS-INC-001_2026-10-17/`.
+- **New marker:** `A09_EggCentre`, an invisible part at the old core's centre (−51.30, 16.31, 1494.97). The client places the egg on it.
+- **Hologram:** a ForceField copy of each piece mesh, 1% larger, in light lavender (225, 175, 255). It fades out as its piece snaps in and comes back after a hatch.
+
+![Empty egg: all hologram](HOS-INC-001/ingame_hologram_empty.jpg)
+![Building: solid pieces at the bottom, hologram above](HOS-INC-001/ingame_building_hologram.jpg)
 
 ## Notes
 - **Why the pieces are baked:** building the pieces at runtime with EditableMesh worked in Studio, but a player's client ran out of its EditableMesh memory budget after 8 of the 18 pieces, and phones get less. Baked meshes have no such limit and don't need the "Allow Mesh / Image APIs" setting.

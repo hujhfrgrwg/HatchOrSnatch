@@ -4,9 +4,8 @@
 --             the lanterns sway on their chains and the neon (strips, beams, runes, sign, base disc, ring) breathes
 --   your egg  every player sees their own egg, a cracked-shell puzzle (EggPieces): SLOTS pieces that fit together,
 --             placed bottom up, one per FILL / SLOTS of fill, each wearing the rarity of the shard that filled it
---             (ProfileState incubator.shards; the EggShardKit look). Until it's whole, a hologram egg (the model's wedge
---             shell as ForceField) shows what's being built and the core glows brighter as it fills; a ready egg is
---             whole, the hologram fades and it glows gold
+--             (ProfileState incubator.shards; the EggShardKit look). Every piece not placed yet shows as a ForceField
+--             hologram of itself, so the whole egg is always outlined; a ready egg is solid and glows gold
 --   walk-up   stepping onto the platform opens the incubator screen (EggUIController's openIncubator); walking away
 --             closes it. Shards earned since the last visit (incubator.unseen) first fly from the player's back to the
 --             egg one by one and their pieces snap into the puzzle; then EOS_Egg.SeenShards clears them on the server
@@ -32,7 +31,7 @@ local OPEN_RADIUS, CLOSE_RADIUS = 11, 14 -- studs from the egg's axis (the platf
 local ANIM_RANGE = 260 -- the camera must be this close for the idle animation to run
 local SLOTS = EggPieces.COUNT -- puzzle pieces (EggConfig.INCUBATOR.FILL is 18: one fill each)
 local SNAP = 1.6 -- studs out from its place a piece appears before it snaps in
-local HOLO = Color3.fromRGB(190, 130, 255)
+local HOLO = Color3.fromRGB(225, 175, 255) -- the hologram pieces (ForceField reads faint, so a light tint)
 local GOLD = Color3.fromRGB(255, 210, 58)
 
 local deps: any = {}
@@ -156,34 +155,24 @@ end
 
 local function bind(m: Model)
 	local s: any = { model = m }
-	local core = m:FindFirstChild("A09_EggCore")
-	if not core then return nil end
-	local ccf = (core :: Model):GetBoundingBox()
-	s.E = ccf.Position
-	-- the hologram: the model's wedge shell, as a shimmering ForceField egg
-	s.holo = partsOf(m:FindFirstChild("A09_EggShards"))
-	for _, p in s.holo do
-		p.Material = Enum.Material.ForceField
-		p.Color = HOLO
-		p.Transparency = 0
-		p.CastShadow = false
-	end
-	-- the real egg: the puzzle pieces, hidden until filled (they ride the egg's turn in step)
+	local centre = m:FindFirstChild("A09_EggCentre") -- an invisible marker at the egg's centre
+	if not (centre and centre:IsA("BasePart")) then return nil end
+	s.E = centre.Position
+	-- the egg: the puzzle pieces (hidden until filled) and their holograms (they ride the egg's turn in step)
 	s.slots = {}
 	if EGG then
 		for i, pc in EGG.pieces do
 			s.slots[i] = pc
 			for k, p in pc.parts do p.CFrame = CFrame.new(s.E) * pc.locals[k] end
+			for k, p in pc.holo do
+				p.CFrame = CFrame.new(s.E) * pc.holoLocals[k]
+				p.Color = HOLO
+			end
 		end
 		EGG.model.Parent = workspace
 	end
-	s.core = partsOf(core) -- fades in as the egg fills
-	-- the egg turns and bobs as one: hologram, core and its light (and the pieces)
-	local eggParts = {}
-	for _, p in s.holo do table.insert(eggParts, p) end
-	for _, p in s.core do table.insert(eggParts, p) end
-	for _, p in partsOf(m:FindFirstChild("A09_EggLight_OPTIONAL")) do table.insert(eggParts, p) end
-	s.egg = group(eggParts)
+	-- the egg's light turns and bobs with it
+	s.egg = group(partsOf(m:FindFirstChild("A09_EggLight_OPTIONAL")))
 	s.ring = group(partsOf(m:FindFirstChild("A09_OrbitRings_OPTIONAL")))
 	s.float = group(partsOf(m:FindFirstChild("A09_FloatShards")))
 	-- lanterns swing from the top of their chains
@@ -249,11 +238,20 @@ local function setSlot(i: number, rarity: string?, animate: boolean, pop: boolea
 	local was = sl.rarity
 	sl.rarity = rarity
 	local t = if rarity then 0 else 1
+	local fade = animate and (was == nil) ~= (rarity == nil)
 	for _, p in sl.parts do
-		if animate and (was == nil) ~= (rarity == nil) then
+		if fade then
 			TweenService:Create(p, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = t }):Play()
 		else
 			p.Transparency = t
+		end
+	end
+	-- its hologram shows while it's missing
+	for _, p in sl.holo do
+		if animate then
+			TweenService:Create(p, TweenInfo.new(0.4), { Transparency = 1 - t }):Play()
+		else
+			p.Transparency = 1 - t
 		end
 	end
 	if pop and rarity then sl.popAt = os.clock() end -- appears SNAP studs out and snaps into its place (step)
@@ -269,18 +267,6 @@ local function ready(): boolean
 	return v ~= nil and displayFill >= v.need - 1e-9
 end
 
-local function setHologram(on: boolean, animate: boolean)
-	if not S then return end
-	for _, p in S.holo do
-		local goal = { Transparency = if on then 0 else 1 }
-		if animate then
-			TweenService:Create(p, TweenInfo.new(0.6), goal):Play()
-		else
-			p.Transparency = goal.Transparency
-		end
-	end
-end
-
 local function applyEgg(animate: boolean)
 	if not S then return end
 	local v = view()
@@ -290,18 +276,6 @@ local function applyEgg(animate: boolean)
 	for i = 1, SLOTS do
 		local keep = S.slots[i] and S.slots[i].rarity -- a placed slot keeps its look (a hatch clears them)
 		setSlot(i, if i <= n then (keep or rar[i]) else nil, animate)
-	end
-	setHologram(n < SLOTS, animate)
-	-- the core glows brighter through the cracks as it fills; a whole egg hides it (it's taller than the egg, and the
-	-- ready glow takes over)
-	local frac = math.clamp(displayFill / need, 0, 1)
-	for _, p in S.core do
-		local goal = { Transparency = if n == SLOTS then 1 else 0.3 + 0.55 * (1 - frac) }
-		if animate then
-			TweenService:Create(p, TweenInfo.new(0.4), goal):Play()
-		else
-			p.Transparency = goal.Transparency
-		end
 	end
 	-- a ready egg glows gold, with motes when effects are on
 	local isReady = v ~= nil and n == SLOTS
@@ -574,6 +548,10 @@ local function step(dt: number)
 		for j, p in sl.parts do
 			table.insert(parts, p)
 			table.insert(cfs, Tegg * C * sl.locals[j])
+		end
+		for j, p in sl.holo do
+			table.insert(parts, p)
+			table.insert(cfs, Tegg * CFrame.new(E) * sl.holoLocals[j])
 		end
 	end
 	-- ring precesses the other way, riding the bob
