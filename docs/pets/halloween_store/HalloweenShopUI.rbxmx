@@ -1,0 +1,104 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" version="4">
+<Item class="ModuleScript" referent="RBX0">
+<Properties>
+<string name="Name">HalloweenShopUI</string>
+<ProtectedString name="Source"><![CDATA[--!strict
+-- HalloweenShopUI (client): puts the three Halloween pet cards on the Shop's Featured page while the sale runs,
+-- HOS-HWN-001. The cards are roblox-ui-maker templates (ReplicatedStorage.HalloweenUITemplates, from ui/build.py
+-- s_hwn_templates via ui_hwn/rbx.json). UIController's Featured loop calls slots(sc) (one line) and then fills each
+-- returned card exactly like FeatA / FeatB (Title, Tagline, Icon, price / Robux / OWNED buttons, Have).
+-- After HalloweenShop.ENDS_AT the cards hide and FeatA / FeatB come back. From ROTATE_AT (Oct 24) the order is
+-- Bone Dragon (NEW) | Jack-o'-Lantern | Mummy (HalloweenShop.featured).
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HalloweenShop = require(ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared"):WaitForChild("HalloweenShop"))
+
+local HalloweenShopUI = {}
+
+local TEMPLATE = { hwn_wraith = "HwnCardWraith", hwn_cat = "HwnCardCat", hwn_mummy = "HwnCardMummy", hwn_dragon = "HwnCardDragon" }
+local GAP = 22 -- 3 x 494 + 2 x 22 = the page's 1526 px
+
+local function setLabels(scope: Instance?, text: string)
+	if not scope then
+		return
+	end
+	for _, d in scope:GetDescendants() do
+		if d:IsA("TextLabel") then
+			d.Text = text
+		end
+	end
+end
+
+local function setNamed(scope: Instance, name: string, text: string)
+	for _, d in scope:GetDescendants() do
+		if d:IsA("TextLabel") and (d.Name == name or d.Name == name .. "Shadow") then
+			d.Text = text
+		end
+	end
+end
+
+-- slot name -> EconomyConfig.FEATURED key for the Featured loop; the default pair when the sale is over.
+-- HalloweenShop.featured() decides which cards show and in what order (the Bone Dragon rotates in on Oct 24).
+function HalloweenShopUI.slots(sc: Instance): { [string]: string }
+	local pf = sc:FindFirstChild("PageFeatured", true)
+	local ids = HalloweenShop.featured()
+	local map: { [string]: string } = {}
+	if pf then
+		local templates = ReplicatedStorage:FindFirstChild("HalloweenUITemplates")
+		local order: { [string]: number } = {}
+		for i, id in ids do
+			order[id] = i
+		end
+		local left = HalloweenShop.secondsLeft()
+		for id, tpl in TEMPLATE do
+			local card = pf:FindFirstChild(tpl) :: GuiObject?
+			local i = order[id]
+			if i and not card and templates and templates:FindFirstChild(tpl) then
+				local nc = (templates :: any)[tpl]:Clone() :: GuiObject
+				nc.Parent = pf
+				card = nc
+			end
+			if card then
+				card.Visible = i ~= nil
+				if i then
+					card.Position = UDim2.fromOffset((i - 1) * (card.Size.X.Offset + GAP), 0)
+					map[tpl] = id
+					setLabels(card:FindFirstChild("EndsTag", true), ("ENDS IN %dD %dH"):format(left // 86400, (left % 86400) // 3600))
+					local nt = card:FindFirstChild("NewTag", true)
+					if nt and nt:IsA("GuiObject") then
+						nt.Visible = id == "hwn_dragon"
+					end
+				end
+			end
+		end
+		local on = next(map) ~= nil
+		for _, n in { "FeatA", "FeatB" } do
+			local f = pf:FindFirstChild(n)
+			if f and f:IsA("GuiObject") then
+				f.Visible = not on
+			end
+		end
+		if on then
+			-- after the Featured loop has filled the cards: the Robux-only pets have no Gem wallet line
+			task.defer(function()
+				for id, tpl in TEMPLATE do
+					local it = HalloweenShop.item(id)
+					local card = pf:FindFirstChild(tpl)
+					if it and card and it.wallet == "robux" then
+						local owned = card:FindFirstChild("BtnOwned", true)
+						local isOwned = owned and owned:IsA("GuiObject") and owned.Visible
+						setNamed(card, "Have", if isOwned then "In your pets  ·  equip it from Pets" else "Yours to keep after the event")
+					end
+				end
+			end)
+			return map
+		end
+	end
+	return { FeatA = "weekly", FeatB = "spotlight" }
+end
+
+return HalloweenShopUI
+]]></ProtectedString>
+</Properties>
+</Item>
+</roblox>

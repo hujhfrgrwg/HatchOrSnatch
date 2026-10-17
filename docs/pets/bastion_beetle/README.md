@@ -71,3 +71,23 @@ Rebuilt to Hunter's model sheet, `docs/pets/concepts/bastion_beetle_model_sheet.
 ## Not done / next
 - **No live playtest:** Studio refused to start one this pass (solo and multiplayer both returned an unknown error). The clip is staged in edit mode, as before.
 - **Against the sheet:** the sheet's shell plates are rounder, with finer bronze trim and a larger back crystal. This is a low-poly read of them.
+
+## Per-level looks + per-level ability effects (17 Oct, HOS-PET-013d)
+Hunter 07:46: "The beetle needs to look different from l1-l3, and also needs abilities to look different per level."
+- Looks (no new geometry; L3 is at 1,905 / 2,000 tris): tools/pets/beetle_level_looks.py recolours the baked maps by
+  material class. L1 ivory + bronze (as built); L2 "Gilded" pearl plates + polished gold rims + brighter crystals;
+  L3 "Royal" royal-blue enamel plates + gold rims + white-hot crystals + faint gold rim glow. Files in tex/levels/
+  (Body / L2 / L3 colour + emissive for L2 and L3), preview tex/levels/beetle_levels_preview.jpg (the old renders
+  recoloured: backdrop tint is a preview artifact). NOT uploaded yet: waiting for Hunter's yes; then a Looks folder
+  (Body1-3 / Face1-3 / Extra2-3) on the template.
+- Ability effects per level (Studio, no uploads): Beetle{ShieldUp,ShieldBubble,ShieldBreak,TetherBeam,TetherYank}_L2
+  (+ gold accent ring / flash layers, counts x1.3, gold core thread on the tether) and _L3 (counts x1.6, + violet-white
+  royal crystals, gold sparks, a violet spiral on the tether, violet-white bubble crystals). The dome and its blue
+  keep their size and colour (opponents read it). Level plumbing: Shared.tagVfx / beam / grantTagBlock carry a level,
+  Guardian passes ctx.level, AbilityVFX dresses tagged parts with VFXLevel (originals in
+  docs/backups/IMP_HOOKS_20261017/ORIGINAL_LINES.md).
+- Hunter 07:51 "Yes upload": the 12 textures uploaded (docs/VFX-LEDGER.md). Template Looks: Body1-3, Face1-3 (emissive
+  up per level), Extra2_L2, Extra3_L2, Extra3_L3 (per-mesh looks: PetModel.applyLevelLook now tries
+  Extra<level>_<mesh> first, original line backed up). Builder check: L1 / L2 / L3 each get their own maps.
+  Real render: tex/levels/beetle_levels_render.png (tools/pets/render_beetle_levels.py).
+- **Touch-up (17 Oct, HOS-PET-REDO; Hunter asked whether to redo it; answer "Both" = touch it up)**: kept the cream / bronze look and the mesh. Bigger, sharper eyes (about 1.35x, narrower, slanted 24 degrees; `tools/pets/bastion_beetle.py`, rebuilt into `v4/`), engraved bronze filigree and fine scratches on the ivory plates, carved into the normal map (`tools/pets/beetle_engrave.py`), and the engraved lines glow at L2 / L3 (`tex/levels/*_engrave.png` added to the level emissive masks after `beetle_level_looks.py`). L2 Gilded and L3 Royal looks kept. Template rebuilt with the old structure (same SurfaceAppearance settings, Looks Body1-3 / Face1-3 / Extra2_L2 / Extra3_L2 / Extra3_L3, L3 Aura light and sparkles). New FBX 110638009824673; 31 uploads (old ids kept as `#superseded-HOS-PET-REDO`). `EconomyConfig.SPECIES_RARITY` now "common". Old files: `docs/backups/HOS-PET-REDO_20261017/bastion_beetle_before/`. Not saved: Hunter saves the place.
