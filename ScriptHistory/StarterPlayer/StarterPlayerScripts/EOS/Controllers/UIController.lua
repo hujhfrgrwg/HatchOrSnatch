@@ -21,6 +21,8 @@ local GameConfig = require(Shared:WaitForChild("GameConfig"))
 local MarketplaceService = game:GetService("MarketplaceService")
 local TierConfig = require(Shared:WaitForChild("TierConfig"))
 local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
+local AbilityConfig = require(Shared:WaitForChild("AbilityConfig"))
+local AbilityCosmetics = require(Shared:WaitForChild("AbilityCosmetics"))
 local Layout = require(Shared:WaitForChild("Layout"))
 local Format = require(Shared:WaitForChild("Format"))
 local Net = require(Shared:WaitForChild("Net"))
@@ -61,12 +63,13 @@ local trackedQuest: string? = nil
 local joinedAt = os.clock()
 
 ----------------------------------------------------------------------------------------------- data
-local ORDER = { "DoubleDash", "Decoy", "Scout", "Brake", "Invisibility", "Wall", "Shield", "Spring", "PetTackle" }
-local FAMILY = { -- the nine families (HOS-ABIL-001); EconomyConfig.FAMILIES wins where the game has the family
+-- HOS-PET-001: Scout and Brake are gone (their incubator tiles are hidden at init). Per-role text for
+-- the five ability archetypes comes from AbilityConfig where it has the family.
+local ORDER = { "DoubleDash", "Decoy", "Invisibility", "Wall", "Shield", "Spring", "PetTackle" }
+local REMOVED_FAMILIES = { "Scout", "Brake" }
+local FAMILY = { -- the design's families (HOS-ABIL-001); EconomyConfig / AbilityConfig win where the game has the family
 	DoubleDash = { title = "Double Dash", icon = "ab_dash", blurb = "Two quick dashes in a row", run = "escape burst", catch = "close the gap", wave = 1 },
 	Decoy = { title = "Decoy", icon = "ab_decoy", blurb = "A running copy of you", run = "fake out chasers", catch = "fake out runners", wave = 1 },
-	Scout = { title = "Scout", icon = "ab_scout", blurb = "See the 3 nearest rivals", run = "see the 3 nearest Catchers", catch = "see the 3 nearest Runners", wave = 1 },
-	Brake = { title = "Brake", icon = "ab_brake", blurb = "Stop dead and cut sharply", run = "stop and cut", catch = "cut off a juke", wave = 2 },
 	Invisibility = { title = "Invisibility", icon = "ab_invis", blurb = "Fade out for a few seconds", run = "slip past", catch = "sneak up", wave = 2 },
 	Wall = { title = "Wall", icon = "ab_wall", blurb = "Drop a wall in a lane", run = "block the chaser", catch = "block the escape lane", wave = 2 },
 	Shield = { title = "Shield", icon = "ab_shield", blurb = "A bubble that blocks one hit", run = "blocks one tag", catch = "to be decided", wave = 3 },
@@ -77,7 +80,6 @@ local FAMILY = { -- the nine families (HOS-ABIL-001); EconomyConfig.FAMILIES win
 local PET_ART = {
 	DoubleDash = { "shades_shark", "surfer_dog", "thunder_wolf" },
 	Decoy = { "gamer_axolotl", "bandit_raccoon", "ninja_penguin" },
-	Scout = { "seagull_scout" },
 	Invisibility = { "koi_spirit", "jelly_wisp", "saucer_pilot" },
 	Wall = { "sand_crab", "robo_crab", "armored_rex" },
 	Shield = { "pebble_frog", "puffer_pup", "hermit_knight" },
@@ -324,7 +326,7 @@ local function moveRing(ring: Instance?, target: Instance?, pad: number?)
 end
 
 local function launchFamilies(): { string }
-	return EconomyConfig.LAUNCH_FAMILIES or { "Decoy", "Scout", "Brake" }
+	return EconomyConfig.LAUNCH_FAMILIES or { "Decoy" }
 end
 local function isLive(f: string): boolean
 	return table.find(launchFamilies(), f) ~= nil
@@ -332,7 +334,11 @@ end
 local function familyTitle(f: string): string
 	return (FAMILY[f] and FAMILY[f].title) or f
 end
-local function familyAbility(f: string): string
+local function familyAbility(f: string, r: string?): string
+	local rd = r and AbilityConfig.forRole(f, r) -- in a match: the ability for your role (HOS-PET-001)
+	if rd then
+		return rd.name
+	end
 	local ef = EconomyConfig.FAMILIES[f]
 	return (ef and ef.ability) or string.upper(familyTitle(f))
 end
@@ -830,7 +836,8 @@ end
 
 local abilityWasReady = true
 local function abilityCard()
-	local fam = player:GetAttribute("EOS_PetFamily") or ""
+	-- Pets.family: nil for the match's starting Catcher (no pet ability) and for a removed family
+	local fam = Pets.family() or ""
 	local has = fam ~= ""
 	hideGroup("Ability", not has)
 	if not has then return end
@@ -843,9 +850,10 @@ local function abilityCard()
 	for _, sc in ipairs({ "HUD", "MatchHUD" }) do
 		local card = hudGroup(sc, "Ability")
 		if card then
-			if card:GetAttribute("Fam") ~= fam .. rarity then
-				card:SetAttribute("Fam", fam .. rarity)
-				setText(card, "AbilityName", familyAbility(fam))
+			local cr = if sc == "MatchHUD" and inMatch() then role() else nil
+			if card:GetAttribute("Fam") ~= fam .. rarity .. (cr or "") then
+				card:SetAttribute("Fam", fam .. rarity .. (cr or ""))
+				setText(card, "AbilityName", familyAbility(fam, cr))
 				setIcon(card, "AbilityIcon", familyIcon(fam))
 				setIcon(card, "PetIcon", art)
 			end
@@ -925,7 +933,7 @@ local function touchButtons()
 	local tagB, dashB, abB = t:FindFirstChild("TouchTag"), t:FindFirstChild("TouchDash"), t:FindFirstChild("TouchAbility")
 	if tagB then tagB.Visible = r == "CATCHER" end
 	if abB then
-		local fam = player:GetAttribute("EOS_PetFamily") or ""
+		local fam = Pets.family() or "" -- hidden for the starting Catcher
 		abB.Visible = fam ~= ""
 		if abB:GetAttribute("Fam") ~= fam then
 			abB:SetAttribute("Fam", fam)
@@ -1302,7 +1310,11 @@ local function refreshIncubator()
 	local lad = find(sc, "Ladder")
 	if lad then
 		local f = selFamily :: string
-		local info = FAMILY[f] or {}
+		local info = table.clone(FAMILY[f] or {})
+		local arch = AbilityConfig.get(f) -- the game's per-role lines win over the design's
+		if arch then
+			info.run, info.catch = arch.Runner.text, arch.Catcher.text
+		end
 		-- the well's folder-tab title is unnamed in the export: init() tags it (and its shadow) LadderTitle
 		for _, d in sc:GetDescendants() do
 			if d:IsA("TextLabel") and d:GetAttribute("LadderTitle") then
@@ -2753,6 +2765,13 @@ local function wireButtons()
 	-- Incubator
 	local inc = S.Incubator
 	if inc then
+		-- removed families (HOS-PET-001): their tiles and counts stay in the GUI, hidden
+		for _, f in ipairs(REMOVED_FAMILIES) do
+			for _, n in ipairs({ "Family_" .. f, "FamCount_" .. f, "FamCount_" .. f .. "Shadow" }) do
+				local g = find(inc, n)
+				if g and g:IsA("GuiObject") then g.Visible = false end
+			end
+		end
 		for _, f in ipairs(ORDER) do
 			onClick(find(inc, "Family_" .. f), function()
 				if isLive(f) then
@@ -3313,8 +3332,8 @@ function UIC.init()
 		UIC.toast(text, kind)
 	end
 	Pets.onUsed = function()
-		local fam = player:GetAttribute("EOS_PetFamily") or ""
-		Sound.play(if fam == "Decoy" then "poof" elseif fam == "Scout" then "ping" else "ability")
+		local fam = Pets.family()
+		Sound.play(AbilityCosmetics.resolve(player:GetAttribute("EOS_PetSpecies"), fam).sound)
 		local card = hudGroup("MatchHUD", "Ability")
 		if card then UI.pulse(card, 0.1) end
 	end

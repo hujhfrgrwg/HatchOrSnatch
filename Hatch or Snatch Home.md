@@ -23,6 +23,7 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 
 ## Design
 - [[Emote Light Constructs]]: Destiny-style glowing props for the 13 emotes that mime one (scythe, surfboard, toilet, cart, ...). In the place since 2026-10-16: templates `ReplicatedStorage.EOS_EmoteFX`, client `Controllers.EmoteFX`; playtest owed.
+- [[HOS-PET-001 Ability Framework]]: five pet ability archetypes (Decoy, Invisibility, Guardian, Tempest, Rift), a Runner and a Catcher handler each, numbers in `Shared.AbilityConfig`, species looks in `Shared.AbilityCosmetics`, handlers in `ServerScriptService.EOS.Abilities`. Scout and Brake removed; the starting Catcher has no pet ability. Since 2026-10-16; only Decoy and Invisibility (Runner side) are built.
 
 ## UI
 - [[Emote Crate Spin]]: emote crate opening animation (HTML in `UI/web/`, client script in `UI/roblox/`). In the place since 2026-10-16 as `StarterGui.EmoteCrateUI`, played by EmoteController.

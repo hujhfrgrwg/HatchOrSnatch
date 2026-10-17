@@ -128,36 +128,52 @@ end
 
 -- ===== pets and ability families (GDD 13, appendix B) =====
 -- One equipped pet = one ability. Rarity is visual at launch (casual rarity stats are a TEST: 0%).
-EconomyConfig.LAUNCH_FAMILIES = { "Decoy", "Scout", "Brake" }
+-- HOS-PET-001 (16 Oct): Scout and Brake are gone. A family is one of the five ability archetypes
+-- (AbilityConfig: Decoy, Invisibility, Guardian, Tempest, Rift); the cooldown / duration shown here are
+-- the Runner side's, read from AbilityConfig (the one place the numbers live). Only families with
+-- species are listed; LAUNCH_FAMILIES is what eggs hatch.
+local AbilityConfig = require(script.Parent:WaitForChild("AbilityConfig"))
+local AR = AbilityConfig.ARCHETYPES
+EconomyConfig.LAUNCH_FAMILIES = { "Decoy" }
 EconomyConfig.FAMILIES = {
 	Decoy = {
 		ability = "DECOY",
 		short = "A running copy of you",
 		desc = "Sends a copy of you running ahead for 3 seconds. Catchers chasing it lose you.",
 		species = { common = "Mouse", rare = "Parrot", epic = "Mirror Dragon" },
-		color = Color3.fromRGB(255, 196, 92),
-		cooldown = 20,
-		duration = 3,
+		color = AR.Decoy.color,
+		cooldown = AR.Decoy.Runner.cooldown,
+		duration = AR.Decoy.Runner.duration,
 	},
-	Scout = {
-		ability = "SCOUT",
-		short = "See the nearest opponents",
-		desc = "Pings the 3 nearest opponents through walls for 4 seconds.",
-		species = { common = "Sparrow", rare = "Seagull", epic = "Celestial Owl" },
-		color = Color3.fromRGB(110, 214, 255),
-		cooldown = 18,
-		duration = 4,
-	},
-	Brake = {
-		ability = "BRAKE",
-		short = "Stop dead and cut",
-		desc = "Kills your momentum and lets you cut a new way at full speed, no build-up.",
-		species = { common = "Turtle", rare = "Hermit Crab", epic = "Time Spirit" },
-		color = Color3.fromRGB(120, 236, 140),
-		cooldown = 10,
-		duration = 0.7,
+	-- not a launch family yet (not in LAUNCH_FAMILIES, so eggs don't hatch it): the shared backend
+	-- for the invisibility pets. Abilities.Invisibility / client Controllers.Invisibility.
+	Invisibility = {
+		ability = "INVISIBLE",
+		short = "Fade from sight",
+		desc = "Turns you nearly invisible for 3 seconds: opponents only see a faint shimmer.",
+		species = { common = "Grim Ghost", rare = "Prism Chameleon", epic = "Prism Chameleon" },
+		color = AR.Invisibility.color,
+		cooldown = AR.Invisibility.Runner.cooldown,
+		duration = AR.Invisibility.Runner.duration,
 	},
 }
+
+-- the family a species belongs to (hatch tables above, plus the new rigged pets not in a table yet)
+EconomyConfig.EXTRA_SPECIES = { Crow = "Decoy", Kitsune = "Decoy" } :: { [string]: string }
+function EconomyConfig.familyOfSpecies(species: string): string?
+	local extra = EconomyConfig.EXTRA_SPECIES[species]
+	if extra then
+		return extra
+	end
+	for fam, def in pairs(EconomyConfig.FAMILIES) do
+		for _, sp in pairs(def.species) do
+			if sp == species then
+				return fam
+			end
+		end
+	end
+	return nil
+end
 
 function EconomyConfig.speciesFor(family: string, rarity: string): string
 	local f = EconomyConfig.FAMILIES[family]

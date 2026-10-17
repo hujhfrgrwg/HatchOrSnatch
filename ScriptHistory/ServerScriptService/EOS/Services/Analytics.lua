@@ -24,6 +24,8 @@ Analytics.KNOWN = {
 	-- GDD v0.4 appendix E
 	GoldSource = true, GoldSink = true, GemsSource = true, GemsSink = true, PieceAwarded = true,
 	PetCrafted = true, FocusUsed = true, AbilityUsed = true, CosmeticUsed = true, WaveEnded = true,
+	-- HOS-PET-001 ability framework: a press refused by its handler, a stub pressed, a tag blocked
+	AbilityRefused = true, AbilityStub = true, AbilityTagBlocked = true,
 }
 
 function Analytics.setSink(fn: ((any) -> ())?)

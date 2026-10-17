@@ -143,10 +143,53 @@ PetModel.SPECS = {
 -- Rigged mesh pets: skinned meshes in ReplicatedStorage.EOS.Assets.Pets.<species>, posed from
 -- code by Shared/CrowRig (no Animation assets). Their PrimaryPart "RootPart" sits at the feet.
 -- Template attributes: BaseScale (studs per unit of `scale`), EyeBase / EyeL3 (eye textures).
-PetModel.RIGGED = { Crow = true } :: { [string]: boolean }
+-- Newer pets (Shared/PetRig): RigScale (the template's own Model scale), Prefix (mesh name prefix);
+-- meshes <Prefix>Body / Face / L2 / L3 and a Looks folder with SurfaceAppearances Body1..3 / Face1..3.
+-- Level 1 shows Body + Face; level 2 adds L2; level 3 adds L3 (each level has its own colour + face maps).
+PetModel.RIGGED = { Crow = true, Kitsune = true, ["Prism Chameleon"] = true } :: { [string]: boolean }
 
 function PetModel.isRigged(species: string): boolean
 	return PetModel.RIGGED[species] == true
+end
+
+-- the rig module that poses a species' bones (CrowRig for the crow, PetRig for the rest)
+function PetModel.rigModule(species: string): any
+	if species == "Crow" then
+		return require(script.Parent:WaitForChild("CrowRig"))
+	end
+	return require(script.Parent:WaitForChild("PetRig"))
+end
+
+local function applyLevelLook(model: Model, prefix: string, level: number)
+	local looks = model:FindFirstChild("Looks")
+	if level < 2 then
+		local p = model:FindFirstChild(prefix .. "L2")
+		if p then
+			p:Destroy()
+		end
+	end
+	if level < 3 then
+		local p = model:FindFirstChild(prefix .. "L3")
+		if p then
+			p:Destroy()
+		end
+	end
+	if looks then
+		for _, nm in ipairs({ "Body", "L2", "L3", "Face" }) do
+			local p = model:FindFirstChild(prefix .. nm)
+			local look = looks:FindFirstChild((if nm == "Face" then "Face" else "Body") .. level)
+			if p and look then
+				local old = p:FindFirstChildOfClass("SurfaceAppearance")
+				if old then
+					old:Destroy()
+				end
+				local sa = look:Clone()
+				sa.Name = "SurfaceAppearance"
+				sa.Parent = p
+			end
+		end
+		looks:Destroy()
+	end
 end
 
 local function buildRigged(species: string, s: number, level: number): Model?
@@ -156,8 +199,8 @@ local function buildRigged(species: string, s: number, level: number): Model?
 	if not tpl or not tpl:IsA("Model") then
 		return nil
 	end
-	local CrowRig = require(script.Parent:WaitForChild("CrowRig")) :: any
-	CrowRig.prime(tpl)
+	local Rig = PetModel.rigModule(species)
+	Rig.prime(tpl, species)
 	local model = tpl:Clone()
 	model.Name = "EOS_Pet"
 	model:SetAttribute("Species", species)
@@ -167,9 +210,14 @@ local function buildRigged(species: string, s: number, level: number): Model?
 	if level >= 3 and eyes and eyes:IsA("MeshPart") and type(l3) == "string" then
 		eyes.TextureID = l3 -- level 3: the red eyes
 	end
+	local prefix = tpl:GetAttribute("Prefix")
+	if type(prefix) == "string" then
+		applyLevelLook(model, prefix, level)
+	end
 	local base = tpl:GetAttribute("BaseScale")
-	model:ScaleTo(s * (if type(base) == "number" then base else 1))
-	CrowRig.new(model):pose("Idle", 0)
+	local rs = tpl:GetAttribute("RigScale")
+	model:ScaleTo(s * (if type(base) == "number" then base else 1) * (if type(rs) == "number" then rs else 1))
+	Rig.new(model, species):pose("Idle", 0)
 	return model
 end
 

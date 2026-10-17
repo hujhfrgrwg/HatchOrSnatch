@@ -24,7 +24,6 @@ Net.TO_CLIENT = {
 	"ShopResult", -- { ok, reason, itemId, robux?, refunded? } or a Gem pack { ok, gems }
 	"AbilityFx", -- { userId, slot?, family, kind, ... } everyone: a pet's ability fired (telegraph)
 	"AbilityState", -- { family, readyAt, ok, reason } owner: cooldown / refusal
-	"ScoutPing", -- { targets = { { uid, slot?, pos } }, untilT } owner: Scout results
 	"ServerList", -- { servers = { { id, players, max, country, code, city, phase, ping } }, here, t } after RequestServers
 }
 -- client -> server

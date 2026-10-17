@@ -1,10 +1,11 @@
 -- Pets: the client side of pets and their abilities (GDD v0.4 section 13).
 --  * follower: your equipped pet floats by your shoulder (yours only during a match; in the lobby
 --    everyone's pets show, nearest few). Built locally from Shared/PetModel, never physical.
---  * ability: Q / gamepad Y / the round touch button asks the server; Brake also runs here at once
---    (Movement.brake) because movement is client-driven. The server owns the cooldown.
+--  * ability: Q / gamepad Y / the round touch button asks the server, which runs the archetype's Runner
+--    or Catcher handler for your role (HOS-PET-001, AbilityConfig). The server owns the cooldown; the
+--    match's starting Catcher has none (EOS_PetAbilityOff), so for them there's no ability at all.
 --  * effects: a short pet summon + ring over whoever used an ability (everyone sees it), the Decoy
---    poof, and Scout's through-wall pings (only the scout sees them).
+--    poof, and a ring where a tag was blocked. Species pick looks and sound only (AbilityCosmetics).
 
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
@@ -13,12 +14,16 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
+local AbilityConfig = require(Shared:WaitForChild("AbilityConfig"))
+local AbilityCosmetics = require(Shared:WaitForChild("AbilityCosmetics"))
 local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
 local Net = require(Shared:WaitForChild("Net"))
 local PetModel = require(Shared:WaitForChild("PetModel"))
 local Movement = require(script.Parent.Movement)
 local Sound = require(script.Parent.Sound)
 local CrowPet = require(script.Parent.CrowPet) -- rigged crow: walking follower, swoop-in summon
+local PetBehaviors = require(script.Parent.PetBehaviors) -- rigged pets: follower + summon per species
+local Invisibility = require(script.Parent.Invisibility) -- how invisible players look from here
 
 local Pets = {}
 Pets.readyAt = 0 -- os.clock() when the ability is ready again
@@ -27,14 +32,18 @@ Pets.onToast = nil :: ((string, string?) -> ())?
 Pets.onUsed = nil :: ((string) -> ())?
 
 local player = Players.LocalPlayer
-local GOLD = Color3.fromRGB(255, 210, 58)
 
 function Pets.family(): string?
 	local f = player:GetAttribute("EOS_PetFamily")
-	if RunService:IsStudio() and type(player:GetAttribute("EOS_TestPet")) == "string" then
-		f = player:GetAttribute("EOS_TestPetFamily") or "Decoy" -- Studio pet test (CrowPet.speciesOf)
+	local test = player:GetAttribute("EOS_TestPet")
+	if RunService:IsStudio() and type(test) == "string" and test ~= "" then
+		-- Studio pet test (CrowPet.speciesOf): the test pet's own family
+		f = player:GetAttribute("EOS_TestPetFamily") or EconomyConfig.familyOfSpecies(test) or "Decoy"
 	end
-	return if type(f) == "string" and f ~= "" then f else nil
+	if player:GetAttribute("EOS_PetAbilityOff") == true then
+		return nil -- the match's starting Catcher: no pet ability this match
+	end
+	return if AbilityConfig.get(f) then f else nil -- (a pet of a removed family has no ability)
 end
 
 -- 0..1 (1 = ready)
@@ -66,17 +75,16 @@ function Pets.use()
 	if role ~= "RUNNER" and role ~= "CATCHER" then
 		return
 	end
-	local def = EconomyConfig.FAMILIES[fam]
-	-- predicted: the server answers with the real cooldown (AbilityState)
-	local cd = def.cooldown
-	local testCd = if RunService:IsStudio() then workspace:GetAttribute("EOS_TestCooldown") else nil
-	if type(testCd) == "number" and testCd > 0 then
-		cd = testCd -- Studio pet test (AbilityService.studioTest)
-	end
-	Pets.cooldown = cd
-	Pets.readyAt = os.clock() + cd
-	if fam == "Brake" then
-		Movement.brake(def.duration)
+	local def = AbilityConfig.forRole(fam, role)
+	if def and def.built then
+		-- predicted: the server answers with the real cooldown (AbilityState), or refuses and it's back
+		local cd = def.cooldown
+		local testCd = if RunService:IsStudio() then workspace:GetAttribute("EOS_TestCooldown") else nil
+		if type(testCd) == "number" and testCd > 0 then
+			cd = testCd -- Studio pet test (AbilityService.studioTest)
+		end
+		Pets.cooldown = cd
+		Pets.readyAt = os.clock() + cd
 	end
 	Net.event("RequestAbility"):FireServer(Movement.wishDir())
 	if Pets.onUsed then
@@ -93,7 +101,8 @@ type Follower = {
 	pos: Vector3,
 	t: number,
 	level: number,
-	crow: any?, -- CrowPet follower state for rigged pets
+	crow: any?, -- follower state for rigged pets (driven by `beh`)
+	beh: any?, -- the species' behaviour module (PetBehaviors)
 	hiddenUntil: number, -- the pet flew into its ability; back after the copy is gone
 }
 local followers: { [Player]: Follower } = {}
@@ -146,10 +155,11 @@ local function updateFollowers(dt: number)
 			if not f then
 				local sp, lv = CrowPet.speciesOf(plr)
 				local name = sp :: string
-				if PetModel.isRigged(name) then
-					-- walks behind you first; flies to keep up (CrowPet)
-					local cf = CrowPet.newFollower(lv, r)
-					f = { model = cf.model, species = name, owner = plr, pos = r.Position, t = 0, level = lv, crow = cf, hiddenUntil = 0 }
+				local beh = PetBehaviors.get(name)
+				if PetModel.isRigged(name) and beh then
+					-- rigged pets walk with you (the crow flies to keep up, the chameleon rides your shoulder)
+					local cf = beh.newFollower(lv, r)
+					f = { model = cf.model, species = name, owner = plr, pos = r.Position, t = 0, level = lv, crow = cf, beh = beh, hiddenUntil = 0 }
 				else
 					local m = PetModel.build(name, 1.05)
 					m.Name = "EOS_Follower"
@@ -160,12 +170,12 @@ local function updateFollowers(dt: number)
 			end
 			if f.hiddenUntil > now then
 				f.model.Parent = nil -- it flew into the ability
-			elseif f.crow then
+			elseif f.crow and f.beh then
 				if f.model.Parent == nil then
 					f.model.Parent = workspace.CurrentCamera
-					CrowPet.respawnFollower(f.crow, r)
+					f.beh.respawnFollower(f.crow, r)
 				end
-				CrowPet.updateFollower(f.crow, r, dt)
+				f.beh.updateFollower(f.crow, r, dt)
 			else
 				if f.model.Parent == nil then
 					f.model.Parent = workspace.CurrentCamera
@@ -222,19 +232,19 @@ end
 
 local function summon(t: any)
 	local who = modelFor(t.userId)
-	if who and t.species == "Crow" then
-		-- the crow swoops in and its level's flash fires as the copy appears (CrowPet)
-		CrowPet.summon(who, tonumber(t.level) or 1)
+	local beh = PetBehaviors.get(t.species)
+	if who and beh then
+		-- the rigged pet's own entrance; its level's flash fires as the ability lands (PetBehaviors)
+		beh.summon(who, tonumber(t.level) or 1)
 		local owner = Players:GetPlayerByUserId(t.userId)
 		local f = owner and followers[owner]
 		if f then
-			local fam = EconomyConfig.FAMILIES[t.family]
-			f.hiddenUntil = os.clock() + CrowPet.INTRO + (if fam then fam.duration else 3) + 0.3
+			f.hiddenUntil = os.clock() + (beh.INTRO or 0.5) + (tonumber(t.duration) or 3) + 0.3
 		end
 		return
 	end
 	local head = who and who:FindFirstChild("Head") :: BasePart?
-	local color = if t.gold then GOLD else (EconomyConfig.FAMILIES[t.family] and EconomyConfig.FAMILIES[t.family].color or GOLD)
+	local color = AbilityCosmetics.resolve(t.species, t.family, t.gold == true).ringColor
 	local root = who and who:FindFirstChild("HumanoidRootPart") :: BasePart?
 	if root then
 		ring(root.Position - Vector3.new(0, 2.6, 0), color)
@@ -286,40 +296,6 @@ local function poof(pos: Vector3)
 	end)
 end
 
-local pings: { Highlight } = {}
-local function scoutPing(t: any)
-	for _, h in ipairs(pings) do
-		h:Destroy()
-	end
-	table.clear(pings)
-	local color = EconomyConfig.FAMILIES.Scout.color
-	for _, uid in ipairs(t.targets or {}) do
-		local m = modelFor(uid)
-		if m then
-			local h = Instance.new("Highlight")
-			h.Name = "EOS_ScoutPing"
-			h.FillColor = color
-			h.FillTransparency = 0.55
-			h.OutlineColor = Color3.new(1, 1, 1)
-			h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-			h.Adornee = m
-			h.Parent = workspace.CurrentCamera
-			table.insert(pings, h)
-		end
-	end
-	if #pings == 0 then
-		toast("Scout: nobody nearby", "info")
-	else
-		toast(("Scout: %d spotted"):format(#pings), "info")
-	end
-	local mine = table.clone(pings)
-	task.delay(t.duration or 4, function()
-		for _, h in ipairs(mine) do
-			h:Destroy()
-		end
-	end)
-end
-
 function Pets.init()
 	ContextActionService:BindAction("EOS_PetAbility", function(_, state)
 		if state == Enum.UserInputState.Begin then
@@ -349,12 +325,17 @@ function Pets.init()
 			Sound.play("evolve", 1.4)
 		elseif t.kind == "poof" and typeof(t.pos) == "Vector3" then
 			-- the crow's copy leaves in a scatter of crows at level 2+
-			if not (t.species == "Crow" and CrowPet.poof(t.pos, tonumber(t.level) or 1)) then
+			local beh = PetBehaviors.get(t.species)
+			if not (beh and beh.poof(t.pos, tonumber(t.level) or 1)) then
 				poof(t.pos)
 			end
+		elseif t.kind == "blocked" and typeof(t.pos) == "Vector3" then
+			-- a "blocks one tag" charge stopped a tag: everyone sees where (archetype colour, never gold)
+			ring(t.pos - Vector3.new(0, 1.5, 0), AbilityCosmetics.resolve(nil, t.family).color)
+			Sound.play("tick", 1.2)
 		end
 	end)
-	Net.event("ScoutPing").OnClientEvent:Connect(scoutPing)
+	Invisibility.init()
 	-- a new match: the cooldown starts fresh
 	player:GetAttributeChangedSignal("EOS_InMatch"):Connect(function()
 		Pets.readyAt = 0

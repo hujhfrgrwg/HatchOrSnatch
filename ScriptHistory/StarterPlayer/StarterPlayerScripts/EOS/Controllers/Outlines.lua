@@ -6,7 +6,7 @@
 --    Catchers / caught players see no outline on Runners at all
 --  * DECOY copies take their owner's outline, so they still fool people
 -- Outline only (no fill), and hidden behind walls and bricks (DepthMode Occluded): no wallhacks.
--- Nothing outside a match (lobby, practice) gets one. A Scout ping on a body takes over while it shows.
+-- Nothing outside a match (lobby, practice) gets one.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -73,7 +73,8 @@ local function refresh()
 		-- players
 		for _, plr in ipairs(Players:GetPlayers()) do
 			local char = plr.Character
-			if char and plr:GetAttribute("EOS_InMatch") == true then
+			-- an invisible player (Invisibility pets) shows no outline to anyone else
+			if char and plr:GetAttribute("EOS_InMatch") == true and (plr == player or char:GetAttribute("EOS_Invisible") ~= true) then
 				local c = Outlines.colorFor(viewerRole, plr:GetAttribute("EOS_Role"), plr == player)
 				if c then
 					want[char] = c
@@ -103,15 +104,6 @@ local function refresh()
 					if c then
 						want[m :: Model] = c
 					end
-				end
-			end
-		end
-		-- a Scout ping (Pets) owns the body while it shows: one highlight per body reads best
-		local cam = workspace.CurrentCamera
-		if cam then
-			for _, h in ipairs(cam:GetChildren()) do
-				if h.Name == "EOS_ScoutPing" and h:IsA("Highlight") and h.Adornee and h.Adornee:IsA("Model") then
-					want[h.Adornee :: Model] = nil
 				end
 			end
 		end

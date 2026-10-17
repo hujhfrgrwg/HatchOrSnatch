@@ -35,7 +35,6 @@ Movement.refusedAt = -math.huge -- last time a dash press found no allowed direc
 Movement.refusedWhy = "FORWARD" -- "FORWARD" (straight ahead of the camera / no push) | "FACING" (the way the body faces)
 Movement.backpedaling = false -- in a match and pushing backwards: facing the camera, walking backwards slowly
 Movement.dashStartedAt = -math.huge
-Movement.brakeUntil = -math.huge -- Brake pet ability: momentum is gone and the next push is instant
 Movement._testWish = nil :: Vector3? -- test hook: stands in for the move input (Studio checks only)
 
 local listeners: { (side: string) -> () } = {}
@@ -390,21 +389,6 @@ function Movement.dashPending(): boolean
 	return pendingUntil > -math.huge
 end
 
--- Brake (pet ability): stop dead, then for `duration` seconds whatever way you push is full speed at
--- once (no kick / build-up) and the body snaps to it. Returns false when there's no body to brake.
-function Movement.brake(duration: number): boolean
-	local data = current
-	if not data or not data.active then
-		return false
-	end
-	data.velocity = Vector3.zero
-	turn = nil
-	Movement.dashing = false
-	data.heldFacing = nil
-	Movement.brakeUntil = os.clock() + duration
-	return true
-end
-
 -- the way the player is pushing right now (flat, may be zero)
 function Movement.wishDir(): Vector3
 	local data = current
@@ -497,7 +481,6 @@ function Movement.init()
 
 		local sinceDash = now - Movement.dashStartedAt
 		local dashSpeed, burst, recover = tune("DashSpeed", D.SPEED), tune("DashBurst", D.BURST_TIME), tune("DashRecover", D.RECOVER_TIME)
-		local braking = now < Movement.brakeUntil
 		local sinceLunge = now - Movement.lungeStartedAt
 		if Movement.lunging and sinceLunge >= LG.BURST_TIME + LG.RECOVER_TIME then
 			Movement.lunging = false
@@ -506,9 +489,6 @@ function Movement.init()
 			-- the lunge holds its line: full lunge speed, then ease down to (the slowed) top speed
 			local t = math.clamp((sinceLunge - LG.BURST_TIME) / math.max(LG.RECOVER_TIME, 0.01), 0, 1)
 			data.velocity = data.dashDir * (LG.SPEED + (math.min(top, LG.SPEED) - LG.SPEED) * t)
-		elseif braking then
-			-- Brake: no inertia at all; the push is full speed straight away
-			data.velocity = if wish.Magnitude > 0.1 then wish.Unit * moveTop else Vector3.zero
 		elseif Movement.dashing and sinceDash < burst + recover then
 			-- the dash holds its line (straight left / right / back) while it eases back down to top
 			-- speed, whatever is held; your keys take over again when it's done
@@ -546,7 +526,7 @@ function Movement.init()
 		end
 		if heading.Magnitude > 0.01 then
 			local facing = CFrame.lookAt(root.Position, root.Position + heading)
-			root.CFrame = root.CFrame:Lerp(facing, 1 - math.exp(-dt * M.TURN_RATE * (if braking then 3 else 1)))
+			root.CFrame = root.CFrame:Lerp(facing, 1 - math.exp(-dt * M.TURN_RATE))
 		end
 		Movement.speedFraction = if top > 0 then math.clamp(data.velocity.Magnitude / top, 0, 1.5) else 0
 	end)

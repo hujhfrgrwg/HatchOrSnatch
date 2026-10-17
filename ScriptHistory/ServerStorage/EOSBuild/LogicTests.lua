@@ -771,21 +771,24 @@ return function(deps)
 	case("G04", "First Common pet: 2 pieces with a free family pick, then random 2 / chosen 3", function()
 		local p = ProfileLogic.default()
 		p.materials.common = 7
-		local ctx = { econ = Econ, pickFamily = function() return "Scout" end }
+		-- HOS-PET-001: Decoy is the only launch family now (Scout and Brake were removed)
+		local ctx = { econ = Econ, pickFamily = function() return "Decoy" end }
 		local ok, reason = ProfileLogic.hatch(p, "common", nil, ctx)
 		eq(ok, false)
 		eq(reason, "CHOOSE_FAMILY")
 		eq(p.materials.common, 7)
-		local ok2, _, pet = ProfileLogic.hatch(p, "common", "Brake", ctx)
+		eq(ProfileLogic.hatch(p, "common", "Brake", ctx), false) -- a removed family can't be picked
+		eq(p.materials.common, 7)
+		local ok2, _, pet = ProfileLogic.hatch(p, "common", "Decoy", ctx)
 		truthy(ok2)
 		eq(p.materials.common, 5)
-		eq(pet.family, "Brake")
-		eq(pet.species, "Turtle")
+		eq(pet.family, "Decoy")
+		eq(pet.species, "Mouse")
 		eq(p.equippedPet, pet.id) -- first pet equips itself
 		local ok3, _, pet2 = ProfileLogic.hatch(p, "common", nil, ctx)
 		truthy(ok3)
 		eq(p.materials.common, 3)
-		eq(pet2.family, "Scout")
+		eq(pet2.family, "Decoy")
 		eq(p.equippedPet, pet.id) -- later pets don't steal the slot
 		truthy(ProfileLogic.hatch(p, "common", "Decoy", ctx))
 		eq(p.materials.common, 0) -- chosen family = one extra piece

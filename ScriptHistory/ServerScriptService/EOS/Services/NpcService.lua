@@ -744,7 +744,8 @@ end
 local FLANKS = { 0, -1, 1, -2, 2 }
 
 local function validTarget(r: any): boolean
-	return r ~= nil and not r.safe and not inZone(r.pos)
+	-- an invisible Runner (Invisibility pets) drops off the NPC Catchers' radar until it shows again
+	return r ~= nil and not r.safe and not r.hidden and not inZone(r.pos)
 end
 
 -- uid -> os.clock() a Runner was last seen mid-dash (Npc.DASH_FAKE_TIME)
@@ -936,7 +937,7 @@ local function matchContext(m: any): Ctx?
 		local char = actor.Character
 		local hrp = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 		if p and not p.disconnected and hrp then
-			local entry = { uid = uid, pos = hrp.Position, vel = flat(hrp.AssemblyLinearVelocity), human = not NpcService.isBot(actor), safe = p.isSafeThisWave, fakedUntil = 0 }
+			local entry = { uid = uid, pos = hrp.Position, vel = flat(hrp.AssemblyLinearVelocity), human = not NpcService.isBot(actor), safe = p.isSafeThisWave, fakedUntil = 0, hidden = char:GetAttribute("EOS_Invisible") == true }
 			if p.role == "RUNNER" then
 				-- mid-dash (much faster than a run): Catchers on this Runner get faked out for a moment
 				local now = os.clock()

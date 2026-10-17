@@ -69,6 +69,12 @@ end
 function MatchService.onPlayerMatchEnd(fn: (Player) -> ())
 	table.insert(leaveHooks, fn)
 end
+-- HOS-PET-001: asked just before a tag that would land (every check passed). A guard that returns a
+-- reason stops it: e.g. AbilityService's "blocks one tag" charge. fn(hunter, victim, kind) -> string?
+local captureGuards: { (any, any, string) -> string? } = {}
+function MatchService.addCaptureGuard(fn: (any, any, string) -> string?)
+	table.insert(captureGuards, fn)
+end
 
 -- the running match (nil in the lobby)
 type Current = {
@@ -440,6 +446,28 @@ local function tryCapture(c: Current, hunter: any, victim: any, kind: string): (
 			return false, "COOLDOWN"
 		end
 		c.lastSwing[hunter.UserId] = os.clock()
+	end
+	if #captureGuards > 0 then
+		-- only a tag that would really land is offered to the guards (the same checks as MatchLogic:capture),
+		-- so a block is never spent on one the rules refuse anyway
+		local lg, h, v, t = c.logic, c.logic:get(hunter.UserId), c.logic:get(victim.UserId), now()
+		local lands = lg.phase == "ACTIVE" and h ~= nil and v ~= nil and not h.disconnected and not v.disconnected
+			and h.role == "CATCHER" and v.role == "RUNNER" and not v.isSafeThisWave and t >= h.graceUntil
+			and t >= lg.waveStartedAt + lg.waveStartProtection
+		if lands then
+			for _, guard in ipairs(captureGuards) do
+				local okG, why = pcall(guard, hunter, victim, kind)
+				if not okG then
+					warn("[EOS] capture guard: " .. tostring(why))
+				elseif why then
+					if kind == "lunge" then
+						c.lungeHit = c.lungeHit or {}
+						c.lungeHit[hunter.UserId] = c.lastLunge[hunter.UserId] -- the blocked lunge is spent
+					end
+					return false, why
+				end
+			end
+		end
 	end
 	local ok, reason, info = c.logic:capture(hunter.UserId, victim.UserId, now())
 	if not ok then
