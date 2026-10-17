@@ -18,6 +18,8 @@ Every pet and effect asset uploaded to Roblox (group 228184582) for Hatch or Sna
 | Bastion Beetle effects | `bb_okshard.png` | 129175569947780 | crystal sparkle (AllVFX) |
 | Bastion Beetle effects | `bb_spike_shard.png` | 76230772574709 | crystal spike shard (AllVFX) |
 | Bastion Beetle effects | `beetle_shield_meshes.fbx` | 124416136733506 | model (FBX) |
+| Thunder Toad effects (ground bolts, rocks) | `toad_ground_bolts.png` | 102071494996612 | colour map |
+| Thunder Toad effects (ground bolts, rocks) | `toad_rock.png` | 92391687883880 | colour map |
 | Bastion Beetle v3 (superseded by v4) | `Beetle_Body_emit_v3.png` | 125124402509775 | emissive mask |
 | Bastion Beetle v3 (superseded by v4) | `Beetle_Body_v3.png` | 130920859999276 | colour map |
 | Bastion Beetle v3 (superseded by v4) | `Beetle_Face_emit_v3.png` | 87526503961006 | emissive mask |
@@ -64,31 +66,47 @@ Every pet and effect asset uploaded to Roblox (group 228184582) for Hatch or Sna
 | Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L3_normal_v5.png` | 111251964818735 | normal map |
 | Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L3_rough_v5.png` | 94415892915168 | roughness map |
 | Bastion Beetle v5 (live: painted detail + PBR) | `Beetle_L3_v5.png` | 99660022253191 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_emit_v2.png` | 80917119841498 | emissive mask |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_v2.png` | 140262336549848 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_v2.png` | 84587837636656 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_emit_v2.png` | 74598409218794 | emissive mask |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_v2.png` | 83286456948781 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_emit_v2.png` | 110942317276691 | emissive mask |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_v2.png` | 117921039381206 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `thunder_toad_v2.fbx` | 114122866538752 | model (FBX) |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_emit_v3.png` | 96863442965358 | emissive mask |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_metal_v3.png` | 105113545052987 | metalness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_normal_v3.png` | 131850022061037 | normal map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_rough_v3.png` | 129539009906105 | roughness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Body_v3.png` | 113482463051138 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_metal_v3.png` | 132527274040211 | metalness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_normal_v3.png` | 99968413669991 | normal map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_rough_v3.png` | 82285159408413 | roughness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_Face_v3.png` | 85953943885038 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_emit_v3.png` | 75437331693904 | emissive mask |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_metal_v3.png` | 71547302259747 | metalness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_normal_v3.png` | 118292863192105 | normal map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_rough_v3.png` | 135567405188561 | roughness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L2_v3.png` | 139987849551461 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_emit_v3.png` | 73019552130863 | emissive mask |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_metal_v3.png` | 99651814439018 | metalness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_normal_v3.png` | 80293593567227 | normal map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_rough_v3.png` | 71712399921144 | roughness map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `Toad_L3_v3.png` | 139121628130008 | colour map |
-| Thunder Toad v2 / v3 (v3 = PBR build, paused for the model sheet) | `thunder_toad_v3.fbx` | 105986079507870 | model (FBX) |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_emit_v2.png` | 80917119841498 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_v2.png` | 140262336549848 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_v2.png` | 84587837636656 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_emit_v2.png` | 74598409218794 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_v2.png` | 83286456948781 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_emit_v2.png` | 110942317276691 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_v2.png` | 117921039381206 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `thunder_toad_v2.fbx` | 114122866538752 | model (FBX) |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_emit_v3.png` | 96863442965358 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_metal_v3.png` | 105113545052987 | metalness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_normal_v3.png` | 131850022061037 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_rough_v3.png` | 129539009906105 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_v3.png` | 113482463051138 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_metal_v3.png` | 132527274040211 | metalness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_normal_v3.png` | 99968413669991 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_rough_v3.png` | 82285159408413 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_v3.png` | 85953943885038 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_emit_v3.png` | 75437331693904 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_metal_v3.png` | 71547302259747 | metalness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_normal_v3.png` | 118292863192105 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_rough_v3.png` | 135567405188561 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_v3.png` | 139987849551461 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_emit_v3.png` | 73019552130863 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_metal_v3.png` | 99651814439018 | metalness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_normal_v3.png` | 80293593567227 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_rough_v3.png` | 71712399921144 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_v3.png` | 139121628130008 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `thunder_toad_v3.fbx` | 105986079507870 | model (FBX) |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_emit_v4.png` | 86146349346573 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_normal_v4.png` | 137334266977591 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_rough_v4.png` | 90009635658722 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Body_v4.png` | 116885077748704 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_normal_v4.png` | 109256532670526 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_rough_v4.png` | 73004882024845 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_Face_v4.png` | 105704610966190 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_emit_v4.png` | 124394036018568 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_normal_v4.png` | 113204966785651 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_rough_v4.png` | 97739840430923 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L2_v4.png` | 90551423439646 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_emit_v4.png` | 108167470811282 | emissive mask |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_normal_v4.png` | 76961499895427 | normal map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_rough_v4.png` | 132755060638682 | roughness map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `Toad_L3_v4.png` | 109434805623993 | colour map |
+| Thunder Toad v2-v4 (v4 = live, model sheet + texture standard) | `thunder_toad_v4.fbx` | 125164665550745 | model (FBX) |
