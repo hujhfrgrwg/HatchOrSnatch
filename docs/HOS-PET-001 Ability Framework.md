@@ -62,7 +62,31 @@ Checked in local playtests (2 players + bots): shield blocks exactly one tag the
 New hooks: `MatchService.onCatcherAttack` (stab / lunge), `ctx.refund` (AbilityService), `Shared.actorsInRole / slideTo / beam / ring / groundBelow`.
 
 ## VFX polish (HOS-VFX-001+)
-Decoy, Guardian, Tempest and Rift done; previews in `docs/ability-vfx/<archetype>/`. Storm Ball now bounces once (`bounces = 1`, built in HOS-VFX-003).
+Decoy, Guardian, Tempest and Rift done; previews in `docs/ability-vfx/<archetype>/`. Storm Ball now bounces once (`bounces = 1`, built in HOS-VFX-003); its v2 look (energy orb, lightning cage, floor arcs, scorch trail) is HOS-VFX-003b.
+
+### Per-pet ability VFX (HOS-VFX-OVR, Hunter 17 Oct)
+Every pet will get its own ability VFX one day. The archetype effects are the defaults for pets that have none of their own. Pets that already have their own effects (Crow, Kitsune, Grim Ghost, and Prism Chameleon's summon) keep them exactly as built, and no default plays on top of them.
+
+**Effect keys.** Each effect has a key: the default template's name in `ReplicatedStorage.VFX.Abilities`.
+- One-shots: DecoySplit, DecoyPoof, SnareTrigger, ShieldUp, ShieldBreak, TetherYank, PulseBlast, KnockHit, StormBounce, StormHit, RiftPortal, RiftArrive, RiftFizzle.
+- Lasting effects: Snare, Rooted, ShieldBubble, TetherBeam, PulseCharge, StormBall, Slowed, RiftReticle.
+- `Summon`: the pet's entrance over the user, for pets without a rigged entrance.
+
+**Add an override for a species:**
+1. Build the template next to the default in `ReplicatedStorage.VFX.Abilities` under a new name, e.g. `PulseBlast_Fox`. Keep the same structure: a Model with a `Root` part. For the custom-dressed effects (Snare, TetherBeam, StormBall), copy the default's children, because the client looks them up by name.
+2. In `Shared.AbilityCosmetics.SPECIES`, add `Fox = { vfx = { PulseBlast = "PulseBlast_Fox" } }`. Override only the keys you want; everything else stays the default. One-shots and lasting effects work the same way.
+3. To show nothing for one key (because the pet's own effect already covers it), use `AbilityCosmetics.NONE`. Crow and Kitsune do this for DecoySplit, since their swoop-in or run-in summon is the split.
+
+**How it resolves.** The server sends the user's species with every effect: `Shared.vfx(name, pos, look, ctx.species)` and `Shared.tagVfx(part, name, keepVisible, ctx.species)`, which sets the `VFXSpecies` attribute. The client then picks the template in `AbilityVFX.template(key, species)`:
+- the override, if the species has one and the template exists;
+- otherwise the default.
+
+A missing override template falls back to the default.
+
+**Rules:**
+- Pets with a rigged module (`PetBehaviors.MODULES`) always draw their own summon and poof; the poof falls back to the grey puff at level 1, as before HOS-VFX-001.
+- Overrides are looks only: no numbers or timings.
+- An override of something opponents must read (the snare, warning rings, the reticle, the Decoy copy) keeps its size, readability and archetype colour. Gold Ability Colors never applies to these.
 
 ## Queued for the polish pass
 - **Storm Ball** (17 Oct): reference Mad Maggie's Wrecking Ball (Apex Legends), Hunter's pick. Mechanics decided: bounces off a wall **once**, same 50-stud total range; no speed pads (would make Catchers stronger); no detonation (keeps "slow the first Runner hit"). Build the bounce in the Storm Ball polish ticket, not before.

@@ -33,7 +33,7 @@ function Tempest.Runner(ctx: any): (boolean, string?)
 	local me = ctx.player
 	local role = me:GetAttribute("EOS_Role")
 	local tele = Shared.ring(Shared.groundBelow(root.Position) + Vector3.new(0, 0.12, 0), d.radius, COLOR, d.windup, 0.55)
-	Shared.tagVfx(tele, "PulseCharge") -- the charge ring and arcs (HOS-VFX-003)
+	Shared.tagVfx(tele, "PulseCharge", nil, ctx.species) -- the charge ring and arcs (HOS-VFX-003)
 	task.spawn(function()
 		local t0 = os.clock()
 		while os.clock() - t0 < d.windup and tele.Parent and root.Parent do
@@ -46,7 +46,7 @@ function Tempest.Runner(ctx: any): (boolean, string?)
 			return
 		end
 		local center = root.Position
-		Shared.vfx("PulseBlast", Shared.groundBelow(center))
+		Shared.vfx("PulseBlast", Shared.groundBelow(center), nil, ctx.species)
 		local now = os.clock()
 		for _, c in ipairs(Shared.actorsInRole("CATCHER", true)) do
 			local cr = c.Character.HumanoidRootPart :: BasePart
@@ -58,7 +58,7 @@ function Tempest.Runner(ctx: any): (boolean, string?)
 					if Shared.validPosition(c, dest) then
 						pushImmuneUntil[c] = now + d.immunity
 						Shared.slideTo(c, dest, 0.2)
-						Shared.vfx("KnockHit", cr.Position, dir)
+						Shared.vfx("KnockHit", cr.Position, dir, ctx.species)
 						break
 					end
 				end
@@ -88,7 +88,7 @@ function Tempest.Catcher(ctx: any): (boolean, string?)
 	ball.Anchored, ball.CanCollide, ball.CanQuery, ball.CanTouch, ball.CastShadow = true, false, false, false, false
 	ball.CFrame = CFrame.new(start)
 	ball.Parent = Shared.runtimeFolder("AbilityFx")
-	Shared.tagVfx(ball, "StormBall", true)
+	Shared.tagVfx(ball, "StormBall", true, ctx.species)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	local ignore: { Instance } = { Shared.runtimeFolder("AbilityFx") }
@@ -127,7 +127,7 @@ function Tempest.Catcher(ctx: any): (boolean, string?)
 			-- HOS-VFX-003 (Wrecking Ball reference): bounce off the first wall, same total range; stop at the next
 			local n = flat(hit.Normal)
 			n = if n.Magnitude > 0.01 then n.Unit else -dir
-			Shared.vfx("StormBounce", hit.Position, n)
+			Shared.vfx("StormBounce", hit.Position, n, ctx.species)
 			if bounces < (d.bounces or 0) then
 				bounces += 1
 				local out = flat(dir - 2 * dir:Dot(n) * n)
@@ -146,8 +146,8 @@ function Tempest.Catcher(ctx: any): (boolean, string?)
 			local off = rr.Position - pos
 			if flat(off).Magnitude <= d.hitRadius and math.abs(off.Y) < 5 then
 				CharacterService.slowFor(r, d.slow, d.slowTime)
-				Shared.tagVfx(Shared.ring(Shared.groundBelow(rr.Position) + Vector3.new(0, 0.15, 0), 2.2, COLOR, d.slowTime, 0.15), "Slowed")
-				Shared.vfx("StormHit", pos)
+				Shared.tagVfx(Shared.ring(Shared.groundBelow(rr.Position) + Vector3.new(0, 0.15, 0), 2.2, COLOR, d.slowTime, 0.15), "Slowed", nil, ctx.species)
+				Shared.vfx("StormHit", pos, nil, ctx.species)
 				stop()
 				return
 			end

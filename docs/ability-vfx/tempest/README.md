@@ -19,3 +19,18 @@ Checked in a 2-player playtest with a temporary test wall:
 - Ball: drawn at 0.06 s, bounce at 0.39 s, hit at 0.6 s; the Runner is slowed ×0.5 for about 1.1 s.
 - With a second wall: the ball stops there with no hit and is cleaned up.
 - No script errors.
+
+## Storm Ball v2 (HOS-VFX-003b)
+Preview: `stormball_v2_preview.mp4` (gameplay angle, then side). Stills: `stormball_v2_still_1.jpg` (gameplay), `stormball_v2_still_2.jpg` (side).
+
+- **Energy orb** (drawn on each client; the server's ball is hidden there and stays the gameplay part):
+  - a dark metal core with three glowing yellow seams;
+  - a crackling amber ForceField shell with a dark-brown outline so it reads on sand;
+  - a yellow light.
+  - It spins as the server rolls it.
+- **Lightning cage:** three electric beams that jump around the shell about 20 times a second.
+- **Floor arcs:** two bolts (with dark twins) that jump from the ball to random floor points.
+- **Ground trail:** a dark scorch mark and a yellow electric streak along the path, fading out over about 0.5 s.
+- The earlier arcs, halo, sparks and dust are kept. The gameplay numbers are unchanged.
+
+Checked in a 2-player playtest: the orb, 7 beams and 2 trails are drawn, the server ball is hidden on the client, bounce at 0.36 s, hit and slow at 0.59 s, everything is cleaned up afterwards, and there are no errors.

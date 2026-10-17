@@ -236,6 +236,16 @@ end
 local function summon(t: any)
 	local who = modelFor(t.userId)
 	local beh = PetBehaviors.get(t.species)
+	-- HOS-VFX-OVR: a pet without its own rigged entrance can have a "Summon" template (AbilityCosmetics.vfx);
+	-- rigged pets (beh) keep theirs exactly as built
+	local look = if beh then nil else AbilityCosmetics.vfx(t.species, "Summon")
+	if who and look and look ~= "Summon" then
+		local r = who:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if r then
+			AbilityVFX.play("Summon", r.CFrame, t.species)
+			return
+		end
+	end
 	if who and beh then
 		-- the rigged pet's own entrance; its level's flash fires as the ability lands (PetBehaviors)
 		beh.summon(who, tonumber(t.level) or 1)
@@ -327,15 +337,21 @@ function Pets.init()
 			summon(t)
 			Sound.play("evolve", 1.4)
 		elseif t.kind == "poof" and typeof(t.pos) == "Vector3" then
-			-- the crow's copy leaves in a scatter of crows at level 2+
+			-- the crow's copy leaves in a scatter of crows at level 2+. Rigged pets keep their own look exactly
+			-- (their level-1 exit is the grey puff, as before HOS-VFX-001); other pets get effect "DecoyPoof"
+			-- (the archetype default, or their override: HOS-VFX-OVR)
 			local beh = PetBehaviors.get(t.species)
-			if not (beh and beh.poof(t.pos, tonumber(t.level) or 1)) then
-				AbilityVFX.play("DecoyPoof", CFrame.new(t.pos)) -- (the old grey puff: poof)
+			if beh then
+				if not beh.poof(t.pos, tonumber(t.level) or 1) then
+					poof(t.pos)
+				end
+			else
+				AbilityVFX.play("DecoyPoof", CFrame.new(t.pos), t.species)
 			end
 		elseif t.kind == "vfx" and type(t.name) == "string" and typeof(t.pos) == "Vector3" then
 			-- an ability's one-shot effect (Abilities.Shared.vfx), facing `look` when given
 			local look = if typeof(t.look) == "Vector3" and t.look.Magnitude > 0.01 then t.look else nil
-			AbilityVFX.play(t.name, if look then CFrame.lookAt(t.pos, t.pos + look) else CFrame.new(t.pos))
+			AbilityVFX.play(t.name, if look then CFrame.lookAt(t.pos, t.pos + look) else CFrame.new(t.pos), t.species)
 		elseif t.kind == "blocked" and typeof(t.pos) == "Vector3" then
 			-- a "blocks one tag" charge stopped a tag: everyone sees where (archetype colour, never gold)
 			ring(t.pos - Vector3.new(0, 1.5, 0), AbilityCosmetics.resolve(nil, t.family).color)

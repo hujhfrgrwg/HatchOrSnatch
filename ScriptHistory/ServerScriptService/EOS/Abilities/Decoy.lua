@@ -129,7 +129,7 @@ function Decoy.Runner(ctx: any): (boolean, string?)
 	end
 	-- on the press (Hunter, 17 Oct): the species' fly-in plays over the copy and never delays it
 	-- a puff at your feet that you and the copy both leave, so nobody can tell which is which
-	Shared.vfx("DecoySplit", Shared.groundBelow(ctx.root.Position))
+	Shared.vfx("DecoySplit", Shared.groundBelow(ctx.root.Position), nil, ctx.species)
 	decoy(ctx.player, ctx.moveDir, ctx.def.duration, ctx.def.spread or 145, ctx.species, ctx.level)
 	return true, nil
 end
@@ -167,7 +167,7 @@ function Decoy.Catcher(ctx: any): (boolean, string?)
 	local center = ground + Vector3.new(0, 0.12, 0)
 	local part = Shared.ring(center, d.radius, SNARE_COLOR, 0, 0.3)
 	part.Name = "EOS_Snare"
-	Shared.tagVfx(part, "Snare") -- the chain seal everyone sees (HOS-VFX-001)
+	Shared.tagVfx(part, "Snare", nil, ctx.species) -- the chain seal everyone sees (HOS-VFX-001)
 	local t0 = os.clock()
 	local conn
 	conn = RunService.Heartbeat:Connect(function()
@@ -183,8 +183,8 @@ function Decoy.Catcher(ctx: any): (boolean, string?)
 			if Vector3.new(off.X, 0, off.Z).Magnitude <= d.radius and math.abs(off.Y) < 6 then
 				CharacterService.slowFor(r, 0, d.root)
 				local feet = Shared.groundBelow(rr.Position)
-				Shared.tagVfx(Shared.ring(feet + Vector3.new(0, 0.15, 0), 2.2, SNARE_COLOR, d.root, 0.1), "Rooted")
-				Shared.vfx("SnareTrigger", feet)
+				Shared.tagVfx(Shared.ring(feet + Vector3.new(0, 0.15, 0), 2.2, SNARE_COLOR, d.root, 0.1), "Rooted", nil, ctx.species)
+				Shared.vfx("SnareTrigger", feet, nil, ctx.species)
 				clearSnare(plr)
 				return
 			end

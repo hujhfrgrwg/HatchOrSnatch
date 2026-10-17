@@ -52,11 +52,11 @@ local function teleport(ctx: any, dir: Vector3, showStart: boolean): (boolean, s
 	if showStart then
 		-- PORTAL HOP (HOS-VFX-004): a portal stands at each end for the windup, facing the way you go
 		endRing.Transparency = 1
-		Shared.vfx("RiftPortal", Shared.groundBelow(root.Position) + PORTAL_UP, dir)
-		Shared.vfx("RiftPortal", Shared.groundBelow(dest) + PORTAL_UP, dir)
+		Shared.vfx("RiftPortal", Shared.groundBelow(root.Position) + PORTAL_UP, dir, ctx.species)
+		Shared.vfx("RiftPortal", Shared.groundBelow(dest) + PORTAL_UP, dir, ctx.species)
 	else
 		-- RIFT BLINK: clients draw the warning reticle on the ring
-		Shared.tagVfx(endRing, "RiftReticle")
+		Shared.tagVfx(endRing, "RiftReticle", nil, ctx.species)
 	end
 	local role = plr:GetAttribute("EOS_Role")
 	local char = plr.Character
@@ -69,18 +69,18 @@ local function teleport(ctx: any, dir: Vector3, showStart: boolean): (boolean, s
 		local ok2, why2 = Shared.validPosition(plr, now)
 		if not ok2 then
 			ctx.refund("FIZZLED")
-			Shared.vfx("RiftFizzle", Shared.groundBelow(root.Position))
+			Shared.vfx("RiftFizzle", Shared.groundBelow(root.Position), nil, ctx.species)
 			print(("[EOS] Rift %s fizzled: %s"):format(ctx.roleKey, tostring(why2)))
 			return
 		end
 		if not showStart then
-			Shared.vfx("RiftArrive", Shared.groundBelow(root.Position)) -- where the Catcher left
+			Shared.vfx("RiftArrive", Shared.groundBelow(root.Position), nil, ctx.species) -- where the Catcher left
 		end
 		local rot = root.CFrame - root.Position
 		char:PivotTo(CFrame.new(now) * rot)
 		root.AssemblyLinearVelocity = Vector3.zero
 		plr:SetAttribute("EOS_TeleportedAt", os.clock())
-		Shared.vfx("RiftArrive", Shared.groundBelow(now))
+		Shared.vfx("RiftArrive", Shared.groundBelow(now), nil, ctx.species)
 	end)
 	return true, nil
 end

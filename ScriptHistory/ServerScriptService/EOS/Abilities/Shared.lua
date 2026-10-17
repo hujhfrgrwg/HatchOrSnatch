@@ -50,17 +50,19 @@ end
 -- ===== looks (HOS-VFX-001) =====
 -- Effects are drawn by each client (Controllers.AbilityVFX, templates in ReplicatedStorage.VFX.Abilities).
 -- vfx: a one-shot template played at a position (ground point for ground effects), facing `look`.
-function Shared.vfx(name: string, pos: Vector3, look: Vector3?)
-	Shared.fx({ kind = "vfx", name = name, pos = pos, look = look })
+-- `species` (the user's pet) lets clients draw that species' override (AbilityCosmetics.vfx, HOS-VFX-OVR).
+function Shared.vfx(name: string, pos: Vector3, look: Vector3?, species: string?)
+	Shared.fx({ kind = "vfx", name = name, pos = pos, look = look, species = species })
 end
 
 -- tagVfx: the server keeps its gameplay part (invisible) and every client dresses it with a lasting
 -- effect for as long as the part exists.
-function Shared.tagVfx(part: BasePart, name: string, keepVisible: boolean?)
+function Shared.tagVfx(part: BasePart, name: string, keepVisible: boolean?, species: string?)
 	if not keepVisible then
 		part.Transparency = 1
 	end
 	part:SetAttribute("VFX", name)
+	part:SetAttribute("VFXSpecies", species) -- whose ability: clients draw its override if it has one
 	game:GetService("CollectionService"):AddTag(part, "EOS_AbilityVFX")
 end
 
@@ -173,7 +175,7 @@ end
 -- contact retries every tick, so without it the next touch would tag you a moment after the block).
 -- Keyed by actor (a Player or an NPC bot). The body carries EOS_TagBlock (charges left) for clients.
 
-type Block = { charges: number, untilT: number, archetype: string, immunity: number, graceUntil: number }
+type Block = { charges: number, untilT: number, archetype: string, immunity: number, graceUntil: number, species: string? }
 local blocks: { [any]: Block } = {}
 
 local function show(actor: any, n: number?)
@@ -183,13 +185,14 @@ local function show(actor: any, n: number?)
 	end
 end
 
-function Shared.grantTagBlock(actor: any, charges: number, seconds: number, archetype: string, immunity: number?)
+function Shared.grantTagBlock(actor: any, charges: number, seconds: number, archetype: string, immunity: number?, species: string?)
 	local b = {
 		charges = math.max(1, math.floor(charges)),
 		untilT = os.clock() + seconds,
 		archetype = archetype,
 		immunity = immunity or 0,
 		graceUntil = 0,
+		species = species, -- for its ShieldBreak override (HOS-VFX-OVR)
 	}
 	blocks[actor] = b
 	show(actor, b.charges)
@@ -235,7 +238,7 @@ function Shared.consumeTagBlock(victim: any, hunter: any): boolean
 	local r = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	Shared.fx({ userId = victim.UserId, family = b.archetype, kind = "blocked", pos = r and r.Position or nil, by = hunter and hunter.UserId })
 	if b.archetype == "Guardian" and r then
-		Shared.vfx("ShieldBreak", r.Position) -- the bubble shatters (HOS-VFX-002)
+		Shared.vfx("ShieldBreak", r.Position, nil, b.species) -- the bubble shatters (HOS-VFX-002)
 	end
 	Analytics.log("AbilityTagBlocked", { userId = victim.UserId, by = hunter and hunter.UserId, family = b.archetype })
 	return true
