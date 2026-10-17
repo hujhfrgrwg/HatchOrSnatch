@@ -1,7 +1,7 @@
 --!nocheck
 -- Haunted Graveyard (HOS-MAP-001, 17 Oct 2026, from Matthew's approved concept
 -- docs/concepts/HOS-MAP-001_halloween_arena_concept.webp): night-time halloween arena, field 192 long
--- (Stadium size). NO cover: an empty dark-purple field with small coloured tile patches. The safe
+-- (Stadium size). NO cover: an empty, plain dark-purple field (no colour patches, Matthew 17 Oct). The safe
 -- zones are the glowing lanes past the field (purple A, orange B); past them is out-of-bounds paving.
 -- No chalk lines, flags or tall back walls: the zone edge is where the field block ends.
 -- Scenery only outside the fence: candle pillars in the fence, hanging-lantern posts, gravestones,
@@ -32,12 +32,6 @@ local G = {
 	lantern = rgb(255, 156, 60), crystal = rgb(196, 120, 255),
 	shrineRed = rgb(184, 52, 52), shrineRed2 = rgb(150, 40, 46), shrineWall = rgb(96, 58, 54),
 	brew = rgb(176, 84, 255), pot = rgb(48, 42, 60),
-}
--- field patches: mostly orange, some purple, a few dull green (as in the concept). The oranges are
--- muted toward the field (Matthew, 17 Oct) so they tint the floor instead of popping off it.
-local PATCH = {
-	rgb(146, 84, 66), rgb(146, 84, 66), rgb(136, 78, 68), rgb(156, 92, 68),
-	rgb(122, 78, 176), rgb(104, 60, 120), rgb(72, 100, 84),
 }
 
 local THEME = {
@@ -353,7 +347,7 @@ return function(world: Instance, def)
 	if chalk then
 		chalk:Destroy()
 	end
-	-- field checker on a 4-stud tile so the patches below sit on its grid
+	-- faint 4-stud checker on the field
 	local checker = arena.Ground.Field:FindFirstChild("Checker")
 	if checker then
 		checker.StudsPerTileU = 8
@@ -389,37 +383,6 @@ return function(world: Instance, def)
 		cap.Position = Vector3.new(cap.Position.X, 0.75, cap.Position.Z)
 		for _, sz in { -1, 1 } do
 			lanternPost(lamps, Vector3.new(X + sx * FX, 0.19, Z + sz * (HZ + 1.5)), Vector3.new(sx, 0, 0))
-		end
-	end
-
-	-- ===== coloured tile patches on the field (flat, on the 4-stud grid, never touching) =====
-	local patches = Kit.model(arena.Ground, "FieldPatches")
-	local CELL = 4
-	local nx, nz = math.floor(2 * FX / CELL), math.floor(2 * HZ / CELL)
-	local used = {}
-	local placed, tries = 0, 0
-	while placed < 72 and tries < 600 do
-		tries += 1
-		local w = if rng:NextNumber() < 0.45 then 2 else 1
-		local d = if rng:NextNumber() < 0.35 then 2 else 1
-		local i0, j0 = rng:NextInteger(0, nx - w), rng:NextInteger(0, nz - d)
-		local ok = true
-		for i = i0 - 1, i0 + w do
-			for j = j0 - 1, j0 + d do
-				if used[i .. "," .. j] then
-					ok = false
-				end
-			end
-		end
-		if ok then
-			for i = i0, i0 + w - 1 do
-				for j = j0, j0 + d - 1 do
-					used[i .. "," .. j] = true
-				end
-			end
-			local x0, z0 = X - FX + i0 * CELL, Z - HZ + j0 * CELL
-			Kit.box(patches, "Patch", x0, x0 + w * CELL, 0.2, 0.26, z0, z0 + d * CELL, PATCH[rng:NextInteger(1, #PATCH)], { Pattern = "Universal", CanCollide = false, CanQuery = false, CanTouch = false, CastShadow = false })
-			placed += 1
 		end
 	end
 

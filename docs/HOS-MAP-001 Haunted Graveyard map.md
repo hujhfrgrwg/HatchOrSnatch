@@ -21,7 +21,7 @@ The overview was taken with the Ground model selected, which is where the outlin
 ## What's in it
 | Area | Build |
 |---|---|
-| Field | Dark purple studded floor with 72 flat colour patches on a 4-stud grid: mostly muted orange that blends into the floor, some purple, a few dull green. No cover, per Matthew. |
+| Field | Plain dark purple studded floor with a faint checker. No cover and no colour patches, per Matthew. |
 | Safe zones | A is purple and B is orange. Glow strips run along both long edges of each lane. Each zone is simply the floor past the field; past the zones is out-of-bounds paving. No chalk lines or flags. The tall back walls are now a low stone kerb. |
 | Fence | Wooden ranch fence around the play area. Every fourth post is a stone pillar with a candle on top and candles at its foot. |
 | Lantern posts | 5 posts with stone feet, purple crystal tops and hanging orange lanterns: one at each end of both zone edges and one by the shrine. |
@@ -51,7 +51,10 @@ Not built, by request: trees, the sky, moon, castle and clouds, other off-island
 - Re-ran both checks after the rebuild: 0 overlaps and 0 visible shared faces.
 - Pre-change builder: `docs/backups/HOS-MAP-001_2026-10-17/ServerStorage.EOSBuild.Maps.BuildGraveyard.before-pool-removal.lua`.
 
+- **Removed the field colour patches altogether** (Matthew, after seeing the muted ones). The field is now plain. Props moved again for the same seed reason, and both checks are still 0. Pre-change builder: `docs/backups/HOS-MAP-001_2026-10-17/ServerStorage.EOSBuild.Maps.BuildGraveyard.before-patch-removal.lua`.
+
 ![Front walkway without the pool](HOS-MAP-001/front_walkway_no_pool.jpg)
+![Plain field](HOS-MAP-001/plain_field.jpg)
 ![Shrine close-up](HOS-MAP-001/shrine_closeup.jpg)
 ![Zone B at player height](HOS-MAP-001/lane_B_player_height.jpg)
 
