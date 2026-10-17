@@ -79,7 +79,7 @@ Hunter's playbook lives at `C:\Users\hunte\OneDrive\Documents\Game-Blueprint` (o
 - **VFX ledger:** add one (`docs/VFX-LEDGER.md`) and list every uploaded effect texture.
 
 ## Conflicts with what Hunter has decided (his rules win)
-1. **Uploads need a typed yes** (blueprint) vs this project's standing go-ahead to upload pet and ability assets during the pet work. *Hunter to confirm.*
+1. **Uploads need a typed yes** (blueprint): **overridden by Hunter on 17 Oct.** He chose "Keep uploading", so pet and effect assets go up as I work, and every upload is listed in [[VFX-LEDGER]].
 2. **AI music** (`skills/roblox-game-score`) vs real recordings only. We keep real recordings. The blueprint's `rbxasset://sounds/` fallbacks need checking against "Roblox's licensed library".
 3. **Drawing VFX textures with numpy** (`roblox-vfx` skill) vs "we're using AllVFX for all vfx". We keep the pack, which `04_VFX_Workflow.md` also says.
 4. **Vertex colour first** vs our baked SurfaceAppearance texture. We keep the bake: it carries the AO, sheen and emissive the sheets need.

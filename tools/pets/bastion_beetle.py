@@ -30,6 +30,11 @@ CRYSTAL_LT = K.material("Beetle_CrystalLight", K.hexrgb(155, 230, 255), rough=0.
 EYE = K.material("Eye_Glow", K.hexrgb(90, 214, 255), rough=0.2)
 EYE_HOT = K.material("Eye_GlowHot", K.hexrgb(214, 248, 255), rough=0.2)
 SOCKET = K.material("Eye_Socket", K.hexrgb(22, 24, 30), rough=0.5)
+# PBR (Hunter 17 Oct, "premium"): bronze rims metallic, ivory satin, crystals glossy; read by rigkit's pbr bake
+for _m, _metal in ((BRONZE, 1.0), (BRONZE_DK, 0.85)):
+    _m["metal"] = _metal
+for _m, _r in ((IVORY, 0.55), (BRONZE, 0.3), (BRONZE_DK, 0.4), (DARK, 0.75), (DARK_LT, 0.6), (CRYSTAL, 0.08), (CRYSTAL_LT, 0.08), (EYE, 0.1), (EYE_HOT, 0.1)):
+    next(n for n in _m.node_tree.nodes if n.type == "BSDF_PRINCIPLED").inputs["Roughness"].default_value = _r
 
 
 # ===== plate primitives =====
@@ -372,10 +377,10 @@ R.write_anims(os.path.join(OUT, "BeetleAnims.lua"), "Beetle", "tools/pets/bastio
 # ===== texture (sheen on armour and crystal), export, renders =====
 meshes = [body, face, l2_ob, l3_ob]
 SHEEN = (K.hexrgb(255, 248, 228)[:3],
-         {"Beetle_Ivory": 0.55, "Beetle_Bronze": 0.6, "Beetle_BronzeDark": 0.3, "Beetle_Crystal": 0.85, "Beetle_CrystalLight": 0.7},
+         {"Beetle_Ivory": 0.3, "Beetle_Bronze": 0.3, "Beetle_BronzeDark": 0.15, "Beetle_Crystal": 0.45, "Beetle_CrystalLight": 0.35},
          (-0.3, -0.45, 0.85))
 tex = R.bake_textures(meshes, OUT, size=512, ao_strength=0.6, sheen=SHEEN, ao_distance=0.35, sizes={PREFIX + "Body": 1024},
-                       emissive={"Eye_Glow": 1.0, "Eye_GlowHot": 1.0, "Beetle_Crystal": 0.45, "Beetle_CrystalLight": 0.55})
+                       emissive={"Eye_Glow": 1.0, "Eye_GlowHot": 1.0, "Beetle_Crystal": 0.85, "Beetle_CrystalLight": 1.0}, pbr=True)
 R.use_baked(meshes, tex)
 R.export_fbx(os.path.join(OUT, SLUG + ".fbx"), [arm] + meshes)
 import bpy

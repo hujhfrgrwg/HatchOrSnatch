@@ -49,6 +49,25 @@ Rebuilt to Hunter's model sheet, `docs/pets/concepts/bastion_beetle_model_sheet.
 - **Not changed:** gameplay numbers, the server, and the archetype defaults.
 - `BastionBeetle_InPlace.rbxm` exports the template and all Beetle effect templates.
 
+
+## Full PBR retrofit (17 Oct, Hunter: "premium")
+- **What it is:** every Beetle MeshPart's SurfaceAppearance now carries the full PBR set: colour, normal, roughness, metalness and emissive maps.
+- **Normal map:** tangent space, baked from a smoothed subdivided copy, so the plates and limbs shade rounded with no extra triangles.
+- **Metalness:** the bronze rims are metallic. Roughness: the ivory is satin and the crystals are glossy.
+- **Glow:** emissive masks on the horn crystal, forehead crystal, claw insets, back crystals and eyes.
+  - EmissiveStrength: body 2.2, eyes 3.0, L2 3.2, L3 2.6. Tint is cyan.
+  - The base value is stored as the `BaseEmissive` attribute, for a later idle pulse.
+- **Ivory tint:** SurfaceAppearance.Color is set to (242, 226, 196), the warm ivory of the sheet.
+- **Assets:**
+  - FBX Model 128824837218745 (triangulated, exported with tangents).
+  - All map ids are in `docs/VFX-LEDGER.md`.
+- **Pipeline:** `rigkit.bake_textures(pbr=True)` bakes these maps, and the Studio helper `_G.HOS_ApplyPBR` applies them. Every pet from the Toad on uses both.
+- **Daylight previews:**
+  - `bastion_beetle_ingame_daylight.jpg` (hero view)
+  - `bastion_beetle_ingame_daylight_L3_L1.jpg` (L3 next to L1)
+  - `bastion_beetle_studio_hero / front / side / back.jpg`
+  - `bastion_beetle_vs_sheet.jpg`, now with Studio views beside the sheet.
+
 ## Not done / next
 - **No live playtest:** Studio refused to start one this pass (solo and multiplayer both returned an unknown error). The clip is staged in edit mode, as before.
 - **Against the sheet:** the sheet's shell plates are rounder, with finer bronze trim and a larger back crystal. This is a low-poly read of them.

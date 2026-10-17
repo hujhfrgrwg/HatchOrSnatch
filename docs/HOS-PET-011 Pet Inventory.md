@@ -118,3 +118,31 @@ The three finished pets stand side by side at every level in `Workspace.EOS_PetT
   - The HUD equipped card, the hatch reveal, the pet preview and the incubator ladder use these names; other pets keep their placeholder showroom names.
 - **Roster rarities:** recorded as `EconomyConfig.SPECIES_RARITY` (Crow Common, Kitsune Rare, Chameleon Common, Ghost Rare). The hatch tables are unchanged.
 - **Egg pack readme:** the `ReadMe.Read` script in `Workspace["Vynx's_Opensource_Eggpack :D"]` is now **Disabled** (it threw a parse error on every server start). The models are kept.
+
+## Build order (Hunter, 17 Oct)
+Build one pet at a time, rotating through the archetypes. Each pet is finished fully, with previews pushed, before the next one starts, and no two pets are worked on in parallel. Crow, Kitsune and Chameleon already exist, so they're skipped.
+
+| # | Pet | Archetype, rarity | Status |
+|---|---|---|---|
+| 1 | Bastion Beetle | Guardian, Common | done (HOS-PET-013c + full PBR) |
+| 2 | Thunder Toad | Tempest, Common | in progress (HOS-PET-014) |
+| 3 | Ring Imp | Rift, Common | |
+| 4 | Grin Ghost | Invisibility, Rare | |
+| 5 | Crystal Warden | Guardian, Rare | |
+| 6 | Riot Hound | Tempest, Rare | |
+| 7 | Compass Hare | Rift, Rare | |
+| 8 | Scroll Tanuki | Decoy, Epic | |
+| 9 | Moonveil Moth | Invisibility, Epic | |
+| 10 | Shrine Lion | Guardian, Epic | |
+| 11 | Drum Oni | Tempest, Epic | |
+| 12 | Astral Djinn | Rift, Epic | |
+| 13 | Eclipse Tengu | Decoy, Legendary | |
+| 14 | Veil Nekomata | Invisibility, Legendary | |
+| 15 | Aegis Kirin | Guardian, Legendary | |
+| 16 | Raiju | Tempest, Legendary | |
+| 17 | Void Seraph | Rift, Legendary | |
+
+**Standard for every pet (Hunter, 17 Oct, "premium"):**
+- Each MeshPart's SurfaceAppearance carries the full PBR set: colour, normal (baked from a smoothed copy, so plates shade rounded), roughness and metalness maps.
+- An emissive mask covers the crystals, eyes, glowing markings and runes. The glow is tuned to read in daylight on the sand map.
+- Uploads are logged in [[VFX-LEDGER]].

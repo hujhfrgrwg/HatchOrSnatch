@@ -83,12 +83,17 @@ def armature(bones):
 
 
 # ===== baked colour texture =====
-def bake_textures(obs, outdir, size=512, ao_strength=0.55, sheen=None, ao_distance=None, sizes=None, emissive=None):
+def bake_textures(obs, outdir, size=512, ao_strength=0.55, sheen=None, ao_distance=None, sizes=None, emissive=None, pbr=False):
     """Smart-UV each mesh and bake base colour x ambient occlusion into tex/<object>.png (Cycles, CPU).
     sheen = (highlight linear rgb, {material name: strength}, light dir (Blender model axes)): a soft baked
     highlight on the faces of those materials that point toward the light, so armour reads as polished
-    even under flat in-game light."""
+    even under flat in-game light.
+    emissive = {material name: 0..1}: a glow mask tex/<object>_emit.png (SurfaceAppearance.EmissiveMaskContent).
+    pbr = True: also tex/<object>_normal.png (tangent space, OpenGL, baked from a smoothed subdivided copy so
+    low-poly plates and limbs shade rounded), _rough.png (each material's Roughness) and _metal.png (each
+    material's custom property "metal", 0..1). Meshes are triangulated first so Roblox's tangents match."""
     import numpy as np
+    import bmesh
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     sc.cycles.samples = 64
@@ -108,6 +113,12 @@ def bake_textures(obs, outdir, size=512, ao_strength=0.55, sheen=None, ao_distan
         later = [o for o in obs[oi + 1:] if not o.hide_render]
         for o in later:
             o.hide_render = True
+        if pbr:
+            bm = bmesh.new()
+            bm.from_mesh(ob.data)
+            bmesh.ops.triangulate(bm, faces=bm.faces[:])
+            bm.to_mesh(ob.data)
+            bm.free()
         bpy.ops.object.select_all(action="DESELECT")
         ob.select_set(True)
         bpy.context.view_layer.objects.active = ob
@@ -197,6 +208,62 @@ def bake_textures(obs, outdir, size=512, ao_strength=0.55, sheen=None, ao_distan
             em.file_format = "PNG"
             em.save()
             out[ob.name + "_emit"] = em.filepath_raw
+        if pbr:
+            def target(img):
+                for m in ob.data.materials:
+                    m.node_tree.nodes["BakeTarget"].image = img
+                    m.node_tree.nodes.active = m.node_tree.nodes["BakeTarget"]
+
+            def save(name, arr):
+                im = bpy.data.images.new(f"{ob.name}_{name}", res, res)
+                im.colorspace_settings.name = "Non-Color"
+                im.pixels[:] = np.concatenate([np.clip(arr, 0, 1), np.ones((arr.shape[0], 1))], axis=1).ravel()
+                im.filepath_raw = os.path.join(texdir, f"{ob.name}_{name}.png")
+                im.file_format = "PNG"
+                im.save()
+                out[f"{ob.name}_{name}"] = im.filepath_raw
+
+            # grayscale masks from per-material values
+            for name, val in (("rough", lambda m, b: b.inputs["Roughness"].default_value), ("metal", lambda m, b: float(m.get("metal", 0.0)))):
+                gimg = bpy.data.images.new(f"{ob.name}_{name}_f", res, res, float_buffer=True)
+                saved = []
+                for m in ob.data.materials:
+                    bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+                    saved.append((bsdf, tuple(bsdf.inputs["Emission Color"].default_value), bsdf.inputs["Emission Strength"].default_value))
+                    k = val(m, bsdf)
+                    bsdf.inputs["Emission Color"].default_value = (k, k, k, 1)
+                    bsdf.inputs["Emission Strength"].default_value = 1.0
+                target(gimg)
+                bpy.ops.object.bake(type="EMIT", margin=4)
+                for bsdf, c, st in saved:
+                    bsdf.inputs["Emission Color"].default_value = c
+                    bsdf.inputs["Emission Strength"].default_value = st
+                g = np.array(gimg.pixels[:]).reshape(-1, 4)[:, :1]
+                save(name, np.repeat(g, 3, axis=1))
+            # tangent-space normals from a smoothed, subdivided copy (rounded bevels without extra triangles)
+            hp = ob.copy()
+            hp.data = ob.data.copy()
+            hp.name = ob.name + "_HP"
+            bpy.context.scene.collection.objects.link(hp)
+            for mod in list(hp.modifiers):
+                hp.modifiers.remove(mod)
+            for e in hp.data.edges:
+                e.use_edge_sharp = False
+            for poly in hp.data.polygons:
+                poly.use_smooth = True
+            sub = hp.modifiers.new("Sub", "SUBSURF")
+            sub.levels = sub.render_levels = 2
+            nimg = bpy.data.images.new(f"{ob.name}_normal_f", res, res, float_buffer=True)
+            target(nimg)
+            bpy.ops.object.select_all(action="DESELECT")
+            hp.select_set(True)
+            ob.select_set(True)
+            bpy.context.view_layer.objects.active = ob
+            bpy.ops.object.bake(type="NORMAL", normal_space="TANGENT", use_selected_to_active=True,
+                                cage_extrusion=0.03, max_ray_distance=0.09, margin=4)
+            bpy.data.objects.remove(hp, do_unlink=True)
+            nm = np.array(nimg.pixels[:]).reshape(-1, 4)[:, :3]
+            save("normal", nm)
         for m in ob.data.materials:
             n = m.node_tree.nodes.get("BakeTarget")
             if n:
@@ -229,7 +296,7 @@ def export_fbx(path, objs):
         o.select_set(True)
     bpy.ops.export_scene.fbx(filepath=path, use_selection=True, object_types={"ARMATURE", "MESH"},
                              add_leaf_bones=False, bake_anim=False, use_armature_deform_only=True,
-                             mesh_smooth_type="FACE", path_mode="STRIP")
+                             mesh_smooth_type="FACE", use_tspace=True, path_mode="STRIP")
 
 
 # ===== animations (generated in code) =====

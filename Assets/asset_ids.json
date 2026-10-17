@@ -277,5 +277,92 @@
  },
  "docs/ability-vfx/beetle_v3/upload/beetle_shield_meshes.fbx": {
   "assetId": "124416136733506"
+ },
+ "docs/pets/thunder_toad/upload/Toad_Body_emit_v2.png": {
+  "assetId": "80917119841498"
+ },
+ "docs/pets/thunder_toad/upload/Toad_Body_v2.png": {
+  "assetId": "140262336549848"
+ },
+ "docs/pets/thunder_toad/upload/Toad_Face_v2.png": {
+  "assetId": "84587837636656"
+ },
+ "docs/pets/thunder_toad/upload/Toad_L2_emit_v2.png": {
+  "assetId": "74598409218794"
+ },
+ "docs/pets/thunder_toad/upload/Toad_L2_v2.png": {
+  "assetId": "83286456948781"
+ },
+ "docs/pets/thunder_toad/upload/Toad_L3_emit_v2.png": {
+  "assetId": "110942317276691"
+ },
+ "docs/pets/thunder_toad/upload/Toad_L3_v2.png": {
+  "assetId": "117921039381206"
+ },
+ "docs/pets/thunder_toad/upload/thunder_toad_v2.fbx": {
+  "assetId": "114122866538752"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Body_emit_v4.png": {
+  "assetId": "138004223323256"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Body_metal_v4.png": {
+  "assetId": "138576641261237"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Body_normal_v4.png": {
+  "assetId": "77081148910310"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Body_rough_v4.png": {
+  "assetId": "80848720489950"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Body_v4.png": {
+  "assetId": "87696509421436"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Face_emit_v4.png": {
+  "assetId": "99251058675702"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Face_metal_v4.png": {
+  "assetId": "124416373052573"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Face_normal_v4.png": {
+  "assetId": "101200737557958"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Face_rough_v4.png": {
+  "assetId": "139074068306498"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_Face_v4.png": {
+  "assetId": "96428737531798"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L2_emit_v4.png": {
+  "assetId": "103169892575817"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L2_metal_v4.png": {
+  "assetId": "72083494105209"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L2_normal_v4.png": {
+  "assetId": "122109508763802"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L2_rough_v4.png": {
+  "assetId": "88125830948458"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L2_v4.png": {
+  "assetId": "76353812844160"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L3_emit_v4.png": {
+  "assetId": "82625710850576"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L3_metal_v4.png": {
+  "assetId": "101786538242314"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L3_normal_v4.png": {
+  "assetId": "131445332977075"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L3_rough_v4.png": {
+  "assetId": "97792541981198"
+ },
+ "docs/pets/bastion_beetle/upload_v4/Beetle_L3_v4.png": {
+  "assetId": "121844569709252"
+ },
+ "docs/pets/bastion_beetle/upload_v4/bastion_beetle_v4.fbx": {
+  "assetId": "128824837218745"
  }
 }
