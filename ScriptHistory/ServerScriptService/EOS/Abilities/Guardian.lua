@@ -2,7 +2,7 @@
 -- Abilities.Guardian (HOS-PET-001): the Guardian archetype slot. Numbers: AbilityConfig.ARCHETYPES.Guardian.
 -- Both handlers are stubs that only log until they're built (AbilityConfig ... built = false):
 --  * Runner: shield that blocks one tag (Shared.grantTagBlock)
---  * Catcher: longer stab / lunge reach
+--  * Catcher: tether: pull the nearest Runner in front towards you (check the end spot with Shared.validPosition)
 
 local Shared = require(script.Parent.Shared)
 

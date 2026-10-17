@@ -1,113 +1,131 @@
 {
- "UI/web/rbx/out/upload/a07e0d4ea71.png": {
-  "assetId": "101191169484972"
- },
- "UI/web/rbx/out/upload/a09275686ea.png": {
-  "assetId": "80710967883211"
- },
- "UI/web/rbx/out/upload/a0a1dbe9364.png": {
-  "assetId": "73780211947068"
- },
- "UI/web/rbx/out/upload/a17b765f468.png": {
-  "assetId": "133118122145997"
- },
- "UI/web/rbx/out/upload/a1dc8148db1.png": {
-  "assetId": "113591679604532"
- },
- "UI/web/rbx/out/upload/a25719adaba.png": {
-  "assetId": "106957770962876"
- },
- "UI/web/rbx/out/upload/a38078fdead.png": {
-  "assetId": "118886518894616"
- },
- "UI/web/rbx/out/upload/a3fbc6a6138.png": {
-  "assetId": "139813295809544"
- },
- "UI/web/rbx/out/upload/a40f92d9979.png": {
-  "assetId": "107927863182165"
- },
- "UI/web/rbx/out/upload/a410fcf9208.png": {
-  "assetId": "78413848455703"
- },
- "UI/web/rbx/out/upload/a411fd2b187.png": {
-  "assetId": "112868075221699"
- },
- "UI/web/rbx/out/upload/a459e53702d.png": {
-  "assetId": "105211738699639"
- },
- "UI/web/rbx/out/upload/a48da59d2f8.png": {
-  "assetId": "125457979672873"
- },
- "UI/web/rbx/out/upload/a49d2ed5898.png": {
-  "assetId": "98330065145741"
- },
- "UI/web/rbx/out/upload/a4aeefe2952.png": {
-  "assetId": "136581442483239"
- },
- "UI/web/rbx/out/upload/a4cb09ea2ae.png": {
-  "assetId": "76489595071097"
- },
- "UI/web/rbx/out/upload/a4f21ba0faf.png": {
-  "assetId": "118072941361409"
- },
- "UI/web/rbx/out/upload/a5a15f36cea.png": {
-  "assetId": "97186576283452"
- },
- "UI/web/rbx/out/upload/a5b67565614.png": {
-  "assetId": "114055859655308"
- },
- "UI/web/rbx/out/upload/a6124082fd9.png": {
-  "assetId": "93907506963952"
- },
- "UI/web/rbx/out/upload/a67be6a9b10.png": {
-  "assetId": "88494393548027"
- },
- "UI/web/rbx/out/upload/a8129b62206.png": {
-  "assetId": "113723614996986"
- },
- "UI/web/rbx/out/upload/a82b558f1e9.png": {
-  "assetId": "130395234702610"
- },
- "UI/web/rbx/out/upload/a90e23d2576.png": {
-  "assetId": "126573038121944"
- },
- "UI/web/rbx/out/upload/aa16d2ac55e.png": {
-  "assetId": "101393065616041"
- },
- "UI/web/rbx/out/upload/aba499c328c.png": {
-  "assetId": "127172890594528"
- },
- "UI/web/rbx/out/upload/abdf102519c.png": {
-  "assetId": "104634365399471"
- },
- "UI/web/rbx/out/upload/ac56105c070.png": {
-  "assetId": "104286147260575"
- },
- "UI/web/rbx/out/upload/ac6c0bc1c62.png": {
-  "assetId": "118626538175003"
- },
- "UI/web/rbx/out/upload/ad2420899d5.png": {
-  "assetId": "101732461972079"
- },
- "UI/web/rbx/out/upload/ad7ce5cbd55.png": {
-  "assetId": "85265873408688"
- },
- "UI/web/rbx/out/upload/adb8161acf9.png": {
-  "assetId": "83026270795167"
- },
- "UI/web/rbx/out/upload/af0d8c1fd70.png": {
-  "assetId": "137924667707150"
- },
- "UI/web/rbx/out/upload/glow.png": {
-  "assetId": "96981995991480"
- },
- "UI/web/icons/emote_slot.png": {
-  "assetId": "72554873269559"
- },
- "Assets/Icons/ab_rift_512.png": {
-  "assetId": "70655053025084"
- },
- "Assets/Icons/ab_tempest_512.png": {
-  "assetId": "128962896976411"
- }
+  "UI/web/rbx/out/upload/a07e0d4ea71.png": {
+    "assetId": "101191169484972"
+  },
+  "UI/web/rbx/out/upload/a09275686ea.png": {
+    "assetId": "80710967883211"
+  },
+  "UI/web/rbx/out/upload/a0a1dbe9364.png": {
+    "assetId": "73780211947068"
+  },
+  "UI/web/rbx/out/upload/a17b765f468.png": {
+    "assetId": "133118122145997"
+  },
+  "UI/web/rbx/out/upload/a1dc8148db1.png": {
+    "assetId": "113591679604532"
+  },
+  "UI/web/rbx/out/upload/a25719adaba.png": {
+    "assetId": "106957770962876"
+  },
+  "UI/web/rbx/out/upload/a38078fdead.png": {
+    "assetId": "118886518894616"
+  },
+  "UI/web/rbx/out/upload/a3fbc6a6138.png": {
+    "assetId": "139813295809544"
+  },
+  "UI/web/rbx/out/upload/a40f92d9979.png": {
+    "assetId": "107927863182165"
+  },
+  "UI/web/rbx/out/upload/a410fcf9208.png": {
+    "assetId": "78413848455703"
+  },
+  "UI/web/rbx/out/upload/a411fd2b187.png": {
+    "assetId": "112868075221699"
+  },
+  "UI/web/rbx/out/upload/a459e53702d.png": {
+    "assetId": "105211738699639"
+  },
+  "UI/web/rbx/out/upload/a48da59d2f8.png": {
+    "assetId": "125457979672873"
+  },
+  "UI/web/rbx/out/upload/a49d2ed5898.png": {
+    "assetId": "98330065145741"
+  },
+  "UI/web/rbx/out/upload/a4aeefe2952.png": {
+    "assetId": "136581442483239"
+  },
+  "UI/web/rbx/out/upload/a4cb09ea2ae.png": {
+    "assetId": "76489595071097"
+  },
+  "UI/web/rbx/out/upload/a4f21ba0faf.png": {
+    "assetId": "118072941361409"
+  },
+  "UI/web/rbx/out/upload/a5a15f36cea.png": {
+    "assetId": "97186576283452"
+  },
+  "UI/web/rbx/out/upload/a5b67565614.png": {
+    "assetId": "114055859655308"
+  },
+  "UI/web/rbx/out/upload/a6124082fd9.png": {
+    "assetId": "93907506963952"
+  },
+  "UI/web/rbx/out/upload/a67be6a9b10.png": {
+    "assetId": "88494393548027"
+  },
+  "UI/web/rbx/out/upload/a8129b62206.png": {
+    "assetId": "113723614996986"
+  },
+  "UI/web/rbx/out/upload/a82b558f1e9.png": {
+    "assetId": "130395234702610"
+  },
+  "UI/web/rbx/out/upload/a90e23d2576.png": {
+    "assetId": "126573038121944"
+  },
+  "UI/web/rbx/out/upload/aa16d2ac55e.png": {
+    "assetId": "101393065616041"
+  },
+  "UI/web/rbx/out/upload/aba499c328c.png": {
+    "assetId": "127172890594528"
+  },
+  "UI/web/rbx/out/upload/abdf102519c.png": {
+    "assetId": "104634365399471"
+  },
+  "UI/web/rbx/out/upload/ac56105c070.png": {
+    "assetId": "104286147260575"
+  },
+  "UI/web/rbx/out/upload/ac6c0bc1c62.png": {
+    "assetId": "118626538175003"
+  },
+  "UI/web/rbx/out/upload/ad2420899d5.png": {
+    "assetId": "101732461972079"
+  },
+  "UI/web/rbx/out/upload/ad7ce5cbd55.png": {
+    "assetId": "85265873408688"
+  },
+  "UI/web/rbx/out/upload/adb8161acf9.png": {
+    "assetId": "83026270795167"
+  },
+  "UI/web/rbx/out/upload/af0d8c1fd70.png": {
+    "assetId": "137924667707150"
+  },
+  "UI/web/rbx/out/upload/glow.png": {
+    "assetId": "96981995991480"
+  },
+  "UI/web/icons/emote_slot.png": {
+    "assetId": "72554873269559"
+  },
+  "Assets/Icons/ab_rift_512.png": {
+    "assetId": "70655053025084"
+  },
+  "Assets/Icons/ab_tempest_512.png": {
+    "assetId": "128962896976411"
+  },
+  "Assets/Icons/ab_snare_512.png": {
+    "assetId": "75214795660706"
+  },
+  "Assets/Icons/ab_tether_512.png": {
+    "assetId": "135934187140221"
+  },
+  "Assets/Icons/ab_stormball_512.png": {
+    "assetId": "119278923698140"
+  },
+  "Assets/Icons/ab_blink_512.png": {
+    "assetId": "76397874464574"
+  },
+  "Assets/Icons/_unused/ab_snare_512_speckled.png": {
+    "assetId": "134148995985984"
+  },
+  "Assets/Icons/_unused/ab_reach_512.png": {
+    "assetId": "126229126619811"
+  }
 }

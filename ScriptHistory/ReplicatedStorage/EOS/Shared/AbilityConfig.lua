@@ -68,14 +68,17 @@ AbilityConfig.ARCHETYPES = {
 			duration = 3,
 			windup = 0,
 		},
+		-- 17 Oct (Hunter): the Catcher side is invisibility too, with tighter limits
 		Catcher = {
 			built = false,
-			name = "TETHER",
-			icon = "ab_tether",
-			text = "pull the nearest Runner in front towards you",
+			name = "INVISIBLE",
+			icon = "ab_invis",
+			text = "fade out to sneak up; any stab or lunge shows you",
 			cooldown = 20,
-			duration = 0,
-			windup = 0.4,
+			duration = 2,
+			windup = 0,
+			revealRadius = 15, -- Runners this close see a faint shimmer
+			endsOnAttack = true, -- a stab or lunge ends it at once
 		},
 	},
 	Guardian = {
@@ -90,14 +93,17 @@ AbilityConfig.ARCHETYPES = {
 			duration = 3,
 			windup = 0,
 		},
+		-- 17 Oct (Hunter): tether moved here from Invisibility; Long Reach was dropped
 		Catcher = {
 			built = false,
-			name = "LONG REACH",
-			icon = "ab_reach",
-			text = "your next stab or lunge reaches further",
-			cooldown = 18,
-			duration = 3,
-			windup = 0,
+			name = "TETHER",
+			icon = "ab_tether",
+			text = "pull the nearest Runner in front towards you",
+			cooldown = 20,
+			duration = 0,
+			windup = 0.4, -- visible windup before the pull
+			range = 25, -- studs: the nearest Runner in front within this
+			pull = 6, -- studs pulled towards you
 		},
 	},
 	Tempest = {

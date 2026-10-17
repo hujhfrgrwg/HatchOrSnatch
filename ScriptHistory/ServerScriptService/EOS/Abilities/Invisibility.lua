@@ -1,7 +1,8 @@
 --!strict
 -- Abilities.Invisibility (HOS-PET-001): the Invisibility archetype. Numbers: AbilityConfig.ARCHETYPES.Invisibility.
 --  * Runner: the existing invisibility (below), the same for every species.
---  * Catcher: stub (the tether is not built yet).
+--  * Catcher: stub. Planned: the same invisibility, shorter (2 s), a shimmer Runners see within 15 studs,
+--    ends on a stab or lunge (AbilityConfig .Catcher).
 
 local Shared = require(script.Parent.Shared)
 
@@ -63,7 +64,10 @@ function Invisibility.Runner(ctx: any): (boolean, string?)
 	if not ctx.root then
 		return false, "NO_CHARACTER"
 	end
-	invisible(ctx.player, ctx.def.duration, ctx.species, ctx.level)
+	-- you vanish when the species' summon melts into you (under its flash): Shared.INTRO
+	Shared.afterIntro(ctx, function()
+		invisible(ctx.player, ctx.def.duration, ctx.species, ctx.level)
+	end)
 	return true, nil
 end
 

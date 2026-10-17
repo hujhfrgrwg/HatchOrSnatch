@@ -16,6 +16,11 @@ return {
 		-- HOS-PET-002 (17 Oct): added by hand (this pack's upload ledger isn't in the repo); ChatGPT icons, Open Cloud upload
 		["ab_rift"] = "rbxassetid://95710596996212",
 		["ab_tempest"] = "rbxassetid://108468538791427",
+		-- HOS-PET-004 (17 Oct): Catcher-side ability icons, added by hand like ab_rift / ab_tempest
+		["ab_snare"] = "rbxassetid://76188862683171",
+		["ab_tether"] = "rbxassetid://104994377640480",
+		["ab_stormball"] = "rbxassetid://123701685229353",
+		["ab_blink"] = "rbxassetid://138344437907055",
 		["abilityfx"] = "rbxassetid://123506725390433",
 		["abilityfx_gold"] = "rbxassetid://93570700141538",
 		["afk"] = "rbxassetid://75947854058692",
