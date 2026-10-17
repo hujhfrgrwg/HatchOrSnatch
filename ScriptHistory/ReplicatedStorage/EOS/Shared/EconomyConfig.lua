@@ -134,24 +134,24 @@ end
 -- species are listed; LAUNCH_FAMILIES is what eggs hatch.
 local AbilityConfig = require(script.Parent:WaitForChild("AbilityConfig"))
 local AR = AbilityConfig.ARCHETYPES
-EconomyConfig.LAUNCH_FAMILIES = { "Decoy" }
+EconomyConfig.LAUNCH_FAMILIES = { "Decoy", "Invisibility" }
 EconomyConfig.FAMILIES = {
 	Decoy = {
 		ability = "DECOY",
 		short = "A running copy of you",
 		desc = "Sends a copy of you running ahead for 3 seconds. Catchers chasing it lose you.",
-		species = { common = "Mouse", rare = "Parrot", epic = "Mirror Dragon" },
+		species = { common = "Mouse", rare = "Crow", epic = "Kitsune" },
 		color = AR.Decoy.color,
 		cooldown = AR.Decoy.Runner.cooldown,
 		duration = AR.Decoy.Runner.duration,
 	},
-	-- not a launch family yet (not in LAUNCH_FAMILIES, so eggs don't hatch it): the shared backend
-	-- for the invisibility pets. Abilities.Invisibility / client Controllers.Invisibility.
+	-- the invisibility pets (Abilities.Invisibility / client Controllers.Invisibility). Only the Prism
+	-- Chameleon has a model so far, so it is every rarity until the Grim Ghost ships.
 	Invisibility = {
 		ability = "INVISIBLE",
 		short = "Fade from sight",
 		desc = "Turns you nearly invisible for 3 seconds: opponents only see a faint shimmer.",
-		species = { common = "Grim Ghost", rare = "Prism Chameleon", epic = "Prism Chameleon" },
+		species = { common = "Prism Chameleon", rare = "Prism Chameleon", epic = "Prism Chameleon" },
 		color = AR.Invisibility.color,
 		cooldown = AR.Invisibility.Runner.cooldown,
 		duration = AR.Invisibility.Runner.duration,
@@ -160,6 +160,25 @@ EconomyConfig.FAMILIES = {
 
 -- the family a species belongs to (hatch tables above, plus the new rigged pets not in a table yet)
 EconomyConfig.EXTRA_SPECIES = { Crow = "Decoy", Kitsune = "Decoy" } :: { [string]: string }
+
+-- HOS-PET-012: roster pets go by the cofounder handoff's names on screen. Internal ids (a saved pet's
+-- `species`, attributes, asset folders) stay as they are, so no save migration is needed.
+EconomyConfig.DISPLAY_NAMES = {
+	Crow = "Mimic Crow",
+	Kitsune = "Tricktail Kitsune",
+	["Prism Chameleon"] = "Veil Chameleon",
+	["Grim Ghost"] = "Grin Ghost",
+} :: { [string]: string }
+-- the roster rarity of each roster pet (cofounder handoff). The hatch tables above are not changed by this
+-- (HOS-PET-012: no hatch changes yet); a later ticket swaps roster pets into them.
+EconomyConfig.SPECIES_RARITY = { Crow = "common", Kitsune = "rare", ["Prism Chameleon"] = "common", ["Grim Ghost"] = "rare" } :: { [string]: string }
+
+function EconomyConfig.displayName(species: string?): string
+	if type(species) ~= "string" or species == "" then
+		return "Pet"
+	end
+	return EconomyConfig.DISPLAY_NAMES[species] or species
+end
 function EconomyConfig.familyOfSpecies(species: string): string?
 	local extra = EconomyConfig.EXTRA_SPECIES[species]
 	if extra then

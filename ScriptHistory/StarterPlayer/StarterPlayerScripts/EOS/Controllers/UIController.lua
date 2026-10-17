@@ -83,8 +83,8 @@ local FAMILY = { -- the design's families (HOS-ABIL-001); EconomyConfig / Abilit
 -- showroom pets (Workspace.FWP_PetShowroom / FWPPetData.Pools) that skin each family, common -> epic
 local PET_ART = {
 	DoubleDash = { "shades_shark", "surfer_dog", "thunder_wolf" },
-	Decoy = { "gamer_axolotl", "bandit_raccoon", "ninja_penguin" },
-	Invisibility = { "koi_spirit", "jelly_wisp", "saucer_pilot" },
+	Decoy = { "gamer_axolotl", "crow", "kitsune" }, -- rare Crow, epic Kitsune (the game's own pets)
+	Invisibility = { "prism_chameleon", "prism_chameleon", "prism_chameleon" },
 	Wall = { "sand_crab", "robo_crab", "armored_rex" },
 	Shield = { "pebble_frog", "puffer_pup", "hermit_knight" },
 	PetTackle = { "viking_walrus", "cozy_lion", "narwhal_calf" },
@@ -372,13 +372,15 @@ end
 local function petArt(family: string?, rarity: string?, variant: number?): (string, string)
 	local list = family and PET_ART[family]
 	local idx = table.find(RARITIES, rarity or "common") or 1
+	-- a roster pet hatched for this family/rarity goes by its roster name (HOS-PET-012); art unchanged
+	local rosterName = family and EconomyConfig.DISPLAY_NAMES[EconomyConfig.speciesFor(family, rarity or "common")]
 	if list then
 		local slug = list[math.min(idx, #list)]
 		local v = variant or (if idx > #list then idx else 1)
-		return ("pet_%s_t%d"):format(slug, math.clamp(v, 1, 3)), titleCase(slug)
+		return ("pet_%s_t%d"):format(slug, math.clamp(v, 1, 3)), rosterName or titleCase(slug)
 	end
 	local species = family and EconomyConfig.speciesFor(family, rarity or "common") or "Pet"
-	return familyIcon(family), species
+	return familyIcon(family), EconomyConfig.displayName(species)
 end
 
 local function eggSlug(level: number): string
@@ -874,7 +876,9 @@ local function abilityCard()
 			local key = card:FindFirstChild("Key")
 			if key then key.Visible = dev ~= "touch" end
 			if sc == "HUD" then
-				setText(card, "Status", ("EQUIPPED  ·  %s"):format(string.upper(petName ~= "" and petName or species)))
+				-- a roster pet shows its own name (HOS-PET-012); others keep the showroom placeholder name
+				local shown = EconomyConfig.DISPLAY_NAMES[species] or (if petName ~= "" then petName else EconomyConfig.displayName(species))
+				setText(card, "Status", ("EQUIPPED  ·  %s"):format(string.upper(shown)))
 				setBar(card:FindFirstChild("Cooldown"), 1)
 				setText(card, "KeyText", if dev == "gamepad" or dev == "console" then "Y" else "Q")
 			else
@@ -1421,6 +1425,7 @@ local function showReveal(t: any)
 	local sc = S.Hatch
 	if not sc or not pet then return end
 	local art, nm = petArt(pet.family, pet.rarity)
+	nm = EconomyConfig.DISPLAY_NAMES[pet.species] or nm -- the hatched species' roster name (HOS-PET-012)
 	setText(sc, "Title", if t.royal then "A ROYAL HATCH!" else "NEW PET!")
 	setText(sc, "PetName", nm)
 	setText(sc, "RarityText", RARITY_NAME[pet.rarity] or pet.rarity or "")
@@ -1639,6 +1644,7 @@ local function refreshPets()
 		if selPet then
 			local stars = math.min(#selPet.ids, 3)
 			local art, nm = petArt(selPet.family, selPet.rarity, stars)
+			nm = EconomyConfig.DISPLAY_NAMES[selPet.species] or nm -- HOS-PET-012
 			setIcon(pv, "Icon", art)
 			setText(pv, "PetName", nm)
 			setText(pv, "RarityText", RARITY_NAME[selPet.rarity] or "")

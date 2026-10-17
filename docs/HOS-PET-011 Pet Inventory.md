@@ -106,3 +106,15 @@ The three finished pets stand side by side at every level in `Workspace.EOS_PetT
 5. **Placeholders to retire:**
    - Mouse, Parrot and Mirror Dragon are the only hatchable pets today, so they can't simply be removed (rule 21 disposition needed).
    - The Scout and Brake voxel specs only serve old saves.
+
+## Corrections and follow-ups (HOS-PET-012, 17 Oct)
+- **Correction:** the live place's hatch tables differ from the script snapshots this inventory was first written from. Another session had already changed them:
+  - `LAUNCH_FAMILIES = { "Decoy", "Invisibility" }`
+  - Decoy hatches Mouse (Common), **Crow (Rare)** and **Kitsune (Epic)**
+  - Invisibility hatches the **Prism Chameleon** at every rarity
+  - So Crow, Kitsune and Chameleon *are* hatchable today. HOS-PET-012 does not touch these tables (no hatch changes yet); they differ from the roster rarities, and a later ticket swaps roster pets in.
+- **Display names:** roster names are now shown on screen (`EconomyConfig.DISPLAY_NAMES` / `displayName()`): Crow → Mimic Crow, Kitsune → Tricktail Kitsune, Prism Chameleon → Veil Chameleon, Grim Ghost → Grin Ghost.
+  - Internal ids are unchanged, so no save migration.
+  - The HUD equipped card, the hatch reveal, the pet preview and the incubator ladder use these names; other pets keep their placeholder showroom names.
+- **Roster rarities:** recorded as `EconomyConfig.SPECIES_RARITY` (Crow Common, Kitsune Rare, Chameleon Common, Ghost Rare). The hatch tables are unchanged.
+- **Egg pack readme:** the `ReadMe.Read` script in `Workspace["Vynx's_Opensource_Eggpack :D"]` is now **Disabled** (it threw a parse error on every server start). The models are kept.
