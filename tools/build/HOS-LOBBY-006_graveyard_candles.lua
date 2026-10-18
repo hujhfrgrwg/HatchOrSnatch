@@ -1,6 +1,6 @@
 --!nocheck
 -- HOS-LOBBY-006 (18 Oct 2026, Matthew): small groups of candles beside the lobby graves that have no pumpkin (the pumpkins
--- are HOS-LOBBY-005), two or three candles each, a bit smaller than the kit ones. Only the tallest candle in a group keeps
+-- are HOS-LOBBY-005) and at least PUMPKIN_GAP from any pumpkin, two or three candles each, a bit smaller than the kit ones. Only the tallest candle in a group keeps
 -- its light. Rebuildable: clears Workspace.LobbyCandles and places them again (same spots every time).
 -- Needs the kit candles, ServerStorage.HalloweenLobbyKit.A05_Candle_Large/Medium/Small (tools/build/HOS-LOBBY-006_candles.lua).
 local ServerStorage = game:GetService("ServerStorage")
@@ -16,6 +16,19 @@ local ground = workspace:WaitForChild("Ground")
 local CENTRE = Vector3.new(0, 10, 1500)
 local GRAVES = { "Grave_03", "Grave_06", "Grave_09", "Grave_13", "Grave_17" }
 local GROUPS = { { "Large", "Small" }, { "Medium", "Small", "Small" }, { "Large", "Medium" } }
+local PUMPKIN_GAP = 4
+
+local pumpkins = {}
+local pf = workspace:FindFirstChild("LobbyPumpkins")
+for _, p in (pf and pf:GetChildren() or {}) do
+	table.insert(pumpkins, p:GetPivot().Position)
+end
+local function nearPumpkin(at: Vector3): boolean
+	for _, p in pumpkins do
+		if Vector3.new(p.X - at.X, 0, p.Z - at.Z).Magnitude < PUMPKIN_GAP then return true end
+	end
+	return false
+end
 
 local old = workspace:FindFirstChild("LobbyCandles")
 if old then old:Destroy() end
@@ -66,13 +79,15 @@ for gi, name in GRAVES do
 		local group = Instance.new("Model")
 		group.Name = "Candles_" .. name
 		group.Parent = folder
-		-- try a few spots beside the grave until the whole group fits
-		for try = 0, 4 do
-			local base = gcf.Position + inward * 0.4 + side * (1.6 + try * 0.7)
-			local spots = { base, base + side * 0.7 + inward * 0.35, base - side * 0.15 + inward * 0.75 }
-			local ok = true
-			for k, s in sizes do
-				if not stand(group, s, spots[k], rng:NextNumber(0.7, 0.85)) then
+		-- try a few spots either side of the grave until the whole group fits, clear of the pumpkins
+		for try = 0, 9 do
+			local s = side * (if try % 2 == 0 then 1 else -1)
+			local base = gcf.Position + inward * 0.4 + s * (1.6 + math.floor(try / 2) * 0.7)
+			local spots = { base, base + s * 0.7 + inward * 0.35, base - s * 0.15 + inward * 0.75 }
+			local ok = not nearPumpkin(base)
+			for k, sz in sizes do
+				if not ok then break end
+				if not stand(group, sz, spots[k], rng:NextNumber(0.7, 0.85)) then
 					ok = false
 					break
 				end

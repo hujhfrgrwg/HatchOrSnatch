@@ -20,7 +20,7 @@ local WAX = Color3.fromRGB(247, 210, 160) -- cream with a hint of orange (Matthe
 local FLAME = Color3.fromRGB(255, 232, 170) -- a light, warm neon
 local WICK = Color3.fromRGB(40, 30, 25)
 local LIGHT_COLOR, LIGHT_RANGE, LIGHT_BRIGHTNESS = Color3.fromRGB(255, 170, 90), 7, 1.4
-local LIGHT_GAP = 3.5 -- studs: candles closer than this to a lit one share its light
+local LIGHT_GAP = 5 -- studs: candles closer than this to a lit one share its light
 
 local kit = ServerStorage:WaitForChild("HalloweenLobbyKit")
 local backups = ServerStorage:FindFirstChild("_Backups") or Instance.new("Folder")
