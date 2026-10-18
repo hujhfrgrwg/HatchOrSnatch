@@ -300,6 +300,10 @@ EconomyConfig.KNIFE_CRATE = {
 	-- bad-luck protection (Hunter 17 Oct: "you shouldnt be able to just buy whatever you want", so the crate is the
 	-- main way in): an Epic or better at the latest on the 10th opening since the last one, a Legendary on the 30th
 	pity = { epic = 10, legendary = 30 },
+	-- HOS-INV-001 (Hunter 18 Oct "Go"): open x10 (one Epic or better guaranteed) and one opening for Robux
+	multi = { count = 10, gems = 2250 },
+	robux = 149,
+	productId = 3719377809 :: number?, -- "Weapon Crate" developer product (tools/upload/create_weapon_crate_product.py)
 }
 -- Tiers re-cut 17 Oct (Hunter: "pick the ones that are top dog to be higher rarities"): a pyramid, 8 / 11 / 15 / 16.
 EconomyConfig.KNIFE_SKINS = { -- skin (template name), name, rarity

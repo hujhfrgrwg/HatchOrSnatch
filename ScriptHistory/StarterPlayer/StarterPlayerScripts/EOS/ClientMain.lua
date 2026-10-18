@@ -45,6 +45,8 @@ task.spawn(require(Controllers.LeadCatcherController).init) -- HOS-LEAD-001: the
 task.spawn(require(Controllers.BackpackController).init) -- HOS-INV-001: the Pets screen becomes the Backpack (Pets, Weapons, Cosmetics tabs)
 task.spawn(require(Controllers.HudDeclutter).init) -- HOS-INV-001 clutter pass: MENU square, one wallet plate, dash hints after 3 matches, streak row from the first clean crossing
 task.spawn(require(Controllers.ShopItemPreview).init) -- HOS-INV-001: hover previews for the Shop's Cosmetics and Featured cosmetic cards
+task.spawn(require(Controllers.CrateShowcase).init) -- HOS-INV-001: everyone sees crate openings (overhead burst, chat line for Epic+)
+task.spawn(require(Controllers.CrateExtras).init) -- HOS-INV-001: open x10, the 10 PULLS screen, Emote Crate guarantee lines
 SlideFX.init() -- streaks on the floor and in the air for every slide (yours, other players', NPCs')
 FieldGems.init() -- field Gems: spin, sparkle, pickup burst, "+1"
 Outlines.init() -- Catchers / downed red, Runner teammates blue; per viewer, hidden behind walls

@@ -126,6 +126,44 @@ function EmoteConfig.roll(r: number): string
 	return EmoteConfig.LIST[#EmoteConfig.LIST].id
 end
 
+-- HOS-INV-001 (Hunter 18 Oct "Go"): bad-luck protection like the Weapon Crate's: an Epic or better at the latest on
+-- the 10th opening since the last one, a Legendary on the 30th (pity = the player's emotePity { epic, legendary }).
+-- Open x10: 10 openings for 2,250 Gems, at least one Epic or better.
+EmoteConfig.PITY = { epic = 10, legendary = 30 }
+EmoteConfig.MULTI = { count = 10, gems = 2250 }
+function EmoteConfig.rollPity(r: number, pity: any?, forceEpic: boolean?): string
+	local need: { [string]: boolean }? = nil
+	if type(pity) == "table" then
+		if (tonumber(pity.legendary) or 0) + 1 >= EmoteConfig.PITY.legendary then
+			need = { legendary = true }
+		elseif (tonumber(pity.epic) or 0) + 1 >= EmoteConfig.PITY.epic then
+			need = { epic = true, legendary = true }
+		end
+	end
+	if forceEpic and not need then
+		need = { epic = true, legendary = true }
+	end
+	if not need then
+		return EmoteConfig.roll(r)
+	end
+	local total = 0
+	for _, e in ipairs(EmoteConfig.LIST) do
+		if need[e.rarity] then
+			total += EmoteConfig.odds(e)
+		end
+	end
+	local x = r * total
+	for _, e in ipairs(EmoteConfig.LIST) do
+		if need[e.rarity] then
+			x -= EmoteConfig.odds(e)
+			if x < 0 then
+				return e.id
+			end
+		end
+	end
+	return EmoteConfig.roll(r)
+end
+
 -- a saved wheel, cleaned: WHEEL_SLOTS entries, each an owned emote id or "" (no duplicates)
 function EmoteConfig.cleanWheel(wheel: any, owned: any): { string }
 	local out, seen = {}, {}

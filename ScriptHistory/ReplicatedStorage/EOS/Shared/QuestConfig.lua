@@ -24,7 +24,7 @@ QuestConfig.Pool = {
 	{ id = "match1", kind = "match", metric = "matches", target = 1, reward = 15, title = "Finish 1 match" },
 	{ id = "match3", kind = "match", metric = "matches", target = 3, reward = 25, title = "Finish 3 matches" },
 	{ id = "tier2", kind = "tier", metric = "secureTier", minTier = 2, target = 1, reward = 20, title = "Secure a Tier 2+ egg" },
-	{ id = "tier3", kind = "tier", metric = "secureTier", minTier = 3, target = 1, reward = 30, title = "Secure a Tier 3+ egg" },
+	{ id = "tier3", kind = "tier", metric = "secureTier", minTier = 3, target = 1, reward = 30, title = "Secure a Level 3+ egg" }, -- HOS-INV-001: "Level", like the egg card and the quest text
 } :: { QuestDef }
 
 local byId: { [string]: QuestDef } = {}

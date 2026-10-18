@@ -94,7 +94,26 @@ function WeaponCrateService.roll(u1: number, u2: number, pity: any?): string?
 	return pool[math.clamp(math.floor(u2 * #pool) + 1, 1, #pool)]
 end
 
-local function onCrate(plr: Player)
+-- HOS-INV-001: everyone nearby sees an opening (Controllers.CrateShowcase): kind|rarity|name|stamp
+local function showcase(plr: Player, itemId: string)
+	local it = EconomyConfig.item(itemId)
+	plr:SetAttribute("EOS_CrateOpen", ("weapon|%s|%s|%d"):format(it and (it :: any).rarity or "common", it and it.name or "a weapon", math.floor(os.clock() * 1000)))
+end
+
+-- the pull the reel shows: the rarest (the first of equals)
+local RANK = { common = 1, rare = 2, epic = 3, legendary = 4 }
+local function bestOf(results: { any }): any
+	local best = results[1]
+	for _, r in results do
+		local a, b = EconomyConfig.item(r.itemId), EconomyConfig.item(best.itemId)
+		if a and b and (RANK[(a :: any).rarity] or 0) > (RANK[(b :: any).rarity] or 0) then
+			best = r
+		end
+	end
+	return best
+end
+
+local function onCrate(plr: Player, count: any)
 	if not MatchService.limiter:allow(plr.UserId, "RequestWeaponCrate", os.clock()) then
 		return
 	end
@@ -111,23 +130,80 @@ local function onCrate(plr: Player)
 		ev:FireClient(plr, { ok = false, reason = "NOT_LOADED" })
 		return toast(plr, WORDS.NOT_LOADED, "warn")
 	end
-	-- rolled once, here, so every replay of the change gives the same skin
-	local itemId = WeaponCrateService.roll(rng:NextNumber(), rng:NextNumber(), live.weaponPity)
-	if not itemId then
-		ev:FireClient(plr, { ok = false, reason = "UNKNOWN" })
-		return toast(plr, WORDS.UNKNOWN, "warn")
-	end
+	-- rolled once, here, so every replay of the change gives the same skins. HOS-INV-001: count 10 = open x10
+	-- (KNIFE_CRATE.multi: one price, one Epic or better guaranteed); every roll honours the guarantee
+	local C = EconomyConfig.KNIFE_CRATE
+	local multi = count == C.multi.count
+	local n = if multi then C.multi.count else 1
+	local price = if multi then C.multi.gems else C.gems
 	local scratch = ProfileLogic.deepCopy(live)
-	local ok, info = ProfileLogic.openWeaponCrate(scratch, itemId, EconomyConfig)
-	if not ok then
-		ev:FireClient(plr, { ok = false, reason = info })
-		return toast(plr, (WORDS[info] or WORDS.UNKNOWN):format(EconomyConfig.KNIFE_CRATE.gems), "warn")
+	local ids, results = {}, {}
+	local gotEpic = false
+	for i = 1, n do
+		local pity = scratch.weaponPity
+		if multi and i == n and not gotEpic then -- the x10 guarantee: the last roll is Epic or better
+			pity = { epic = C.pity.epic, legendary = (type(pity) == "table" and tonumber(pity.legendary)) or 0 }
+		end
+		local itemId = WeaponCrateService.roll(rng:NextNumber(), rng:NextNumber(), pity)
+		if not itemId then
+			ev:FireClient(plr, { ok = false, reason = "UNKNOWN" })
+			return toast(plr, WORDS.UNKNOWN, "warn")
+		end
+		local ok, info = ProfileLogic.openWeaponCrate(scratch, itemId, EconomyConfig, if i == 1 then price else 0)
+		if not ok then
+			ev:FireClient(plr, { ok = false, reason = info })
+			return toast(plr, (WORDS[info] or WORDS.UNKNOWN):format(price), "warn")
+		end
+		local it = EconomyConfig.item(itemId)
+		if it and (it.rarity == "epic" or it.rarity == "legendary") then
+			gotEpic = true
+		end
+		table.insert(ids, itemId)
+		table.insert(results, info)
 	end
-	DataService.update(plr, "wcrate:" .. itemId, function(p)
-		ProfileLogic.openWeaponCrate(p, itemId, EconomyConfig)
+	local best = bestOf(results)
+	DataService.update(plr, "wcrate:" .. (if multi then "x10" else ids[1]), function(p)
+		for i, id in ids do
+			ProfileLogic.openWeaponCrate(p, id, EconomyConfig, if i == 1 then price else 0)
+		end
+		if multi and not best.dupe then
+			p.cosmetics.knifeSkin = best.itemId -- x10 wears the best new skin, not the last one
+		end
 	end)
-	ev:FireClient(plr, { ok = true, itemId = itemId, dupe = info.dupe, refund = info.refund, pity = scratch.weaponPity })
-	Analytics.log("GemsSink", { userId = plr.UserId, amount = EconomyConfig.KNIFE_CRATE.gems, reason = "weapon_crate" })
+	ev:FireClient(plr, { ok = true, itemId = best.itemId, dupe = best.dupe, refund = best.refund, pity = scratch.weaponPity, multi = if multi then results else nil })
+	showcase(plr, best.itemId)
+	Analytics.log("GemsSink", { userId = plr.UserId, amount = price, reason = if multi then "weapon_crate_x10" else "weapon_crate" })
+end
+
+-- HOS-INV-001: one Weapon Crate opened with Robux (KNIFE_CRATE.productId). PurchaseService hands receipts here first;
+-- nil = not this product. Granted only after the save (DataService.commit), exact-once by the receipt ledger.
+function WeaponCrateService.processReceipt(info: any, plr: Player, ledgerSize: number): Enum.ProductPurchaseDecision?
+	local C = EconomyConfig.KNIFE_CRATE
+	if not C.productId or info.ProductId ~= C.productId then
+		return nil
+	end
+	local live = DataService.get(plr)
+	local itemId = WeaponCrateService.roll(rng:NextNumber(), rng:NextNumber(), live and live.weaponPity)
+	if not itemId then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	local receipt = tostring(info.PurchaseId)
+	local result = nil
+	if not DataService.commit(plr, "receipt:" .. receipt, function(p)
+		local ok, res = ProfileLogic.grantWeaponCratePurchase(p, receipt, itemId, EconomyConfig, ledgerSize)
+		if ok then
+			result = res
+		end
+	end) then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	if result then
+		local now = DataService.get(plr)
+		Net.event("WeaponCrateResult"):FireClient(plr, { ok = true, itemId = result.itemId, dupe = result.dupe, refund = result.refund, pity = now and now.weaponPity, robux = true })
+		showcase(plr, result.itemId)
+		Analytics.log("CosmeticUsed", { userId = plr.UserId, reason = "robux_weapon_crate", itemId = result.itemId, robux = info.CurrencySpent, purchaseId = receipt })
+	end
+	return Enum.ProductPurchaseDecision.PurchaseGranted
 end
 
 -- the shop's 3D previews: the templates without anything that runs or makes sound

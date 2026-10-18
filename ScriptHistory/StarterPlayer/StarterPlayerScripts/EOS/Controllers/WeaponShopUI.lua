@@ -30,6 +30,7 @@ local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
 local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
 local AnimConfig = require(Shared:WaitForChild("AnimConfig"))
+local GameConfigShop = require(Shared:WaitForChild("GameConfig")) -- HOS-INV-001: SHOP_PURCHASES gates the Robux crate
 local Net = require(Shared:WaitForChild("Net"))
 
 local WeaponShopUI = {}
@@ -879,9 +880,31 @@ function WeaponShopUI.mount(shop: Instance)
 		crateCard = p:FindFirstChild("CrateCard") :: GuiObject?
 		previewCard = p:FindFirstChild("PreviewCard") :: GuiObject?
 		show(previewCard, false)
-		show(p:FindFirstChild("BtnCrateRobux", true), false) -- no developer product yet
+		-- HOS-INV-001: one opening for Robux (KNIFE_CRATE.productId); hidden where paid random items are restricted
+		local robuxOn = EconomyConfig.KNIFE_CRATE.productId ~= nil and (GameConfigShop.Features and GameConfigShop.Features.SHOP_PURCHASES) == true
+		local rbBtn = p:FindFirstChild("BtnCrateRobux", true) :: GuiObject?
+		show(rbBtn, robuxOn)
+		if robuxOn and rbBtn then
+			setText(rbBtn, "Label", tostring(EconomyConfig.KNIFE_CRATE.robux or ""))
+			onClick(rbBtn, function()
+				local UIC = require(script.Parent.UIController) :: any
+				if UIC.crateBlocked then
+					return
+				end
+				pcall(function()
+					game:GetService("MarketplaceService"):PromptProductPurchase(Players.LocalPlayer, EconomyConfig.KNIFE_CRATE.productId)
+				end)
+			end)
+			task.spawn(function() -- the policy answer arrives a moment after join (EmoteController asks)
+				task.wait(3)
+				local UIC = require(script.Parent.UIController) :: any
+				if UIC.crateBlocked then
+					show(rbBtn, false)
+				end
+			end)
+		end
 		local gems = p:FindFirstChild("BtnCrateGems", true) :: GuiObject?
-		if gems then -- the Gem button takes the Robux one's room too
+		if gems and not robuxOn then -- the Gem button takes the Robux one's room too
 			local rb = p:FindFirstChild("BtnCrateRobux", true) :: GuiObject?
 			if rb then
 				gems.Size = UDim2.fromOffset(rb.Position.X.Offset + rb.Size.X.Offset - gems.Position.X.Offset, gems.Size.Y.Offset)

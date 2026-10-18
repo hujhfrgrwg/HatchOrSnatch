@@ -49,6 +49,7 @@ function ProfileLogic.default(): any
 		emotes = {}, -- [emoteId] = true (won from the Emote Crate; see Shared/EmoteConfig)
 		emoteWheel = {}, -- up to 6 owned emote ids on the G wheel ("" = empty slot)
 		weaponPity = { epic = 0, legendary = 0 }, -- Weapon Crate openings since the last Epic+ / Legendary (HOS-WEP-001)
+		emotePity = { epic = 0, legendary = 0 }, -- Emote Crate openings since the last Epic+ / Legendary (HOS-INV-001)
 		receipts = {}, -- bounded exact-once ledger for Robux purchases (newest last)
 		shells = 0, -- V2 currency, moved into gold by migrate (kept for old saves)
 		unhatchedEggsByTier = eggs, -- V2 egg tokens, moved into materials by migrate
@@ -607,12 +608,27 @@ end
 -- Emote Crate, paid with Gems: the emote is rolled by the caller BEFORE this runs (so every replay
 -- of the change gives the same emote). A duplicate refunds its rarity's gems. Returns
 -- (ok, reasonOrResult). result = { emote = id, dupe = bool, refund = n }
-function ProfileLogic.openEmoteCrate(p: any, emoteId: string, emoteConfig: any): (boolean, any)
+-- HOS-INV-001: the Emote Crate guarantee counters (EmoteConfig.PITY), reset by the rarity that came out
+function ProfileLogic.bumpEmotePity(p: any, rarity: string)
+	if type(p.emotePity) ~= "table" then
+		p.emotePity = { epic = 0, legendary = 0 }
+	end
+	local P = p.emotePity
+	if rarity == "legendary" then
+		P.epic, P.legendary = 0, 0
+	elseif rarity == "epic" then
+		P.epic, P.legendary = 0, num(P.legendary, 0) + 1
+	else
+		P.epic, P.legendary = num(P.epic, 0) + 1, num(P.legendary, 0) + 1
+	end
+end
+
+function ProfileLogic.openEmoteCrate(p: any, emoteId: string, emoteConfig: any, priceOverride: number?): (boolean, any)
 	local e = emoteConfig.get(emoteId)
 	if not e then
 		return false, "UNKNOWN"
 	end
-	local price = emoteConfig.CRATE_GEMS
+	local price = if priceOverride ~= nil then priceOverride else emoteConfig.CRATE_GEMS -- HOS-INV-001: x10 charges once
 	if p.gems < price then
 		return false, "NOT_ENOUGH"
 	end
@@ -620,6 +636,7 @@ function ProfileLogic.openEmoteCrate(p: any, emoteId: string, emoteConfig: any):
 	if type(p.emotes) ~= "table" then
 		p.emotes = {}
 	end
+	ProfileLogic.bumpEmotePity(p, e.rarity)
 	local dupe = p.emotes[emoteId] == true
 	local refund = 0
 	if dupe then
@@ -634,16 +651,17 @@ end
 -- Weapon Crate (HOS-WEP-001), paid with Gems: the knife skin item is rolled by the caller BEFORE this runs. A new
 -- skin is owned and equipped (like buying it); a duplicate refunds its rarity's Gems. Returns (ok, reasonOrResult),
 -- result = { itemId, dupe, refund }.
-function ProfileLogic.openWeaponCrate(p: any, itemId: string, econ: any): (boolean, any)
+function ProfileLogic.openWeaponCrate(p: any, itemId: string, econ: any, priceOverride: number?): (boolean, any)
 	local item = econ.item(itemId)
 	if not item or item.kind ~= "knifeSkin" then
 		return false, "UNKNOWN"
 	end
 	local C = econ.KNIFE_CRATE
-	if (p.gems or 0) < C.gems then
+	local cost = if priceOverride ~= nil then priceOverride else C.gems -- HOS-INV-001: x10 charges once, Robux charges 0
+	if (p.gems or 0) < cost then
 		return false, "NOT_ENOUGH"
 	end
-	p.gems -= C.gems
+	p.gems -= cost
 	-- the guarantee counters (KNIFE_CRATE.pity): reset by the rarity that came out
 	if type(p.weaponPity) ~= "table" then
 		p.weaponPity = { epic = 0, legendary = 0 }
@@ -713,6 +731,18 @@ function ProfileLogic.grantItemPurchase(p: any, receiptId: string, itemId: strin
 	return true, nil
 end
 
+-- HOS-INV-001: a Weapon Crate opened with Robux (its own developer product): the skin is rolled by the caller, the
+-- receipt goes in the exact-once ledger, then it's openWeaponCrate without the Gems. Returns (granted, resultOrReason).
+function ProfileLogic.grantWeaponCratePurchase(p: any, receiptId: string, itemId: string, econ: any, ledgerSize: number): (boolean, any)
+	if type(receiptId) ~= "string" or receiptId == "" or not econ.item(itemId) then
+		return false, "BAD_RECEIPT"
+	end
+	if not takeReceipt(p, receiptId, ledgerSize) then
+		return false, "DUPLICATE"
+	end
+	return ProfileLogic.openWeaponCrate(p, itemId, econ, 0)
+end
+
 -- An Emote Crate opened with Robux: the emote is rolled by the caller (like openEmoteCrate, minus the Gems).
 -- Returns (granted, resultOrReason); result = { emote, dupe, refund }.
 function ProfileLogic.grantCratePurchase(p: any, receiptId: string, emoteId: string, emoteConfig: any, ledgerSize: number): (boolean, any)
@@ -726,6 +756,7 @@ function ProfileLogic.grantCratePurchase(p: any, receiptId: string, emoteId: str
 	if type(p.emotes) ~= "table" then
 		p.emotes = {}
 	end
+	ProfileLogic.bumpEmotePity(p, e.rarity) -- HOS-INV-001
 	local dupe = p.emotes[emoteId] == true
 	local refund = 0
 	if dupe then
@@ -830,6 +861,7 @@ function ProfileLogic.clientView(p: any, questConfig: any): any
 		emotes = deepCopy(p.emotes),
 		emoteWheel = deepCopy(p.emoteWheel),
 		weaponPity = deepCopy(p.weaponPity), -- HOS-WEP-001: the crate guarantee bars
+		emotePity = deepCopy(p.emotePity), -- HOS-INV-001: the Emote Crate guarantee lines
 		stats = deepCopy(p.stats),
 		quests = quests,
 		questDate = p.dailyQuests.utcDate,

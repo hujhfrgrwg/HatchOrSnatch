@@ -64,7 +64,7 @@ local function crateRestricted(plr: Player): boolean
 	return restricted[plr]
 end
 
-local function onOpenCrate(plr: Player)
+local function onOpenCrate(plr: Player, count: any)
 	if not MatchService.limiter:allow(plr.UserId, "RequestOpenCrate", os.clock()) then
 		return
 	end
@@ -80,23 +80,50 @@ local function onOpenCrate(plr: Player)
 		Net.event("CrateResult"):FireClient(plr, { ok = false, reason = "NOT_LOADED" })
 		return toast(plr, CRATE_WORDS.NOT_LOADED, "warn")
 	end
-	-- rolled once, here, so every replay of the change gives the same emote
-	local emoteId = EmoteConfig.roll(rng:NextNumber())
+	-- rolled once, here, so every replay of the change gives the same emotes. HOS-INV-001: count 10 = open x10
+	-- (EmoteConfig.MULTI: one price, one Epic or better guaranteed); every roll honours the guarantee (rollPity)
+	local multi = count == EmoteConfig.MULTI.count
+	local n = if multi then EmoteConfig.MULTI.count else 1
+	local price = if multi then EmoteConfig.MULTI.gems else EmoteConfig.CRATE_GEMS
 	local scratch = ProfileLogic.deepCopy(live)
-	local ok, info = ProfileLogic.openEmoteCrate(scratch, emoteId, EmoteConfig)
-	if not ok then
-		Net.event("CrateResult"):FireClient(plr, { ok = false, reason = info })
-		return toast(plr, (CRATE_WORDS[info] or CRATE_WORDS.UNKNOWN):format(EmoteConfig.CRATE_GEMS), "warn")
+	local ids, results = {}, {}
+	local gotEpic = false
+	for i = 1, n do
+		local id = EmoteConfig.rollPity(rng:NextNumber(), scratch.emotePity, multi and i == n and not gotEpic)
+		local ok, info = ProfileLogic.openEmoteCrate(scratch, id, EmoteConfig, if i == 1 then price else 0)
+		if not ok then
+			Net.event("CrateResult"):FireClient(plr, { ok = false, reason = info })
+			return toast(plr, (CRATE_WORDS[info] or CRATE_WORDS.UNKNOWN):format(price), "warn")
+		end
+		local e = EmoteConfig.get(id)
+		if e and (e.rarity == "epic" or e.rarity == "legendary") then
+			gotEpic = true
+		end
+		table.insert(ids, id)
+		table.insert(results, info)
 	end
-	local result = info
-	DataService.update(plr, "crate:" .. emoteId, function(p)
-		local won = ProfileLogic.openEmoteCrate(p, emoteId, EmoteConfig)
-		if won then
-			ProfileLogic.wheelAdd(p, emoteId, EmoteConfig)
+	DataService.update(plr, "crate:" .. (if multi then "x10" else ids[1]), function(p)
+		for i, id in ids do
+			if ProfileLogic.openEmoteCrate(p, id, EmoteConfig, if i == 1 then price else 0) then
+				ProfileLogic.wheelAdd(p, id, EmoteConfig)
+			end
 		end
 	end)
-	Net.event("CrateResult"):FireClient(plr, { ok = true, emote = result.emote, dupe = result.dupe, refund = result.refund })
-	Analytics.log("GemsSink", { userId = plr.UserId, amount = EmoteConfig.CRATE_GEMS, reason = "emote_crate" })
+	-- the reel plays the best pull; x10 also sends every result (Controllers.CrateExtras shows them all)
+	local RANK = { common = 1, rare = 2, epic = 3, legendary = 4 }
+	local best = results[1]
+	for _, r in results do
+		local a, b = EmoteConfig.get(r.emote), EmoteConfig.get(best.emote)
+		if a and b and (RANK[a.rarity] or 0) > (RANK[b.rarity] or 0) then
+			best = r
+		end
+	end
+	Net.event("CrateResult"):FireClient(plr, { ok = true, emote = best.emote, dupe = best.dupe, refund = best.refund, multi = if multi then results else nil })
+	do -- HOS-INV-001: everyone nearby sees the opening (Controllers.CrateShowcase): kind|rarity|name|stamp
+		local e = EmoteConfig.get(best.emote)
+		plr:SetAttribute("EOS_CrateOpen", ("emote|%s|%s|%d"):format(e and e.rarity or "common", e and e.name or "an emote", math.floor(os.clock() * 1000)))
+	end
+	Analytics.log("GemsSink", { userId = plr.UserId, amount = price, reason = if multi then "emote_crate_x10" else "emote_crate" })
 end
 
 local function onEmote(plr: Player, id: any)

@@ -4,7 +4,8 @@
 -- Client-only, nothing replicates. Distance is measured flat from the model's pivot; the model's
 -- FadeNear / FadeFar attributes (studs) are where it is fully shown / fully hidden.
 -- Beams and parts fade through LocalTransparencyModifier, CanvasGroups through GroupTransparency,
--- lights through Brightness. Streamed-in pieces join the fade as they arrive.
+-- text through TextTransparency, UIStrokes through Transparency, lights through Brightness (text and
+-- strokes are faded directly because CanvasGroups don't draw in AlwaysOnTop SurfaceGuis). Streamed-in pieces join the fade as they arrive.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -33,6 +34,10 @@ local function setPiece(inst: Instance, base: number, h: number)
 		inst.LocalTransparencyModifier = h
 	elseif inst:IsA("CanvasGroup") then
 		inst.GroupTransparency = base + (1 - base) * h
+	elseif inst:IsA("TextLabel") then
+		inst.TextTransparency = base + (1 - base) * h
+	elseif inst:IsA("UIStroke") then
+		inst.Transparency = base + (1 - base) * h
 	elseif inst:IsA("Light") then
 		inst.Brightness = base * (1 - h)
 	end
@@ -41,6 +46,10 @@ end
 local function remember(e: Entry, inst: Instance)
 	if inst:IsA("CanvasGroup") then
 		e.base[inst] = inst.GroupTransparency
+	elseif inst:IsA("TextLabel") then
+		e.base[inst] = inst.TextTransparency
+	elseif inst:IsA("UIStroke") then
+		e.base[inst] = inst.Transparency
 	elseif inst:IsA("Light") then
 		e.base[inst] = inst.Brightness
 	elseif inst:IsA("Beam") or inst:IsA("BasePart") then

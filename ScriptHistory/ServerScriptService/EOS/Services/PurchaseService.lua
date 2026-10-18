@@ -54,6 +54,7 @@ end
 -- items and crates: same exact-once ledger, same "granted only after the save" rule
 local function processOther(info: any, plr: Player): Enum.ProductPurchaseDecision?
 	local egg = require(script.Parent.EggService).processReceipt(info, plr) if egg then return egg end -- HOS-EGG-002: hatch boost products (nil = not ours)
+	local wc = require(script.Parent.WeaponCrateService).processReceipt(info, plr, RECEIPT_LEDGER) if wc then return wc end -- HOS-INV-001: Weapon Crate for Robux
 	local receipt = tostring(info.PurchaseId)
 	local item = itemByProduct[info.ProductId]
 	if item then
