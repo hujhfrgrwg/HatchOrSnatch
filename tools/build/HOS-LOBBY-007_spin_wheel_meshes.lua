@@ -7,18 +7,20 @@
 --   2. copies the one Sector and Divider round the wheel (8 each, Sector_1 at the top under the pointer, then clockwise as
 --      you face it) and the one Gem round the rim (11, none at the top under the crystal)
 --   3. colours and materials (stone Plastic, neon accents), collisions (only the stone and wheel body collide)
---   4. adds a kit pumpkin as the hub's emblem, a tree lantern on each post's hook, and pumpkins and candles on the ledges
---      either side of the steps (the two big pumpkins and the lanterns are the only lights)
+--   4. adds a kit pumpkin as the hub's emblem, a tree lantern on each post's hook, and pumpkins and candles on the base's
+--      top either side of the steps, sized and placed as in the concept (the two big pumpkins and the lanterns are the
+--      only lights)
 --   5. groups it as Workspace.SpinWheel: Base, Posts, Frame, Wheel (PrimaryPart Hub; spin it about the Hub's Z axis), Props
 -- The block version (Workspace.SpinWheel before this) goes to ServerStorage._Backups.HOS-LOBBY-007_2026-10-18_BlockSpinWheel.
 local ServerStorage = game:GetService("ServerStorage")
 local CHS = game:GetService("ChangeHistoryService")
 
 local ORIGIN = CFrame.new(0, 10, 1451)
-local RIM_LOCAL = Vector3.new(0, 9.95, -1.25) -- WheelRim's centre in the GLB (the wheel's axis runs through it along Z)
-local HOOK_LOCAL = Vector3.new(12.95, 14.0, -1.5) -- the posts' lantern hooks (x mirrored for the left)
-local LEDGE_TOP = 2.0 -- the ledges either side of the steps
-local HUB_FRONT = 0.18 -- the hub's recessed face, in front of the axis point
+local RIM_LOCAL = Vector3.new(0, 10.72, -0.05) -- WheelRim's centre in the GLB (the wheel's axis runs through it along Z)
+local HOOK_LOCAL = Vector3.new(10.1, 16.6, -1.75) -- the posts' lantern hooks (x mirrored for the left)
+local LEDGE_TOP = 3.0 -- the base's top, where the pumpkins and candles stand
+local HUB_FRONT = 0.23 -- the hub's recessed face, in front of the rim's centre
+local LANTERN_H = 4.4 -- the concept's lanterns, ring to base
 
 local STONE_DARK = Color3.fromRGB(74, 63, 99)
 local NEON = Color3.fromRGB(180, 92, 255)
@@ -29,7 +31,7 @@ local LOOK = { -- name: colour, material, collides
 	PostL = { Color3.fromRGB(98, 88, 124), Enum.Material.Plastic, true },
 	PostR = { Color3.fromRGB(98, 88, 124), Enum.Material.Plastic, true },
 	Cracks = { Color3.fromRGB(40, 34, 58), Enum.Material.Plastic, false },
-	BackFrame = { Color3.fromRGB(68, 60, 94), Enum.Material.Plastic, true },
+	BackFrame = { Color3.fromRGB(40, 36, 62), Enum.Material.Plastic, true },
 	Axle = { Color3.fromRGB(58, 48, 54), Enum.Material.Plastic, false },
 	Crystal = { Color3.fromRGB(200, 110, 255), Enum.Material.Neon, false },
 	WheelBacking = { Color3.fromRGB(17, 18, 38), Enum.Material.Plastic, true },
@@ -39,7 +41,6 @@ local LOOK = { -- name: colour, material, collides
 	Divider = { Color3.fromRGB(170, 90, 255), Enum.Material.Neon, false },
 	Gem = { Color3.fromRGB(150, 75, 235), Enum.Material.Plastic, false },
 	Hub = { Color3.fromRGB(32, 28, 52), Enum.Material.Plastic, true },
-	HubGlow = { NEON, Enum.Material.Neon, false },
 }
 local SECTOR_COLORS = { -- clockwise from the top, as in the concept
 	Color3.fromRGB(80, 40, 130), Color3.fromRGB(150, 70, 230), Color3.fromRGB(40, 32, 58), Color3.fromRGB(40, 32, 58),
@@ -132,7 +133,7 @@ P.Gem:Destroy()
 ---------------------------------------------------------------- 3. grouping
 for _, n in { "BaseStone", "BaseBlocks", "StepGlow", "Cracks" } do P[n].Parent = base end
 for _, n in { "BackFrame", "Axle", "Crystal" } do P[n].Parent = frame end
-for _, n in { "WheelBacking", "WheelRim", "WheelRimInner", "Hub", "HubGlow" } do P[n].Parent = wheel end
+for _, n in { "WheelBacking", "WheelRim", "WheelRimInner", "Hub" } do P[n].Parent = wheel end
 local postL, postR = model("Post_L", posts), model("Post_R", posts)
 P.PostL.Parent, P.PostR.Parent = postL, postR
 wheel.PrimaryPart = P.Hub
@@ -165,7 +166,7 @@ if jack then
 	local e = jack:Clone()
 	e.Name = "Emblem"
 	local _, sz = e:GetBoundingBox()
-	e:ScaleTo(2.6 / sz.Y)
+	e:ScaleTo(2.45 / sz.Y) -- fills the hub ring, as in the concept
 	for _, d in e:GetDescendants() do
 		if d:IsA("Light") then d.Parent:Destroy() end
 	end
@@ -184,6 +185,8 @@ if lanternSrc then
 	for _, side in { -1, 1 } do
 		local lan = lanternSrc:Clone()
 		lan.Name = "Lantern"
+		local _, lsz0 = lan:GetBoundingBox()
+		lan:ScaleTo(lan:GetScale() * LANTERN_H / lsz0.Y)
 		local _, lsz = lan:GetBoundingBox()
 		local pv = lan:GetPivot()
 		lan:PivotTo(CFrame.new(pv.Position) * CFrame.Angles(0, if side < 0 then 0 else math.pi, 0) * pv.Rotation)
@@ -194,25 +197,22 @@ if lanternSrc then
 	end
 end
 local rng = Random.new(1007)
-local function candleGroup(cx, cz, sizes)
-	local g = model("Candles", props)
-	local spots = { Vector3.new(0, 0, 0), Vector3.new(0.75, 0, 0.45), Vector3.new(-0.35, 0, 0.8) }
-	for k, s in sizes do
-		local src = kit:FindFirstChild("A05_Candle_" .. s)
-		if src then
-			local _, ssz = src:GetBoundingBox()
-			prop(g, src, ssz.Y * 0.85, cx + spots[k].X, cz + spots[k].Z, LEDGE_TOP, rng:NextNumber(0, 2 * math.pi), false)
-		end
-	end
+-- sizes and spots read off the concept: a big and a small pumpkin and two candles on the left, two candles and a pumpkin
+-- on the right; the candles stand in front of the rim's gems so the wheel can turn
+local function candle(name, size, height, x, z)
+	local src = kit:FindFirstChild("A05_Candle_" .. size)
+	if src then prop(props, src, height, x, z, LEDGE_TOP, rng:NextNumber(0, 2 * math.pi), false).Name = name end
 end
 if jack then
 	-- kit pumpkins face -Z: a half turn faces them to the front, a little more turns them outward
-	prop(props, jack, 2.4, -8.3, 4.2, LEDGE_TOP, math.pi - math.rad(20), true).Name = "Pumpkin_L"
-	prop(props, jack, 1.4, -9.6, 5.7, LEDGE_TOP, math.pi - math.rad(35), false).Name = "PumpkinSmall_L"
-	prop(props, jack, 2.2, 8.6, 4.4, LEDGE_TOP, math.pi + math.rad(20), true).Name = "Pumpkin_R"
+	prop(props, jack, 2.9, -7.58, 0.9, LEDGE_TOP, math.pi - math.rad(15), true).Name = "Pumpkin_L"
+	prop(props, jack, 1.86, -10.2, 1.6, LEDGE_TOP, math.pi - math.rad(30), false).Name = "PumpkinSmall_L"
+	prop(props, jack, 2.4, 9.3, 0.9, LEDGE_TOP, math.pi + math.rad(15), true).Name = "Pumpkin_R"
 end
-candleGroup(-6.0, 3.9, { "Large", "Small" })
-candleGroup(5.9, 3.7, { "Large", "Medium", "Small" })
+candle("Candle_L1", "Large", 3.0, -5.4, 1.4)
+candle("Candle_L2", "Small", 1.9, -6.2, 1.75)
+candle("Candle_R1", "Large", 3.6, 6.85, 1.4)
+candle("Candle_R2", "Medium", 2.2, 7.45, 2.0)
 
 ---------------------------------------------------------------- 5. swap in
 local backups = ServerStorage:FindFirstChild("_Backups") or Instance.new("Folder")

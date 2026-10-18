@@ -1,24 +1,24 @@
-"""HOS-LOBBY-007 (18 Oct 2026, Matthew): meshes for the Halloween spin wheel, after Matthew's front-view concept
-(docs/HOS-LOBBY-007/spin_wheel_frame_concept.webp): "frame needs to look like this ... it needs to be meshes for mostly
-everything".
+"""HOS-LOBBY-007 (18 Oct 2026, Matthew): meshes for the Halloween spin wheel, matched 1:1 to Matthew's front-view concept
+(docs/HOS-LOBBY-007/spin_wheel_frame_concept.webp): "frame needs to look like this ... meshes for mostly everything", then
+"more tightly fitted and a bit more skinny like in the concept. Go 1:1". Every size below is measured off that image.
 
 Writes one GLB, every node already in place (units are studs, +Y up, the front faces +Z, the origin on the ground under
 the middle of the base). HOS-LOBBY-007_spin_wheel_meshes.lua assembles the import in Studio.
-  BaseStone     stepped octagonal plinth, the wheel's tier, two front steps, the cradle under the wheel, stone stacks
-                under the posts (bevelled, low-poly)
-  BaseBlocks    chunky bevelled blocks round the plinth's sides and back (a second stone tone)
-  StepGlow      glow strips on the step and tier risers (neon)
-  PostL, PostR  angular stone posts: four bevelled slabs stacked and leaning outward, with a hooked arm for the lantern
-  Cracks        dark crack lines carved into the posts' and blocks' faces
-  BackFrame     a pillar behind the wheel with a bar over the top that holds the pointer
+  BaseStone     the 3-stud octagonal base, the stand under the wheel and the two steps below it (bevelled, low-poly)
+  BaseBlocks    the stepped blocks either side of the stairs, the blocks stacked at each post's foot, and along the back
+  StepGlow      glow strips on the stand's and middle step's risers (neon)
+  PostL, PostR  skinny stone posts that lean in to hug the rim (just behind it), rise to a slanted top, and put out one
+                short arm with a hook for the lantern
+  Cracks        dark crack lines carved into the posts, steps and blocks
+  BackFrame     a pillar behind the wheel, a bar over its top and the mount block in front of it that holds the crystal
   Axle          the axle from the pillar to the wheel (hidden behind it)
   Crystal       the pointer: a long faceted crystal with two small side crystals (neon)
   WheelBacking  the dark disc behind the sectors
-  WheelRim      the thick bevelled rim; WheelRimInner a thin band inside it
+  WheelRim      the thick bevelled rim; WheelRimInner the thin band inside it
   Sector        ONE sector (the top slot); the Studio script copies it round the wheel 8 times
   Divider       ONE divider (on the top slot's left edge as you face it); copied 8 times (neon)
   Gem           ONE faceted stud on the rim (at 60 degrees); copied round the rim, skipping the top under the pointer
-  Hub           the raised hub ring; HubGlow a thin ring round it (neon)
+  Hub           the raised hub ring (the kit pumpkin sits in it)
 
 Run: python3 tools/build/HOS-LOBBY-007_spin_wheel_meshes.py docs/HOS-LOBBY-007/SpinWheel.glb
 """
@@ -35,16 +35,15 @@ from shapely.geometry import LineString, Polygon
 
 rng = random.Random(1007)
 
-# layout (local studs)
-PLINTH_H, TIER_H = 0.9, 0.7
-TIER_TOP = PLINTH_H + TIER_H
-TIER_Z, TIER_D = -1.5, 8.0
-WHEEL_Y = TIER_TOP + 0.9 + 7.45  # wheel centre height
-WHEEL_Z = -1.2
-POST_X, POST_Z = 10.0, -1.5
-POST_Y = PLINTH_H + 1.5  # the posts stand on two stacked blocks
-
-
+# layout (local studs), measured 1:1 off the concept (1254 px square): the rim's outer radius (380 px) is 7.45 studs,
+# so 1 px = 0.0196 studs; x = (px - 627) * k, y = (1145 - py) * k (1145 px is the ground under the base)
+K = 7.45 / 380
+WHEEL_Y = 10.72  # wheel centre height (598 px)
+WHEEL_Z = 0.0  # the wheel's plane; +Z is the front
+R_OUT, R_RIM, R_IN, R_HUB = 7.45, 6.3, 5.98, 1.9  # rim outside, rim band inside, inner band inside (sectors' edge), hub
+LEDGE_TOP = 3.0  # the base's top, where the pumpkins and candles stand (990 px)
+STAND_TOP = 3.2  # the top step the wheel stands over (the rim's bottom is at WHEEL_Y - R_OUT = 3.27)
+POST_Z, POST_D = -1.75, 2.0  # the posts stand just behind the wheel
 # ---------------------------------------------------------------- primitives
 def hull(points):
     """the convex hull of `points` as outward-wound triangles"""
@@ -200,136 +199,118 @@ def cracks_on(poly, z, n, width=0.07, lift=0.02, inset=0.3, to3d=None):
 
 # ---------------------------------------------------------------- base
 base, blocks, glow, cracks = [], [], [], []
-base += bevel_slab(octagon(26, 14, 2.6), 0.0, PLINTH_H, 0.15)
-base += bevel_slab(octagon(19, TIER_D, 1.6, cz=TIER_Z), PLINTH_H - 0.05, TIER_TOP, 0.12)
-tier_front = TIER_Z + TIER_D / 2
-# step from the ground onto the plinth, and from the plinth onto the tier
-base += bevel_box((0, 0.42 / 2, 7.0 + 0.55), (10, 0.42, 1.3), 0.08)
-base += bevel_box((0, PLINTH_H + 0.36 / 2, tier_front + 0.55), (9, 0.36, 1.5), 0.08)
-glow += bevel_box((0, 0.21, 7.0 + 1.2 + 0.03), (8.8, 0.07, 0.06), 0.0)
-glow += bevel_box((0, PLINTH_H + 0.18, tier_front + 1.3 + 0.03), (7.8, 0.07, 0.06), 0.0)
-glow += bevel_box((0, PLINTH_H + 0.36 + (TIER_H - 0.36) / 2, tier_front + 0.03), (15.0, 0.07, 0.06), 0.0)
-# cradle under the wheel
-cradle_top = WHEEL_Y - 7.45 - 0.03  # just under the rim, so the wheel can turn
-base += bevel_box((0, (TIER_TOP + cradle_top) / 2, WHEEL_Z - 0.1), (6.5, cradle_top - TIER_TOP + 0.1, 2.0), 0.12)
-# stone stacks under the posts
-for s in (-1, 1):
-    base += bevel_box((s * POST_X, PLINTH_H + 0.5, POST_Z), (4.4, 1.0, 4.0), 0.15, yaw=s * 0.05)
-    base += bevel_box((s * POST_X, PLINTH_H + 1.0 + 0.25, POST_Z), (3.8, 0.55, 3.5), 0.12, yaw=-s * 0.08)
-# chunky blocks round the sides and back of the plinth, two rows high near the posts
-def block_row(x0, z0, x1, z1, rows=1):
-    L = math.hypot(x1 - x0, z1 - z0)
-    n = max(1, round(L / 2.6))
-    yaw = -math.atan2(z1 - z0, x1 - x0)
-    for i in range(n):
-        t = (i + 0.5) / n
-        x, z = x0 + (x1 - x0) * t, z0 + (z1 - z0) * t
-        for r in range(rows):
-            h = rng.uniform(0.7, 1.0) if r == 0 else rng.uniform(0.5, 0.7)
-            y = PLINTH_H + h / 2 + (0.85 * r)
-            size = (L / n - 0.08 - r * 0.4, h, rng.uniform(1.4, 1.9) - r * 0.3)
-            blocks.extend(bevel_box((x, y, z), size, 0.12, yaw + rng.uniform(-0.08, 0.08)))
-# chunky ledges either side of the steps (the pumpkins and candles sit on these), cracked on the front
-LEDGE_X0, LEDGE_X1, LEDGE_Z0, LEDGE_Z1, LEDGE_H = 4.85, 10.65, 2.6, 6.6, 1.1
-LEDGE_TOP = PLINTH_H + LEDGE_H
-for s in (-1, 1):
-    blocks.extend(bevel_box((s * (LEDGE_X0 + LEDGE_X1) / 2, PLINTH_H + LEDGE_H / 2, (LEDGE_Z0 + LEDGE_Z1) / 2), (LEDGE_X1 - LEDGE_X0, LEDGE_H, LEDGE_Z1 - LEDGE_Z0), 0.15))
-    x0, x1 = sorted((s * (LEDGE_X0 + 0.2), s * (LEDGE_X1 - 0.2)))
-    cracks.extend(cracks_on([(x0, PLINTH_H + 0.17), (x1, PLINTH_H + 0.17), (x1, LEDGE_TOP - 0.17), (x0, LEDGE_TOP - 0.17)], 0, 3, inset=0.05,
-                            to3d=lambda p: np.array([p[0], p[1], LEDGE_Z1 + p[2]])))
-block_row(-9.6, -6.1, 9.6, -6.1, rows=2)  # the back, clear of the octagon's cut corners
-block_row(-12.1, 0.9, -12.1, 3.7)  # the sides, in front of the post stacks
-block_row(12.1, 0.9, 12.1, 3.7)
-# cracks on the plinth's front face
-cracks += cracks_on([(-10.4, 0.1), (10.4, 0.1), (10.4, PLINTH_H - 0.1), (-10.4, PLINTH_H - 0.1)], 0, 6, inset=0.05,
-                    to3d=lambda p: np.array([p[0], p[1], 7.0 + p[2]]))
+BASE_Z0, BASE_Z1 = -4.0, 2.2
+base += bevel_slab(octagon(23.6, BASE_Z1 - BASE_Z0, 1.5, cz=(BASE_Z0 + BASE_Z1) / 2), 0.0, LEDGE_TOP, 0.2)
+# three steps up the middle: the stand under the wheel, then two below it (450-810 px and 365-890 px wide)
+STAND_Z1, STEP2_Z1, STEP1_Z1 = 3.6, 4.9, 6.2
+base += bevel_box((0, STAND_TOP / 2, (-1.2 + STAND_Z1) / 2), (7.0, STAND_TOP, STAND_Z1 + 1.2), 0.15)
+base += bevel_box((0, 2.16 / 2, (STAND_Z1 - 0.2 + STEP2_Z1) / 2), (10.2, 2.16, STEP2_Z1 - STAND_Z1 + 0.2), 0.15)
+base += bevel_box((0, 1.08 / 2, (STEP2_Z1 - 0.2 + STEP1_Z1) / 2), (10.2, 1.08, STEP1_Z1 - STEP2_Z1 + 0.2), 0.15)
+glow += bevel_box((0, 2.3, STAND_Z1 + 0.02), (6.4, 0.1, 0.06), 0.0)
+glow += bevel_box((0, 1.22, STEP2_Z1 + 0.02), (9.4, 0.08, 0.06), 0.0)
+for face_z, x0, x1, y0, y1 in ((STAND_Z1, -3.2, 3.2, 2.4, STAND_TOP - 0.2), (STEP2_Z1, -4.8, 4.8, 1.3, 2.0), (STEP1_Z1, -4.8, 4.8, 0.2, 0.9)):
+    cracks += cracks_on([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 0, 3, inset=0.05, to3d=lambda p, fz=face_z: np.array([p[0], p[1], fz + p[2]]))
+# the stepped blocks either side of the stairs (front view: inner tall, middle low, outer corner), and the two blocks
+# stacked against each post's outer foot
+FRONT_BLOCKS = [  # (x0, x1, top, z0, z1)
+    (5.1, 7.7, 2.84, 1.9, 4.6),
+    (7.7, 9.7, 2.06, 1.9, 4.3),
+    (9.7, 11.6, 2.65, 1.2, 3.5),
+]
+for s_ in (-1, 1):
+    for x0, x1, top, z0, z1 in FRONT_BLOCKS:
+        cx = s_ * (x0 + x1) / 2
+        blocks.extend(bevel_box((cx, top / 2, (z0 + z1) / 2), (x1 - x0 - 0.06, top, z1 - z0), 0.16, yaw=s_ * rng.uniform(-0.04, 0.04)))
+        xa, xb = sorted((s_ * (x0 + 0.25), s_ * (x1 - 0.25)))
+        cracks.extend(cracks_on([(xa, 0.25), (xb, 0.25), (xb, top - 0.25), (xa, top - 0.25)], 0, 2, inset=0.05,
+                                to3d=lambda p, fz=z1: np.array([p[0], p[1], fz + p[2]])))
+    blocks.extend(bevel_box((s_ * 9.95, (LEDGE_TOP + 5.88) / 2, POST_Z - 0.2), (1.7, 5.88 - LEDGE_TOP + 0.1, 2.0), 0.14, yaw=s_ * 0.05))
+    blocks.extend(bevel_box((s_ * 9.2, (5.78 + 7.45) / 2, POST_Z - 0.3), (1.45, 7.45 - 5.78, 1.8), 0.12, yaw=-s_ * 0.06))
+# blocks along the back edge
+for i in range(6):
+    x = -9.6 + i * 3.84
+    h = rng.uniform(0.5, 0.8)
+    blocks.extend(bevel_box((x, LEDGE_TOP + h / 2 - 0.05, BASE_Z0 + 0.8), (3.7, h, 1.4), 0.12, yaw=rng.uniform(-0.05, 0.05)))
 
-# ---------------------------------------------------------------- posts (left, built at x < 0, then mirrored)
-CHUNKS = [  # (outline (x, y), depth); x = 0 is the post's centre line, +x is inward (towards the wheel)
-    # the posts rise and then curve INWARD over the wheel, staying clear of the rim (radius 7.45 round the wheel's
-    # centre, which is at post-local (POST_X, WHEEL_Y - POST_Y)) by at least half a stud so the wheel can turn
-    ([(-1.9, 0.0), (1.8, 0.0), (1.8, 5.4), (-1.8, 5.6)], 2.8),
-    ([(-1.8, 5.2), (1.8, 5.0), (2.2, 10.2), (-1.4, 10.4)], 2.6),
-    ([(-1.4, 10.0), (2.2, 9.8), (3.6, 13.6), (0.0, 14.0)], 2.4),
-    ([(0.0, 13.6), (3.6, 13.2), (5.6, 16.0), (2.6, 16.8)], 2.2),
+# ---------------------------------------------------------------- posts (the left one, measured off the concept; the right mirrors it)
+# They rise from the ledge leaning in to hug the rim (behind it), then go up nearly straight to a slanted top; one short
+# arm branches outward near the top and ends in a hook the lantern hangs from.
+POST = [  # convex slabs, bottom to top, each overlapping the one below
+    [(-9.75, 3.0), (-7.35, 3.0), (-7.29, 7.35), (-9.64, 7.35)],
+    [(-9.64, 7.1), (-7.29, 7.1), (-7.15, 10.68), (-6.9, 12.64), (-9.15, 12.64), (-9.55, 10.68)],
+    [(-9.15, 12.4), (-6.9, 12.4), (-6.41, 14.6), (-5.6, 16.2), (-8.0, 16.2), (-8.47, 14.6)],
+    [(-8.0, 15.9), (-5.6, 15.9), (-4.74, 17.54), (-6.41, 21.23), (-8.08, 20.5), (-8.1, 18.5)],
 ]
-ARM = [  # the one short branch outward, near the top, with a hook for the lantern
-    ([(-0.6, 11.6), (-0.2, 13.0), (-3.0, 13.7), (-3.3, 12.4)], 1.4),
-    ([(-3.35, 12.55), (-2.65, 12.65), (-2.6, 11.65), (-3.3, 11.55)], 1.2),
+ARM = [  # (outline, depth)
+    ([(-7.4, 15.9), (-7.3, 16.9), (-9.45, 18.15), (-9.75, 17.3)], 1.2),
+    ([(-10.65, 18.0), (-9.6, 18.25), (-9.65, 16.75), (-10.55, 16.6)], 1.3),
 ]
-LANTERN_HOOK = (-2.95, 11.6)  # the hook's tip (post-local x, y): the lantern hangs from here
-# keep the posts clear of the turning rim
-_wc = np.array([POST_X, WHEEL_Y - POST_Y])
-for _poly, _d in CHUNKS + ARM:
-    _gap = Polygon(_poly).distance(shapely.Point(*_wc).buffer(7.5, 64))
-    assert _gap >= 0.3, ("a post slab is too close to the wheel", _poly, _gap)
+LANTERN_HOOK = (-10.1, 16.6)  # the hook's underside: the lantern hangs from here
 post, post_cracks = [], []
-for poly, d in CHUNKS + ARM:
-    post += bevel_prism(poly, -d / 2, d / 2, 0.16)
-for poly, d in CHUNKS:  # cracks on each slab's front face
-    post_cracks += cracks_on(poly, d / 2, 4)
-post_L = move(post, (-POST_X, POST_Y, POST_Z))
+for poly in POST:
+    post += bevel_prism(poly, POST_Z - POST_D / 2, POST_Z + POST_D / 2, 0.16)
+    post_cracks += cracks_on(poly, POST_Z + POST_D / 2, 7, inset=0.22)
+for poly, d in ARM:
+    post += bevel_prism(poly, POST_Z - d / 2, POST_Z + d / 2, 0.14)
+post_L = post
 post_R = mirror_x(post_L)
-cl = move(post_cracks, (-POST_X, POST_Y, POST_Z))
-cracks += cl + mirror_x(cl)
+cracks += post_cracks + mirror_x(post_cracks)
 
 # ---------------------------------------------------------------- frame and pointer
 frame = []
-PILLAR_Z = WHEEL_Z - 1.75
-BAR_Y = WHEEL_Y + 7.45 + 0.95
-CRYSTAL_Z = WHEEL_Z + 1.45  # in front of the rim and its gems, so the wheel turns behind it
-MOUNT_FRONT = CRYSTAL_Z - 0.35  # the bar stops behind the crystal, which sits against its front
-frame += bevel_box((0, (TIER_TOP + BAR_Y) / 2, PILLAR_Z), (2.6, BAR_Y - TIER_TOP, 1.5), 0.15)
-frame += bevel_box((0, BAR_Y + 0.15, (PILLAR_Z - 0.75 + MOUNT_FRONT) / 2), (2.4, 0.9, MOUNT_FRONT - PILLAR_Z + 0.75), 0.15)
-frame += bevel_box((0, BAR_Y + 0.8, (PILLAR_Z - 0.75 + MOUNT_FRONT) / 2 + 0.2), (3.4, 0.45, MOUNT_FRONT - PILLAR_Z + 0.3), 0.12)  # the mount's cap
-for s in (-1, 1):  # angled wings either side of the mount, behind the crystal
-    frame += bevel_box((s * 1.55, BAR_Y + 0.2, MOUNT_FRONT - 0.45), (1.1, 0.7, 0.9), 0.1, yaw=s * 0.35)
-axle = lathe([(0, -0.9), (0.75, -0.9), (0.75, 0.9), (0, 0.9)], 12, (0, WHEEL_Y, PILLAR_Z + 0.75 + 0.6))
+PILLAR_Z = WHEEL_Z - 1.6  # behind the wheel's backing (-0.75)
+BAR_Y0 = WHEEL_Y + R_OUT + 0.08  # the bar over the top clears the rim
+MOUNT_Z0, MOUNT_Z1 = WHEEL_Z + 0.55, WHEEL_Z + 1.35  # the mount block in front of the rim's top (the rim turns behind it)
+frame += bevel_box((0, (LEDGE_TOP + BAR_Y0 + 0.5) / 2, PILLAR_Z), (2.0, BAR_Y0 + 0.5 - LEDGE_TOP, 1.2), 0.14)
+frame += bevel_box((0, BAR_Y0 + 0.25, (PILLAR_Z - 0.6 + MOUNT_Z1) / 2), (2.2, 0.5, MOUNT_Z1 - PILLAR_Z + 0.6), 0.12)
+frame += bevel_box((0, (17.54 + 18.42) / 2, (MOUNT_Z0 + MOUNT_Z1) / 2), (5.0, 18.42 - 17.54, MOUNT_Z1 - MOUNT_Z0), 0.14)
+for s_ in (-1, 1):  # angled cheeks either side of the crystal on the mount
+    frame += bevel_box((s_ * 1.7, 18.6, MOUNT_Z1 - 0.3), (1.0, 0.7, 0.7), 0.1, yaw=s_ * 0.4)
+axle = lathe([(0, -0.6), (0.7, -0.6), (0.7, 0.6), (0, 0.6)], 12, (0, WHEEL_Y, PILLAR_Z + 0.6 + 0.3))
 def bipyramid(cx, cy, cz, top, bottom, rx, rz, girdle, tilt=0.0):
     pts = [(0, top, 0), (0, -bottom, 0)]
     for i in range(6):
         a = 2 * math.pi * i / 6 + math.pi / 6
         pts.append((rx * math.cos(a), girdle, rz * math.sin(a)))
     c, s = math.cos(tilt), math.sin(tilt)
-    out = []
-    for x, y, z in pts:
-        out.append((cx + x * c - y * s, cy + x * s + y * c, cz + z))
-    return hull(out)
-crystal_y = WHEEL_Y + 6.7 + 2.3  # its point reaches down over the rim
-crystal = bipyramid(0, crystal_y, CRYSTAL_Z, 2.0, 2.3, 1.0, 0.45, 0.35)
-crystal += bipyramid(-1.15, crystal_y + 0.5, CRYSTAL_Z - 0.1, 0.95, 0.45, 0.36, 0.25, 0.1, tilt=math.radians(40))
-crystal += bipyramid(1.15, crystal_y + 0.5, CRYSTAL_Z - 0.1, 0.95, 0.45, 0.36, 0.25, 0.1, tilt=math.radians(-40))
+    return hull([(cx + x * c - y * s, cy + x * s + y * c, cz + z) for x, y, z in pts])
+CRYSTAL_Z = MOUNT_Z1 + 0.35
+# 92 px top, 180 px girdle (widest, 135 px across), 305 px tip
+crystal = bipyramid(0, 18.9, CRYSTAL_Z, 20.64 - 18.9, 18.9 - 16.46, 1.31, 0.5, 0.0)
+crystal += bipyramid(-1.2, 19.35, CRYSTAL_Z - 0.15, 0.95, 0.4, 0.34, 0.24, 0.1, tilt=math.radians(35))
+crystal += bipyramid(1.2, 19.35, CRYSTAL_Z - 0.15, 0.95, 0.4, 0.34, 0.24, 0.1, tilt=math.radians(-35))
 
-# ---------------------------------------------------------------- wheel (all about the axis through (0, WHEEL_Y, WHEEL_Z))
+# ---------------------------------------------------------------- wheel (about the axis through (0, WHEEL_Y, WHEEL_Z))
 C = (0, WHEEL_Y, WHEEL_Z)
-R_IN, R_OUT = 6.05, 7.45
-backing = lathe([(0, -0.75), (7.2, -0.75), (7.2, -0.3), (0, -0.3)], 32, C, phase=math.pi / 32)
-rim = lathe([(R_IN, -0.6), (R_OUT, -0.6), (R_OUT, 0.3), (R_OUT - 0.2, 0.5), (R_IN + 0.15, 0.5), (R_IN, 0.35)], 32, C, phase=math.pi / 32)
-rim_inner = lathe([(R_IN - 0.3, -0.35), (R_IN + 0.02, -0.35), (R_IN + 0.02, 0.18), (R_IN - 0.3, 0.18)], 32, C, phase=math.pi / 32)
-hub = lathe([(0, -0.35), (2.45, -0.35), (2.45, 0.3), (2.3, 0.5), (1.85, 0.5), (1.7, 0.18), (0, 0.18)], 24, C)
-hub_glow = lathe([(2.42, -0.25), (2.62, -0.25), (2.62, 0.15), (2.42, 0.15)], 24, C)
+backing = lathe([(0, -0.75), (R_OUT - 0.25, -0.75), (R_OUT - 0.25, -0.3), (0, -0.3)], 32, C, phase=math.pi / 32)
+rim = lathe([(R_RIM, -0.6), (R_OUT, -0.6), (R_OUT, 0.3), (R_OUT - 0.2, 0.5), (R_RIM + 0.15, 0.5), (R_RIM, 0.35)], 32, C, phase=math.pi / 32)
+rim_inner = lathe([(R_IN - 0.05, -0.35), (R_RIM + 0.02, -0.35), (R_RIM + 0.02, 0.16), (R_IN - 0.05, 0.16)], 32, C, phase=math.pi / 32)
+hub = lathe([(0, -0.35), (R_HUB, -0.35), (R_HUB, 0.3), (R_HUB - 0.12, 0.5), (1.5, 0.5), (1.37, 0.18), (0, 0.18)], 24, C)
 # one sector, the top slot (67.5 to 112.5 degrees), a hair narrower than 45 so neighbours never share a face
 arc = [math.radians(67.5 + 0.15 + (45 - 0.3) * i / 8) for i in range(9)]
-sec_r0, sec_r1 = 2.35, R_IN - 0.25
+sec_r0, sec_r1 = R_HUB - 0.1, R_IN
 sec_poly = [(sec_r1 * math.cos(a), sec_r1 * math.sin(a)) for a in arc] + [(sec_r0 * math.cos(a), sec_r0 * math.sin(a)) for a in reversed(arc)]
 sector = extrude(sec_poly, -0.32, -0.02, lambda p: np.array([p[0] + C[0], p[1] + C[1], p[2] + C[2]]))
 # one divider, on the top slot's left edge (112.5 degrees)
 a = math.radians(112.5)
 u = np.array([math.cos(a), math.sin(a)])
-nrm = np.array([-u[1], u[0]]) * 0.09
-div_poly = [tuple(u * (sec_r0 - 0.1) - nrm), tuple(u * (sec_r1 + 0.2) - nrm), tuple(u * (sec_r1 + 0.2) + nrm), tuple(u * (sec_r0 - 0.1) + nrm)]
-divider = extrude(div_poly, -0.3, 0.06, lambda p: np.array([p[0] + C[0], p[1] + C[1], p[2] + C[2]]))
-# one gem on the rim's face at 60 degrees: a bevelled square pyramid, set diamond-wise
+nrm = np.array([-u[1], u[0]]) * 0.08
+div_poly = [tuple(u * (sec_r0 - 0.05) - nrm), tuple(u * (sec_r1 + 0.1) - nrm), tuple(u * (sec_r1 + 0.1) + nrm), tuple(u * (sec_r0 - 0.05) + nrm)]
+divider = extrude(div_poly, -0.3, 0.05, lambda p: np.array([p[0] + C[0], p[1] + C[1], p[2] + C[2]]))
+# one gem on the rim's face at 60 degrees (345 px out, 55 px across): a bevelled square pyramid, set diamond-wise
 GEM_A = math.radians(60)
-gr = (R_IN + R_OUT) / 2
+gr = (R_RIM + R_OUT) / 2
 gc = np.array([C[0] + gr * math.cos(GEM_A), C[1] + gr * math.sin(GEM_A), C[2] + 0.5])
 gem_pts = []
 for i in range(4):
-    t = math.pi / 4 * (2 * i) + GEM_A  # corners pointing along and across the radius
-    gem_pts.append(gc + np.array([0.5 * math.cos(t), 0.5 * math.sin(t), -0.05]))
-    gem_pts.append(gc + np.array([0.38 * math.cos(t), 0.38 * math.sin(t), 0.2]))
+    t = math.pi / 2 * i + GEM_A
+    gem_pts.append(gc + np.array([0.55 * math.cos(t), 0.55 * math.sin(t), -0.05]))
+    gem_pts.append(gc + np.array([0.42 * math.cos(t), 0.42 * math.sin(t), 0.2]))
 gem_pts.append(gc + np.array([0, 0, 0.48]))
 gem = hull(gem_pts)
+
+# keep the posts clear of the turning wheel: behind its backing, and their arms outside its silhouette
+assert POST_Z + POST_D / 2 < WHEEL_Z - 0.6, "the posts must stand behind the rim"
 
 NODES = [
     ("BaseStone", base, (74, 63, 99)),
@@ -338,7 +319,7 @@ NODES = [
     ("PostL", post_L, (98, 88, 124)),
     ("PostR", post_R, (98, 88, 124)),
     ("Cracks", cracks, (40, 34, 58)),
-    ("BackFrame", frame, (68, 60, 94)),
+    ("BackFrame", frame, (40, 36, 62)),
     ("Axle", axle, (58, 48, 54)),
     ("Crystal", crystal, (200, 110, 255)),
     ("WheelBacking", backing, (17, 18, 38)),
@@ -348,9 +329,7 @@ NODES = [
     ("Divider", divider, (170, 90, 255)),
     ("Gem", gem, (150, 75, 235)),
     ("Hub", hub, (32, 28, 52)),
-    ("HubGlow", hub_glow, (180, 92, 255)),
 ]
-
 
 def write_glb(path, meshes):
     bin_ = bytearray(); views = []; accessors = []; gmeshes = []; nodes = []; materials = []
@@ -397,5 +376,4 @@ if __name__ == '__main__':
         total += len(tris)
         print(f"{name:14s} {len(tris):5d} tris  centre {np.round((pts.min(0) + pts.max(0)) / 2, 3).tolist()}  size {np.round(pts.max(0) - pts.min(0), 3).tolist()}")
     print('total triangles', total)
-    print(f'ledge top {LEDGE_TOP:.3f} (pumpkins and candles stand here), plinth top {PLINTH_H}')
-    print(f'wheel centre (0, {WHEEL_Y:.3f}, {WHEEL_Z:.3f}); lantern hooks (+-{POST_X - LANTERN_HOOK[0]:.3f}, {POST_Y + LANTERN_HOOK[1]:.3f}, {POST_Z:.3f})')
+    print(f'wheel centre (0, {WHEEL_Y:.3f}, {WHEEL_Z:.3f}); lantern hooks (+-{-LANTERN_HOOK[0]:.3f}, {LANTERN_HOOK[1]:.3f}, {POST_Z:.3f}); ledge top {LEDGE_TOP}')
