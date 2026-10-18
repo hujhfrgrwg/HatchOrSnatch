@@ -245,18 +245,24 @@ cracks += cracks_on([(-10.4, 0.1), (10.4, 0.1), (10.4, PLINTH_H - 0.1), (-10.4, 
                     to3d=lambda p: np.array([p[0], p[1], 7.0 + p[2]]))
 
 # ---------------------------------------------------------------- posts (left, built at x < 0, then mirrored)
-CHUNKS = [  # (outline (x outward-negative, y), depth); x = 0 is the post's centre line
-    ([(-1.9, 0.0), (1.8, 0.0), (1.9, 5.6), (-1.7, 5.8)], 2.8),
-    ([(-1.7, 5.4), (1.9, 5.2), (1.5, 10.6), (-1.9, 10.9)], 2.6),
-    ([(-1.9, 10.5), (1.5, 10.2), (0.2, 14.6), (-3.0, 14.6)], 2.4),
-    ([(-3.0, 14.2), (0.2, 14.3), (-1.0, 17.3), (-3.7, 16.5)], 2.2),
+CHUNKS = [  # (outline (x, y), depth); x = 0 is the post's centre line, +x is inward (towards the wheel)
+    # the posts rise and then curve INWARD over the wheel, staying clear of the rim (radius 7.45 round the wheel's
+    # centre, which is at post-local (POST_X, WHEEL_Y - POST_Y)) by at least half a stud so the wheel can turn
+    ([(-1.9, 0.0), (1.8, 0.0), (1.8, 5.4), (-1.8, 5.6)], 2.8),
+    ([(-1.8, 5.2), (1.8, 5.0), (2.2, 10.2), (-1.4, 10.4)], 2.6),
+    ([(-1.4, 10.0), (2.2, 9.8), (3.6, 13.6), (0.0, 14.0)], 2.4),
+    ([(0.0, 13.6), (3.6, 13.2), (5.6, 16.0), (2.6, 16.8)], 2.2),
 ]
-ARM = [  # the hooked arm out to the lantern
-    ([(-1.5, 8.4), (-1.3, 9.9), (-3.6, 11.9), (-4.1, 10.7)], 1.5),
-    ([(-4.3, 10.6), (-3.5, 12.1), (-5.7, 12.2), (-5.9, 11.1)], 1.4),
-    ([(-5.95, 11.25), (-5.3, 11.3), (-5.25, 10.35), (-5.9, 10.3)], 1.3),
+ARM = [  # the one short branch outward, near the top, with a hook for the lantern
+    ([(-0.6, 11.6), (-0.2, 13.0), (-3.0, 13.7), (-3.3, 12.4)], 1.4),
+    ([(-3.35, 12.55), (-2.65, 12.65), (-2.6, 11.65), (-3.3, 11.55)], 1.2),
 ]
-LANTERN_HOOK = (-5.6, 10.3)  # the arm's tip (post-local x, y): the lantern hangs from here
+LANTERN_HOOK = (-2.95, 11.6)  # the hook's tip (post-local x, y): the lantern hangs from here
+# keep the posts clear of the turning rim
+_wc = np.array([POST_X, WHEEL_Y - POST_Y])
+for _poly, _d in CHUNKS + ARM:
+    _gap = Polygon(_poly).distance(shapely.Point(*_wc).buffer(7.5, 64))
+    assert _gap >= 0.3, ("a post slab is too close to the wheel", _poly, _gap)
 post, post_cracks = [], []
 for poly, d in CHUNKS + ARM:
     post += bevel_prism(poly, -d / 2, d / 2, 0.16)

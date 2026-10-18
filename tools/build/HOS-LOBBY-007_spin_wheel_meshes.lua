@@ -16,7 +16,7 @@ local CHS = game:GetService("ChangeHistoryService")
 
 local ORIGIN = CFrame.new(0, 10, 1451)
 local RIM_LOCAL = Vector3.new(0, 9.95, -1.25) -- WheelRim's centre in the GLB (the wheel's axis runs through it along Z)
-local HOOK_LOCAL = Vector3.new(15.6, 12.7, -1.5) -- the posts' lantern hooks (x mirrored for the left)
+local HOOK_LOCAL = Vector3.new(12.95, 14.0, -1.5) -- the posts' lantern hooks (x mirrored for the left)
 local LEDGE_TOP = 2.0 -- the ledges either side of the steps
 local HUB_FRONT = 0.18 -- the hub's recessed face, in front of the axis point
 
