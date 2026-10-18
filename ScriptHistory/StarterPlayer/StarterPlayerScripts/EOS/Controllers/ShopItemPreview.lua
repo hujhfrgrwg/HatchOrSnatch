@@ -50,10 +50,10 @@ local KIND = { -- backdrop + the line under the stage
 	abilitySkin = { "violet", "YOUR RIFT PORTALS" },
 	hatchFx = { "violet", "EVERY HATCH AT THE INCUBATOR" },
 }
-local TRAIL_TEX = { -- EconomyService.TRAIL_LAYERS (first layer of each)
-	trail_spark = "rbxassetid://18568183566",
-	trail_ember = "rbxassetid://70464235210468",
-	trailp_rainbow = "rbxassetid://99421661918040",
+local TRAIL_LAYERS = { -- EconomyService.TRAIL_LAYERS: the layers a match draws (texture, width, lifetime)
+	trail_spark = { { tex = "rbxassetid://18568183566", width = 1, life = 0.5 }, { tex = "rbxassetid://18568048335", width = 0.6, life = 0.35 } },
+	trail_ember = { { tex = "rbxassetid://70464235210468", width = 1, life = 0.4 } },
+	trailp_rainbow = { { tex = "rbxassetid://99421661918040", width = 1, life = 0.55 }, { tex = "rbxassetid://18568048335", width = 0.7, life = 0.4 } },
 }
 local RAINBOW = ColorSequence.new({
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
@@ -338,6 +338,19 @@ SCENES.case = function(stage, fx, item, alive)
 	end)
 end
 
+-- HOS-PREV-001 (Matthew 18 Oct: "They look bad and I hope the trail doesnt look like that in game. You could move the
+-- player all the way to the left on the viewport so the trail can be seen in the center/right side"). The trail is
+-- drawn the way a match draws it (EconomyService.trailOn): each of the item's layers with its own texture stretched
+-- along it, 0.8 studs tall (times the layer's width) at the egg, its colour running from the egg to the tail as it
+-- fades out, the shorter-lived layer shorter. A viewport draws no Trails, so the layers are flat pictures on a layer
+-- just under the 3D: the egg and your back cover where it starts, as in a match. The camera is worked out every frame
+-- so you stand at TRAIL_X across, TRAIL_FILL of the scene's height, whatever shape the stage is (a Featured daily
+-- card's scene ends at its SceneBottom attribute, above the card's name and buttons).
+local TRAIL_X, TRAIL_FILL, TRAIL_TOP = 0.26, 0.8, 0.06 -- where you stand (of the width), how tall (of the scene), its top
+local TRAIL_END = 0.97 -- the longest layer reaches this far across
+local TRAIL_LEAD = 0.15 -- the textures start blank: this much of a layer's length sits back under the egg
+local TRAIL_GLOW = 3 -- each layer drawn this many times over itself (a match adds light with LightEmission; pictures only blend)
+
 local function trailScene(stage, fx, item, alive)
 	local _, wm, cam = viewport(stage)
 	local char, root, hum = cloneMe()
@@ -345,62 +358,79 @@ local function trailScene(stage, fx, item, alive)
 		return
 	end
 	char.Parent = wm
-	eggOnBack(char, nil)
+	local egg = eggOnBack(char, nil)
+	local base = egg and egg.PrimaryPart
 	;(root :: BasePart).CFrame = CFrame.new(0, 3, 0) * CFrame.Angles(0, math.rad(-90), 0) -- running toward screen left (the egg and its trail on the right)
-	local run = AnimConfig.ids and (AnimConfig.ids.WalkFast or AnimConfig.ids.Run) -- the jog leans less than the sprint, so you read as standing
-	play(hum :: Humanoid, run, true, 1.2)
-	cam.CFrame = CFrame.lookAt(Vector3.new(1.6, 3.2, -14), Vector3.new(1.6, 1.8, 0))
-	-- the trail: streaks from the egg (left of centre) flowing right, in the trail's colour
-	local rainbow = item.id == "trailp_rainbow"
-	local tex = TRAIL_TEX[item.id] or ""
-	local ribbon = Instance.new("Frame")
-	ribbon.BorderSizePixel = 0
-	ribbon.AnchorPoint = Vector2.new(0, 0.5)
-	ribbon.BackgroundColor3 = if rainbow then Color3.new(1, 1, 1) else item.color
-	ribbon.ZIndex = fx.ZIndex
-	local rg = Instance.new("UIGradient")
-	rg.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(0.6, 0.55), NumberSequenceKeypoint.new(1, 1) })
-	if rainbow then
-		rg.Color = RAINBOW
+	local boxCf, box = char:GetBoundingBox()
+	local run = AnimConfig.ids and (AnimConfig.ids.Run or AnimConfig.ids.WalkFast) -- the run clip, as a Runner moves in a match (Matthew: "it should be their running animation, not the walk")
+	play(hum :: Humanoid, run, true)
+	-- the layers, under the viewport (over the backdrop at the stage's z, under the viewport at +2)
+	local back = Instance.new("Frame")
+	back.Name = "TrailBack"
+	back.BackgroundTransparency = 1
+	back.Size = UDim2.fromScale(1, 1)
+	back.ZIndex = stage.ZIndex + 1
+	back.Parent = stage
+	local layers = TRAIL_LAYERS[item.id] or { { tex = "", width = 1, life = 0.45 } }
+	local longest = 0
+	for _, layer in layers do
+		longest = math.max(longest, layer.life)
 	end
-	rg.Parent = ribbon
-	local rc = Instance.new("UICorner")
-	rc.CornerRadius = UDim.new(0.5, 0)
-	rc.Parent = ribbon
-	ribbon.Parent = fx
-	local streaks = {}
-	for i = 1, 3 do
-		local s = img(fx, tex, fx.ZIndex + 1)
-		s.ScaleType = Enum.ScaleType.Stretch
-		s.AnchorPoint = Vector2.new(0, 0.5)
-		s.ImageColor3 = if rainbow then Color3.new(1, 1, 1) else item.color
-		local g = Instance.new("UIGradient")
-		g.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.05), NumberSequenceKeypoint.new(1, 1) })
-		if rainbow then
-			g.Color = RAINBOW
+	local ribbons = {}
+	for i, layer in layers do
+		for k = 1, TRAIL_GLOW do
+			local r = img(back, layer.tex, i)
+			r.ScaleType = Enum.ScaleType.Stretch
+			r.AnchorPoint = Vector2.new(0, 0.5)
+			if layer.tex == "" then
+				r.BackgroundTransparency = 0
+				r.BorderSizePixel = 0
+			end
+			local g = Instance.new("UIGradient")
+			g.Color = if item.id == "trailp_rainbow" then RAINBOW else ColorSequence.new(item.color)
+			g.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, if i == 1 then 0.1 else 0.35), NumberSequenceKeypoint.new(1, 1) })
+			g.Parent = r
+			table.insert(ribbons, { gui = r, layer = layer, y = nil :: number? })
 		end
-		g.Parent = s
-		if tex == "" then
-			s.BackgroundTransparency = 0.2
-			s.BackgroundColor3 = item.color
-		end
-		streaks[i] = s
 	end
-	local t0 = os.clock()
+	local from = Vector2.new(TRAIL_X + 0.05, 0.4) -- where the egg is on screen (the sparks start there)
 	local conn
-	conn = RunService.RenderStepped:Connect(function()
+	conn = RunService.RenderStepped:Connect(function(dt)
 		if not alive() then
 			conn:Disconnect()
 			return
 		end
-		local t = os.clock() - t0
-		ribbon.Position = UDim2.fromScale(0.53, 0.5 + 0.015 * math.sin(t * 9))
-		ribbon.Size = UDim2.fromScale(0.5, 0.13)
-		for i, s in streaks do
-			local k = ((t * 1.6 + i / 3) % 1)
-			s.Position = UDim2.fromScale(0.52 + 0.08 * k, 0.5 + 0.04 * math.sin(t * 9 + i))
-			s.Size = UDim2.fromScale(0.42 + 0.12 * (1 - k), 0.2 + 0.06 * i / 3)
-			s.ImageTransparency = 0.6 * k
+		local abs = stage.AbsoluteSize
+		if abs.X < 2 or abs.Y < 2 then
+			return
+		end
+		local aspect = abs.X / abs.Y
+		local tanV = math.tan(math.rad(cam.FieldOfView / 2))
+		local bottom = (stage:GetAttribute("SceneBottom") :: number?) or (1 - TRAIL_TOP)
+		local win = bottom - TRAIL_TOP
+		local dist = box.Y / (2 * TRAIL_FILL * win * tanV)
+		local c = boxCf.Position
+		-- looking along +Z, screen right is world -X: put the middle of you at (TRAIL_X, the scene's middle)
+		local at = Vector3.new(c.X + (2 * TRAIL_X - 1) * dist * tanV * aspect, c.Y - (1 - 2 * (TRAIL_TOP + win / 2)) * dist * tanV, c.Z - dist)
+		cam.CFrame = CFrame.lookAt(at, at + Vector3.new(0, 0, 1))
+		if not base then
+			return
+		end
+		local function screen(p: Vector3): Vector2
+			local l = cam.CFrame:PointToObjectSpace(p)
+			local z = math.max(-l.Z, 0.1)
+			return Vector2.new(0.5 + l.X / (z * tanV * aspect) / 2, 0.5 - l.Y / (z * tanV) / 2)
+		end
+		local cf = base.CFrame
+		for _, rb in ribbons do
+			local lo = screen(cf * Vector3.new(0, 0.1, 0)) -- EconomyService.trailOn's attachments
+			local hi = screen(cf * Vector3.new(0, 0.1 + 0.8 * rb.layer.width, 0))
+			local x, y = (lo.X + hi.X) / 2, (lo.Y + hi.Y) / 2
+			rb.y = if rb.y then rb.y + (y - rb.y) * math.min(1, dt * 8) else y -- (follows the egg's bob a touch behind, like the trail does)
+			local len = math.max(0, (TRAIL_END - x) * rb.layer.life / longest)
+			rb.gui.Position = UDim2.fromScale(x - TRAIL_LEAD * len, rb.y :: number)
+			rb.gui.Size = UDim2.fromScale(len * (1 + TRAIL_LEAD), math.abs(lo.Y - hi.Y))
+			from = Vector2.new(x, y)
 		end
 	end)
 	if item.id ~= "trailp_rainbow" then -- sparks / embers like the egg's emitter
@@ -408,7 +438,7 @@ local function trailScene(stage, fx, item, alive)
 			while alive() do
 				local sp = img(fx, icon("sparkle"), fx.ZIndex + 2)
 				sp.ImageColor3 = item.color
-				sp.Position = UDim2.fromScale(0.54 + math.random() * 0.05, 0.5 + (math.random() - 0.5) * 0.12)
+				sp.Position = UDim2.fromScale(from.X + 0.02 + math.random() * 0.05, from.Y + (math.random() - 0.5) * 0.08)
 				sp.Size = UDim2.fromScale(0.06, 0.06)
 				sp.SizeConstraint = Enum.SizeConstraint.RelativeYY
 				local up = if item.id == "trail_ember" then -0.15 else 0.12
@@ -421,6 +451,7 @@ local function trailScene(stage, fx, item, alive)
 		end)
 	end
 end
+
 SCENES.trail = trailScene
 SCENES.trailPerm = trailScene
 
@@ -1155,7 +1186,53 @@ function ShopItemPreview.preview(card: Instance, on: boolean)
 	end
 end
 
+-- HOS-INV-001: until your first Gem pack, every pack card wears a "FIRST BUY 2x" ribbon (the server doubles it)
+local function gemBadges(shop: Instance, first: boolean)
+	local packs = shop:FindFirstChild("Packs", true)
+	if not packs then
+		return
+	end
+	for i, pack in packs:GetChildren() do
+		if pack:IsA("GuiObject") and pack.Name:match("^Pack%d") then
+			local b = pack:FindFirstChild("FirstBuy") :: TextLabel?
+			if first and not b then
+				local idx = tonumber(pack.Name:match("%d+"))
+				local def = idx and EconomyConfig.GEM_PACKS[idx]
+				-- the HTML template PullsUITemplates.FirstBuy (UI/build_pulls.py first_buy)
+				local T = ReplicatedStorage:FindFirstChild("PullsUITemplates")
+				local tpl = T and T:FindFirstChild("FirstBuy")
+				if tpl then
+					local l = tpl:Clone() :: GuiObject
+					l.Name = "FirstBuy"
+					l.Position = UDim2.fromOffset(10, 4)
+					l.ZIndex = 12
+					local text = if def then ("FIRST BUY 2x  ·  %s GEMS"):format((tostring(def.gems * 2):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", ""))) else "FIRST BUY 2x"
+					for _, d in l:GetDescendants() do
+						if d:IsA("TextLabel") and (d.Name == "RibbonText" or d.Name == "RibbonTextShadow") then
+							d.Text = text
+						end
+					end
+					l.Parent = pack
+				end
+			elseif b and not first then
+				b:Destroy()
+			end
+		end
+	end
+end
+
 function ShopItemPreview.init()
+	task.spawn(function() local B = script.Parent:WaitForChild("PreviewBlend", 10) if B then require(B).watch() end end) -- HOS-FEAT-001: every preview fades into its frame
+	task.spawn(function() -- the FIRST BUY 2x ribbons follow your save
+		local Net = require(Shared:WaitForChild("Net"))
+		Net.event("ProfileState").OnClientEvent:Connect(function(view)
+			local sh = player.PlayerGui:FindFirstChild("EOSUI") and player.PlayerGui.EOSUI:FindFirstChild("Root")
+			sh = sh and sh:FindFirstChild("Shop")
+			if sh and type(view) == "table" and type(view.stats) == "table" then
+				gemBadges(sh, (tonumber(view.stats.gemsPurchased) or 0) == 0)
+			end
+		end)
+	end)
 	local pg = player:WaitForChild("PlayerGui")
 	local gui = pg:WaitForChild("EOSUI", 30)
 	local root = gui and gui:WaitForChild("Root", 10)
@@ -1234,4 +1311,10 @@ function ShopItemPreview.init()
 	end
 end
 
+-- HOS-FEAT-001: a Featured v3 card (Controllers.FeaturedShopUI) gets the same stage, inside its own ArtBox
+function ShopItemPreview.attachCard(card: GuiObject, id: string)
+	attach(card, function()
+		return EconomyConfig.item(id)
+	end)
+end
 return ShopItemPreview
