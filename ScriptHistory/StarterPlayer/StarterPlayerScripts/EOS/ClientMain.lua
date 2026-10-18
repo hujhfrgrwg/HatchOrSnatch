@@ -47,11 +47,13 @@ task.spawn(require(Controllers.HudDeclutter).init) -- HOS-INV-001 clutter pass: 
 task.spawn(require(Controllers.ShopItemPreview).init) -- HOS-INV-001: hover previews for the Shop's Cosmetics and Featured cosmetic cards
 task.spawn(require(Controllers.CrateShowcase).init) -- HOS-INV-001: everyone sees crate openings (overhead burst, chat line for Epic+)
 task.spawn(require(Controllers.CrateExtras).init) -- HOS-INV-001: open x10, the 10 PULLS screen, Emote Crate guarantee lines
+task.spawn(require(Controllers.InspectController).init) -- HOS-INV-001: click a player in the lobby: their weapon, pet, emotes, GET IT
 SlideFX.init() -- streaks on the floor and in the air for every slide (yours, other players', NPCs')
 FieldGems.init() -- field Gems: spin, sparkle, pickup burst, "+1"
 Outlines.init() -- Catchers / downed red, Runner teammates blue; per viewer, hidden behind walls
 FacePlayer.init() -- lobby leaderboards swivel to face you
 require(Controllers.ProximityFade).init() -- HOS-LOBBY-003: the pro altar's beam wall and PRO LOBBY signs fade in as you walk up
+require(Controllers.LobbyAmbience).init() -- HOS-LOBBY-004: lanterns swing when you're near, white wind trails; all lobby animation stops in a match
 Ragdoll.bindLocal() -- caught = your body ragdolls (the server builds the joints, your client simulates)
 
 -- every server->client remote has at least one listener (no "invocation queue exhausted")

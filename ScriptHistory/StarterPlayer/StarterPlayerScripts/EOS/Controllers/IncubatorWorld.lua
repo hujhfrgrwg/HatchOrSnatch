@@ -23,12 +23,13 @@ local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
 local EggConfig = require(Shared:WaitForChild("EggConfig"))
 local Net = require(Shared:WaitForChild("Net"))
 local EggPieces = require(script:WaitForChild("EggPieces"))
+local LobbyGate = require(script.Parent:WaitForChild("LobbyGate"))
 
 local player = Players.LocalPlayer
 local World = {}
 
 local OPEN_RADIUS, CLOSE_RADIUS = 11, 14 -- studs from the egg's axis (the platform is 15 x 15)
-local ANIM_RANGE = 260 -- the camera must be this close for the idle animation to run
+local ANIM_RANGE = LobbyGate.ANIM_RANGE -- the idle animation runs only this close (half the lobby's width) and on screen
 local SLOTS = EggPieces.COUNT -- puzzle pieces (EggConfig.INCUBATOR.FILL is 18: one fill each)
 local SNAP = 1.6 -- studs out from its place a piece appears before it snaps in
 local HOLO = Color3.fromRGB(225, 175, 255) -- the hologram pieces (ForceField reads faint, so a light tint)
@@ -544,8 +545,8 @@ local function step(dt: number)
 		end
 	end
 	if not S then return end
-	local cam = workspace.CurrentCamera
-	if not cam or (cam.CFrame.Position - S.E).Magnitude > ANIM_RANGE then return end
+	-- HOS-LOBBY-004: nothing in a match or away from the lobby; otherwise only close by and on screen
+	if not LobbyGate.active() or not LobbyGate.near(S.E, ANIM_RANGE) or not LobbyGate.onScreen(S.E + Vector3.new(0, 1, 0), 9) then return end
 	local t = os.clock()
 	local E = S.E
 	local parts, cfs = {}, {}

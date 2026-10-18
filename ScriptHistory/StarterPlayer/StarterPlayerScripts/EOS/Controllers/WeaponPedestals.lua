@@ -26,6 +26,7 @@ local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
 local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
 local AnimConfig = require(Shared:WaitForChild("AnimConfig"))
 local Net = require(Shared:WaitForChild("Net"))
+local LobbyGate = require(script.Parent:WaitForChild("LobbyGate")) -- HOS-LOBBY-004
 
 local WeaponPedestals = {}
 
@@ -536,6 +537,9 @@ function WeaponPedestals.start()
 		nextLegendary()
 		local lastCrate, lastDay = os.clock(), os.clock()
 		RunService.Heartbeat:Connect(function()
+			if not LobbyGate.active() then
+				return -- HOS-LOBBY-004: the pedestals rest in a match and while the camera is away from the lobby
+			end
 			local t = os.clock()
 			if t - lastCrate >= CRATE_EVERY then
 				lastCrate = t

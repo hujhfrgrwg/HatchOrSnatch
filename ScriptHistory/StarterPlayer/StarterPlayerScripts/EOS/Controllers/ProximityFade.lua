@@ -14,6 +14,8 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+local LobbyGate = require(script.Parent:WaitForChild("LobbyGate"))
+
 local ProximityFade = {}
 
 local TAG = "EOS_ProximityFade"
@@ -119,6 +121,9 @@ local function twinkle(e: Entry, now: number)
 end
 
 local function step(dt: number)
+	if not LobbyGate.active() then
+		return -- HOS-LOBBY-004: lobby animations stop in a match and while the camera is away from the lobby
+	end
 	local char = player.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local target = if root then root.Position else workspace.CurrentCamera.CFrame.Position
