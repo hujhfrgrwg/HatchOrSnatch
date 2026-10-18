@@ -56,7 +56,23 @@ end
 local function processOther(info: any, plr: Player): Enum.ProductPurchaseDecision?
 	local egg = require(script.Parent.EggService).processReceipt(info, plr) if egg then return egg end -- HOS-EGG-002: hatch boost products (nil = not ours)
 	local wc = require(script.Parent.WeaponCrateService).processReceipt(info, plr, RECEIPT_LEDGER) if wc then return wc end -- HOS-INV-001: Weapon Crate for Robux
+	local spin = require(script.Parent.SpinWheelService).processReceipt(info, plr) if spin then return spin end -- HOS-SPIN-001: spin wheel packs (nil = not ours)
 	local receipt = tostring(info.PurchaseId)
+	local S = require(Shared:WaitForChild("RetentionConfig")).STARTER -- HOS-INV-001: the Starter Pack
+	if S.productId and info.ProductId == S.productId then
+		local granted = false
+		if not settle(plr, receipt, function(p)
+			granted = ProfileLogic.grantStarterPack(p, receipt, S, EconomyConfig, EmoteConfig, RECEIPT_LEDGER)
+		end) then
+			return Enum.ProductPurchaseDecision.NotProcessedYet
+		end
+		if granted then
+			Net.event("ShopResult"):FireClient(plr, { ok = true, gems = S.gems, starter = true })
+			Net.event("Toast"):FireClient(plr, { text = "Starter Pack unlocked: Rainbow Trail, Sunset Egg Case and Breakdance are in your Backpack!", kind = "reward" })
+			Analytics.log("GemsSource", { userId = plr.UserId, amount = S.gems, reason = "starter_pack", robux = info.CurrencySpent, purchaseId = receipt })
+		end
+		return Enum.ProductPurchaseDecision.PurchaseGranted
+	end
 	local item = itemByProduct[info.ProductId]
 	if item then
 		local granted, why = false, nil

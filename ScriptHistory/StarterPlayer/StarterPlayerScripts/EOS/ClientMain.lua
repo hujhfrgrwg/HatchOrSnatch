@@ -41,6 +41,7 @@ require(Controllers.LastStanding).init() -- HOS-CINE-002: the lone Runner's cut-
 UIController.spectating = SpectateController.isActive
 UIController.startSpectate = SpectateController.start
 task.spawn(require(Controllers.RetentionController).init, UIController) -- HOS-RET-001
+task.spawn(require(Controllers.SpinWheelController).init, UIController) -- HOS-SPIN-001: the lobby spin wheel (walk-up screen, spins, the big wheel turning)
 task.spawn(require(Controllers.LeadCatcherController).init) -- HOS-LEAD-001: the paid Lead Catcher card in the lobby wait
 task.spawn(require(Controllers.BackpackController).init) -- HOS-INV-001: the Pets screen becomes the Backpack (Pets, Weapons, Cosmetics tabs)
 task.spawn(require(Controllers.HudDeclutter).init) -- HOS-INV-001 clutter pass: MENU square, one wallet plate, dash hints after 3 matches, streak row from the first clean crossing
@@ -48,6 +49,7 @@ task.spawn(require(Controllers.ShopItemPreview).init) -- HOS-INV-001: hover prev
 task.spawn(require(Controllers.CrateShowcase).init) -- HOS-INV-001: everyone sees crate openings (overhead burst, chat line for Epic+)
 task.spawn(require(Controllers.CrateExtras).init) -- HOS-INV-001: open x10, the 10 PULLS screen, Emote Crate guarantee lines
 task.spawn(require(Controllers.InspectController).init) -- HOS-INV-001: click a player in the lobby: their weapon, pet, emotes, GET IT
+task.spawn(require(Controllers.LobbyBillboards).init) -- HOS-LOBBYBB-001: incubator chip/card (your egg), lobby crate signs, pedestal signs only when near; hidden in matches
 SlideFX.init() -- streaks on the floor and in the air for every slide (yours, other players', NPCs')
 FieldGems.init() -- field Gems: spin, sparkle, pickup burst, "+1"
 Outlines.init() -- Catchers / downed red, Runner teammates blue; per viewer, hidden behind walls

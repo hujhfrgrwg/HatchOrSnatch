@@ -44,6 +44,7 @@ PurchaseService.init() -- Robux Gem packs: ProcessReceipt grants once, after the
 require(Services.LeadCatcherService).init() -- HOS-LEAD-001 one paid Lead Catcher per match
 PassService.init() -- VIP and 2x Gold game passes: ownership -> EOS_VIP / EOS_Gold2x
 require(Services.RetentionService).init() -- HOS-RET-001 welcome back gift, favorite / event / starter prompts
+require(Services.SpinWheelService).init() -- HOS-SPIN-001 lobby spin wheel: free spin, spin packs, server-rolled results
 require(Services.ReviveService).init(MatchService, require(Services.PointsService).init(MatchService)) -- HOS-PTS-001 points, revive (PointsConfig switches)
 LobbyService.init()
 PracticeService.init()
