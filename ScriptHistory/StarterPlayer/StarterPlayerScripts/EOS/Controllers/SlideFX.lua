@@ -4,6 +4,10 @@
 --    bright edge lines, lying flat along the ground where the body slid
 --  * in the air: two speed lines off the torso (shoulder height and hip height), facing the camera
 --  * a small dust kick as the slide starts (Roblox's built-in smoke texture)
+--  * HOS-TRAIL-002 (Matthew 18 Oct: "Can you have the dash beams be the trail beams as well?"): a player wearing an egg
+--    trail (Player attribute EOS_Trail, set by EconomyService) slides in that trail's look: the core band, edge lines
+--    and speed lines take its colours (the rainbow runs along them) and the core band its first layer's texture
+--    (Shared.TrailLook). No trail (and NPCs): the usual white-blue streaks. The dark scuff stays as it is.
 -- Triggered by the dash clips themselves (Animator.AnimationPlayed), so it covers your own slides,
 -- other players' and NPCs' with no extra network traffic. Built locally per body on its first slide;
 -- nothing here replicates. Reduce Effects keeps only the floor lines.
@@ -15,6 +19,8 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("EOS"):WaitForChild("Shared")
 local AnimConfig = require(Shared:WaitForChild("AnimConfig"))
 local GameConfig = require(Shared:WaitForChild("GameConfig"))
+local EconomyConfig = require(Shared:WaitForChild("EconomyConfig"))
+local TrailLook = require(Shared:WaitForChild("TrailLook"))
 local WorldFX = require(script.Parent.WorldFX)
 
 local SlideFX = {}
@@ -63,6 +69,7 @@ type Rig = {
 	floor: { { a0: Attachment, a1: Attachment, from: number, to: number } }, -- across-the-path spans
 	trails: { Trail },
 	air: { Trail },
+	bright: { { t: Trail, color: ColorSequence, brightness: number, textured: boolean } }, -- the streaks a worn trail restyles
 	dust: ParticleEmitter,
 	token: number,
 }
@@ -96,7 +103,7 @@ local function build(char: Model): Rig?
 	if not root or not torso then
 		return nil
 	end
-	local rig: Rig = { floor = {}, trails = {}, air = {}, dust = nil :: any, token = 0 }
+	local rig: Rig = { floor = {}, trails = {}, air = {}, bright = {}, dust = nil :: any, token = 0 }
 	local function span(name: string, from: number, to: number, props: { [string]: any })
 		local a0 = attach(root, "EOS_Slide_" .. name .. "0", Vector3.zero)
 		local a1 = attach(root, "EOS_Slide_" .. name .. "1", Vector3.zero)
@@ -174,8 +181,34 @@ local function build(char: Model): Rig?
 	dust.RotSpeed = NumberRange.new(-40, 40)
 	dust.Parent = feet
 	rig.dust = dust
+	for _, t in ipairs(rig.trails) do
+		if t.Name ~= "EOS_Slide_Scuff" then
+			table.insert(rig.bright, { t = t, color = t.Color, brightness = t.Brightness, textured = t.Name == "EOS_Slide_Core" })
+		end
+	end
+	for _, t in ipairs(rig.air) do
+		table.insert(rig.bright, { t = t, color = t.Color, brightness = t.Brightness, textured = false })
+	end
 	rigs[char] = rig
 	return rig
+end
+
+-- the worn trail's look on the bright streaks, or their own white-blue. A worn trail draws at TRAIL_BRIGHTNESS: at the
+-- streaks' own 3 its colours wash out to white
+local TRAIL_BRIGHTNESS = 1
+local function dress(rig: Rig, char: Model)
+	local plr = Players:GetPlayerFromCharacter(char)
+	local id = plr and plr:GetAttribute("EOS_Trail")
+	local item = if type(id) == "string" then EconomyConfig.item(id) else nil
+	local layers = item and TrailLook.LAYERS[item.id]
+	local color = if item then TrailLook.color(item) else nil
+	local tex = if layers then layers[1].tex else ""
+	for _, b in ipairs(rig.bright) do
+		b.t.Color = color or b.color
+		b.t.Brightness = if color then TRAIL_BRIGHTNESS else b.brightness
+		b.t.Texture = if color and b.textured then tex else ""
+		b.t.TextureMode = Enum.TextureMode.Stretch
+	end
 end
 
 -- one slide on `char`: side = "Left" | "Right" | "Back" | "Forward" (relative to the body, which holds
@@ -194,6 +227,7 @@ function SlideFX.play(char: Model, side: string)
 		end
 	end
 	lay(if side == "Left" or side == "Right" then Vector3.zAxis else Vector3.xAxis)
+	dress(rig, char)
 	local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local reduce = WorldFX.reduceEffects
 	for _, t in ipairs(rig.trails) do
