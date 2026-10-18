@@ -71,7 +71,7 @@ studs.StudsPerTile = STUDS_PER_TILE
 ---------------------------------------------------------------- 1. the import, turned and placed
 local imported
 for _, d in workspace:GetDescendants() do
-	if d:IsA("MeshPart") and d.Name == "WheelRim" then
+	if d:IsA("MeshPart") and d.Name == "WheelRim" and d.Parent and d.Parent.Name == "WheelRim_Node" then -- the import (not an assembled wheel)
 		imported = d
 		while imported.Parent ~= workspace do imported = imported.Parent end
 		break
