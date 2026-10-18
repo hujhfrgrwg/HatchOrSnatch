@@ -405,78 +405,66 @@ local function wallBeam(line: BasePart, Q: CFrame, name: string, height: number,
 	return b
 end
 
+-- sign style copied from the incubator sign (Workspace.Incubator A09_Sign*): stone plaque, navy inset panel,
+-- lavender GothamSSm Heavy text with a purple outline, purple neon star diamonds, SurfaceGui brightness 2
 local signFont = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Heavy)
+local INC_PANEL = Color3.fromRGB(17, 18, 38)
+local INC_TEXT = Color3.fromRGB(230, 200, 255)
+local INC_STROKE = Color3.fromRGB(166, 64, 255)
 for k = 0, 3 do
 	local Q = O * CFrame.Angles(0, k * math.pi / 2, 0) -- local +Z = outward
 	local side = model(("Side_%d"):format(k + 1), gate)
 	-- glowing ground line along this side (alternate sides a hair taller so the corners don't flicker)
 	local line = box(side, "GroundLine", Q, -GATE - 0.15, 0, GATE - 0.15, GATE + 0.15, 0.06 + (k % 2) * 0.006, GATE + 0.15, C.glowPurple, { style = "neon", collide = false })
 	-- one full-length wall beam per side, plus a shorter brighter glow band at its foot
-	wallBeam(line, Q, "Wall", BEAM_H, 2 * GATE + 0.3, WALL_T, C.glowPurple, Color3.fromRGB(150, 110, 255))
-	wallBeam(line, Q, "WallGlow", 9, 2 * GATE + 0.3, GLOW_T, Color3.fromRGB(215, 150, 255), C.glowPurple)
+	wallBeam(line, Q, "Wall", BEAM_H, 2 * GATE + 0.3, WALL_T, C.glowPurple, INC_STROKE)
+	wallBeam(line, Q, "WallGlow", 9, 2 * GATE + 0.3, GLOW_T, INC_TEXT, C.glowPurple)
 
-	-- flat sign over the entrance, facing out, just in front of the curtain
-	local sign = brick(side, "Sign", Vector3.new(9, 3.4, 0.2), Q * CFrame.new(0, 7.7, GATE + 0.6) * CFrame.Angles(0, math.pi, 0), C.deep, { style = "smooth", collide = false })
-	sign.Transparency = 1
-	sign.CastShadow = false
+	-- sign over the entrance, facing out, in front of the wall (the incubator sign's construction)
+	local S = Q * CFrame.new(0, 7.7, GATE + 0.6) * CFrame.Angles(0, math.pi, 0) -- -Z faces out
+	local signM = model("Sign", side)
+	box(signM, "Plaque", S, -4.9, -2.05, -0.25, 4.9, 2.05, 0.25, C.deep, { collide = false })
+	box(signM, "PlaqueCap", S, -5.05, 2.05, -0.3, 5.05, 2.4, 0.3, C.stoneDark, { collide = false })
+	local panel = box(signM, "Panel", S, -4.5, -1.7, -0.3, 4.5, 1.7, -0.22, INC_PANEL, { collide = false })
+	-- purple neon four-point stars either side of the title (like the incubator sign's)
+	for _, sx in { -1, 1 } do
+		local at = S * CFrame.new(sx * 3.95, 0.65, -0.33)
+		brick(signM, "StarGlow", Vector3.new(0.3, 0.3, 0.06), at * CFrame.Angles(0, 0, math.rad(45)), C.glowPurple, { style = "neon", collide = false })
+		brick(signM, "StarGlow", Vector3.new(0.08, 0.9, 0.064), at, C.glowPurple, { style = "neon", collide = false })
+		brick(signM, "StarGlow", Vector3.new(0.7, 0.08, 0.068), at, C.glowPurple, { style = "neon", collide = false })
+	end
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "SignGui"
 	gui.Face = Enum.NormalId.Front
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	gui.PixelsPerStud = 60
 	gui.LightInfluence = 0
-	gui.Brightness = 1.3
-	gui.Parent = sign
-	local fade = Instance.new("CanvasGroup")
+	gui.Brightness = 2
+	gui.Parent = panel
+	local fade = Instance.new("CanvasGroup") -- ProximityFade fades the text through this
 	fade.Name = "Fade"
 	fade.Size = UDim2.fromScale(1, 1)
 	fade.BackgroundTransparency = 1
 	fade.Parent = gui
-	local panel = Instance.new("Frame")
-	panel.Name = "Panel"
-	panel.AnchorPoint = Vector2.new(0.5, 0.5)
-	panel.Position = UDim2.fromScale(0.5, 0.5)
-	panel.Size = UDim2.new(1, -12, 1, -12)
-	panel.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
-	panel.BackgroundTransparency = 0.08
-	panel.Parent = fade
-	Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 18)
-	local edge = Instance.new("UIStroke")
-	edge.Color = C.glowPurple
-	edge.Thickness = 5
-	edge.Parent = panel
-	local inner = Instance.new("Frame")
-	inner.Name = "Inner"
-	inner.AnchorPoint = Vector2.new(0.5, 0.5)
-	inner.Position = UDim2.fromScale(0.5, 0.5)
-	inner.Size = UDim2.new(1, -22, 1, -22)
-	inner.BackgroundTransparency = 1
-	inner.Parent = panel
-	Instance.new("UICorner", inner).CornerRadius = UDim.new(0, 12)
-	local innerEdge = Instance.new("UIStroke")
-	innerEdge.Color = C.gold
-	innerEdge.Thickness = 2
-	innerEdge.Transparency = 0.3
-	innerEdge.Parent = inner
-	local function label(name: string, text: string, y: number, h: number, color: Color3)
+	local function label(name: string, text: string, y: number, h: number, w: number)
 		local t = Instance.new("TextLabel")
 		t.Name = name
 		t.AnchorPoint = Vector2.new(0.5, 0)
 		t.Position = UDim2.fromScale(0.5, y)
-		t.Size = UDim2.fromScale(0.86, h)
+		t.Size = UDim2.fromScale(w, h)
 		t.BackgroundTransparency = 1
 		t.FontFace = signFont
 		t.Text = text
 		t.TextScaled = true
-		t.TextColor3 = color
-		t.Parent = panel
+		t.TextColor3 = INC_TEXT
+		t.Parent = fade
 		local st = Instance.new("UIStroke")
-		st.Color = Color3.fromRGB(20, 12, 30)
+		st.Color = INC_STROKE
 		st.Thickness = 3
 		st.Parent = t
 	end
-	label("Title", "PRO LOBBY", 0.1, 0.48, C.gold)
-	label("Status", "LOCKED", 0.6, 0.28, Color3.fromRGB(255, 95, 95))
+	label("Title", "PRO LOBBY", 0.1, 0.46, 0.72)
+	label("Status", "LOCKED", 0.6, 0.28, 0.5)
 end
 gate.WorldPivot = O
 

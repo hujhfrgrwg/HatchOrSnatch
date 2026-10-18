@@ -12,15 +12,15 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
 `Workspace.CentralAltar.ProAltar.ProGate`, built by `tools/build/HOS-LOBBY-002_pro_altar.lua` with the rest of the altar.
 
 - **Beam wall** (revised 18 Oct after Matthew's feedback that the column curtain looked like a jail cell): one flat beam per side, a 32 × 32 square (half-width `GATE` = `HALF` + 5) just outside the stairs and jack-o'-lanterns.
-  - **Wall:** 32.3 wide (the full side), 70 tall, not camera-facing. Purple, with a transparency gradient from 0.55 at the bottom to 0.92 by 40% of the height and fully clear at the top.
+  - **Wall:** 32.3 wide (the full side), 70 tall, not camera-facing. The incubator's purples (180,92,255 into 166,64,255), with a transparency gradient from 0.55 at the bottom to 0.92 by 40% of the height and fully clear at the top.
   - **Glow band:** a second full-length beam on each side, 9 tall, brighter at the foot (0.35 fading to 1).
   - **Ground line:** a thin neon line on the ground under each wall.
   - **Orientation:** each wall's attachments have X = up (the beam's run), Y = outward (the face) and Z = along the side (the width).
-- **Signs:** a flat sign at each entrance, about 0.6 studs in front of the wall, 6–9.4 studs up, facing out.
-  - 9 × 3.4 studs; the part is invisible and everything shows through its `SurfaceGui`.
-  - A dark panel with a purple edge and a gold inner line.
-  - "PRO LOBBY" in gold and "LOCKED" in red, in the lobby boards' font (GothamSSm Heavy).
-  - It's static: it doesn't turn to face the player.
+- **Signs:** one over each entrance, facing out, just in front of the wall, built like the incubator sign (`Workspace.Incubator` A09_Sign*).
+  - **Plaque:** a stone plaque (47,41,68) with a cap, and a dark navy inset panel (17,18,38).
+  - **Text:** "PRO LOBBY" over "LOCKED", lavender (230,200,255) GothamSSm Heavy with a purple (166,64,255) outline, SurfaceGui brightness 2.
+  - **Stars:** a purple neon four-point star either side of the title.
+  - **Static:** it doesn't turn to face the player.
 - **No collision:** nothing in the gate blocks movement, and players can still walk up to the summoning circle. Blocking entry would need either a wall or a server check once pro access exists.
 
 ## The fade (client)
@@ -33,7 +33,7 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
   - Change those two attributes to tune it.
 - **How each piece fades:**
   - Beams and parts use `LocalTransparencyModifier`.
-  - The signs' `CanvasGroup` uses `GroupTransparency`.
+  - The sign text's `CanvasGroup` uses `GroupTransparency` (the plaque parts fade like any part).
   - Lights dim through `Brightness`.
   - It's smoothed over about a quarter of a second, and pieces that stream in later join the fade.
   - All of this is client-only, so each player sees only their own fade.
@@ -52,7 +52,8 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
   | 20 | 0.00 |
 
 - **Errors:** none in the output.
-- **Look:** the first column version was a washed-out white wall from an angle, then read as jail bars once thinned. It's now one flat wall per side. The flat walls haven't been screenshotted yet: the playtest wouldn't start and the capture returned another window. If a wall shows as a thin line or sticks out sideways, swap the attachments' Y and Z axes in `wallBeam`.
+- **Look:** the first column version was a washed-out white wall from an angle, then read as jail bars once thinned. It's now one flat wall per side. Screenshots straight on and from a three-quarter angle show a smooth sheet on every side, and the incubator-style signs read clearly.
+- **Fade after the restyle:** 8 wall beams, 40 sign/line parts and the sign text were all hidden at 50 studs, half at 30 and shown at 20.
 - **Stairs:** walking in from outside with real key presses, the character climbed the steps, crossed the dais and stopped on the circle, standing on the disc and inside `SummonZone`.
 - **Movement note:** the game moves characters with its own controller (`EOS_MoveDrive`) and keeps `Humanoid.WalkSpeed` at 0. Scripted `Humanoid:Move` does nothing, so movement tests need real key input.
 
