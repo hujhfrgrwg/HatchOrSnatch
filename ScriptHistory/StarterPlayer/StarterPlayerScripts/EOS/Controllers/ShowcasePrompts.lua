@@ -2,8 +2,8 @@
 -- ShowcasePrompts (client), HOS-SHOW-001 (Matthew, 18 Oct): "Make sure all of these have walk up pop up GUI that takes
 -- them to that part of the shop. each one should then have a hold E to pop up if they close out of the shop but are
 -- still standing"
---  * The lobby showcase podiums, by tag: the sword (HOS_WeaponShowcase) opens the Shop on Weapons, the Halloween pets
---    (HOS_PetShowcase) on Featured, the emote hologram (HOS_EmoteShowcase) on Emotes.
+--  * The lobby showcase podiums, by tag: the sword (HOS_WeaponShowcase) and the Halloween pets (HOS_PetShowcase) open
+--    the Shop on Featured, the emote hologram (HOS_EmoteShowcase) on Emotes.
 --  * Walk up (within OPEN_AT of the podium's stand) and the Shop opens on that tab, once. Walk away (past CLOSE_AT) and
 --    it closes again if the walk opened it, and the walk-up is armed for next time (the spin wheel's rule).
 --  * Close the Shop while still standing there and a "hold E" prompt on the podium opens it again. The prompt only
@@ -32,7 +32,7 @@ local TICK = 0.2 -- seconds between checks
 
 -- tag -> the Shop tab it opens and the prompt's words
 local SHOWCASES: { { tag: string, tab: string, action: string, object: string } } = {
-	{ tag = "HOS_WeaponShowcase", tab = "weapons", action = "View in Shop", object = "Weapons" },
+	{ tag = "HOS_WeaponShowcase", tab = "featured", action = "View in Shop", object = "Weapons" }, -- (Matthew: the sword's on Featured)
 	{ tag = "HOS_PetShowcase", tab = "featured", action = "View in Shop", object = "Halloween Pets" },
 	{ tag = "HOS_EmoteShowcase", tab = "emotes", action = "View in Shop", object = "Emotes" },
 }
