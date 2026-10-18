@@ -2,8 +2,10 @@
 -- HOS-LOBBY-005 (18 Oct 2026, Matthew): the low-poly jack-o'-lantern. Run in Studio (edit, command bar or the MCP's
 -- execute_luau) after File -> Import 3D of docs/HOS-LOBBY-005/JackOLantern.glb.
 --   1. finds the imported model (MeshParts JackBody, JackRim, JackGlow, JackStem; the importer wraps each in a <Name>_Node
---      model) and turns it into the kit pumpkin: colours and materials, a warm PointLight, face along -Z, pivot at the
---      bounding-box centre, the old kit pumpkin's height (2.88) at scale factor 1
+--      model; uploaded as mesh asset 96124739533958) and turns it into the kit pumpkin: colours and materials, a warm
+--      orange PointLight low in front of the face, face along -Z, pivot at the
+--      bounding-box centre, the old kit pumpkin's height (2.88) at scale factor 1. The dark rim round the face (JackRim)
+--      is left out (Matthew: "remove the rim"); it goes with the rest of the import.
 --   2. puts it in ServerStorage.HalloweenLobbyKit as A04_JackOLantern (the altar rebuild, tools/build/HOS-LOBBY-002_pro_altar.lua,
 --      clones it from there; the incubator dais, tools/build/HOS-INC-001_pedestal.lua, clones the altar's)
 --   3. swaps every block jack-o'-lantern in the lobby (ProAltar Side_1..4 corners, the incubator dais, FloorProps.Prop_Pumpkin)
@@ -15,7 +17,6 @@ local CHS = game:GetService("ChangeHistoryService")
 local KIT_HEIGHT = 2.877 -- the old kit pumpkin's height, stem included
 local LOOK = {
 	JackBody = { Color3.fromRGB(255, 112, 24), Enum.Material.SmoothPlastic },
-	JackRim = { Color3.fromRGB(96, 34, 8), Enum.Material.SmoothPlastic },
 	JackGlow = { Color3.fromRGB(255, 210, 58), Enum.Material.Neon },
 	JackStem = { Color3.fromRGB(92, 98, 44), Enum.Material.SmoothPlastic },
 }
@@ -82,7 +83,6 @@ for name, p in parts do
 	pcall(function() p.CollisionFidelity = Enum.CollisionFidelity.Hull end)
 end
 imported:Destroy()
-build.PrimaryPart = parts.JackBody
 
 -- face along -Z, centred on the origin
 local face = assert(faceOf(build), "no glow to read the face from")
@@ -97,23 +97,26 @@ for _, p in parts do p.CFrame -= cf.Position end
 build.WorldPivot = CFrame.new()
 build:ScaleTo(KIT_HEIGHT / size.Y)
 
--- warm light inside, like the old one
+-- a warm orange light low in front of the face, so it pools on the ground and the nearby graves and fences. Matthew wanted
+-- it subtle, but range 6 at brightness 0.45 (and 5 at 1.5) didn't show against the lobby's bright ambient, and range 9
+-- at 2.2 turned the whole graveyard orange.
+local LIGHT_RANGE, LIGHT_BRIGHTNESS = 8, 2
 local light = Instance.new("Part")
 light.Name = "A04_Light_OPTIONAL"
 light.Size = Vector3.new(0.2, 0.2, 0.2)
 light.Transparency = 1
 light.Anchored, light.CanCollide, light.CanQuery, light.CanTouch, light.CastShadow = true, false, false, false, false
-light.CFrame = CFrame.new(body.Position)
+light.CFrame = CFrame.new(body.Position.X, -KIT_HEIGHT / 2 + 0.6, body.Position.Z - (body.Size.X / 2 + 0.6))
 light.Parent = build
 local pl = Instance.new("PointLight")
-pl.Color, pl.Range, pl.Brightness, pl.Shadows = Color3.new(1, 0.604, 0.165), 8, 0.25, false
+pl.Color, pl.Range, pl.Brightness, pl.Shadows = Color3.fromRGB(255, 132, 44), LIGHT_RANGE, LIGHT_BRIGHTNESS, false
 pl.Parent = light
 
 -- a fresh model holds the scaled parts at scale factor 1, so kitClone(..., 0.85) means 85% of the kit size
 local template = Instance.new("Model")
 template.Name = "A04_JackOLantern"
 for _, c in build:GetChildren() do c.Parent = template end
-template.PrimaryPart = body
+-- no PrimaryPart: the pivot (and the bounding box) stay square to the world, face along -Z
 template.WorldPivot = CFrame.new(template:GetBoundingBox().Position)
 template:SetAttribute("HOS", "HOS-LOBBY-005 low-poly jack-o'-lantern; face along -Z")
 build:Destroy()
@@ -155,6 +158,7 @@ for _, old in targets do
 		local new = template:Clone()
 		new.Name = old.Name
 		new:ScaleTo(osz.Y / tSize.Y)
+		new.A04_Light_OPTIONAL.PointLight.Range = LIGHT_RANGE -- ScaleTo shrinks it with the model
 		local _, nsz = new:GetBoundingBox()
 		local theta = math.atan2(-f.X, -f.Z) -- turns -Z onto f
 		new:PivotTo(CFrame.new(ocf.Position.X, ocf.Position.Y - osz.Y / 2 + nsz.Y / 2, ocf.Position.Z) * CFrame.Angles(0, theta, 0))

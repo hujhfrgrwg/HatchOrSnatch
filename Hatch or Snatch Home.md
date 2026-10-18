@@ -26,6 +26,7 @@ Arena maps are built from code: `ServerStorage.EOSBuild.Maps` (`MapDefs` plus on
 - **Edge walls** (HOS-LOBBY-001, Matthew): invisible walls flush with the island's outer edge (`Workspace.LobbyEdgeWalls`) so players can walk to the edge without falling. See [[HOS-LOBBY-001 Lobby edge walls]].
 - **Incubator** (HOS-INC-001, Matthew): animated; walking up opens the incubator screen; each player's egg is 18 cracked puzzle pieces that turn from hologram to solid as it fills (the old faceted egg and core are gone), earned shards fly in, and hatching bursts it. Egg piece meshes are in `ReplicatedStorage.IncubatorEggPieces`. See [[HOS-INC-001 Incubator]].
 - **Ambience** (HOS-LOBBY-004, Matthew): lanterns swing when you're within 60 studs and they're on screen, white wind wisps drift through; every lobby animation (lanterns, wind, incubator, leaderboards, pro gate, weapon pedestals) stops in a match or when the camera is away from the lobby (`LobbyGate`). See [[HOS-LOBBY-004 Lobby ambience]].
+- **Jack-o'-lanterns** (HOS-LOBBY-005, Matthew): low-poly mesh pumpkin with a glowing carved face and a warm orange light (kit copy `ServerStorage.HalloweenLobbyKit.A04_JackOLantern`). It replaced the lobby's block pumpkins, and 15 more sit among the trees and graves (`Workspace.LobbyPumpkins`). See [[HOS-LOBBY-005 Jack-o'-lanterns]].
 - **Leaderboards** (HOS-LB-001, Matthew): the four Halloween boards in `Workspace.Leaderboards` show live this-server stats and turn to face each player. See [[HOS-LB-001 Halloween leaderboards]].
 
 ## Setup
