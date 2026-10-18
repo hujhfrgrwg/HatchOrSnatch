@@ -1,0 +1,310 @@
+<!doctype html>
+<!--
+HOS-ICON-001 v2 (18 Oct 2026, Matthew: "Use html to create this crate in 3d. then we can just get an image icon of it"):
+the Emote Crate as a real 3D model in three.js, rendered with a transparent background for the icon.
+  * the chest: rounded teal plank body, a barrel lid open on its back hinge, gold corner / rim bands and lid end
+    bands, rivets, a raised gold shield with a purple field and a glossy pink double note
+  * light: a studio reflection map for the gold, a warm key, a cool rim, and a hot pink light inside the open lid
+  * 2D on top (HTML / SVG): the light rays and bloom behind, the dark outline round the silhouette (stacked CSS
+    drop-shadows), and the notes and sparkles bursting out, in the style of the game's other crate icons
+Rendered by render.mjs (headless Chromium): emote_crate_icon.png. Open this file in a browser to look at it; drag to
+turn the camera when ?orbit is in the URL.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Emote Crate 3D</title>
+<style>
+  html, body { margin: 0; background: transparent; }
+  body.preview { background: #241a30; }
+  #stage { position: relative; width: 512px; height: 512px; overflow: hidden; }
+  #rays, #glow, #fx { position: absolute; inset: 0; pointer-events: none; }
+  #glow { background: radial-gradient(ellipse 34% 20% at 50% 41%, rgba(255,130,230,.85), rgba(255,100,220,.35) 55%, rgba(255,90,210,0) 100%); }
+  #rays { background: conic-gradient(from 0deg at 50% 40%,
+      transparent 0deg 290deg, rgba(255,200,245,.0) 290deg, rgba(255,210,248,.55) 298deg, transparent 306deg,
+      transparent 312deg, rgba(255,210,248,.55) 320deg, transparent 328deg,
+      transparent 334deg, rgba(255,230,252,.7) 342deg, transparent 350deg,
+      transparent 354deg, rgba(255,230,252,.7) 2deg, transparent 10deg,
+      transparent 14deg, rgba(255,210,248,.55) 22deg, transparent 30deg,
+      transparent 36deg, rgba(255,210,248,.55) 44deg, transparent 52deg, transparent 360deg);
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0, rgba(0,0,0,.7) 26%, transparent 52%);
+            mask-image: radial-gradient(circle at 50% 40%, #000 0, rgba(0,0,0,.7) 26%, transparent 52%);
+    filter: blur(2px); }
+  #crate { position: absolute; inset: 0;
+    /* the dark outline every icon in the set has: the silhouette pushed out 5 px all round */
+    filter: drop-shadow(5px 0 0 #1c0c2e) drop-shadow(-5px 0 0 #1c0c2e) drop-shadow(0 5px 0 #1c0c2e) drop-shadow(0 -5px 0 #1c0c2e)
+            drop-shadow(0 10px 8px rgba(20,4,40,.55)); }
+  #crate canvas { display: block; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js", "three/addons/": "./vendor/addons/" } }
+</script>
+</head>
+<body>
+<div id="stage">
+  <div id="glow"></div>
+  <div id="rays"></div>
+  <div id="crate"></div>
+  <svg id="fx" viewBox="0 0 512 512">
+    <defs>
+      <linearGradient id="gCyan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ef6ff"/><stop offset="1" stop-color="#16a6dc"/></linearGradient>
+      <linearGradient id="gPink" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc0f2"/><stop offset="1" stop-color="#e3239f"/></linearGradient>
+      <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset="1" stop-color="#ee9a10"/></linearGradient>
+      <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+      <!-- a quaver and a pair of beamed quavers, head centre at 0,0, about 60 tall -->
+      <g id="note1">
+        <ellipse cx="0" cy="0" rx="17" ry="12.5" transform="rotate(-22)"/>
+        <rect x="11" y="-58" width="7" height="58" rx="2"/>
+        <path d="M15 -58 C 34 -50, 44 -36, 36 -16 C 34 -28, 26 -36, 15 -38 Z"/>
+      </g>
+      <g id="note2">
+        <ellipse cx="0" cy="0" rx="17" ry="12.5" transform="rotate(-22)"/>
+        <ellipse cx="40" cy="-10" rx="17" ry="12.5" transform="rotate(-22 40 -10)"/>
+        <rect x="11" y="-58" width="7" height="58" rx="2"/>
+        <rect x="51" y="-68" width="7" height="58" rx="2"/>
+        <path d="M11 -58 L58 -68 L58 -54 L11 -44 Z"/>
+      </g>
+      <path id="spark" d="M0 -1 C .12 -.12 .12 -.12 1 0 C .12 .12 .12 .12 0 1 C -.12 .12 -.12 .12 -1 0 C -.12 -.12 -.12 -.12 0 -1 Z"/>
+    </defs>
+    <!-- glows under the notes -->
+    <g opacity=".75" filter="url(#soft)">
+      <use href="#note1" transform="translate(132 150) rotate(-14) scale(1.05)" fill="#7ef3ff"/>
+      <use href="#note2" transform="translate(316 118) rotate(10) scale(1.1)" fill="#ff8ae6"/>
+      <use href="#note1" transform="translate(236 78) rotate(-6) scale(.8)" fill="#ffd77a"/>
+    </g>
+    <g stroke="#1c0c2e" stroke-width="6" stroke-linejoin="round" paint-order="stroke">
+      <use href="#note1" transform="translate(132 150) rotate(-14) scale(1.05)" fill="url(#gCyan)"/>
+      <use href="#note2" transform="translate(316 118) rotate(10) scale(1.1)" fill="url(#gPink)"/>
+      <use href="#note1" transform="translate(236 78) rotate(-6) scale(.8)" fill="url(#gGold)"/>
+    </g>
+    <!-- the little white shine on each note head -->
+    <g fill="#fff" opacity=".85">
+      <ellipse cx="124" cy="146" rx="6" ry="3.5" transform="rotate(-36 124 146)"/>
+      <ellipse cx="309" cy="114" rx="6" ry="3.5" transform="rotate(-12 309 114)"/>
+      <ellipse cx="353" cy="111" rx="6" ry="3.5" transform="rotate(-12 353 111)"/>
+      <ellipse cx="230" cy="75" rx="5" ry="3" transform="rotate(-28 230 75)"/>
+    </g>
+    <g fill="#fff">
+      <g filter="url(#soft)" opacity=".8" fill="#ffe2ff">
+        <use href="#spark" transform="translate(84 214) scale(26)"/>
+        <use href="#spark" transform="translate(432 176) scale(30)"/>
+        <use href="#spark" transform="translate(400 52) scale(18)"/>
+      </g>
+      <use href="#spark" transform="translate(84 214) scale(26)"/>
+      <use href="#spark" transform="translate(432 176) scale(30)"/>
+      <use href="#spark" transform="translate(400 52) scale(18)"/>
+      <use href="#spark" transform="translate(62 330) scale(14)"/>
+      <use href="#spark" transform="translate(462 334) scale(16)"/>
+      <use href="#spark" transform="translate(186 34) scale(12)"/>
+    </g>
+  </svg>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const params = new URLSearchParams(location.search);
+if (params.has('preview')) document.body.classList.add('preview');
+
+const SIZE = 512, DPR = Number(params.get('dpr') || 2);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(DPR);
+renderer.setSize(SIZE, SIZE);
+renderer.setClearColor(0x000000, 0);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NeutralToneMapping; // keeps the saturated teal / pink (ACES washed them out)
+renderer.toneMappingExposure = 1.0;
+document.getElementById('crate').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// ---------------------------------------------------------------- materials
+// the teal planks: a canvas texture (vertical shade, plank seams, a little grain)
+function plankTexture(seams) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#12b2c8'); grad.addColorStop(1, '#044a7a');
+  g.fillStyle = grad; g.fillRect(0, 0, 512, 512);
+  g.globalAlpha = .08;
+  for (let i = 0; i < 90; i++) {
+    g.strokeStyle = i % 2 ? '#ffffff' : '#003a5a';
+    g.lineWidth = 1 + Math.random() * 2;
+    const y = Math.random() * 512;
+    g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(170, y + 6, 340, y - 6, 512, y + 2); g.stroke();
+  }
+  g.globalAlpha = 1;
+  for (const y of seams) {
+    g.fillStyle = 'rgba(4,40,70,.85)'; g.fillRect(0, y - 5, 512, 8);
+    g.fillStyle = 'rgba(160,255,255,.35)'; g.fillRect(0, y + 3, 512, 3);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+const teal = new THREE.MeshPhysicalMaterial({ map: plankTexture([180, 345]), roughness: .55, clearcoat: .3, clearcoatRoughness: .35, envMapIntensity: .25 });
+const tealLid = new THREE.MeshPhysicalMaterial({ map: plankTexture([256]), roughness: .5, clearcoat: .35, clearcoatRoughness: .3, envMapIntensity: .25 });
+const gold = new THREE.MeshStandardMaterial({ color: 0xffc23a, metalness: 1, roughness: .22, envMapIntensity: 1.5 });
+const goldDark = new THREE.MeshStandardMaterial({ color: 0xd88914, metalness: 1, roughness: .3, envMapIntensity: 1.3 });
+const purple = new THREE.MeshPhysicalMaterial({ color: 0x2c0752, roughness: .35, clearcoat: 1, clearcoatRoughness: .15, envMapIntensity: .4 });
+const pink = new THREE.MeshPhysicalMaterial({ color: 0xff3dbb, emissive: 0xa00a66, emissiveIntensity: .3, roughness: .2, clearcoat: 1, clearcoatRoughness: .05 });
+// inside the chest: a pool of hot pink light, white at its heart
+function glowTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d');
+  const r = g.createRadialGradient(128, 150, 6, 128, 140, 150);
+  r.addColorStop(0, '#ffffff'); r.addColorStop(.25, '#ffc4f0'); r.addColorStop(.6, '#ff4fc8'); r.addColorStop(1, '#8a0f6e');
+  g.fillStyle = r; g.fillRect(0, 0, 256, 256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const inside = new THREE.MeshBasicMaterial({ map: glowTexture() });
+const insideDark = new THREE.MeshStandardMaterial({ color: 0x0a3f62, roughness: .8 });
+
+// ---------------------------------------------------------------- the chest
+const W = 2.7, H = 1.45, D = 1.5, R = D / 2, LIP = .22, OPEN = THREE.MathUtils.degToRad(17);
+const chest = new THREE.Group();
+scene.add(chest);
+
+// body (a shell: outer box, and a glowing top inside the rim)
+const body = new THREE.Mesh(new RoundedBoxGeometry(W, H, D, 4, .07), teal);
+body.position.y = H / 2;
+chest.add(body);
+const glowTop = new THREE.Mesh(new THREE.PlaneGeometry(W - .3, D - .3), inside);
+glowTop.rotation.x = -Math.PI / 2;
+glowTop.position.y = H + .002;
+chest.add(glowTop);
+
+function box(w, h, d, mat, x, y, z, r = .03) {
+  const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, Math.min(r, w / 2.2, h / 2.2, d / 2.2)), mat);
+  m.position.set(x, y, z);
+  chest.add(m);
+  return m;
+}
+const BAND = .26, T = .05;
+// corner bands (front and back corners, wrapping two faces)
+for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+  box(BAND, H + .04, BAND, gold, sx * (W / 2 - BAND / 2 + T / 2), H / 2, sz * (D / 2 - BAND / 2 + T / 2), .04);
+}
+// rim and base bands
+for (const [y, h] of [[.13, .26], [H - .1, .2]]) {
+  box(W + T * 2, h, D + T * 2, gold, 0, y, 0, .05);
+}
+
+// rivets
+const rivetGeo = new THREE.SphereGeometry(.055, 18, 12);
+function rivet(x, y, z) { const m = new THREE.Mesh(rivetGeo, gold); m.position.set(x, y, z); m.scale.z = .6; chest.add(m); }
+for (const x of [-W / 2 + BAND / 2, W / 2 - BAND / 2]) for (const y of [.13, H - .1, H * .55]) rivet(x, y, D / 2 + T + .02);
+for (const x of [-W * .2, W * .2]) for (const y of [.13, H - .1]) rivet(x, y, D / 2 + T + .02);
+
+// the lid: a barrel top on a straight lip, hinged at the back top edge, opened OPEN
+const hinge = new THREE.Group();
+hinge.position.set(0, H, -D / 2);
+hinge.rotation.x = -OPEN;
+chest.add(hinge);
+const lid = new THREE.Group();
+lid.position.set(0, 0, D / 2); // back to the chest's centre line
+hinge.add(lid);
+const lip = new THREE.Mesh(new RoundedBoxGeometry(W + .02, LIP, D + .02, 3, .05), tealLid);
+lip.position.y = LIP / 2;
+lid.add(lip);
+const barrel = new THREE.Mesh(new THREE.CylinderGeometry(R + .01, R + .01, W + .02, 48, 1, false, 0, Math.PI), tealLid);
+barrel.rotation.z = Math.PI / 2; // the axis along x; theta 0..pi is then the top half
+barrel.position.y = LIP;
+lid.add(barrel);
+// underside of the lid, lit pink by the glow
+const under = new THREE.Mesh(new THREE.PlaneGeometry(W - .1, D - .1), new THREE.MeshBasicMaterial({ color: 0xd8309e, side: THREE.DoubleSide }));
+under.rotation.x = Math.PI / 2;
+under.position.y = .005;
+lid.add(under);
+// gold: the lip band, the barrel end bands, a middle strap
+const lipBand = new THREE.Mesh(new RoundedBoxGeometry(W + .1, LIP * .7, D + .1, 3, .04), gold);
+lipBand.position.y = LIP * .45;
+lid.add(lipBand);
+for (const x of [-W / 2 + BAND / 2 - .01, W / 2 - BAND / 2 + .01]) {
+  const b = new THREE.Mesh(new THREE.CylinderGeometry(R + .06, R + .06, BAND, 48, 1, false, 0, Math.PI), gold);
+  b.rotation.z = Math.PI / 2;
+  b.position.set(x, LIP, 0);
+  lid.add(b);
+}
+for (const x of [-W / 2 + BAND / 2, W / 2 - BAND / 2]) { const m = new THREE.Mesh(rivetGeo, gold); m.position.set(x, LIP * .45, D / 2 + .06); m.scale.z = .6; lid.add(m); }
+
+// the emblem: a gold shield, a purple field, a pink double note, all extruded
+function shieldShape(w, h) {
+  const s = new THREE.Shape();
+  s.moveTo(-w / 2, h / 2); s.lineTo(w / 2, h / 2); s.lineTo(w / 2, -h * .08);
+  s.quadraticCurveTo(w / 2, -h * .32, 0, -h / 2);
+  s.quadraticCurveTo(-w / 2, -h * .32, -w / 2, -h * .08);
+  s.closePath();
+  return s;
+}
+const shield = new THREE.Mesh(new THREE.ExtrudeGeometry(shieldShape(.92, 1.0), { depth: .08, bevelEnabled: true, bevelSize: .04, bevelThickness: .04, bevelSegments: 4, curveSegments: 24 }), gold);
+shield.position.set(0, H * .5, D / 2 + .02);
+chest.add(shield);
+const field = new THREE.Mesh(new THREE.ExtrudeGeometry(shieldShape(.72, .8), { depth: .06, bevelEnabled: true, bevelSize: .015, bevelThickness: .015, bevelSegments: 3, curveSegments: 24 }), purple);
+field.position.set(0, H * .5 + .02, D / 2 + .1);
+chest.add(field);
+function noteShape() {
+  // two heads, two stems, a beam: sized to sit inside the field (Matthew: "fit the tune note inside the purple")
+  const parts = [];
+  for (const [hx, hy] of [[-.15, -.17], [.12, -.1]]) {
+    const head = new THREE.Shape();
+    head.absellipse(hx, hy, .095, .068, 0, Math.PI * 2, false, -.4);
+    parts.push(head);
+    const stem = new THREE.Shape();
+    const sx = hx + .07;
+    stem.moveTo(sx - .028, hy); stem.lineTo(sx + .012, hy); stem.lineTo(sx + .012, hy + .34); stem.lineTo(sx - .028, hy + .34); stem.closePath();
+    parts.push(stem);
+  }
+  const beam = new THREE.Shape();
+  beam.moveTo(-.108, .17); beam.lineTo(.202, .24); beam.lineTo(.202, .31); beam.lineTo(-.108, .24); beam.closePath();
+  parts.push(beam);
+  return parts;
+}
+const note = new THREE.Mesh(new THREE.ExtrudeGeometry(noteShape(), { depth: .05, bevelEnabled: true, bevelSize: .018, bevelThickness: .02, bevelSegments: 4, curveSegments: 24 }), pink);
+note.position.set(0, H * .5 + .06, D / 2 + .18);
+chest.add(note);
+
+// ---------------------------------------------------------------- light
+scene.add(new THREE.HemisphereLight(0xcff6ff, 0x3a1450, .55));
+const key = new THREE.DirectionalLight(0xfff1dd, 1.9); key.position.set(3, 5, 6); scene.add(key);
+const rim = new THREE.DirectionalLight(0x9fe8ff, 2.2); rim.position.set(-5, 3, -4); scene.add(rim);
+const glowLight = new THREE.PointLight(0xff5cd6, 9, 4, 1.4); glowLight.position.set(0, H + .35, .1); scene.add(glowLight);
+const fill = new THREE.PointLight(0xffb0f0, 3, 6, 1.5); fill.position.set(0, H + 1.2, 1.6); scene.add(fill);
+
+// ---------------------------------------------------------------- camera: a little from the right and above
+const cam = new THREE.PerspectiveCamera(28, 1, .1, 100);
+const az = THREE.MathUtils.degToRad(Number(params.get('az') ?? 26));
+const el = THREE.MathUtils.degToRad(Number(params.get('el') ?? 16));
+const dist = Number(params.get('dist') ?? 10.2);
+const target = new THREE.Vector3(0, H * .78, 0);
+function placeCam() {
+  cam.position.set(target.x + dist * Math.sin(az0) * Math.cos(el0), target.y + dist * Math.sin(el0), target.z + dist * Math.cos(az0) * Math.cos(el0));
+  cam.lookAt(target);
+}
+let az0 = az, el0 = el;
+placeCam();
+// the chest sits low in the frame, under the notes
+cam.setViewOffset(SIZE, SIZE, 0, -SIZE * Number(params.get('lift') ?? .07), SIZE, SIZE);
+
+function draw() { renderer.render(scene, cam); }
+draw();
+if (params.has('orbit')) {
+  let drag = null;
+  renderer.domElement.addEventListener('pointerdown', e => drag = [e.clientX, e.clientY, az0, el0]);
+  addEventListener('pointerup', () => drag = null);
+  addEventListener('pointermove', e => {
+    if (!drag) return;
+    az0 = drag[2] - (e.clientX - drag[0]) * .01;
+    el0 = Math.max(-.2, Math.min(1.2, drag[3] + (e.clientY - drag[1]) * .01));
+    placeCam(); draw();
+  });
+}
+window.__ready = true;
+</script>
+</body>
+</html>

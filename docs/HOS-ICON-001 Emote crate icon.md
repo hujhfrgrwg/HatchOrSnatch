@@ -6,6 +6,22 @@ requested_by: Matthew
 ---
 # HOS-ICON-001: Emote Crate icon
 
+**v2, 18 Oct (Matthew: "We also need to make this look better. Use html to create this crate in 3d. then we can just get an image icon of it as well"):** the icon is now a render of a real 3D chest.
+- `tools/build/HOS-ICON-001/emote_crate_3d.html` builds it in three.js. It has:
+  - rounded teal planks, and a barrel lid opened on its back hinge with a hot pink glow pouring out;
+  - metallic gold bands and rivets under a studio reflection map;
+  - an extruded gold shield with a purple field and a pink double note.
+- HTML/SVG on top of the render adds the light rays, the dark outline (stacked CSS drop-shadows), and the notes and sparkles.
+- `render.mjs` screenshots it in the pre-installed headless Chromium (software WebGL) at 2×, and it's scaled to 512 × 512. To render again: `npm i three@0.169.0 playwright-core@1.56.1` anywhere, then `NODE_MODULES=<that>/node_modules node tools/build/HOS-ICON-001/render.mjs`.
+- To look at it: open the html (with a `vendor/` folder holding three.js) and add `?orbit&preview` to drag the camera round.
+- The first, flat version is kept as `emote_crate_icon_v1.png`, which is the one uploaded as `78853379381316`.
+
+The same day, the Shop's Emote Crate card lost its text clutter (Matthew: "We don't need all that text clutter on the emote crate menu"). The odds rows, the subtitle and the pity / duplicates line are gone. The title and buttons now sit in one stack beside the crate:
+
+![Shop card](HOS-ICON-001/shop_card_decluttered.jpg)
+
+The odds are still on the Emotes screen's crate page, where players go to see what's inside.
+
 Matthew: "Generate a 2d icon for the emote crate. Rn it's the default crate icon. Take inspiration from our other icon styles." Then: "fit the tune note inside the purple. so make it smaller."
 
 ![Icon and sizes](HOS-ICON-001/emote_crate_icon_preview.png)
