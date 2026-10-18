@@ -153,6 +153,8 @@ local function buildObelisk(O: CFrame)
 		brick(rim, "RimGlow", Vector3.new(s + 0.06, 0.08 + (i % 2) * 0.006, 0.08), R * CFrame.new(0, t - 0.03, -s / 2 - 0.01), C.glow, { style = "neon" }) -- alternate heights: the corners overlap
 	end
 	standDisc(m, O, TOP, C.glow)
+	-- HOS-EMOTE-002: EmoteShowcase (client) puts a purple hologram of you here, cycling every emote
+	game:GetService("CollectionService"):AddTag(m, "HOS_EmoteShowcase")
 	return m
 end
 

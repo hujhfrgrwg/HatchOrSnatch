@@ -270,3 +270,6 @@ require(script.Parent:WaitForChild("Controllers"):WaitForChild("WeaponShowcase")
 
 -- HOS-HWN-002: the Crown podium cycles the Halloween shop's pets with their moves and abilities, its own module
 require(script.Parent:WaitForChild("Controllers"):WaitForChild("PetShowcase")).start()
+
+-- HOS-EMOTE-002: the Obelisk podium's hologram of you cycling every emote, its own module
+require(script.Parent:WaitForChild("Controllers"):WaitForChild("EmoteShowcase")).start()
