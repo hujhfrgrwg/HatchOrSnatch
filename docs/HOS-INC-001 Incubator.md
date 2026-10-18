@@ -118,14 +118,14 @@ Checked in a playtest:
 
 ![The leaned trapezoid sign](HOS-INC-001/sign_trapezoid.jpg)
 
-- **Premium stand:** new `A09_PedestalTrim` model (16 parts). It doesn't change any original part, so deleting it undoes the trim.
-  - a gold band (Foil) just under the top edge of each tier
-  - a glowing purple band round the two lower risers
-  - a gold collar round the glowing disc, and a neon ring inlaid in the top tier
-  - gold caps on the 8 blocks
-  - Rebuild or tweak the colours with `tools/build/HOS-INC-001_pedestal_trim.lua`.
+- **Curved stand** (Matthew: "more premium", then "not as blocky, have some curve to the podium, not bricks"): the stepped tiers and the 8 blocks are replaced by `A09_Pedestal`:
+  - a wide, smooth base dome (radius 4.6, rising 1 stud) with a glowing ring at its foot
+  - a smaller dome rising out of it, with a gold band where they meet
+  - a round plinth under the glowing disc, with a gold rim, a gold collar round the disc and a neon ring between them
+  - The domes are ellipsoids (SpecialMesh spheres), with no new uploads.
+  - The old tiers and blocks are in `ServerStorage._Backups.HOS-INC-001_2026-10-18_IncubatorPedestal`. Rebuild or tweak it with `tools/build/HOS-INC-001_pedestal.lua`.
 
-![The trimmed stand](HOS-INC-001/pedestal_trim.jpg)
+![The curved stand](HOS-INC-001/pedestal_curved.jpg)
 
 ## Notes
 - **Why the pieces are baked:** building the pieces at runtime with EditableMesh worked in Studio, but a player's client ran out of its EditableMesh memory budget after 8 of the 18 pieces, and phones get less. Baked meshes have no such limit and don't need the "Allow Mesh / Image APIs" setting.
