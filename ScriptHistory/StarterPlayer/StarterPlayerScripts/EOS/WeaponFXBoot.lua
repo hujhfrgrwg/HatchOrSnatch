@@ -267,3 +267,6 @@ require(script.Parent:WaitForChild("Controllers"):WaitForChild("WeaponPedestals"
 
 -- HOS-WEP-002: the Halloween podium's showcase (your avatar with the All Hallow's Sword), its own module
 require(script.Parent:WaitForChild("Controllers"):WaitForChild("WeaponShowcase")).start()
+
+-- HOS-HWN-002: the Crown podium cycles the Halloween shop's pets with their moves and abilities, its own module
+require(script.Parent:WaitForChild("Controllers"):WaitForChild("PetShowcase")).start()

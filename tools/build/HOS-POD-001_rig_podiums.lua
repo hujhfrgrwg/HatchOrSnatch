@@ -125,6 +125,8 @@ local function buildCrown(O: CFrame)
 		brick(ring, "CrownGem" .. i, Vector3.new(0.18, 0.18, 0.06), R * CFrame.new(0, y0 + 0.32, -2.71), C.glow, { style = "neon" })
 	end
 	standDisc(m, O, TOP, C.glow)
+	-- HOS-HWN-002: PetShowcase (client) cycles the Halloween shop's pets here with their moves and abilities
+	game:GetService("CollectionService"):AddTag(m, "HOS_PetShowcase")
 	return m
 end
 
