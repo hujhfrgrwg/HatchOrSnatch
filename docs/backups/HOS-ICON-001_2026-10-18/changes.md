@@ -43,3 +43,27 @@ Every moved or resized element keeps its old values in `HOS_WasPos`, `HOS_WasSiz
 Every `rbxassetid://78853379381316` is now `rbxassetid://86101813885240`:
 - the 8 EOSUI images: the Shop card art and shadow, the Emotes tab On/Off icons and shadows, and the Emotes crate panel icon and shadow;
 - the one reference in CrateShowcase.
+
+## Fifth round (18 Oct): less dead space (Matthew: "remove some of the dead space, you can probably make things bigger")
+**CrateCard** (old values are still in each element's `HOS_Was*` attributes):
+- **Crate:** `CrateArt` and its shadow are 480, at (12, 42) and (12, 46).
+- **Title:** `T_EmoteCrate` and its shadow have text 1.6× the original (`HOS_WasTextSize`), are 676 × 112, and sit at (500, 106) and (500, 113).
+- **Price buttons:** `BtnCrateGems` at (500, 234) and `BtnCrateRobux` at (846, 234), both 330 × 120.
+  - Their art is sliced so the corners keep their size.
+  - The icon and label are scaled 1.4× about the old centre and moved to the new centre.
+- **SEE ALL:** `BtnSeeEmotes` at (500, 370), 330 × 84. It has a 48 px eye at x 18, and its label is 246 × 38 at x 72, text size 34, scaled to fit.
+  - At runtime OPEN 10 takes this slot, and SEE ALL moves to x 846.
+
+**StarterPlayerScripts.EOS.Controllers.CrateExtras** (the pre-edit copy is in Studio at `ServerStorage._Backups.HOS-ICON-001_2026-10-18.CrateExtras`). Before:
+```lua
+	local half = 340
+...
+			d.TextSize = math.min(d.TextSize, math.floor(h * 0.5))
+```
+After:
+```lua
+	local half = gems.Size.X.Offset -- HOS-ICON-001: as wide as the Gems button above (was 340)
+...
+			d.TextSize = math.min(d.TextSize, math.floor(h * 0.5), math.floor((w - 24) / (#d.Text * 0.44))) -- HOS-ICON-001: and fits the width
+```
+The second line only ever makes OPEN 10's text smaller, so it fits the button's width. The Weapon Crate's OPEN 10 uses the same code, and is unchanged unless its text would overflow.
