@@ -66,6 +66,8 @@ export type Options = {
 	onOpenAgain: (() -> ())?, -- ask the server for another open; its result comes back through play()
 	onOpened: (() -> ())?, -- e.g. hide the HUD
 	onClosed: (() -> ())?,
+	decorateTile: ((tile: GuiObject, e: Emote) -> ())?, -- HOS-EMOTE-003: e.g. the emote's picture on a reel / reveal tile
+	onClaim: ((r: Result, tile: GuiObject?) -> ())?, -- HOS-EMOTE-003: Claim pressed; tile = the reveal's big tile, still on screen
 	juicy: ((GuiButton) -> ())?, -- the game's button hover/press helper, if it has one
 	-- the game's own sound player, if it has one: cue = "tick" | "burst" | "reveal" | "land",
 	-- rarity set for "land". When given, `sounds` is not used.
@@ -238,6 +240,7 @@ local function makeTile(e: Emote): GuiObject?
 	local icon = find(t, "Icon")
 	if icon and e.image then (icon :: ImageLabel).Image = e.image end
 	show(find(t, "Shade"), false)
+	if opts.decorateTile then pcall(opts.decorateTile, t, e) end
 	return t
 end
 
@@ -596,6 +599,7 @@ local function runQueue()
 		-- the player claims it themselves (never auto-claim); Open again asks the server for another
 		choice = nil
 		while not choice do RunService.RenderStepped:Wait() end
+		if choice == "claim" and opts.onClaim then pcall(opts.onClaim, r, find(screen, "RevealTile")) end
 		if choice == "again" and #queue == 0 and opts.onOpenAgain then
 			show(find(screen, "Reveal"), false)
 			againFailed = false
