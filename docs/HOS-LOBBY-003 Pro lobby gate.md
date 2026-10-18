@@ -15,7 +15,7 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
   - **Wall:** 32.3 wide (the full side), 70 tall, not camera-facing. The incubator's purples (180,92,255 into 166,64,255), with a transparency gradient from 0.55 at the bottom to 0.92 by 40% of the height and fully clear at the top.
   - **Glow band:** a second full-length beam on each side, 9 tall, brighter at the foot (0.35 fading to 1).
   - **Ground line:** a thin neon line on the ground under each wall.
-  - **Orientation:** each wall's attachments have X = up (the beam's run), Y = outward (the face) and Z = along the side (the width).
+  - **Orientation:** a flat (not camera-facing) beam's width runs along its attachments' **Y** axis. Each wall's attachments have X = up (the beam's run), Y = along the side (the width) and Z = outward (the face). The first flat version had Y = outward: the four sheets stuck straight out from the side midpoints and crossed the whole lobby in a plus. Matthew caught it from a top-down view.
 - **Signs:** one over each entrance, facing out, just in front of the wall, built like the incubator sign (`Workspace.Incubator` A09_Sign*).
   - **Plaque:** a stone plaque (47,41,68) with a cap, and a dark navy inset panel (17,18,38).
   - **Text:** "PRO LOBBY" over "LOCKED", lavender (230,200,255) GothamSSm Heavy with a purple (166,64,255) outline, SurfaceGui brightness 2.
@@ -52,7 +52,7 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
   | 20 | 0.00 |
 
 - **Errors:** none in the output.
-- **Look:** the first column version was a washed-out white wall from an angle, then read as jail bars once thinned. It's now one flat wall per side. Screenshots straight on and from a three-quarter angle show a smooth sheet on every side, and the incubator-style signs read clearly.
+- **Look:** the first column version was a washed-out white wall from an angle, then read as jail bars once thinned. It's now one flat wall per side. After the axis fix, a top-down screenshot shows a closed square of light on the gate line with nothing outside it. A three-quarter view shows four walls meeting at the corners, and the incubator-style signs read clearly. (My earlier straight-on check missed the plus because the sheet facing the camera looked right from that angle; check from above.)
 - **Fade after the restyle:** 8 wall beams, 40 sign/line parts and the sign text were all hidden at 50 studs, half at 30 and shown at 20.
 - **Stairs:** walking in from outside with real key presses, the character climbed the steps, crossed the dais and stopped on the circle, standing on the disc and inside `SummonZone`.
 - **Movement note:** the game moves characters with its own controller (`EOS_MoveDrive`) and keeps `Humanoid.WalkSpeed` at 0. Scripted `Humanoid:Move` does nothing, so movement tests need real key input.

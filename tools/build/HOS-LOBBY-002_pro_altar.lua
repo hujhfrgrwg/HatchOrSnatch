@@ -378,14 +378,15 @@ local GLOW_T = NumberSequence.new({
 	NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(0.3, 0.75), NumberSequenceKeypoint.new(1, 1),
 })
 -- one flat (not camera-facing) beam spanning a whole side, from the ground line straight up.
--- Attachment axes: X = up (the beam's run), Y = outward (the beam's face), Z = along the side (its width).
+-- Attachment axes: X = up (the beam's run), Y = along the side (a flat beam's width runs along its
+-- attachments' Y axis), Z = outward (the face). Measured: Y = outward gave four sheets crossing in a plus.
 local function wallBeam(line: BasePart, Q: CFrame, name: string, height: number, width: number, transparency: NumberSequence, c0: Color3, c1: Color3)
 	local base = (Q * CFrame.new(0, 0.03, GATE)).Position
-	local up, out = Vector3.yAxis, Q.LookVector * -1 -- Q's -LookVector is its +Z, i.e. outward
+	local up, along = Vector3.yAxis, Q.RightVector -- the side runs along Q's X
 	local function att(n: string, pos: Vector3)
 		local a = Instance.new("Attachment")
 		a.Name = n
-		a.CFrame = line.CFrame:ToObjectSpace(CFrame.fromMatrix(pos, up, out))
+		a.CFrame = line.CFrame:ToObjectSpace(CFrame.fromMatrix(pos, up, along))
 		a.Parent = line
 		return a
 	end
