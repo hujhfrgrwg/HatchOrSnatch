@@ -14,12 +14,13 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
 - **Beam wall** (revised 18 Oct per Matthew): one flat beam per side, plus twinkling streaks. A 27.6 × 27.6 square (half-width `GATE` = `HALF` + 2.8), about a stud in front of the bottom step. The jack-o'-lanterns moved out to `HALF` + 5.2 and sit just outside its corners.
   - **Wall:** 27.9 wide (the full side), 70 tall, not camera-facing. The incubator's purples (180,92,255 into 166,64,255), with a transparency gradient from 0.64 at the bottom to 0.92 by 40% of the height and fully clear at the top.
   - **Glow band:** a second full-length beam on each side, 9 tall, purple (no white), 0.6 fading to 1.
-  - **Streaks:** 14 thinner flat beams per side over the wall for texture. They have irregular positions, widths 0.25–1.85 and heights 20–65, seeded per side so a rebuild gives the same pattern. Each is a hair further out than the last, so none share a plane. They carry a `Twinkle` attribute, and `ProximityFade` fades each one in and out on its own random rhythm like a sparkle, on top of the distance fade.
+  - **Streaks:** 14 thinner flat beams per side over the wall for texture. They have irregular positions (kept at least 5.5 studs from the middle so none run behind the sign), widths 0.25–1.85 and heights 20–65, seeded per side so a rebuild gives the same pattern. Each is a hair further out than the last, so none share a plane. They carry a `Twinkle` attribute, and `ProximityFade` fades each one in and out on its own random rhythm like a sparkle, on top of the distance fade.
   - **Ground line:** a thin neon line on the ground under each wall.
   - **Orientation:** a flat (not camera-facing) beam's width runs along its attachments' **Y** axis. Each beam's attachments have X = up (the beam's run), Y = along the side (the width) and Z = outward (the face). The first flat version had Y = outward: the four sheets stuck straight out from the side midpoints and crossed the whole lobby in a plus. Matthew caught it from a top-down view.
 - **Signs:** text only (18 Oct, Matthew: no bricks). One over each entrance, facing out, just in front of the wall, centred 9.6 studs up.
   - **Text:** "PRO LOBBY" over "LOCKED", the incubator sign's lavender (230,200,255) GothamSSm Heavy.
-  - **Outline:** a 6 px near-black purple outline (24,6,44), so it reads against the glowing wall with no panel behind it. SurfaceGui brightness 1.2.
+  - **Outline:** a 6 px near-black purple outline (24,6,44). SurfaceGui brightness 1.2.
+  - **Backdrop:** a soft dark glow behind the text (GUI only, no part). It's a dark purple (16,6,30) pill `Frame` at 0.3 transparency whose `UIGradient` fades it out at both ends, so the text stands off the white of the beams.
   - **Holder:** the text sits on an invisible holder part (`Sign`, transparency 1).
   - **Static:** it doesn't turn to face the player.
   - **Not always-on-top:** I tried `AlwaysOnTop` to stop the wall washing the text out. With it, Roblox didn't draw the text at all, first with a CanvasGroup and then without one, so it's off.
@@ -35,7 +36,7 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
   - Change those two attributes to tune it.
 - **How each piece fades:**
   - Beams and parts use `LocalTransparencyModifier`.
-  - Text fades through `TextTransparency` and outlines through `UIStroke.Transparency`. CanvasGroups (`GroupTransparency`) are still supported, but the signs no longer use one.
+  - Text fades through `TextTransparency`, outlines through `UIStroke.Transparency` and the backdrop `Frame` through `BackgroundTransparency`. CanvasGroups (`GroupTransparency`) are still supported, but the signs no longer use one.
   - Lights dim through `Brightness`.
   - It's smoothed over about a quarter of a second, and pieces that stream in later join the fade.
   - All of this is client-only, so each player sees only their own fade.
