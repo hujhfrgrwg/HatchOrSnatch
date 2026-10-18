@@ -6,7 +6,9 @@
 --      and sets it where the block wheel stood: the base's middle on the ground at ORIGIN
 --   2. copies the one Sector and Divider round the wheel (8 each, Sector_1 at the top under the pointer, then clockwise as
 --      you face it) and the one Gem round the rim (11, none at the top under the crystal)
---   3. colours and materials (stone Plastic, neon accents), collisions (only the stone and wheel body collide)
+--   3. colours and materials (stone Plastic, neon accents), collisions (only the stone and wheel body collide), and studs:
+--      the stone, rim, hub and sectors wear MaterialVariant HOS_StudsMesh (made here from the plaza floor's HOS_Studs
+--      textures, HOS-LOBBY-008), which the GLB's one-UV-per-stud mapping lays out like the Studs surfaces on parts
 --   4. adds a kit pumpkin as the hub's emblem, a tree lantern on each post's hook, and pumpkins and candles on the base's
 --      top either side of the steps, sized and placed as in the concept (the two big pumpkins and the lanterns are the
 --      only lights)
@@ -49,6 +51,23 @@ local SECTOR_COLORS = { -- clockwise from the top, as in the concept
 
 local kit = ServerStorage:WaitForChild("HalloweenLobbyKit")
 
+-- studs on the meshes (Matthew: "Can you stud the parts"): everything solid except the gems, crystal, cracks and glows
+local STUDDED = { BaseStone = true, BaseBlocks = true, PostL = true, PostR = true, BackFrame = true, WheelBacking = true, WheelRim = true, WheelRimInner = true, Sector = true, Hub = true }
+local STUDS_PER_TILE = 1 -- one stud per stud, as the GLB's UVs are in studs
+local MaterialService = game:GetService("MaterialService")
+local studs = MaterialService:FindFirstChild("HOS_StudsMesh")
+if not studs then
+	local src = MaterialService:FindFirstChild("HOS_Studs")
+	assert(src, "no MaterialService.HOS_Studs to copy the stud textures from")
+	studs = Instance.new("MaterialVariant")
+	studs.Name = "HOS_StudsMesh"
+	studs.BaseMaterial = Enum.Material.Plastic
+	studs.ColorMap, studs.NormalMap = src.ColorMap, src.NormalMap
+	studs.MaterialPattern = Enum.MaterialPattern.Regular
+	studs.Parent = MaterialService
+end
+studs.StudsPerTile = STUDS_PER_TILE
+
 ---------------------------------------------------------------- 1. the import, turned and placed
 local imported
 for _, d in workspace:GetDescendants() do
@@ -87,6 +106,7 @@ local base, posts, frame, wheel, props = model("Base", root), model("Posts", roo
 local function style(p: MeshPart, name: string)
 	local l = LOOK[name]
 	p.Color, p.Material = l[1], l[2]
+	p.MaterialVariant = if STUDDED[name] then "HOS_StudsMesh" else ""
 	p.Anchored = true
 	p.CanCollide, p.CanQuery, p.CanTouch = l[3], l[3], false
 	p.CastShadow = l[2] ~= Enum.Material.Neon and name ~= "Cracks"

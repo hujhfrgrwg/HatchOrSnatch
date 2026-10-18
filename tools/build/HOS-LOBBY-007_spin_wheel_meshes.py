@@ -3,7 +3,8 @@
 "more tightly fitted and a bit more skinny like in the concept. Go 1:1". Every size below is measured off that image.
 
 Writes one GLB, every node already in place (units are studs, +Y up, the front faces +Z, the origin on the ground under
-the middle of the base). HOS-LOBBY-007_spin_wheel_meshes.lua assembles the import in Studio.
+the middle of the base). Every face has box-projected UVs (one UV unit per stud) and tangents, so the stud
+MaterialVariant can stud the meshes like the rest of the game's parts (Matthew: "Can you stud the parts"). HOS-LOBBY-007_spin_wheel_meshes.lua assembles the import in Studio.
   BaseStone     the 3-stud octagonal base, the stand under the wheel and the two steps below it (bevelled, low-poly)
   BaseBlocks    the stepped blocks either side of the stairs, the blocks stacked at each post's foot, and along the back
   StepGlow      glow strips on the stand's and middle step's risers (neon)
@@ -331,6 +332,24 @@ NODES = [
     ("Hub", hub, (32, 28, 52)),
 ]
 
+def box_axes(n):
+    """the texture's U and V directions on a face with normal n: box-projected onto the face's main axis, one UV unit per
+    stud, so the stud MaterialVariant lays studs on the meshes at the same size as on parts (and the normal map has
+    tangents to work with)"""
+    ax = int(np.argmax(np.abs(n)))
+    sgn = 1.0 if n[ax] >= 0 else -1.0
+    if ax == 0:  # facing +-X: U runs along -+Z, V up
+        t, bt = np.array([0.0, 0.0, -sgn]), np.array([0.0, 1.0, 0.0])
+    elif ax == 1:  # facing +-Y: U along X, V along -+Z
+        t, bt = np.array([1.0, 0.0, 0.0]), np.array([0.0, 0.0, -sgn])
+    else:  # facing +-Z: U along +-X, V up
+        t, bt = np.array([sgn, 0.0, 0.0]), np.array([0.0, 1.0, 0.0])
+    # tangent: U's direction pushed into the face's plane
+    t = t - n * np.dot(t, n)
+    t = t / max(np.linalg.norm(t), 1e-9)
+    return t, bt
+
+
 def write_glb(path, meshes):
     bin_ = bytearray(); views = []; accessors = []; gmeshes = []; nodes = []; materials = []
 
@@ -340,15 +359,17 @@ def write_glb(path, meshes):
         views.append({'buffer': 0, 'byteOffset': off, 'byteLength': len(data), 'target': target})
         return len(views) - 1
     for name, tris, color in meshes:
-        pos, nrm, uv = [], [], []
+        pos, nrm, uv, tan = [], [], [], []
         for a, b, c in tris:
             n = np.cross(b - a, c - a); n = n / max(np.linalg.norm(n), 1e-9)
+            t, bt = box_axes(n)
+            w = 1.0 if np.dot(np.cross(n, t), bt) >= 0 else -1.0
             for p in (a, b, c):
-                pos.append(p); nrm.append(n); uv.append((0.0, 0.0))
-        pos = np.array(pos, np.float32); nrm = np.array(nrm, np.float32); uv = np.array(uv, np.float32)
+                pos.append(p); nrm.append(n); uv.append((float(np.dot(p, t)), float(-np.dot(p, bt)))); tan.append((*t, w))
+        pos = np.array(pos, np.float32); nrm = np.array(nrm, np.float32); uv = np.array(uv, np.float32); tan = np.array(tan, np.float32)
         ind = np.arange(len(pos), dtype=np.uint32)
         acc = {}
-        for key, arr, typ in (('POSITION', pos, 'VEC3'), ('NORMAL', nrm, 'VEC3'), ('TEXCOORD_0', uv, 'VEC2')):
+        for key, arr, typ in (('POSITION', pos, 'VEC3'), ('NORMAL', nrm, 'VEC3'), ('TANGENT', tan, 'VEC4'), ('TEXCOORD_0', uv, 'VEC2')):
             a = {'bufferView': view(arr.tobytes(), 34962), 'componentType': 5126, 'count': len(arr), 'type': typ}
             if key == 'POSITION':
                 a['min'] = pos.min(0).tolist(); a['max'] = pos.max(0).tolist()
