@@ -343,12 +343,12 @@ end
 -- drawn the way a match draws it (EconomyService.trailOn): each of the item's layers with its own texture stretched
 -- along it, 0.8 studs tall (times the layer's width) at the egg, its colour running from the egg to the tail as it
 -- fades out, the shorter-lived layer shorter. A viewport draws no Trails, so the layers are flat pictures on a layer
--- just under the 3D: the egg and your back cover where it starts, as in a match. The camera is worked out every frame
+-- just under the 3D: your back covers where it starts. The camera is worked out every frame
 -- so you stand at TRAIL_X across, TRAIL_FILL of the scene's height, whatever shape the stage is (a Featured daily
 -- card's scene ends at its SceneBottom attribute, above the card's name and buttons).
 local TRAIL_X, TRAIL_FILL, TRAIL_TOP = 0.26, 0.8, 0.06 -- where you stand (of the width), how tall (of the scene), its top
 local TRAIL_END = 0.97 -- the longest layer reaches this far across
-local TRAIL_LEAD = 0.15 -- the textures start blank: this much of a layer's length sits back under the egg
+local TRAIL_LEAD = 0.15 -- the textures start blank: this much of a layer's length sits back under you
 local TRAIL_GLOW = 3 -- each layer drawn this many times over itself (a match adds light with LightEmission; pictures only blend)
 
 local function trailScene(stage, fx, item, alive)
@@ -358,8 +358,25 @@ local function trailScene(stage, fx, item, alive)
 		return
 	end
 	char.Parent = wm
-	local egg = eggOnBack(char, nil)
-	local base = egg and egg.PrimaryPart
+	-- no egg (Matthew: "remove the egg from the viewport when viewing the trails"): the trail comes off your back where
+	-- it does in the lobby (EconomyService.refreshLobbyTrail), low on the back at the egg's height
+	local torso = (char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")) :: BasePart?
+	local base: BasePart? = nil
+	if torso then
+		local a = Instance.new("Part")
+		a.Name = "TrailAnchor"
+		a.Size = Vector3.new(0.2, 0.2, 0.2)
+		a.Transparency = 1
+		a.CanCollide = false
+		a.Massless = true
+		a.CFrame = torso.CFrame * CFrame.new(0, -0.55, torso.Size.Z / 2 + 0.1)
+		local m = Instance.new("Motor6D") -- (follows the run, like the egg's joint did)
+		m.Part0, m.Part1 = torso, a
+		m.C0 = torso.CFrame:ToObjectSpace(a.CFrame)
+		m.Parent = a
+		a.Parent = char
+		base = a
+	end
 	;(root :: BasePart).CFrame = CFrame.new(0, 3, 0) * CFrame.Angles(0, math.rad(-90), 0) -- running toward screen left (the egg and its trail on the right)
 	local boxCf, box = char:GetBoundingBox()
 	local run = AnimConfig.ids and (AnimConfig.ids.Run or AnimConfig.ids.WalkFast) -- the run clip, as a Runner moves in a match (Matthew: "it should be their running animation, not the walk")
@@ -393,7 +410,7 @@ local function trailScene(stage, fx, item, alive)
 			table.insert(ribbons, { gui = r, layer = layer, y = nil :: number? })
 		end
 	end
-	local from = Vector2.new(TRAIL_X + 0.05, 0.4) -- where the egg is on screen (the sparks start there)
+	local from = Vector2.new(TRAIL_X + 0.05, 0.4) -- where the trail starts on screen (the sparks start there)
 	local conn
 	conn = RunService.RenderStepped:Connect(function(dt)
 		if not alive() then
