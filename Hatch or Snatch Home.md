@@ -40,6 +40,7 @@ Arena maps are built from code: `ServerStorage.EOSBuild.Maps` (`MapDefs` plus on
 - **Trail shop preview** (HOS-PREV-001, Matthew): the egg trail cards' hover preview shows your avatar sprinting on the left with the trail drawn as a match draws it, streaming across the card; the Featured daily cards' previews grow straight out to the card (no zoom out / in). `ShopItemPreview.trailScene`, `FeaturedShopUI.fullCard`. See [[HOS-PREV-001 Trail preview fix]].
 - **Trails in the lobby** (HOS-TRAIL-001, Matthew): the trail your next match will wear (armed one-match trail, else Rainbow when on) streams off your back in the lobby, following the Backpack straight away; nothing is used up there. Testers in `EconomyService.TESTERS` (Matthew) get every trail on load. The trail preview has no egg. See [[HOS-TRAIL-001 Try trails on in the lobby]].
 - **Dash streaks wear your trail** (HOS-TRAIL-002, Matthew): a player wearing an egg trail (Player attribute `EOS_Trail`) slides and dashes in its colours and texture (`SlideFX`); every trail look lives in `Shared.TrailLook`. See [[HOS-TRAIL-002 Dash streaks wear the trail]].
+- **Crown trail showcase** (HOS-TRAIL-003, Matthew): NOT STARTED. Research and plan in [[HOS-TRAIL-003 Handoff - Crown trail showcase]].
 - **Leaderboards** (HOS-LB-001, Matthew): the four Halloween boards in `Workspace.Leaderboards` show live this-server stats and turn to face each player. See [[HOS-LB-001 Halloween leaderboards]].
 
 ## Pets
