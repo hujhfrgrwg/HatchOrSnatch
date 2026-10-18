@@ -35,6 +35,21 @@ For each podium, starting away from it and stepping to its edge:
 
 Re-checked after the change: the sword podium's walk-up and prompt both open **PageFeatured**. After the tap change, a single press and release of the prompt opened the Shop on all three podiums. After the move, each prompt measured 4.6 studs out at the front (facing the lobby's middle) and 0.9 below the stand, and a tap still opened the Shop on all three.
 
+## The two lobby crates (follow-up)
+Matthew: "Now do the same thing for the 2 crates. Just have one button called Buy and it takes you to the page in the shop".
+
+| Crate | Opens the Shop on | Prompt |
+|---|---|---|
+| `LobbyCrates.Crate_weapon` | **Weapons** (both crates are sold there) | **Buy** / Weapon Crate (tap E) |
+| `LobbyCrates.Crate_dual` | **Weapons** | **Buy** / Dual Wield Crate (tap E) |
+
+- **Same rules as the podiums:** walk up (8 studs from the glow in the crate's mouth) and the Shop opens on Weapons. Close it and stay, and tap Buy to open it again. Walk away and it closes.
+- **The Buy prompt** sits low at the crate's front, 3 studs out toward the lobby's middle and 0.8 below the glow.
+- **ShowcasePrompts** now finds the crates in `Workspace.LobbyCrates` by their `CrateId`.
+- **`LobbyCrates` (HOS-WEP-001)** no longer makes its own two prompts: the hold-E "Open · N Gems", which bought a crate right there with the lobby spin, and the F "What's inside". So buying now happens in the Shop. The idle display (weapons rising out of the crate) is unchanged. The lobby spin code is still in `LobbyCrates` but nothing triggers it now.
+- **Backup:** `LobbyCrates` isn't in ScriptHistory (another session's script), so its two replaced passages are in `docs/backups/HOS-SHOW-001_2026-10-18/LobbyCrates_ORIGINAL_LINES.md`. It went from 19,211 to 18,992 bytes. Studio undo step: "HOS-SHOW-001 crates: one Buy prompt to the Shop".
+- **Checked in a playtest:** each crate's walk-up opened PageWeapons; the only prompt shown was ShowcaseShop "Buy / Weapon Crate" (and "Buy / Dual Wield Crate"), hold 0; a tap opened PageWeapons; the prompt measured 3.0 studs out front and 0.8 below the glow. The emote podium still opened PageEmotes, and there were no errors.
+
 ## Backup and undo
 - `WeaponFXBoot` as it was: `docs/backups/HOS-SHOW-001_2026-10-18/WeaponFXBoot.lua`. That is the live script, including another session's lobby crates start line, checked against Studio by length and checksum.
 - Studio undo step: "HOS-SHOW-001 showcase walk-up shop prompts" (module and start line). The module's source was set afterwards.
