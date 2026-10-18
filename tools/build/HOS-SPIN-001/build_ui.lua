@@ -155,12 +155,37 @@ for i, pack in C.PACKS do
 	t.Name = "Tile"
 	scaleTree(t, TILE / 136, TILE / 136)
 	t.Position = UDim2.fromOffset(0, 0)
-	t.Icon.Image = "rbxassetid://87833590533916"
-	t.IconShadow.Image = t.Icon.Image
-	t.Icon.Position += UDim2.fromOffset(0, -4)
-	t.IconShadow.Position += UDim2.fromOffset(0, -4)
+	-- the pack is its number, big, with SPIN(S) under it (Matthew 18 Oct: "just have these be numbers not crate icons")
+	t.Icon:Destroy()
+	t.IconShadow:Destroy()
+	local c = t.Count
+	c.Position = UDim2.fromOffset(0, 6)
+	c.Size = UDim2.fromOffset(TILE, 80)
+	for _, nm in { "CountText", "CountTextShadow" } do
+		local l = c[nm]
+		local sh = if nm == "CountTextShadow" then 1 else 0
+		l.Text = tostring(pack.spins)
+		l.TextXAlignment = Enum.TextXAlignment.Center
+		l.Position = UDim2.fromOffset(0, 4 * sh)
+		l.Size = UDim2.fromOffset(TILE, 58)
+		l.TextSize = if pack.spins >= 100 then 46 else 54
+		l:SetAttribute("FitW", nil)
+		l:SetAttribute("FitRatio", nil)
+		for _, st in l:GetChildren() do
+			if st:IsA("UIStroke") then st.Thickness = 3; st:SetAttribute("BaseThickness", 3) end
+		end
+		local u = l:Clone()
+		u.Name = nm:gsub("Count", "Unit")
+		u.Text = if pack.spins == 1 then "SPIN" else "SPINS"
+		u.Position = UDim2.fromOffset(0, 54 + 2 * sh)
+		u.Size = UDim2.fromOffset(TILE, 20)
+		u.TextSize = 17
+		for _, st in u:GetChildren() do
+			if st:IsA("UIStroke") then st.Thickness = 1.6; st:SetAttribute("BaseThickness", 1.6) end
+		end
+		u.Parent = c
+	end
 	for _, d in t:GetDescendants() do
-		if d:IsA("TextLabel") and d.Name:match("^CountText") then d.Text = "+" .. pack.spins end
 		if d:IsA("TextLabel") and d.Name:match("^LabelText") then
 			d.Text = tostring(pack.robux)
 			d.TextXAlignment = Enum.TextXAlignment.Left
