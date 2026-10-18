@@ -113,7 +113,7 @@ Checked in a playtest:
 
 - **Sign:** the INCUBATOR plaque is now a trapezoid, 6.6 studs wide at the bottom and 5.0 at the top (`A09_Sign.A09_SignPlaque`, a SubtractAsync union). It leans back 40° from its front-bottom edge, so the text faces up at players.
   - The text panel narrowed to 5.0 studs, and the sparkles moved in to match.
-  - The egg-icon block used to sit on top of the plaque. It moved 0.95 studs back to stand on the platform just behind the plaque's top edge, keeping the same top and icon height.
+  - The egg-icon block that sat on top of the plaque, and its neon outline, are removed (Matthew).
   - Rebuild or tweak (lean, top width) with `tools/build/HOS-INC-001_incubator_sign.lua`. It always starts from the originals in `ServerStorage._Backups.HOS-INC-001_2026-10-18_IncubatorSign`.
 
 ![The leaned trapezoid sign](HOS-INC-001/sign_trapezoid.jpg)

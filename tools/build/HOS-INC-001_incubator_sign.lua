@@ -5,8 +5,7 @@
 --   plaque   the 6.6 x 1.6 x 1.2 sign box, cut to a trapezoid (TOP_WIDTH across the top) with SubtractAsync, then
 --            turned back LEAN degrees about its front-bottom edge; the text panel and the sparkles go with it
 --   panel    narrowed to PANEL_WIDTH so it sits inside the trapezoid; the sparkles move in to match
---   icon     the egg-icon block that sat on the sign moves back to just behind the plaque's top edge and now stands
---            on the platform (same top, icon glow at the same height)
+--   icon     the egg-icon block that sat on the sign, and its neon outline, are removed (Matthew, 18 Oct)
 local LEAN = 40
 local TOP_WIDTH = 5.0
 local PANEL_WIDTH = 5.0
@@ -95,16 +94,9 @@ plaque.CFrame = T * plaque.CFrame
 panel.CFrame = T * panel.CFrame
 for _, p in plaqueGlow do p.CFrame = T * p.CFrame end
 
--- the icon block: back behind the plaque's top edge, standing on the platform
-local topFrontZ = D / 2 - H * math.sin(math.rad(LEAN)) -- board space, after the lean
-local li = B:Inverse() * icon.CFrame
-local shiftZ = (topFrontZ - 0.02) - (li.Z + icon.Size.Z / 2)
-local top = li.Y + icon.Size.Y / 2
-local bottom = -H / 2
-icon.Size = Vector3.new(icon.Size.X, top - bottom, icon.Size.Z)
-icon.CFrame = B * CFrame.new(li.X, (top + bottom) / 2, li.Z + shiftZ) * li.Rotation
-local shift = B:VectorToWorldSpace(Vector3.new(0, 0, shiftZ))
-for _, p in iconGlow do p.CFrame = p.CFrame + shift end
+-- the icon block and its outline: removed
+icon:Destroy()
+for _, p in iconGlow do p:Destroy() end
 
 pcall(CHS.SetWaypoint, CHS, "HOS-INC-001: incubator sign")
-return ("sign: trapezoid %.1f -> %.1f wide, leaned %d deg; panel %.1f wide; %d sparkle parts, %d icon glow parts; icon moved %.2f back"):format(W, TOP_WIDTH, LEAN, PANEL_WIDTH, #plaqueGlow, #iconGlow, -shiftZ)
+return ("sign: trapezoid %.1f -> %.1f wide, leaned %d deg; panel %.1f wide; %d sparkle parts; icon and %d icon glow parts removed"):format(W, TOP_WIDTH, LEAN, PANEL_WIDTH, #plaqueGlow, #iconGlow)
