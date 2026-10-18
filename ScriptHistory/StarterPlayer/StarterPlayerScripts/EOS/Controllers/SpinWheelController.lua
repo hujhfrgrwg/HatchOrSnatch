@@ -3,10 +3,12 @@
 --  * walk up to the wheel (Workspace.SpinWheel) and the spin screen opens (SpinWheelUI, built by
 --    tools/build/HOS-SPIN-001/build_ui.lua); walk away and it closes. Closed with X, it waits until you've left.
 --  * SPIN! / SPIN x5 / SPIN x10 ask the server (EOS_SpinWheel.Spin), which rolls and pays; the screen's wheel then
---    turns to the result (the best one of a multi-spin) and the prize pops up in the middle over a black shade
---    (Root.Prize). COLLECT! sends it home: Gold and Gems fly as single coins / gems to the HUD wallet (bottom left),
---    egg shards to the HUD's incubator button (top left). The wallet waits for them: its count-up (EOSUI's
---    UI.countTo) is held from the spin until the first coin lands.
+--    turns to the result and the prize pops up in the middle over a black shade (Root.Prize). SPIN x5 / x10 open that
+--    many wheels at once instead (Root.Multi), all spinning together, each landing on its own prize, which shows under
+--    it. What a wheel lands on is exactly what that spin paid. COLLECT! sends it home: Gold and Gems fly as single
+--    coins / gems to the HUD wallet (bottom left), egg shards to the HUD's incubator button (top left), each from the
+--    wheel or popup it was won on. The wallet waits for them: its count-up (EOSUI's UI.countTo) is held from the spin
+--    until the first coin lands.
 --  * the big wheel in the lobby turns for everyone near it when anyone spins (Spun); far away it just jumps
 --  * the sign over the crystal shows the free spin timer
 --  * spin packs prompt their developer product (SpinWheelConfig.PACKS; not on sale until they have a productId)
@@ -29,7 +31,8 @@ local player = Players.LocalPlayer
 local SpinWheelController = {}
 
 local UIC, UI
-local gui, screen, panel, vf, slotsFrame, prize, flyLayer
+local gui, screen, panel, vf, slotsFrame, prize, multi, flyLayer
+local miniTemplate = nil -- the screen's wheel at rest, copied for the x5 / x10 wheels
 local remotes
 local state = nil
 local clockOffset = 0
@@ -93,11 +96,11 @@ end
 ---------------------------------------------------------------- the screen's wheel
 local ui = { model = nil, rest = nil, centre = nil, axis = nil, angle = 0 }
 
-local function placeSlots(a: number)
-	local size = vf.Size.X.Offset
-	local pps = (size / 2) / vf:GetAttribute("HalfStuds")
-	local cx, cy = size / 2, size / 2 + vf:GetAttribute("LiftStuds") * pps
-	for _, f in slotsFrame:GetChildren() do
+local function placeSlotsIn(view: ViewportFrame, slots: Frame, a: number)
+	local size = view.Size.X.Offset
+	local pps = (size / 2) / view:GetAttribute("HalfStuds")
+	local cx, cy = size / 2, size / 2 + view:GetAttribute("LiftStuds") * pps
+	for _, f in slots:GetChildren() do
 		local k = f:GetAttribute("Slot")
 		if k then
 			local phi = (k - 1) * STEP - a -- clockwise from the top, on screen
@@ -110,7 +113,7 @@ end
 local function setUiAngle(a: number)
 	ui.angle = a
 	turn(ui.model, ui.rest, ui.centre, ui.axis, a)
-	placeSlots(a)
+	placeSlotsIn(vf, slotsFrame, a)
 end
 
 ---------------------------------------------------------------- the lobby's wheel
@@ -236,34 +239,16 @@ local function releaseAll()
 end
 
 ---------------------------------------------------------------- results
-local function describe(g): (string, string, string)
-	if g.kind == "gold" then return "+" .. commas(g.amount) .. " Gold", C.ICONS.gold, "GOLD" end
-	if g.kind == "gems" then return "+" .. commas(g.amount) .. " Gems", C.ICONS.gems, "GEMS" end
-	if g.kind == "shard" then
-		return (g.rarity:gsub("^%l", string.upper)) .. " egg shard", C.ICONS[g.rarity] or C.ICONS.common, "EGG SHARD: GOES INTO YOUR INCUBATOR"
-	end
+local function describe(g): (string, string)
+	if g.kind == "gold" then return "+" .. commas(g.amount) .. " Gold", C.ICONS.gold end
+	if g.kind == "gems" then return "+" .. commas(g.amount) .. " Gems", C.ICONS.gems end
+	if g.kind == "shard" then return (g.rarity:gsub("^%l", string.upper)) .. " egg shard", C.ICONS[g.rarity] or C.ICONS.common end
 	if g.kind == "weapon" then
 		local item = EconomyConfig.item(g.itemId)
 		local name = if item then item.name else "Weapon"
-		return if g.dupe then name .. " (+" .. (g.shards or 0) .. " Weapon Shards)" else name, C.ICONS.weapon, "WEAPON"
+		return if g.dupe then name .. " (+" .. (g.shards or 0) .. " Weapon Shards)" else name, C.ICONS.weapon
 	end
-	return "", "", ""
-end
-
-local function summary(gave): string
-	local gold, gems, shards, weapons = 0, 0, 0, 0
-	for _, g in gave do
-		if g.kind == "gold" then gold += g.amount
-		elseif g.kind == "gems" then gems += g.amount
-		elseif g.kind == "shard" then shards += 1
-		elseif g.kind == "weapon" then weapons += 1 end
-	end
-	local parts = {}
-	if weapons > 0 then table.insert(parts, weapons .. " weapon" .. (if weapons == 1 then "" else "s")) end
-	if gold > 0 then table.insert(parts, "+" .. commas(gold) .. " Gold") end
-	if gems > 0 then table.insert(parts, "+" .. commas(gems) .. " Gems") end
-	if shards > 0 then table.insert(parts, shards .. " egg shard" .. (if shards == 1 then "" else "s")) end
-	return table.concat(parts, ", ")
+	return "", ""
 end
 
 ---------------------------------------------------------------- flying home
@@ -322,7 +307,7 @@ local function landFx(at: Vector2, text: string?)
 	TweenService:Create(sp, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { Size = UDim2.fromOffset(110 * k, 110 * k), ImageTransparency = 1, Rotation = 90 }):Play()
 	Debris:AddItem(sp, 0.4)
 	if text then
-		local src = prize.Reveal:FindFirstChild("KindText")
+		local src = prize.Reveal:FindFirstChild("ItemName")
 		if src then
 			local t = src:Clone()
 			t.Text = text
@@ -390,38 +375,41 @@ local function flyOne(image: string, from: Vector2, kind: string, delay: number,
 	end)
 end
 
--- everything a spin gave goes home: one burst per kind, coins first
-local function sendHome(gave, from: Vector2)
-	local gold, gems, shards = 0, 0, {}
-	for _, g in gave do
-		if g.kind == "gold" then gold += g.amount
-		elseif g.kind == "gems" then gems += g.amount
-		elseif g.kind == "shard" then table.insert(shards, g.rarity) end
-	end
-	local function burst(kind: string, image: string, n: number, total: number, start: number)
-		local landed = 0
-		for i = 1, n do
-			flyOne(image, from, kind, start + (i - 1) * 0.06, function()
-				landed += 1
-				if landed == 1 then
-					if kind ~= "shard" then hold(kind, false) end -- the wallet starts counting as the first one lands
-					local target = hudTarget(kind)
-					landFx(if target then centreOf(target) else fallbackTarget(kind),
-						if kind == "shard" then "+" .. total .. " shard" .. (if total == 1 then "" else "s") else "+" .. commas(total))
-					Sound.play(if kind == "gold" then "reward" else "gem")
-				else
-					Sound.play(if kind == "gold" then "click" else "gem", 1 + landed * 0.03)
-				end
-			end)
+-- everything won goes home. items = { { g = what one spin gave, from = where it was shown } }: each prize bursts
+-- from its own wheel (or the popup) as single coins / gems / shards; the first of a kind to land starts the wallet
+local function sendHome(items)
+	local single = #items == 1
+	local totals = { gold = 0, gems = 0, shard = 0 }
+	local flights = {}
+	for _, it in items do
+		local g = it.g
+		if g.kind == "gold" or g.kind == "gems" then
+			totals[g.kind] += g.amount
+			local n = if single
+				then (if g.kind == "gold" then math.clamp(math.floor(g.amount / 60), 6, 14) else math.clamp(g.amount, 4, 10))
+				else (if g.kind == "gold" then math.clamp(math.floor(g.amount / 100) + 1, 2, 5) else math.clamp(g.amount, 2, 5))
+			for _ = 1, n do table.insert(flights, { kind = g.kind, image = C.ICONS[g.kind], from = it.from }) end
+		elseif g.kind == "shard" then
+			totals.shard += 1
+			table.insert(flights, { kind = "shard", image = C.ICONS[g.rarity] or C.ICONS.common, from = it.from })
 		end
 	end
-	if gold > 0 then burst("gold", C.ICONS.gold, math.clamp(math.floor(gold / 60), 6, 14), gold, 0) else hold("gold", false) end
-	if gems > 0 then burst("gems", C.ICONS.gems, math.clamp(gems, 4, 10), gems, if gold > 0 then 0.18 else 0) else hold("gems", false) end
-	for i, r in shards do
-		flyOne(C.ICONS[r] or C.ICONS.common, from, "shard", 0.1 + (i - 1) * 0.12, function()
-			local target = hudTarget("shard")
-			landFx(if target then centreOf(target) else fallbackTarget("shard"), if i == 1 then "+" .. #shards .. " shard" .. (if #shards == 1 then "" else "s") else nil)
-			Sound.play("gem", 0.8)
+	if totals.gold == 0 then hold("gold", false) end
+	if totals.gems == 0 then hold("gems", false) end
+	local first = {}
+	for i, f in flights do
+		flyOne(f.image, f.from, f.kind, (i - 1) * (if single then 0.06 else 0.035), function()
+			if first[f.kind] then
+				Sound.play(if f.kind == "gold" then "click" else "gem", 1.05)
+				return
+			end
+			first[f.kind] = true
+			if f.kind ~= "shard" then hold(f.kind, false) end -- the wallet starts counting as the first one lands
+			local target = hudTarget(f.kind)
+			local n = totals[f.kind]
+			landFx(if target then centreOf(target) else fallbackTarget(f.kind),
+				if f.kind == "shard" then "+" .. n .. " shard" .. (if n == 1 then "" else "s") else "+" .. commas(n))
+			Sound.play(if f.kind == "gold" then "reward" else "gem", if f.kind == "shard" then 0.8 else nil)
 		end)
 	end
 end
@@ -429,38 +417,145 @@ end
 ---------------------------------------------------------------- the prize popup
 local pendingPrize = nil
 
+-- one spin: the prize in the middle of the screen
 local function openPrize(res)
-	-- the popup shows the prize the wheel stopped on (the first roll of that slot); a multi-spin adds its total
-	local g = res.gave and res.gave[table.find(res.slots, res.best) or 1]
+	local g = res.gave and res.gave[1]
 	if not g then
 		releaseAll()
 		return
 	end
 	pendingPrize = res
-	local text, img, kind = describe(g)
+	local text, img = describe(g)
 	local rev = prize.Reveal
 	for _, n in { "Icon", "IconShadow" } do rev[n].Image = img end
-	setText(rev, "Title", if #res.slots > 1 then "SPIN x" .. #res.slots .. "!" else "YOU WON!")
 	setText(rev, "ItemName", text)
-	setText(rev, "KindText", kind)
-	setText(rev, "SubText", if #res.slots > 1 then "All " .. #res.slots .. " spins: " .. summary(res.gave) else "")
 	UI.open("Prize", { keepHistory = UI.isOpen("Spin") })
 	local rays = rev:FindFirstChild("Rays")
 	if rays then UI.spin(rays, 18) end
 	UI.popFrom(rev.Icon, 0.4, 0.1)
 	UI.popFrom(rev.IconShadow, 0.4, 0.1)
-	Sound.play(if g.kind == "weapon" or C.SLOTS[res.best].weight <= 6 then "reveal" else "reward")
+	Sound.play(if g.kind == "weapon" or C.SLOTS[res.slots[1]].weight <= 6 then "reveal" else "reward")
+end
+
+-- x5 / x10: that many wheels, all spinning at once, each landing on its own roll (res.slots[i] paid res.gave[i])
+local minis = {}
+local multiRes = nil
+
+local function openMulti(res)
+	for _, m in minis do m.frame:Destroy() end
+	table.clear(minis)
+	multiRes = res
+	local n = #res.slots
+	local cols = math.min(n, 5)
+	local rows = math.ceil(n / cols)
+	local k = if rows > 1 then 0.5 else 0.6 -- each wheel is 540 x 620 before this
+	local W, H, GAP = 540 * k, 620 * k, 22
+	local box = multi.Wheels
+	local x0 = (box.Size.X.Offset - (cols * W + (cols - 1) * GAP)) / 2
+	local y0 = (box.Size.Y.Offset - (rows * H + (rows - 1) * GAP)) / 2
+	local nameSrc, nameSh = prize.Reveal.ItemName, prize.Reveal.ItemNameShadow
+	for i, slot in res.slots do
+		local col, row = (i - 1) % cols, (i - 1) // cols
+		local f = Instance.new("Frame")
+		f.Name = "Wheel" .. i
+		f.BackgroundTransparency = 1
+		f.Size = UDim2.fromOffset(540, 620)
+		f.Position = UDim2.fromOffset(x0 + col * (W + GAP), y0 + row * (H + GAP))
+		f.ZIndex = 2
+		local sc = Instance.new("UIScale")
+		sc.Scale = k
+		sc.Parent = f
+		local v = miniTemplate.vf:Clone()
+		v.Position = UDim2.fromOffset(0, 0)
+		v.CurrentCamera = v:FindFirstChildOfClass("Camera")
+		v.Parent = f
+		local sl = miniTemplate.slots:Clone()
+		sl.Position = UDim2.fromOffset(0, 0)
+		sl.Parent = f
+		-- the prize under the wheel, shown when it lands
+		local labels = {}
+		for j, src in { nameSh, nameSrc } do
+			local t = src:Clone()
+			t.Text = ""
+			t.AnchorPoint = Vector2.new(0.5, 0)
+			t.Position = UDim2.fromOffset(270, 548 + (if j == 1 then 5 else 0))
+			t.Size = UDim2.fromOffset(600, 72)
+			t.TextSize = 60
+			t.ZIndex = 5 + j
+			t.Parent = f
+			labels[j] = t
+		end
+		f.Parent = box
+		local model = v:FindFirstChild("Wheel")
+		placeSlotsIn(v, sl, 0)
+		table.insert(minis, {
+			frame = f, vf = v, slots = sl, model = model, rest = model:GetPivot(), labels = labels,
+			target = targetFor(0, slot), dur = C.SPIN_TIME * (0.8 + 0.4 * math.random()), landed = false,
+		})
+	end
+	setText(multi, "Title", "SPIN x" .. n .. "!")
+	multi.BtnCollect.Visible = false
+	UI.open("Multi", { keepHistory = UI.isOpen("Spin") })
+	-- all together; each settles in its own time
+	local t0 = os.clock()
+	local lastSector = 0
+	while multiRes == res do
+		local left = 0
+		local now = os.clock()
+		for i, m in minis do
+			if not m.landed then
+				local u = math.min(1, (now - t0) / m.dur)
+				local a = m.target * ease(u)
+				turn(m.model, m.rest, ui.centre, ui.axis, a)
+				placeSlotsIn(m.vf, m.slots, a)
+				if i == 1 then
+					local sector = math.floor(a / STEP + 0.5)
+					if sector ~= lastSector then
+						lastSector = sector
+						Sound.play("click", 0.9 + 0.3 * (1 - u))
+					end
+				end
+				if u >= 1 then
+					m.landed = true
+					local text = describe(res.gave[i])
+					for _, t in m.labels do t.Text = text end
+					UI.popFrom(m.labels[2], 0.3)
+					UI.popFrom(m.labels[1], 0.3)
+					Sound.play("pop", 1 + i * 0.03)
+				else
+					left += 1
+				end
+			end
+		end
+		if left == 0 then break end
+		RunService.RenderStepped:Wait()
+	end
+	if multiRes == res then
+		multi.BtnCollect.Visible = true
+		UI.popFrom(multi.BtnCollect, 0.4)
+		Sound.play("reward")
+	end
 end
 
 -- COLLECT! (or Escape / a tap on the shade): close the popup and send the prizes home
 local function collect(closeIt: boolean)
-	local res = pendingPrize
-	if not res then return end
-	pendingPrize = nil
-	local icon = prize.Reveal.Icon
-	local from = if icon.AbsoluteSize.X > 2 then centreOf(icon) else flyLayer.AbsoluteSize / 2
-	if closeIt and UI.isOpen("Prize") then UI.close() end
-	sendHome(res.gave, from)
+	local items = {}
+	local scr = nil
+	if pendingPrize then
+		local icon = prize.Reveal.Icon
+		local from = if icon.AbsoluteSize.X > 2 then centreOf(icon) else flyLayer.AbsoluteSize / 2
+		table.insert(items, { g = pendingPrize.gave[1], from = from })
+		pendingPrize, scr = nil, "Prize"
+	elseif multiRes then
+		for i, m in minis do
+			table.insert(items, { g = multiRes.gave[i], from = if m.vf.AbsoluteSize.X > 2 then centreOf(m.vf) else flyLayer.AbsoluteSize / 2 })
+		end
+		multiRes, scr = nil, "Multi"
+	else
+		return
+	end
+	if closeIt and UI.isOpen(scr) then UI.close() end
+	sendHome(items)
 end
 
 ---------------------------------------------------------------- spinning
@@ -501,9 +596,22 @@ local function spin(count: number)
 		clockOffset = (tonumber(res.state.serverNow) or os.time()) - os.time()
 	end
 	refresh()
-	-- the screen's wheel turns to the result (the lobby's turns from Spun)
+	if player:GetAttribute("EOS_InMatch") == true then -- no wheels in a match: the prizes just go home
+		spinning = false
+		local items = {}
+		for _, g in res.gave do table.insert(items, { g = g, from = flyLayer.AbsoluteSize / 2 }) end
+		sendHome(items)
+		return
+	end
+	if count > 1 then
+		openMulti(res)
+		spinning = false
+		refresh()
+		return
+	end
+	-- one spin: the screen's wheel turns to it (the lobby's turns from Spun)
 	local a0 = ui.angle
-	local a1 = targetFor(a0, res.best)
+	local a1 = targetFor(a0, res.slots[1])
 	local t0 = os.clock()
 	local lastSector = math.floor(a0 / STEP + 0.5)
 	while true do
@@ -522,12 +630,7 @@ local function spin(count: number)
 	spinning = false
 	refresh()
 	task.wait(0.35) -- a beat on the winning slot
-	if player:GetAttribute("EOS_InMatch") == true then
-		pendingPrize = res -- no popup in a match: it just goes home
-		collect(false)
-	else
-		openPrize(res)
-	end
+	openPrize(res)
 end
 
 local function buy(spins: number)
@@ -615,6 +718,8 @@ function SpinWheelController.init(uiController)
 	vf = panel:WaitForChild("WheelView")
 	slotsFrame = panel:WaitForChild("Slots")
 	prize = root:WaitForChild("Prize")
+	multi = root:WaitForChild("Multi")
+	miniTemplate = { vf = vf:Clone(), slots = slotsFrame:Clone() } -- before anything turns it
 	flyLayer = gui:WaitForChild("Fly")
 	task.spawn(hookWallet)
 	ui.model = vf:WaitForChild("Wheel")
@@ -634,15 +739,18 @@ function SpinWheelController.init(uiController)
 		elseif name == "CloseButton" then openedByWalk = false end
 	end)
 	UI.Action:Connect(function(name: string, scr: string)
-		if scr ~= "Prize" then return end
+		if scr ~= "Prize" and scr ~= "Multi" then return end
 		if name == "BtnCollect" then collect(true)
 		elseif name == "CloseButton" then collect(false) end -- Escape / the scrim: the UI module closes it
 	end)
-	prize:WaitForChild("Dim").InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+	for _, scr in { prize, multi } do
+		scr:WaitForChild("Dim").InputBegan:Connect(function(input)
+			if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
+			-- the x5 / x10 wheels finish before a tap on the shade collects
+			if scr == multi and not multi.BtnCollect.Visible then return end
 			collect(true)
-		end
-	end)
+		end)
+	end
 
 	remotes:WaitForChild("State").OnClientEvent:Connect(function(v)
 		if type(v) ~= "table" then return end
@@ -666,7 +774,7 @@ function SpinWheelController.init(uiController)
 			if not ok then warn("[SpinWheel] walk-up: " .. tostring(err)) end
 			if not spinning then pcall(refresh) end
 			-- never leave the wallet held (a lost reply, a popup left open for minutes)
-			if (held.gold > 0 or held.gems > 0) and not spinning and os.clock() - heldSince > (if pendingPrize then 120 else 15) then
+			if (held.gold > 0 or held.gems > 0) and not spinning and os.clock() - heldSince > (if pendingPrize or multiRes then 120 else 15) then
 				releaseAll()
 			end
 			task.wait(0.25)

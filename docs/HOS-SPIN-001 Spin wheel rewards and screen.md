@@ -21,7 +21,7 @@ Slot 1 is the top sector, under the crystal, and the rest go clockwise as you fa
 
 | Slot | Reward | Chance |
 |---|---|---|
-| 1 | **Weapon (placeholder)**: dark knife with a "?" | 1% |
+| 1 | **Weapon**: placeholder All Hallow's Sword, shown as a dark knife with a "?" | 1% |
 | 2 | 250 Gold | 20% |
 | 3 | Common egg shard | 17% |
 | 4 | 3 Gems | 15% |
@@ -32,7 +32,10 @@ Slot 1 is the top sector, under the crystal, and the rest go clockwise as you fa
 
 How each reward pays:
 - **Egg shards** go into the incubator like a match shard (`EggLogic.addShard`). They're also added to `incubator.unseen`, so they fly into the egg next time the player walks up to the incubator.
-- **Weapon:** set `weaponId` on slot 1 to a knife skin id (e.g. `knife_rb_all_hallow_s_sword`). The wheel then gives that weapon and equips it. A duplicate gives Weapon Shards, as a crate does. Until it's set, the slot pays **1,000 Gold** (`fallbackGold`).
+- **Weapon:** slot 1's `weaponId` is the weapon it gives, owned and equipped. A duplicate gives Weapon Shards, as a crate does.
+  - At first it was unset and paid 1,000 Gold instead, so the wheel could land on the weapon and pay Gold. Matthew: "Make sure what it lands on is actually what they get."
+  - It's now set to `knife_rb_all_hallow_s_sword` as a stand-in until Matthew picks the weapon.
+  - `mystery = true` keeps the dark "?" knife on the wheel.
 - The odds, amounts, colours and icons are all in the config. I checked the odds over 100,000 test rolls: they came out within 0.3% of the table.
 
 ## On the wheel itself (`Workspace.SpinWheel`)
@@ -58,7 +61,10 @@ Compared with the reference, the screen has one weapon slot instead of two. The 
 
 **Right side**
 - The wheel, a ViewportFrame with a copy of the lobby wheel and crystal. The reward icons ride on their sectors as it turns. It spins clockwise with a ticking sound, then eases onto the result.
-- When it stops, the prize popup opens (below). A x5 or x10 spin lands on its best roll, and the popup adds the total for all of them.
+- When it stops, the prize popup opens (below).
+- **SPIN x5 / x10** open that many wheels at once instead (`Root.Multi`, over the same black shade): 5 in a row, or 2 rows of 5.
+  - They all start together and each settles in its own time, landing on its own roll. The prize shows under each wheel as it lands (a wheel landing on 250 Gold paid exactly that), then **COLLECT!** appears.
+  - On collect, each prize flies home from its own wheel.
 
 ### The prize popup (added the same day)
 Matthew: "Have the reward kinda be its own GUI that pops up in the middle of the screen with the rest of the background kinda shaded black. And then if it's gems/coins, they transition and tween as individual gems/coins to the bottom left. If it's an egg shard, it tweens into egg shards going to the top left incubator button for HUD."
@@ -67,7 +73,9 @@ Matthew: "Have the reward kinda be its own GUI that pops up in the middle of the
 ![Collecting](HOS-SPIN-001/prize_collect.jpg)
 
 This replaces the small prize tile over the hub.
-- **The popup** (`SpinWheelUI.Root.Prize`) is a copy of the shop's reward reveal: spinning rays, sparkles, the big icon, the prize name, its kind, and a total line for x5/x10. It sits over a black shade with one **COLLECT!** button. Escape or a tap on the shade also collects.
+- **The popup** (`SpinWheelUI.Root.Prize`) is a copy of the shop's reward reveal: spinning rays, sparkles, the big icon and the prize name.
+  - The kind and total lines were removed. Matthew: "Remove the Description here."
+  - It sits over a black shade (85% black) with one **COLLECT!** button. Escape or a tap on the shade also collects.
 - **Collecting** sends everything home from the popup's icon:
   - Gold flies as single coins (6 to 14) to the Gold icon in the HUD wallet, bottom left.
   - Gems fly as single gems (4 to 10) to the Gems icon.
@@ -79,10 +87,19 @@ This replaces the small prize tile over the hub.
 - In a match there's no popup; the prizes just fly home.
 - Built by `tools/build/HOS-SPIN-001/build_prize.lua`, which runs after `build_ui.lua`. The flying icons go on the `SpinWheelUI.Fly` layer.
 
-Tested with a x10 (+1,700 Gold, +23 Gems, 3 shards):
-- While the wheel turned and the popup was up, the HUD stayed at 0 / 0.
-- On COLLECT!, the coins, gems and shards flew out and the wallet counted up to exactly 1,700 / 23.
-- The fly layer was empty afterwards.
+![x10: ten wheels at once](HOS-SPIN-001/multi_spinning.jpg)
+![x10 landed](HOS-SPIN-001/multi_landed.jpg)
+![Weapon prize](HOS-SPIN-001/prize_weapon.jpg)
+
+Tested:
+- **x10 with the popup version** (+1,700 Gold, +23 Gems, 3 shards): while the wheel turned and the popup was up, the HUD stayed at 0 / 0. On COLLECT!, the coins, gems and shards flew out and the wallet counted up to exactly 1,700 / 23. The fly layer was empty afterwards.
+- **x10 with ten wheels:**
+  - Every wheel's top sector matched the prize under it: 4 common shards, 2 × 500 Gold and 4 × 250 Gold.
+  - The wallet ended at exactly 2,000 Gold, the sum of the labels.
+  - Shards flew to the incubator button and coins to the wallet, each from its own wheel.
+- **Weapon:** I forced one roll to slot 1 (temporarily, in the playtest only).
+  - The single wheel landed on the weapon, and the popup showed "All Hallow's Sword".
+  - The profile owned and had equipped `knife_rb_all_hallow_s_sword`, and Gold was unchanged.
 
 **Opening and closing:** walking up to the front of the wheel opens the screen, and walking away closes it. If the player closes it with X, it stays shut until they walk away and come back. It never opens in a match, while spectating, or over another panel.
 
@@ -107,7 +124,8 @@ Built by `tools/build/HOS-SPIN-001/build_ui.lua`. The controller is `StarterPlay
 - No errors in the output.
 
 ## Waiting on Matthew / Hunter
-- **The weapon:** say which one and it's one line (`weaponId` on slot 1). The wheel and screen will show its name; the knife icon stays as the picture unless there's a better one.
+- **The weapon:** it's the All Hallow's Sword (legendary) as a stand-in. Say which one and it's one line (`weaponId` on slot 1).
+  - The popup uses the generic knife icon, because knife skins have no 2D icon; the shop shows them as 3D previews.
 - **Robux spin packs:** prices are placeholders (49 / 349 / 2,900, as in the reference). They need developer products created, and the ids go in `SpinWheelConfig.PACKS`. Until then the tiles say "Spin packs aren't on sale yet".
 - **Free spin interval:** 15 minutes, to match the reference. Change `FREE_SECONDS` if you want something else.
 - The stud texture on the wheel is still the egg-pack one with "L"s until the custom stud texture is uploaded (see [[HOS-LOBBY-007 Spin wheel]]).

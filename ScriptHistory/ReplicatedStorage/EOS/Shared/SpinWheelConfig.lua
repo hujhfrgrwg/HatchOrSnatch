@@ -4,8 +4,9 @@
 -- Sectors.Sector_<n>). Only the weapon slot is orange. Weights are relative (they add to 100 here, so weight = % chance).
 --
 -- kinds:
---   weapon  weaponId = a knife skin item id (EconomyConfig.item). nil = placeholder: the slot shows "?" and pays
---           fallbackGold instead, until Matthew picks the weapon. A duplicate gives Weapon Shards like a crate.
+--   weapon  weaponId = a knife skin item id (EconomyConfig.item): won = owned and equipped; a duplicate gives Weapon
+--           Shards like a crate. mystery = the wheel shows a dark knife with a "?" instead of saying which.
+--           (nil weaponId would pay fallbackGold, but then the slot lands on a weapon and pays Gold: keep one set.)
 --   gold / gems   amount
 --   shard   rarity ("common" | "rare" | "epic" | "legendary"): one egg shard into the incubator, flies in at the lobby
 --           incubator like a match shard
@@ -21,7 +22,8 @@ local DEEP = Color3.fromRGB(80, 40, 130)
 local DARK = Color3.fromRGB(40, 32, 58)
 
 C.SLOTS = {
-	{ kind = "weapon", weaponId = nil, fallbackGold = 1000, weight = 1, color = ORANGE },
+	-- placeholder weapon until Matthew picks it (18 Oct): the All Hallow's Sword, so what it lands on is what you get
+	{ kind = "weapon", weaponId = "knife_rb_all_hallow_s_sword", mystery = true, fallbackGold = 1000, weight = 1, color = ORANGE },
 	{ kind = "gold", amount = 250, weight = 20, color = PURPLE },
 	{ kind = "shard", rarity = "common", weight = 17, color = DEEP },
 	{ kind = "gems", amount = 3, weight = 15, color = DARK },

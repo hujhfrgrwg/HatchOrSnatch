@@ -102,7 +102,7 @@ for i, s in C.SLOTS do
 	ic.ImageTransparency = 0
 	ic.ZIndex = 2
 	ic.Parent = f
-	if big and not s.weaponId then
+	if big and s.mystery then
 		ic.ImageColor3 = Color3.fromRGB(40, 22, 8) -- the placeholder weapon is a dark silhouette with a "?"
 		label(f, "Mystery", "?", UDim2.new(0.5, 0, 0.5, -40), UDim2.fromOffset(200, 150), 130, 9)
 	end
