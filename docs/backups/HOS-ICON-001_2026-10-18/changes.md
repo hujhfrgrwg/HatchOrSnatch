@@ -67,3 +67,21 @@ After:
 			d.TextSize = math.min(d.TextSize, math.floor(h * 0.5), math.floor((w - 24) / (#d.Text * 0.44))) -- HOS-ICON-001: and fits the width
 ```
 The second line only ever makes OPEN 10's text smaller, so it fits the button's width. The Weapon Crate's OPEN 10 uses the same code, and is unchanged unless its text would overflow.
+
+## Sixth round (18 Oct): button faces (Matthew: "Theyre being incorrected clipped, especially the bottom ones ... it doesnt feel so saturated")
+**Why they clipped.** The buttons' art is pre-rendered raster images (Gems and Robux are 340 × 88 exports, so 680 × 176 px; the orange tab art is 290 × 66, so 580 × 132 px). Each has a dotted fade baked into its right side.
+- Slicing them to 330 × 120 stretched the right 12 px of that fade into a light strip down the right edge.
+- CrateExtras' `sliceArt` sets each slice rect from the element's size, not the image's. That gave OPEN 10 `Rect(24, 24, 636, 224)` on a 176 px tall image, and SEE ALL `Rect(24, 24, 636, 152)` on a 580 × 132 image. Both rects run past the image, which cut off the bottom edge and broke the corners.
+
+**What changed.** In `BtnCrateGems`, `BtnCrateRobux` and `BtnSeeEmotes`, the `Art` ImageLabel was replaced by an `Art` Frame built from frames (`tools/build/HOS-ICON-001/button_faces.lua`):
+- **`Edge`:** dark outline (20, 14, 26), radius 14.
+- **`Lip`:** darker bottom, inset 3, radius 11.
+- **`Face`:** inset 3 and 6 px shorter than the lip. A white frame with a top-to-bottom UIGradient (the gradient multiplies the frame colour, so the frame must be white).
+- **`Studs`:** the place's stud tile `75407673232479` (the one on the quests pill), tiled at 40 px. Its transparency fades from 1 on the left to 0.35 on the right, like the dots on the other buttons.
+- **Colours:** lighter top / face / lip, all less saturated than the old art.
+  - Gems: (122, 206, 92) / (86, 176, 66) / (46, 112, 44)
+  - Robux: (170, 112, 214) / (132, 78, 184) / (82, 44, 124)
+  - SEE ALL: (246, 182, 84) / (222, 140, 48) / (150, 84, 28)
+- **Old image ids:** each new `Art` keeps its old id in `HOS_WasImage`. The full pre-edit buttons are in Studio at `ServerStorage._Backups.HOS-ICON-001_2026-10-18.Btn*_round6_before`.
+- **CrateExtras is unchanged.** Its `sliceArt` only touches ImageLabels named Art, so it skips the Frame. Its `resize` still sizes the Frame (offset size = button size), so the runtime OPEN 10 clone gets a 330 × 84 face.
+- **Checked in a playtest:** all four buttons have clean corners and full bottom edges. Screenshot: `docs/HOS-ICON-001/shop_card_buttons_round6.png`.

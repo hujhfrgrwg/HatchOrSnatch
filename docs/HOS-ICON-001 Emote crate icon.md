@@ -78,3 +78,10 @@ The gift icon stays everywhere else, such as the daily gift and reward toasts.
 - I checked in Matthew's playtest that the image downloads (in 1.4 s), and it showed on both cards.
 - The changed lines and old ids are in `docs/backups/HOS-ICON-001_2026-10-18/changes.md`. The full old `CrateShowcase` is in Studio under `ServerStorage._Backups.HOS-ICON-001_2026-10-18`.
 - **If EOSUI is ever rebuilt** from `ServerStorage.EOSUIBuild`, the two cards go back to the gift icon, because the build data still says gift. Set them again, or change the build data.
+
+## Shop card buttons (18 Oct, round 6)
+The Emote Crate card's four buttons (250 Gems, 149 Robux, OPEN 10, SEE ALL) were clipped and too saturated.
+- **Cause:** their pre-rendered art was being stretched to sizes it wasn't made for. That cut off the bottom edge, broke the corners and left a strip of the art's dot fade down the right edge.
+- **Fix:** their backgrounds are now built from frames: a dark outline, a darker bottom lip, a softer gradient face, and the place's stud texture fading in toward the right. Built by `tools/build/HOS-ICON-001/button_faces.lua`. They stay sharp at any size.
+- **OPEN 10:** CrateExtras clones this button at runtime, and the copy gets the same face.
+- Details and backups: `docs/backups/HOS-ICON-001_2026-10-18/changes.md`. Screenshot: `docs/HOS-ICON-001/shop_card_buttons_round6.png`.
