@@ -6,6 +6,16 @@ requested_by: Matthew
 ---
 # HOS-ICON-001: Emote Crate icon
 
+**Live icon: `rbxassetid://86101813885240`** (the 3D render with the z-fighting fixed, uploaded by Matthew on 18 Oct). It's used in four places:
+- the Shop's Emote Crate card;
+- the Emotes screen's "Emote Crate" tab (On and Off);
+- the Emotes screen's crate panel;
+- CrateShowcase, the crate over a player's head while they open one.
+
+The earlier uploads `78853379381316` (flat v1) and the first 3D render are no longer used. I checked it in a playtest: the Shop card, then SEE ALL, which opens the Emotes crate page:
+
+![Emotes crate page](HOS-ICON-001/emotes_crate_page.jpg)
+
 **v2, 18 Oct (Matthew: "We also need to make this look better. Use html to create this crate in 3d. then we can just get an image icon of it as well"):** the icon is now a render of a real 3D chest.
 - `tools/build/HOS-ICON-001/emote_crate_3d.html` builds it in three.js. It has:
   - rounded teal planks, and a barrel lid opened on its back hinge with a hot pink glow pouring out;

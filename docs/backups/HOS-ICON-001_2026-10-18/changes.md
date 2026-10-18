@@ -38,3 +38,8 @@ Every moved or resized element keeps its old values in `HOS_WasPos`, `HOS_WasSiz
 - **SEE ALL:** `BtnSeeEmotes` is at (470, 358), now 340 × 64, the width CrateExtras gives it at runtime. CrateExtras puts OPEN 10 at 470 and moves SEE ALL to 826.
   - Its art is the Shop's active-tab orange (`134988778468442`), sliced so the corners stay crisp. It used to be the gray `118469927722961`.
   - It has a new eye icon (`I_eye` with `I_eyeShadow`, the `spectate` icon `90110240378916`), and the label moved right to make room.
+
+## Fourth round (18 Oct): the final icon id
+Every `rbxassetid://78853379381316` is now `rbxassetid://86101813885240`:
+- the 8 EOSUI images: the Shop card art and shadow, the Emotes tab On/Off icons and shadows, and the Emotes crate panel icon and shadow;
+- the one reference in CrateShowcase.
