@@ -4,8 +4,8 @@
 --  * RequestHatch(rarity, family?, allowHigher?)  pieces -> a pet (lobby only)
 --  * RequestEquipPet(petId)                       one equipped pet = one ability (lobby only)
 --  * RequestBuy(itemId) / RequestUseItem(itemId) / RequestSetCosmetic(slot, itemId)
--- Cosmetics are worn here too: egg case + trail on the carried egg, the lobby entrance effect and
--- the confetti burst. None of them change hitboxes, speed or timing.
+-- Cosmetics are worn here too: egg case + trail on the carried egg (and on your back in the lobby, HOS-TRAIL-001),
+-- the lobby entrance effect and the confetti burst. None of them change hitboxes, speed or timing.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -62,7 +62,6 @@ end
 
 local HATCH_WORDS = {
 	NOT_ENOUGH = "Not enough pieces for that hatch yet",
-	CHOOSE_FAMILY = "Pick a family for your first pet (it's free)",
 	NEEDS_HIGHER = "That hatch would use higher pieces: confirm to use them",
 	BAD_FAMILY = "That family isn't available yet",
 	BAD_RARITY = "Unknown egg piece",
@@ -163,6 +162,8 @@ local function onBuy(plr: Player, itemId: any)
 		-- no toast: ShopResult opens the client's Reward reveal (16 Oct)
 		if item.kind == "knifeSkin" then
 			CharacterService.refreshKnife(plr) -- HOS-INV-001: a bought skin is worn at once, on you in the lobby
+		elseif item.kind == "trail" or item.kind == "trailPerm" then
+			EconomyService.refreshLobbyTrail(plr) -- HOS-TRAIL-001: a bought trail streams off you in the lobby at once
 		end
 	end
 end
@@ -249,6 +250,8 @@ local function onSetCosmetic(plr: Player, slot: any, itemId: any)
 		CharacterService.setEgg(plr, plr:GetAttribute("EOS_Tier")) -- re-dress the egg you carry
 	elseif slot == "knifeSkin" then
 		CharacterService.refreshKnife(plr) -- HOS-INV-001: the carried weapon changes straight away
+	elseif slot == "trailNext" or slot == "off" or slot == "on" then
+		EconomyService.refreshLobbyTrail(plr) -- HOS-TRAIL-001: the lobby trail follows the Backpack straight away
 	end
 end
 
@@ -376,6 +379,80 @@ local function decorateEgg(plr: Player, egg: Model)
 	end
 end
 
+-- ===== trying trails on in the lobby (HOS-TRAIL-001) =====
+-- Matthew 18 Oct: "Can you give me all the trails for me to try on? have them be able to equip in lobby". The trail
+-- your next match will wear (an armed one-match trail, else Rainbow Trail when it's on: startMatch's order) streams
+-- off your back in the lobby, low on the back where the egg rides in a match, so you see it as you run. Nothing is
+-- used up in the lobby (startMatch still uses up an armed trail); in a match the carried egg wears it instead.
+local function nextTrail(p: any): string?
+	local armed = p.cosmetics.trailNext
+	if type(armed) == "string" and armed ~= "" and (p.cosmetics.consumables[armed] or 0) > 0 then
+		return armed
+	end
+	if p.cosmetics.owned.trailp_rainbow and not (p.cosmetics.off or {}).trailp_rainbow then
+		return "trailp_rainbow"
+	end
+	return nil
+end
+
+function EconomyService.refreshLobbyTrail(plr: Player)
+	local char = plr.Character
+	if not char then
+		return
+	end
+	local old = char:FindFirstChild("EOS_LobbyTrail")
+	if old then
+		old:Destroy()
+	end
+	local torso = (char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")) :: BasePart?
+	local p = DataService.get(plr)
+	local id = p and not inMatch(plr) and nextTrail(p)
+	local item = id and EconomyConfig.item(id)
+	if not torso or not item then
+		return
+	end
+	local base = Instance.new("Part")
+	base.Name = "EOS_LobbyTrail"
+	base.Size = Vector3.new(0.2, 0.2, 0.2)
+	base.Transparency = 1
+	base.CanCollide = false
+	base.CanQuery = false
+	base.CanTouch = false
+	base.Massless = true
+	base.CastShadow = false
+	base:SetAttribute("EOS_Egg", true) -- CharacterService leaves it out of the collision groups, like the egg
+	base.CFrame = torso.CFrame * CFrame.new(0, -0.55, torso.Size.Z / 2 + 0.1) -- just off your back, at the egg's height
+	local w = Instance.new("WeldConstraint")
+	w.Part0 = torso
+	w.Part1 = base
+	w.Parent = base
+	trailOn(base, item)
+	base.Parent = char
+end
+
+-- HOS-TRAIL-001 testers: every trail to try on (Matthew 18 Oct: "Can you give me all the trails for me to try on?").
+-- Whenever the save loads: the permanent trails owned, the one-match trails topped up to TESTER_TRAILS each.
+local TESTERS: { [number]: boolean } = {
+	[2403942283] = true, -- Matthew (ssported)
+}
+local TESTER_TRAILS = 5
+
+local function giveTesterTrails(plr: Player)
+	if not TESTERS[plr.UserId] or not DataService.get(plr) then
+		return
+	end
+	DataService.update(plr, "tester:trails", function(p)
+		for _, it in ipairs(EconomyConfig.SHOP) do
+			if it.kind == "trailPerm" then
+				p.cosmetics.owned[it.id] = true
+			elseif it.kind == "trail" then
+				p.cosmetics.consumables[it.id] = math.max(p.cosmetics.consumables[it.id] or 0, TESTER_TRAILS)
+			end
+		end
+	end)
+	EconomyService.refreshLobbyTrail(plr)
+end
+
 -- lobby arrival: Bolt Entrance (permanent)
 local function bolt(root: BasePart)
 	local folder = Instance.new("Folder")
@@ -433,8 +510,12 @@ function EconomyService.init()
 	MatchService.onPlayerMatchStart(EconomyService.startMatch)
 	MatchService.onPlayerMatchEnd(EconomyService.endMatch)
 	local function hook(plr: Player)
+		plr:GetAttributeChangedSignal("EOS_InMatch"):Connect(function() -- HOS-TRAIL-001: off in a match, back in the lobby
+			task.defer(EconomyService.refreshLobbyTrail, plr)
+		end)
 		plr.CharacterAdded:Connect(function(char)
 			task.delay(1, function()
+				EconomyService.refreshLobbyTrail(plr) -- HOS-TRAIL-001
 				local p = DataService.get(plr)
 				local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
 				if p and root and p.cosmetics.owned.entrance_bolt and not (p.cosmetics.off or {}).entrance_bolt and not inMatch(plr) and char.Parent then
@@ -446,6 +527,12 @@ function EconomyService.init()
 	Players.PlayerAdded:Connect(hook)
 	for _, plr in ipairs(Players:GetPlayers()) do
 		hook(plr)
+	end
+	DataService.Loaded:Connect(giveTesterTrails) -- HOS-TRAIL-001
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if DataService.isLoaded(plr) then
+			giveTesterTrails(plr)
+		end
 	end
 	Players.PlayerRemoving:Connect(function(plr)
 		matchTrail[plr] = nil
