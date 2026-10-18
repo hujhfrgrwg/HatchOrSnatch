@@ -285,21 +285,11 @@ function EconomyService.endMatch(plr: Player)
 	matchTrail[plr] = nil
 end
 
--- HOS-VFX-RES-001 (Hunter, 17 Oct: use the UNSORTED OS RESOURCES place where it beats ours): textured trail
--- layers instead of flat colour strips. Not our uploads (realkilometers' Stardust, Arisu Club's wisp,
--- BloxenRBLX's ember); if one is ever deleted that layer just draws blank. Swap in our own when we draw them.
-local TRAIL_LAYERS = {
-	trail_spark = { { tex = "rbxassetid://18568183566", width = 1, life = 0.5 }, { tex = "rbxassetid://18568048335", width = 0.6, life = 0.35 } },
-	trail_ember = { { tex = "rbxassetid://70464235210468", width = 1, life = 0.4 } },
-	trailp_rainbow = { { tex = "rbxassetid://99421661918040", width = 1, life = 0.55 }, { tex = "rbxassetid://18568048335", width = 0.7, life = 0.4 } },
-}
-local RAINBOW = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
-	ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 214, 72)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(110, 236, 120)),
-	ColorSequenceKeypoint.new(0.75, Color3.fromRGB(90, 170, 255)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 120, 255)),
-})
+-- the textured layers (HOS-VFX-RES-001) and the rainbow live in Shared.TrailLook (HOS-TRAIL-002): the Shop's preview
+-- and the dash streaks draw the same trails
+local TrailLook = require(Shared:WaitForChild("TrailLook"))
+local TRAIL_LAYERS = TrailLook.LAYERS
+local RAINBOW = TrailLook.RAINBOW
 
 local function trailOn(base: BasePart, item: any)
 	local a1 = Instance.new("Attachment")
@@ -395,7 +385,16 @@ local function nextTrail(p: any): string?
 	return nil
 end
 
+-- HOS-TRAIL-002: the trail you wear right now as Player attribute EOS_Trail (the match's in a match, else the one your
+-- next match will wear), so everyone's dash streaks can take its look (SlideFX)
+function EconomyService.markTrail(plr: Player)
+	local p = DataService.get(plr)
+	local id: string? = if inMatch(plr) then matchTrail[plr] else (if p then nextTrail(p) else nil)
+	plr:SetAttribute("EOS_Trail", id)
+end
+
 function EconomyService.refreshLobbyTrail(plr: Player)
+	EconomyService.markTrail(plr)
 	local char = plr.Character
 	if not char then
 		return
@@ -509,6 +508,8 @@ function EconomyService.init()
 	require(script.Parent.EggService).init({ tryUpdate = tryUpdate, toast = toast }) -- HOS-EGG-002: incubator remotes, egg watch
 	MatchService.onPlayerMatchStart(EconomyService.startMatch)
 	MatchService.onPlayerMatchEnd(EconomyService.endMatch)
+	MatchService.onPlayerMatchStart(EconomyService.markTrail) -- HOS-TRAIL-002: after startMatch picks the match's trail
+	MatchService.onPlayerMatchEnd(EconomyService.markTrail)
 	local function hook(plr: Player)
 		plr:GetAttributeChangedSignal("EOS_InMatch"):Connect(function() -- HOS-TRAIL-001: off in a match, back in the lobby
 			task.defer(EconomyService.refreshLobbyTrail, plr)

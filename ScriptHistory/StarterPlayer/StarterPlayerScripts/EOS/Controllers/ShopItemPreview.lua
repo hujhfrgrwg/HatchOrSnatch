@@ -50,11 +50,7 @@ local KIND = { -- backdrop + the line under the stage
 	abilitySkin = { "violet", "YOUR RIFT PORTALS" },
 	hatchFx = { "violet", "EVERY HATCH AT THE INCUBATOR" },
 }
-local TRAIL_LAYERS = { -- EconomyService.TRAIL_LAYERS: the layers a match draws (texture, width, lifetime)
-	trail_spark = { { tex = "rbxassetid://18568183566", width = 1, life = 0.5 }, { tex = "rbxassetid://18568048335", width = 0.6, life = 0.35 } },
-	trail_ember = { { tex = "rbxassetid://70464235210468", width = 1, life = 0.4 } },
-	trailp_rainbow = { { tex = "rbxassetid://99421661918040", width = 1, life = 0.55 }, { tex = "rbxassetid://18568048335", width = 0.7, life = 0.4 } },
-}
+local TRAIL_LAYERS = require(Shared:WaitForChild("TrailLook")).LAYERS -- the layers a match draws (texture, width, lifetime)
 local RAINBOW = ColorSequence.new({
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 90)),
 	ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 214, 72)),
