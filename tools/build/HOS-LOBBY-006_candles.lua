@@ -4,7 +4,7 @@
 --   1. finds the imported model (MeshParts CandleWaxLarge, CandleWaxMedium, CandleWaxSmall, CandleFlame, CandleWick; the
 --      importer wraps each in a <Name>_Node model) and builds the three kit candles from it, named like the old ones:
 --      A05_Candle_<Size> with parts A05_Candle_<Size>_Wax (peach-tinted cream), _Wick, _Flame (pale warm neon) and
---      _Light_OPTIONAL (a warm PointLight at the flame), each the old kit candle's height at scale factor 1, pivot at the
+--      _Light_OPTIONAL (a yellowish PointLight at the flame), each the old kit candle's height at scale factor 1, pivot at the
 --      bounding-box centre (the altar rebuild, tools/build/HOS-LOBBY-002_pro_altar.lua, stands them by it)
 --   2. puts them in ServerStorage.HalloweenLobbyKit (A05_Candle_Large/Medium/Small, and as A05_Cluster_Large/Medium/Small
 --      in A05_CandleCluster)
@@ -19,7 +19,9 @@ local SIZES = { Large = 2.963, Medium = 2.262, Small = 1.377 } -- the old kit ca
 local WAX = Color3.fromRGB(247, 210, 160) -- cream with a hint of orange (Matthew: "so it's not full white")
 local FLAME = Color3.fromRGB(255, 232, 170) -- a light, warm neon
 local WICK = Color3.fromRGB(40, 30, 25)
-local LIGHT_COLOR, LIGHT_RANGE, LIGHT_BRIGHTNESS = Color3.fromRGB(255, 170, 90), 7, 1.4
+-- a yellowish candle light (Matthew). Range 7 at 1.4 didn't show against the lobby's ambient ("not seeing any light
+-- differences"); range 10 at 3 washed the whole area out.
+local LIGHT_COLOR, LIGHT_RANGE, LIGHT_BRIGHTNESS = Color3.fromRGB(255, 220, 130), 8, 1.8
 local LIGHT_GAP = 5 -- studs: candles closer than this to a lit one share its light
 
 local kit = ServerStorage:WaitForChild("HalloweenLobbyKit")

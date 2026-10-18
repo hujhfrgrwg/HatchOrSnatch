@@ -12,6 +12,11 @@ Matthew, with a screenshot of the block candles: "do the same things for the can
 ![A candle group by a grave](HOS-LOBBY-006/grave_candles.jpg)
 ![The altar corner candles](HOS-LOBBY-006/altar_candles.jpg)
 
+Candle lights off, then on:
+
+![Candle lights off](HOS-LOBBY-006/candle_light_off.jpg)
+![Candle lights on](HOS-LOBBY-006/candle_light_on.jpg)
+
 ## The candle
 - Meshes instead of 10 to 13 blocks each.
   - **Wax:** 8 sides, in three heights, with a lumpy melted lip, a dished pool on top and 3 or 4 drips down the sides.
@@ -30,7 +35,7 @@ Matthew, with a screenshot of the block candles: "do the same things for the can
 - Each kit candle, `A05_Candle_Large/Medium/Small`, uses the old part names: `A05_Candle_<Size>_Wax`, `_Wick`, `_Flame` and `_Light_OPTIONAL`.
   - **Wax:** cream with a hint of orange (247,210,160), SmoothPlastic. It's the only part that collides.
   - **Flame:** pale warm neon (255,232,170).
-  - **Light:** a warm PointLight at the flame (255,170,90), range 7, brightness 1.4, no shadows.
+  - **Light:** a yellowish PointLight at the flame (255,220,130), range 8, brightness 1.8, no shadows. Matthew asked for it brighter and yellower: at first it was orange (255,170,90), range 7, brightness 1.4, which didn't show against the lobby's ambient light ("not seeing any light differences"). Range 10 at brightness 3 washed the whole area out.
   - **Size:** each is the old kit candle's height (2.96 / 2.26 / 1.38) at scale factor 1, with the pivot at the centre.
 - They're in `ServerStorage.HalloweenLobbyKit`, both as `A05_Candle_*` and inside `A05_CandleCluster` as `A05_Cluster_*`. The altar rebuild (`tools/build/HOS-LOBBY-002_pro_altar.lua`) and the incubator dais rebuild (`tools/build/HOS-INC-001_pedestal.lua`) pick them up with no changes.
 - Adopt and swap: `tools/build/HOS-LOBBY-006_candles.lua`.
