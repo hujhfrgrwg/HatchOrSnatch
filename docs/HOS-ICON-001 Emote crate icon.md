@@ -30,5 +30,13 @@ Today the emote crate shows the generic gift icon (`rbxassetid://87833590533916`
 
 The gift icon is also used elsewhere (the daily gift and other cards), so only the emote crate's images change.
 
-## Next
-The file needs uploading on Matthew's or Hunter's PC, because uploads can't be done from the cloud session. Use Studio's Asset Manager or `tools\upload\upload_assets.py`. With the image id, the two cards above get switched over.
+## Uploaded and wired (18 Oct)
+Matthew uploaded it as `rbxassetid://78853379381316`. It's now used in three places:
+- **Shop, Emotes page:** the crate card (`CrateArt` and its shadow).
+- **Emotes screen, Crate page:** the crate icon (`CrateIcon` and its shadow).
+- **CrateShowcase:** the glowing crate over a player's head while they open an Emote Crate. Other players see it too. It was the gift icon before.
+
+The gift icon stays everywhere else, such as the daily gift and reward toasts.
+- I checked in Matthew's playtest that the image downloads (in 1.4 s), and it showed on both cards.
+- The changed lines and old ids are in `docs/backups/HOS-ICON-001_2026-10-18/changes.md`. The full old `CrateShowcase` is in Studio under `ServerStorage._Backups.HOS-ICON-001_2026-10-18`.
+- **If EOSUI is ever rebuilt** from `ServerStorage.EOSUIBuild`, the two cards go back to the gift icon, because the build data still says gift. Set them again, or change the build data.
