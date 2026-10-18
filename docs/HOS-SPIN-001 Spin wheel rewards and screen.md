@@ -12,7 +12,7 @@ The game's coins are Gold, so "Coins" is Gold here.
 
 ![The wheel with its rewards](HOS-SPIN-001/wheel_labels.jpg)
 ![Walk-up: the spin screen](HOS-SPIN-001/screen_walkup.jpg)
-![Result](HOS-SPIN-001/screen_result.jpg)
+![Result (first version, before the popup)](HOS-SPIN-001/screen_result.jpg)
 ![x10](HOS-SPIN-001/screen_x10.jpg)
 ![The lobby wheel after the spin](HOS-SPIN-001/world_after_spin.jpg)
 
@@ -47,7 +47,7 @@ Built by `tools/build/HOS-SPIN-001/wheel_labels.lua`.
 ## The spin screen (`StarterGui.SpinWheelUI`)
 It uses the theme of the welcome-back gift card: a dark panel with an orange border, the orange banner, green buttons, gold tiles, the grey plate and the red X. It's a copy of `RetentionUI`, so it gets the same UI module (scrim, Escape, phone scale, button juice). No new art was needed.
 
-Compared with the reference, the screen has one weapon slot instead of two. The wheel is a live 3D copy of the lobby wheel, and a prize tile pops over the hub when it stops.
+Compared with the reference, the screen has one weapon slot instead of two. The wheel is a live 3D copy of the lobby wheel, and the prize gets its own popup when it stops.
 
 **Left side**
 - The "SPIN TO WIN!" banner.
@@ -58,7 +58,31 @@ Compared with the reference, the screen has one weapon slot instead of two. The 
 
 **Right side**
 - The wheel, a ViewportFrame with a copy of the lobby wheel and crystal. The reward icons ride on their sectors as it turns. It spins clockwise with a ticking sound, then eases onto the result.
-- When it stops, the prize tile pops over the hub. A x5 or x10 spin lands on its best roll and adds a total line ("x10: +2,850 Gold, +3 Gems, 1 egg shard"). A toast says the same.
+- When it stops, the prize popup opens (below). A x5 or x10 spin lands on its best roll, and the popup adds the total for all of them.
+
+### The prize popup (added the same day)
+Matthew: "Have the reward kinda be its own GUI that pops up in the middle of the screen with the rest of the background kinda shaded black. And then if it's gems/coins, they transition and tween as individual gems/coins to the bottom left. If it's an egg shard, it tweens into egg shards going to the top left incubator button for HUD."
+
+![Prize popup](HOS-SPIN-001/prize_popup.jpg)
+![Collecting](HOS-SPIN-001/prize_collect.jpg)
+
+This replaces the small prize tile over the hub.
+- **The popup** (`SpinWheelUI.Root.Prize`) is a copy of the shop's reward reveal: spinning rays, sparkles, the big icon, the prize name, its kind, and a total line for x5/x10. It sits over a black shade with one **COLLECT!** button. Escape or a tap on the shade also collects.
+- **Collecting** sends everything home from the popup's icon:
+  - Gold flies as single coins (6 to 14) to the Gold icon in the HUD wallet, bottom left.
+  - Gems fly as single gems (4 to 10) to the Gems icon.
+  - Each egg shard flies to the HUD's incubator button, top left.
+  - The icons burst out first, then curve in and shrink. Where they land there's a sparkle and a rising "+250" or "+3 shards".
+- **The wallet waits:** the Gold and Gems numbers stay put from the moment you spin, then count up as the first coin lands.
+  - To do this without editing UIController, the controller wraps EOSUI's `UI.countTo` for the "gold" and "gems" keys while a spin is held.
+  - It always lets go: after 15 s, or 2 min if the popup is left open.
+- In a match there's no popup; the prizes just fly home.
+- Built by `tools/build/HOS-SPIN-001/build_prize.lua`, which runs after `build_ui.lua`. The flying icons go on the `SpinWheelUI.Fly` layer.
+
+Tested with a x10 (+1,700 Gold, +23 Gems, 3 shards):
+- While the wheel turned and the popup was up, the HUD stayed at 0 / 0.
+- On COLLECT!, the coins, gems and shards flew out and the wallet counted up to exactly 1,700 / 23.
+- The fly layer was empty afterwards.
 
 **Opening and closing:** walking up to the front of the wheel opens the screen, and walking away closes it. If the player closes it with X, it stays shut until they walk away and come back. It never opens in a match, while spectating, or over another panel.
 
@@ -86,7 +110,6 @@ Built by `tools/build/HOS-SPIN-001/build_ui.lua`. The controller is `StarterPlay
 - **The weapon:** say which one and it's one line (`weaponId` on slot 1). The wheel and screen will show its name; the knife icon stays as the picture unless there's a better one.
 - **Robux spin packs:** prices are placeholders (49 / 349 / 2,900, as in the reference). They need developer products created, and the ids go in `SpinWheelConfig.PACKS`. Until then the tiles say "Spin packs aren't on sale yet".
 - **Free spin interval:** 15 minutes, to match the reference. Change `FREE_SECONDS` if you want something else.
-- **Gold and Gems show early:** the HUD wallet counts up the moment the server pays, about 4 seconds before the wheel stops. Holding the wallet until the wheel stops needs a change in the HUD.
 - The stud texture on the wheel is still the egg-pack one with "L"s until the custom stud texture is uploaded (see [[HOS-LOBBY-007 Spin wheel]]).
 
 ## Backups
