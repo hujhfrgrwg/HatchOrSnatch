@@ -1,4 +1,5 @@
--- HOS-LOBBY-002: pro altar in the middle of the Halloween lobby plaza.
+-- HOS-LOBBY-002: pro altar in the middle of the Halloween lobby plaza, with a summoning circle
+-- in the middle where players stand to enter (SummonZone marks the volume for gameplay code).
 -- Lobby style: Plastic + Studs surfaces, the kit's stone purples, Neon only for glow accents.
 local CHS = game:GetService("ChangeHistoryService")
 local kit = game:GetService("ServerStorage"):WaitForChild("HalloweenLobbyKit")
@@ -33,13 +34,13 @@ local C = {
 }
 
 -- dimensions
-local HALF = 7 -- dais half-width (corner blocks' outer faces)
-local CORE = 6.95 -- core slab half-width (corner blocks sit 0.05 proud)
-local ARM = 3 -- half-width of the cross walkway / stair flights
+local HALF = 8.5 -- dais half-width (corner blocks' outer faces)
+local CORE = 8.45 -- core slab half-width (corner blocks sit 0.05 proud)
+local ARM = 3.5 -- half-width of the cross walkway / stair flights
 local RISE = 0.8
 local D = 3 * RISE -- dais top above the plaza
 local TREAD = 0.9
-local CB_TOP = D + 1.8 -- corner block top
+local CB_TOP = D + 0.6 -- corner block top (low plinths for the lamps and obelisks)
 local CAP_T = 0.4
 
 local root = Instance.new("Model")
@@ -159,12 +160,11 @@ for k = 0, 3 do
 	local cb = model("Block", corner)
 	box(cb, "Body", Q, ARM, 0, ARM, HALF, CB_TOP, HALF, C.stone)
 	box(cb, "BaseCourse", Q, ARM - 0.15, 0, ARM - 0.15, HALF + 0.15, 0.5, HALF + 0.15, C.stoneDark)
-	box(cb, "FloorBand", Q, ARM - 0.1, D, ARM - 0.1, HALF + 0.1, D + 0.3, HALF + 0.1, C.stoneDark)
 	box(cb, "Cap", Q, ARM - 0.25, CB_TOP, ARM - 0.25, HALF + 0.25, CB_TOP + CAP_T, HALF + 0.25, C.stoneLight)
 	box(cb, "CapLip", Q, ARM - 0.12, CB_TOP - 0.2, ARM - 0.12, HALF + 0.12, CB_TOP + 0.05, HALF + 0.12, C.deep)
 	-- cracks on the two outer faces (relief, like the kit's stone blocks)
 	local cracks = {
-		{ 0.6, 1.43, 0.5, 0.12 }, { 1.0, 1.28, 0.12, 0.4 }, { 2.6, 3.23, 0.4, 0.1 }, { 2.75, 2.98, 0.1, 0.37 }, { 1.8, 0.98, 0.3, 0.1 },
+		{ 0.7, 1.43, 0.5, 0.12 }, { 1.1, 1.28, 0.12, 0.4 }, { 3.2, 2.13, 0.4, 0.1 }, { 3.35, 1.88, 0.1, 0.37 }, { 2.1, 0.98, 0.3, 0.1 },
 	}
 	for i, c in cracks do
 		local u, y, w, h = c[1], c[2], c[3], c[4]
@@ -180,7 +180,7 @@ for k = 0, 3 do
 
 	-- candles on three cap corners (the inner one stays clear)
 	local candles = model("Candles", corner)
-	for _, c in { { "A05_Candle_Large", 1.45, 1.45 }, { "A05_Candle_Medium", 1.45, -1.45 }, { "A05_Candle_Small", -1.45, 1.45 } } do
+	for _, c in { { "A05_Candle_Large", 1.95, 1.95 }, { "A05_Candle_Medium", 1.95, -1.95 }, { "A05_Candle_Small", -1.95, 1.95 } } do
 		local m = kitClone(c[1], candles)
 		local _, size = m:GetBoundingBox()
 		m:PivotTo((Q * CFrame.new((ARM + HALF) / 2 + c[2], capTop + size.Y / 2 + 0.002, (ARM + HALF) / 2 + c[3])) * CFrame.Angles(0, math.rad(15 * (k + 1)), 0))
@@ -288,63 +288,73 @@ for k = 0, 3 do
 	end
 end
 
--- ===== centre: pedestal and trophy =====
-local ped = model("Pedestal", root)
-box(ped, "Medallion", O, -2.6, D, -2.6, 2.6, D + 0.12, 2.6, C.deep)
-for _, s in { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } } do
-	box(ped, "MedallionGem", O, s[1] * 2.25 - 0.18, D + 0.12, s[2] * 2.25 - 0.18, s[1] * 2.25 + 0.18, D + 0.17, s[2] * 2.25 + 0.18, C.glowPurple, { style = "neon", collide = false })
+-- ===== centre: summoning circle (players stand here to enter) =====
+local summon = model("SummoningCircle", root)
+local F0 = D -- dais floor
+-- stepped round floor disc (four overlapping slabs, each a hair taller so no tops are coplanar)
+for i, r in { { 3.2, 1.2 }, { 2.95, 2.15 }, { 2.15, 2.95 }, { 1.2, 3.2 } } do
+	box(summon, "Disc", O, -r[1], F0, -r[2], r[1], F0 + 0.12 + i * 0.004, r[2], C.deep)
 end
-box(ped, "Plinth", O, -1.8, D + 0.12, -1.8, 1.8, D + 0.52, 1.8, C.stoneDark)
-box(ped, "Body", O, -1.4, D + 0.52, -1.4, 1.4, D + 2.92, 1.4, C.black)
-for _, s in { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } } do
-	box(ped, "GoldEdge", O, s[1] * 1.4 - 0.1, D + 0.525, s[2] * 1.4 - 0.1, s[1] * 1.4 + 0.1, D + 2.86, s[2] * 1.4 + 0.1, C.gold, { style = "smooth" })
+local discTop = F0 + 0.12 + 4 * 0.004
+-- glowing rings: 24 segments at 15-degree steps, alternate segments a hair taller
+local function ring(name, radius, width, color)
+	local len = 2 * radius * math.tan(math.rad(7.5)) + 0.04
+	for i = 0, 23 do
+		local a = math.rad(i * 15)
+		local h = 0.06 + (i % 2) * 0.006
+		local cf = O * CFrame.Angles(0, a, 0) * CFrame.new(0, discTop - 0.02 + h / 2, -radius)
+		brick(summon, name, Vector3.new(len, h, width), cf, color, { style = "neon", collide = false })
+	end
 end
-box(ped, "GoldLip", O, -1.53, D + 2.8, -1.53, 1.53, D + 2.9, 1.53, C.gold, { style = "smooth" })
-box(ped, "Cap", O, -1.65, D + 2.92, -1.65, 1.65, D + 3.27, 1.65, C.deep)
--- glowing gold crown on every face of the body
-for r = 0, 3 do
-	local R = O * CFrame.Angles(0, r * math.pi / 2, 0)
-	crown(ped, R, 0, D + 1.15, -1.47, -1.39, 1.15, C.gold, { style = "neon", collide = false }, C.black)
+ring("OuterRing", 2.85, 0.22, C.glowPurple)
+ring("InnerRing", 1.7, 0.16, C.glowOrange)
+-- eight runes between the rings, two alternating shapes, each turned to face the centre
+for i = 0, 7 do
+	local R = O * CFrame.Angles(0, math.rad(i * 45), 0) * CFrame.new(0, discTop, -2.27)
+	local function rune(x0, z0, x1, z1, t)
+		box(summon, "Rune", R, x0, -0.02, z0, x1, 0.035 + t, z1, C.glowPurple, { style = "neon", collide = false })
+	end
+	rune(-0.05, -0.24, 0.05, 0.24, 0)
+	if i % 2 == 0 then
+		rune(-0.2, -0.05, 0.2, 0.05, 0.004)
+	else
+		rune(-0.18, -0.24, -0.08, -0.04, 0.004)
+		rune(0.08, 0.04, 0.18, 0.24, 0.004)
+	end
 end
+-- centre sigil: a glowing diamond with a dark heart
+local D45 = O * CFrame.Angles(0, math.rad(45), 0)
+box(summon, "Sigil", D45, -0.5, discTop - 0.02, -0.5, 0.5, discTop + 0.05, 0.5, C.glowPurple, { style = "neon", collide = false })
+box(summon, "SigilHeart", D45, -0.25, discTop - 0.02, -0.25, 0.25, discTop + 0.058, 0.25, C.deep, { style = "smooth", collide = false })
 
-local trophy = model("Trophy", ped)
-local T0 = D + 3.27
-local pad = box(trophy, "GlowPad", O, -0.85, T0, -0.85, 0.85, T0 + 0.1, 0.85, C.gold, { style = "neon", collide = false })
-T0 += 0.1
-local tiers = {
-	{ "Base", 1.3, 0, 0.3, C.goldDark }, { "Base2", 1.0, 0.3, 0.55, C.gold }, { "Stem", 0.35, 0.55, 1.25, C.gold },
-	{ "Knot", 0.65, 0.85, 1.05, C.goldDark }, { "Cup1", 0.7, 1.25, 1.5, C.gold }, { "Cup2", 1.1, 1.5, 1.8, C.gold },
-	{ "Cup3", 1.45, 1.8, 2.5, C.gold }, { "Rim", 1.65, 2.5, 2.7, C.goldDark },
-}
-for _, t in tiers do
-	local h = t[2] / 2
-	box(trophy, t[1], O, -h, T0 + t[3], -h, h, T0 + t[4], h, t[5], { style = t[2] >= 1 and "studs" or "smooth" })
-end
-box(trophy, "Inside", O, -0.62, T0 + 2.65, -0.62, 0.62, T0 + 2.71, 0.62, C.goldInner, { style = "smooth" })
-for _, sx in { -1, 1 } do
-	local a, b = sx * 0.7, sx * 1.15
-	box(trophy, "Handle", O, math.min(a, b), T0 + 2.2, -0.12, math.max(a, b), T0 + 2.38, 0.12, C.gold, { style = "smooth" })
-	box(trophy, "Handle", O, sx * 1.15 - 0.09, T0 + 1.597, -0.13, sx * 1.15 + 0.09, T0 + 2.383, 0.13, C.gold, { style = "smooth" })
-	box(trophy, "Handle", O, math.min(sx * 0.62, sx * 1.15), T0 + 1.6, -0.124, math.max(sx * 0.62, sx * 1.15), T0 + 1.78, 0.124, C.gold, { style = "smooth" })
-end
+-- rising motes and a purple glow over the circle
+local fx = box(summon, "SummonFX", O, -2.4, discTop + 0.05, -2.4, 2.4, discTop + 0.15, 2.4, C.glowPurple, { style = "smooth", collide = false })
+fx.Transparency = 1
 local glow = Instance.new("PointLight")
-glow.Color = C.gold
-glow.Brightness = 1.2
-glow.Range = 14
-glow.Parent = pad
-local sparkle = Instance.new("ParticleEmitter")
-sparkle.Name = "Sparkles"
-sparkle.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-sparkle.Color = ColorSequence.new(C.gold)
-sparkle.LightEmission = 1
-sparkle.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(1, 0) })
-sparkle.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) })
-sparkle.Lifetime = NumberRange.new(1.2, 2)
-sparkle.Rate = 4
-sparkle.Speed = NumberRange.new(0.6, 1.2)
-sparkle.SpreadAngle = Vector2.new(25, 25)
-sparkle.EmissionDirection = Enum.NormalId.Top
-sparkle.Parent = pad
+glow.Color = C.glowPurple
+glow.Brightness = 1
+glow.Range = 12
+glow.Parent = fx
+local motes = Instance.new("ParticleEmitter")
+motes.Name = "Motes"
+motes.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+motes.Color = ColorSequence.new(C.glowPurple, Color3.fromRGB(255, 160, 90))
+motes.LightEmission = 1
+motes.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.22), NumberSequenceKeypoint.new(1, 0) })
+motes.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.3), NumberSequenceKeypoint.new(1, 1) })
+motes.Lifetime = NumberRange.new(1.8, 2.8)
+motes.Rate = 6
+motes.Speed = NumberRange.new(0.8, 1.6)
+motes.SpreadAngle = Vector2.new(10, 10)
+motes.EmissionDirection = Enum.NormalId.Top
+motes.Parent = fx
+
+-- the volume players stand in to enter (no collision; for gameplay code to read)
+local zone = box(summon, "SummonZone", O, -3.1, discTop, -3.1, 3.1, discTop + 7, 3.1, C.glowPurple, { style = "smooth" })
+zone.Transparency = 1
+zone.CanCollide = false
+zone.CastShadow = false
+zone:SetAttribute("Purpose", "Players standing in this volume are entering (summoning circle). Not wired to any code yet.")
 
 -- ===== place it =====
 local rec = CHS:TryBeginRecording("HOS-LOBBY-002 pro altar")
