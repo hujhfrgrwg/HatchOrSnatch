@@ -1,6 +1,6 @@
 ---
 tags: [hub]
-updated: 2026-10-15
+updated: 2026-10-18
 ---
 # Hatch or Snatch Home
 
@@ -12,8 +12,8 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 ## Studio place
 | | |
 |---|---|
-| Place name | *(fill in)* |
-| Place id / universe id | *(fill in)* |
+| Place name | Hatch or Snatch |
+| Place id / universe id | 128015050187408 / *(fill in)* |
 | Owner | *(group or Hunter's account)* |
 
 ## Setup
@@ -29,3 +29,6 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 | `docs/` | Delivery reports, reference images; `docs/backups/` for pre-edit backups |
 | `ScriptHistory/` | Read-only snapshots of the place's scripts |
 | `tools/` | MCP and upload scripts |
+
+## Delivery reports
+- [[HOS-LOBBY-001 Plaza]]: lobby Ground_Plaza made one checkered, studded brick (2026-10-18).

@@ -1,0 +1,37 @@
+{
+  "ticket": "HOS-LOBBY-001",
+  "taken": "2026-10-18",
+  "model": "Workspace.Ground.Ground_Plaza (Model, no attributes, no scripts reference it)",
+  "note": "42 Parts, all named Ground_Plaza. Every property below is shared; only CFrame Z and Size X differ (rows list).",
+  "shared": {
+    "ClassName": "Part",
+    "Shape": "Block",
+    "CFrameRotation": [-1, 0, 0, 0, 1, 0, 0, 0, -1],
+    "PositionX": 0,
+    "PositionY": 10.020000457763672,
+    "SizeY": 0.05999999865889549,
+    "SizeZ": 2,
+    "Material": "Plastic",
+    "BrickColor": "Dark grey metallic",
+    "Color": [0.3294117748737335, 0.30588236451148989, 0.3450980484485626],
+    "TopSurface": "Studs",
+    "BottomSurface": "Inlet",
+    "Anchored": true,
+    "CanCollide": true,
+    "CanTouch": true,
+    "CanQuery": true,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Reflectance": 0,
+    "Locked": false,
+    "CollisionGroup": "Default"
+  },
+  "rows_z_sizeX": [
+    [1459, 4], [1461, 24], [1463, 32], [1465, 40], [1467, 48], [1469, 52], [1471, 56],
+    [1473, 60], [1475, 64], [1477, 68], [1479, 68], [1481, 72], [1483, 72], [1485, 76],
+    [1487, 76], [1489, 76], [1491, 80], [1493, 80], [1495, 80], [1497, 80], [1499, 80],
+    [1501, 80], [1503, 80], [1505, 80], [1507, 80], [1509, 80], [1511, 76], [1513, 76],
+    [1515, 76], [1517, 72], [1519, 72], [1521, 68], [1523, 68], [1525, 64], [1527, 60],
+    [1529, 56], [1531, 52], [1533, 48], [1535, 40], [1537, 32], [1539, 24], [1541, 4]
+  ]
+}
