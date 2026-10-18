@@ -14,8 +14,7 @@ The lobby incubator (`Workspace.Incubator.Incubator`) is now animated and wired 
 ## What players see
 - **Idle animation** (client only; the server's parts never move):
   - The egg turns and bobs.
-  - The orbit ring turns the other way.
-  - The floating crystals circle, bob and spin.
+  - The orbit ring and the floating crystals have been removed for now (18 Oct). The code still animates them if they're put back.
   - The lanterns sway on their chains.
   - The neon strips, beams, runes, sign and lights breathe.
 - **Walk-up:** stepping within 11 studs of the egg opens the incubator screen (`EggUIController`'s `openIncubator`), and walking past 14 studs closes it. It only closes a screen the walk-up opened, and it never opens during a match.
@@ -97,12 +96,20 @@ Walk up and they fly in.
 - `!reset`: empty the egg
 - `!tp`: go back in front of the incubator
 
-Fragments fly in when you walk up, so step away and come back after a command. Set the `Enabled` attribute to false to turn the bench off.
+Fragments fly in when you walk up, or straight away if you're already standing at the incubator. Set the `Enabled` attribute to false to turn the bench off.
 
 Checked in a playtest:
 - **Spawn:** you start at the spot, facing the incubator, with 5 fragments waiting.
 - **Walk-up:** the fly-in placed 13 of 18 pieces and the screen opened.
 - **`!full`:** brought the fill to exactly 18. `DataService.update` runs its callback twice; the first version of the bench didn't account for that and gave double.
+
+## Changes 18 Oct (Matthew)
+- **Second lantern:** the left outside lantern is mirrored onto the outside of the right pillar (`A09_LanternBracket_R`, `A09_LanternRight_Chain/_Frame/_Glass/_Light_OPTIONAL`). It sways like the left one.
+- **Bigger egg:** `A09_EggCentre` moved up to y 17.05 and has a new attribute `EggScale` = 1.7. The egg now spans y 13.1–20.6, about 6 studs wide, filling most of the arch. Change `EggScale` in Studio to resize it; the client scales the pieces, their holograms and the fly-in target.
+- **Removed for now:** the pink floating crystals (`A09_FloatShards`), the white orbit rings (`A09_OrbitRings_OPTIONAL`), and the two lights left behind by the deleted interior lanterns. They're in `ServerStorage._Backups.HOS-INC-001_2026-10-18_IncubatorRingsCrystalsStrayLights`.
+- **Fragments while standing at the incubator:** these now fly in too. Before, the fly-in only started when you stepped onto the platform.
+
+![Front, with both lanterns and the bigger egg](HOS-INC-001/ingame_front_big_egg.jpg)
 
 ## Notes
 - **Why the pieces are baked:** building the pieces at runtime with EditableMesh worked in Studio, but a player's client ran out of its EditableMesh memory budget after 8 of the 18 pieces, and phones get less. Baked meshes have no such limit and don't need the "Allow Mesh / Image APIs" setting.

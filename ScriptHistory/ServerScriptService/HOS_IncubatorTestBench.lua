@@ -13,7 +13,7 @@
 --   !tp                    back in front of the incubator
 -- Attributes on this script: Enabled (turn the whole bench off), Shards (comma list for Play and !shards),
 -- ResetOnPlay (empty the egg when you join).
--- Fragments only fly in when you walk up to the incubator, so after a command, walk away and come back.
+-- Fragments fly in when you walk up to the incubator, or straight away if you are already standing at it.
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
@@ -156,7 +156,7 @@ local function onChat(plr: Player, msg: string)
 	if cmd == "!shards" then
 		local list = if #words > 0 then parse(words) else defaultList()
 		give(plr, list)
-		print(("[IncubatorTestBench] gave %s: %s (walk away and back to the incubator to see them fly in)"):format(plr.Name, table.concat(list, ", ")))
+		print(("[IncubatorTestBench] gave %s: %s (they fly in at the incubator)"):format(plr.Name, table.concat(list, ", ")))
 	elseif cmd == "!full" then
 		local list = fill(plr)
 		print(("[IncubatorTestBench] %s's egg filled with %s"):format(plr.Name, table.concat(list, ", ")))

@@ -154,15 +154,36 @@ local function unbind()
 	S = nil
 end
 
+-- sizes a piece for an egg k times the generator's (keeps the unscaled values the first time)
+local function scalePiece(pc: any, k: number)
+	if not pc.base then
+		pc.base = { locals = pc.locals, holoLocals = pc.holoLocals, centre = pc.centre, sizes = {}, holoSizes = {} }
+		for j, p in pc.parts do pc.base.sizes[j] = p.Size end
+		for j, p in pc.holo do pc.base.holoSizes[j] = p.Size end
+	end
+	local b = pc.base
+	local function scaled(list)
+		local out = {}
+		for j, cf in list do out[j] = CFrame.new(cf.Position * k) * cf.Rotation end
+		return out
+	end
+	pc.locals, pc.holoLocals, pc.centre = scaled(b.locals), scaled(b.holoLocals), b.centre * k
+	for j, p in pc.parts do p.Size = b.sizes[j] * k end
+	for j, p in pc.holo do p.Size = b.holoSizes[j] * k end
+end
+
 local function bind(m: Model)
 	local s: any = { model = m }
-	local centre = m:FindFirstChild("A09_EggCentre") -- an invisible marker at the egg's centre
+	local centre = m:FindFirstChild("A09_EggCentre") -- an invisible marker at the egg's centre; EggScale sizes the egg
 	if not (centre and centre:IsA("BasePart")) then return nil end
 	s.E = centre.Position
+	local k = centre:GetAttribute("EggScale")
+	k = if type(k) == "number" and k > 0 then k else 1
 	-- the egg: the puzzle pieces (hidden until filled) and their holograms (they ride the egg's turn in step)
 	s.slots = {}
 	if EGG then
 		for i, pc in EGG.pieces do
+			scalePiece(pc, k)
 			s.slots[i] = pc
 			for k, p in pc.parts do p.CFrame = CFrame.new(s.E) * pc.locals[k] end
 			for k, p in pc.holo do
@@ -474,6 +495,13 @@ local function checkNear()
 			end)
 		elseif not playing then
 			openScreen()
+		end
+	elseif inside and near and not playing then
+		-- shards that arrive while you're standing here fly in too
+		local v = view()
+		local list = unseenOf(v)
+		if v and #list > 0 and unseenWaiting() then
+			task.spawn(flyIn, v, table.clone(list))
 		end
 	elseif not inside and near then
 		near = false
