@@ -366,16 +366,16 @@ zone:SetAttribute("Purpose", "Players standing in this volume are entering (summ
 local GATE = HALF + 2.8 -- wall half-width: ~1 stud in front of the bottom step (stair cheek caps end at HALF + 2.2)
 local BEAM_H = 70
 local gate = model("ProGate", root)
-gate:SetAttribute("FadeNear", GATE + 8) -- fully shown within this many studs of the centre
-gate:SetAttribute("FadeFar", GATE + 20) -- fully hidden beyond this
+gate:SetAttribute("FadeNear", 17) -- fully shown within this many studs of the centre (the barrier stops players at ~14.8)
+gate:SetAttribute("FadeFar", 25) -- starts fading in at 25 studs from the centre; hidden beyond
 CollectionService:AddTag(gate, "EOS_ProximityFade")
 
 local WALL_T = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 0.64), NumberSequenceKeypoint.new(0.08, 0.76),
-	NumberSequenceKeypoint.new(0.4, 0.92), NumberSequenceKeypoint.new(1, 1),
+	NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(0.08, 0.64),
+	NumberSequenceKeypoint.new(0.4, 0.85), NumberSequenceKeypoint.new(1, 1),
 })
 local GLOW_T = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(0.3, 0.86), NumberSequenceKeypoint.new(1, 1),
+	NumberSequenceKeypoint.new(0, 0.45), NumberSequenceKeypoint.new(0.3, 0.76), NumberSequenceKeypoint.new(1, 1),
 })
 -- a flat (not camera-facing) beam on one side, from the ground line straight up; x shifts it along
 -- the side, out pushes it outward (streaks sit a hair outside the wall so they never share its plane).
@@ -426,14 +426,11 @@ for k = 0, 3 do
 	-- share a plane.
 	local rng = Random.new(31 + k)
 	for i = 1, 14 do
-		local x = 5.5 + rng:NextNumber() * (GATE - 6.5) -- keep clear of the sign (9 wide, centred)
-		if rng:NextNumber() < 0.5 then
-			x = -x
-		end
+		local x = -GATE + 1 + rng:NextNumber() * (2 * GATE - 2)
 		local w = 0.25 + rng:NextNumber() ^ 2 * 1.6
 		local h = 20 + rng:NextNumber() * 45
-		local t0 = 0.5 + rng:NextNumber() * 0.25
-		local seq = NumberSequence.new({ NumberSequenceKeypoint.new(0, t0), NumberSequenceKeypoint.new(0.5, 0.88), NumberSequenceKeypoint.new(1, 1) })
+		local t0 = 0.35 + rng:NextNumber() * 0.25
+		local seq = NumberSequence.new({ NumberSequenceKeypoint.new(0, t0), NumberSequenceKeypoint.new(0.5, 0.8), NumberSequenceKeypoint.new(1, 1) })
 		local tint = C.glowPurple:Lerp(Color3.fromRGB(205, 150, 255), rng:NextNumber() * 0.5)
 		local streak = wallBeam(line, Q, "Streak", h, w, seq, tint, INC_STROKE, x, 0.05 + i * 0.006)
 		streak:SetAttribute("Twinkle", true) -- ProximityFade fades it in and out like a sparkle
@@ -459,7 +456,7 @@ for k = 0, 3 do
 	backdrop.Position = UDim2.fromScale(0.5, 0.5)
 	backdrop.Size = UDim2.fromScale(1, 0.98)
 	backdrop.BackgroundColor3 = Color3.fromRGB(16, 6, 30)
-	backdrop.BackgroundTransparency = 0.3
+	backdrop.BackgroundTransparency = 0.2
 	backdrop.BorderSizePixel = 0
 	backdrop.Parent = gui
 	Instance.new("UICorner", backdrop).CornerRadius = UDim.new(0.5, 0)
