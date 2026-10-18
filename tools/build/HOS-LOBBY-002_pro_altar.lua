@@ -34,14 +34,15 @@ local C = {
 }
 
 -- dimensions
-local HALF = 8.5 -- dais half-width (corner blocks' outer faces)
-local CORE = 8.45 -- core slab half-width (corner blocks sit 0.05 proud)
-local ARM = 3.5 -- half-width of the cross walkway / stair flights
-local RISE = 0.8
+local HALF = 11 -- dais half-width (corner blocks' outer faces)
+local CORE = 10.95 -- core slab half-width (corner blocks sit 0.05 proud)
+local ARM = 5.5 -- half-width of the cross walkway / stair flights (and of the open centre)
+local RISE = 0.5
 local D = 3 * RISE -- dais top above the plaza
 local TREAD = 0.9
 local CB_TOP = D + 0.6 -- corner block top (low plinths for the lamps and obelisks)
 local CAP_T = 0.4
+local CIRCLE = 1.2 -- summoning circle scale (1 = radius 3.2)
 
 local root = Instance.new("Model")
 root.Name = "ProAltar"
@@ -149,25 +150,26 @@ for k = 0, 3 do
 		local cheek = model(sx < 0 and "Cheek_L" or "Cheek_R", stairs)
 		local a, b = sx * (ARM - 0.05), sx * (ARM + 0.6)
 		local xa, xb = math.min(a, b), math.max(a, b)
-		box(cheek, "Low", Q, xa - 0.006, 0, z0 - 0.003, xb + 0.006, 1.4, CORE + 2 * TREAD + 0.35, C.stoneDark)
-		box(cheek, "LowCap", Q, xa - 0.08, 1.4, z0 + 0.012, xb + 0.08, 1.65, CORE + 2 * TREAD + 0.45, C.stoneLight)
-		box(cheek, "High", Q, xa, 0, z0 + 0.016, xb, 2.6, CORE + TREAD + 0.25, C.stoneDark)
-		box(cheek, "HighCap", Q, xa - 0.085, 2.6, z0 + 0.02, xb + 0.085, 2.85, CORE + TREAD + 0.35, C.stoneLight)
+		box(cheek, "Low", Q, xa - 0.006, 0, z0 - 0.003, xb + 0.006, 1.75 * RISE, CORE + 2 * TREAD + 0.35, C.stoneDark)
+		box(cheek, "LowCap", Q, xa - 0.08, 1.75 * RISE, z0 + 0.012, xb + 0.08, 1.75 * RISE + 0.25, CORE + 2 * TREAD + 0.45, C.stoneLight)
+		box(cheek, "High", Q, xa, 0, z0 + 0.016, xb, D + 0.2, CORE + TREAD + 0.25, C.stoneDark)
+		box(cheek, "HighCap", Q, xa - 0.085, D + 0.2, z0 + 0.02, xb + 0.085, D + 0.45, CORE + TREAD + 0.35, C.stoneLight)
 	end
 
 	-- corner block in this side's (+X, +Z) corner
 	local corner = model("Corner", side)
 	local cb = model("Block", corner)
 	box(cb, "Body", Q, ARM, 0, ARM, HALF, CB_TOP, HALF, C.stone)
-	box(cb, "BaseCourse", Q, ARM - 0.15, 0, ARM - 0.15, HALF + 0.15, 0.5, HALF + 0.15, C.stoneDark)
+	box(cb, "BaseCourse", Q, ARM - 0.15, 0, ARM - 0.15, HALF + 0.15, 0.42, HALF + 0.15, C.stoneDark) -- stays below the bottom step's top
 	box(cb, "Cap", Q, ARM - 0.25, CB_TOP, ARM - 0.25, HALF + 0.25, CB_TOP + CAP_T, HALF + 0.25, C.stoneLight)
 	box(cb, "CapLip", Q, ARM - 0.12, CB_TOP - 0.2, ARM - 0.12, HALF + 0.12, CB_TOP + 0.05, HALF + 0.12, C.deep)
 	-- cracks on the two outer faces (relief, like the kit's stone blocks)
 	local cracks = {
 		{ 0.7, 1.43, 0.5, 0.12 }, { 1.1, 1.28, 0.12, 0.4 }, { 3.2, 2.13, 0.4, 0.1 }, { 3.35, 1.88, 0.1, 0.37 }, { 2.1, 0.98, 0.3, 0.1 },
 	}
+	local yScale, uScale = (CB_TOP - 0.3) / 3.6, (HALF - ARM) / 4
 	for i, c in cracks do
-		local u, y, w, h = c[1], c[2], c[3], c[4]
+		local u, y, w, h = c[1] * uScale, c[2] * yScale, c[3], c[4]
 		local proud = 0.05 + i * 0.008 -- every crack at its own depth
 		box(cb, "Crack", Q, ARM + u, y, HALF - 0.02, ARM + u + w, y + h, HALF + proud, C.crack, { style = "smooth" })
 		box(cb, "Crack", Q, HALF - 0.02, y + 0.15, HALF - u - w, HALF + proud, y + 0.15 + h, HALF - u, C.crack, { style = "smooth" })
@@ -180,10 +182,11 @@ for k = 0, 3 do
 
 	-- candles on three cap corners (the inner one stays clear)
 	local candles = model("Candles", corner)
-	for _, c in { { "A05_Candle_Large", 1.95, 1.95 }, { "A05_Candle_Medium", 1.95, -1.95 }, { "A05_Candle_Small", -1.95, 1.95 } } do
+	for _, c in { { "A05_Candle_Large", 1, 1 }, { "A05_Candle_Medium", 1, -1 }, { "A05_Candle_Small", -1, 1 } } do
 		local m = kitClone(c[1], candles)
 		local _, size = m:GetBoundingBox()
-		m:PivotTo((Q * CFrame.new((ARM + HALF) / 2 + c[2], capTop + size.Y / 2 + 0.002, (ARM + HALF) / 2 + c[3])) * CFrame.Angles(0, math.rad(15 * (k + 1)), 0))
+		local off = (HALF - ARM) / 2 - 0.6
+		m:PivotTo((Q * CFrame.new((ARM + HALF) / 2 + c[2] * off, capTop + size.Y / 2 + 0.002, (ARM + HALF) / 2 + c[3] * off)) * CFrame.Angles(0, math.rad(15 * (k + 1)), 0))
 	end
 
 	-- low spiked fence hugging the block's two outer faces
@@ -293,7 +296,7 @@ local summon = model("SummoningCircle", root)
 local F0 = D -- dais floor
 -- stepped round floor disc (four overlapping slabs, each a hair taller so no tops are coplanar)
 for i, r in { { 3.2, 1.2 }, { 2.95, 2.15 }, { 2.15, 2.95 }, { 1.2, 3.2 } } do
-	box(summon, "Disc", O, -r[1], F0, -r[2], r[1], F0 + 0.12 + i * 0.004, r[2], C.deep)
+	box(summon, "Disc", O, -r[1] * CIRCLE, F0, -r[2] * CIRCLE, r[1] * CIRCLE, F0 + 0.12 + i * 0.004, r[2] * CIRCLE, C.deep)
 end
 local discTop = F0 + 0.12 + 4 * 0.004
 -- glowing rings: 24 segments at 15-degree steps, alternate segments a hair taller
@@ -306,11 +309,11 @@ local function ring(name, radius, width, color)
 		brick(summon, name, Vector3.new(len, h, width), cf, color, { style = "neon", collide = false })
 	end
 end
-ring("OuterRing", 2.85, 0.22, C.glowPurple)
-ring("InnerRing", 1.7, 0.16, C.glowOrange)
+ring("OuterRing", 2.85 * CIRCLE, 0.22 * CIRCLE, C.glowPurple)
+ring("InnerRing", 1.7 * CIRCLE, 0.16 * CIRCLE, C.glowOrange)
 -- eight runes between the rings, two alternating shapes, each turned to face the centre
 for i = 0, 7 do
-	local R = O * CFrame.Angles(0, math.rad(i * 45), 0) * CFrame.new(0, discTop, -2.27)
+	local R = O * CFrame.Angles(0, math.rad(i * 45), 0) * CFrame.new(0, discTop, -2.27 * CIRCLE)
 	local function rune(x0, z0, x1, z1, t)
 		box(summon, "Rune", R, x0, -0.02, z0, x1, 0.035 + t, z1, C.glowPurple, { style = "neon", collide = false })
 	end
@@ -328,7 +331,7 @@ box(summon, "Sigil", D45, -0.5, discTop - 0.02, -0.5, 0.5, discTop + 0.05, 0.5, 
 box(summon, "SigilHeart", D45, -0.25, discTop - 0.02, -0.25, 0.25, discTop + 0.058, 0.25, C.deep, { style = "smooth", collide = false })
 
 -- rising motes and a purple glow over the circle
-local fx = box(summon, "SummonFX", O, -2.4, discTop + 0.05, -2.4, 2.4, discTop + 0.15, 2.4, C.glowPurple, { style = "smooth", collide = false })
+local fx = box(summon, "SummonFX", O, -2.4 * CIRCLE, discTop + 0.05, -2.4 * CIRCLE, 2.4 * CIRCLE, discTop + 0.15, 2.4 * CIRCLE, C.glowPurple, { style = "smooth", collide = false })
 fx.Transparency = 1
 local glow = Instance.new("PointLight")
 glow.Color = C.glowPurple
@@ -350,7 +353,7 @@ motes.EmissionDirection = Enum.NormalId.Top
 motes.Parent = fx
 
 -- the volume players stand in to enter (no collision; for gameplay code to read)
-local zone = box(summon, "SummonZone", O, -3.1, discTop, -3.1, 3.1, discTop + 7, 3.1, C.glowPurple, { style = "smooth" })
+local zone = box(summon, "SummonZone", O, -3.1 * CIRCLE, discTop, -3.1 * CIRCLE, 3.1 * CIRCLE, discTop + 7, 3.1 * CIRCLE, C.glowPurple, { style = "smooth" })
 zone.Transparency = 1
 zone.CanCollide = false
 zone.CastShadow = false
