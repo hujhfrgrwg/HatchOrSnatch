@@ -60,7 +60,7 @@ It uses the theme of the welcome-back gift card: a dark panel with an orange bor
 Compared with the reference, the screen has one weapon slot instead of two. The wheel is a live 3D copy of the lobby wheel, and the prize gets its own popup when it stops.
 
 **Left side**
-- The "SPIN TO WIN!" banner.
+- The "SPIN TO WIN!" banner, with the spin wheel icon (`rbxassetid://80232028963934`, the same one the lobby sign uses).
 - The free spin timer and a "Spins: n" count.
 - **FREE SPIN! / SPIN!**, **SPIN x5** and **SPIN x10** buttons. A button greys out when you don't have enough spins; pressing it then says why.
 - "Get more spins": three gold tiles that show the pack as a big number (1 SPIN, 10 SPINS, 100 SPINS) over the Robux price. They used to be gift-box icons; Matthew: "just have these be numbers not crate icons."

@@ -117,7 +117,7 @@ local banner = card.Banner
 for _, n in { "I_gift_daily", "I_gift_dailyShadow" } do
 	local im = banner:FindFirstChild(n)
 	if im then
-		im.Image = "rbxassetid://87833590533916"
+		im.Image = "rbxassetid://80232028963934" -- the spin wheel icon (LobbyBBTemplates.SpinBB), Matthew 18 Oct
 		im.Name = n:gsub("gift_daily", "spin")
 	end
 end
