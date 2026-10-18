@@ -12,9 +12,26 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 ## Studio place
 | | |
 |---|---|
-| Place name | Hatch or Snatch |
-| Place id / universe id | 128015050187408 / *(fill in)* |
-| Owner | *(group or Hunter's account)* |
+| Place name | Hatch or Snatch in Studio; the published place on Roblox is still called "Huss Evolution" |
+| Place id / universe id | 128015050187408 / 10771117139 |
+| Owner | Group "Eggs with Friends" (228184582) |
+
+## Maps
+Arena maps are built from code: `ServerStorage.EOSBuild.Maps` (`MapDefs` plus one `Build<Map>` per map on the shared `ArenaFrame`). Previews sit side by side in `Workspace._MapPreview` along z −390.
+- **Haunted Graveyard** (HOS-MAP-001, Matthew): halloween arena, in the map rotation and vote (`ServerStorage.EOS_Maps.Arena_Graveyard`, copied from the workspace preview). See [[HOS-MAP-001 Haunted Graveyard map]].
+
+## Lobby
+- **Floating-island underside** (HOS-MAP-002, Matthew): cliff columns under the Halloween lobby, sloping in to a point. See [[HOS-MAP-002 Lobby underside]].
+- **Pro altar** (HOS-LOBBY-002, Matthew): altar with a summoning circle in the middle of the plaza (`Workspace.CentralAltar.ProAltar`), rebuildable from `tools/build/HOS-LOBBY-002_pro_altar.lua`. See [[HOS-LOBBY-002 Pro altar]]. Its locked pro gate (tall fading beam wall, PRO LOBBY / LOCKED signs, shown only up close by the client `ProximityFade` controller): [[HOS-LOBBY-003 Pro lobby gate]].
+- **Edge walls** (HOS-LOBBY-001, Matthew): invisible walls flush with the island's outer edge (`Workspace.LobbyEdgeWalls`) so players can walk to the edge without falling. See [[HOS-LOBBY-001 Lobby edge walls]].
+- **Incubator** (HOS-INC-001, Matthew): animated; walking up opens the incubator screen; each player's egg is 18 cracked puzzle pieces that turn from hologram to solid as it fills (the old faceted egg and core are gone), earned shards fly in, and hatching bursts it. Egg piece meshes are in `ReplicatedStorage.IncubatorEggPieces`. See [[HOS-INC-001 Incubator]].
+- **Ambience** (HOS-LOBBY-004, Matthew): lanterns swing when you're within 60 studs and they're on screen, white wind wisps drift through; every lobby animation (lanterns, wind, incubator, leaderboards, pro gate, weapon pedestals) stops in a match or when the camera is away from the lobby (`LobbyGate`). See [[HOS-LOBBY-004 Lobby ambience]].
+- **Jack-o'-lanterns** (HOS-LOBBY-005, Matthew): low-poly mesh pumpkin with a glowing carved face and a warm orange light (kit copy `ServerStorage.HalloweenLobbyKit.A04_JackOLantern`). It replaced the lobby's block pumpkins, and 15 more sit among the trees and graves (`Workspace.LobbyPumpkins`). See [[HOS-LOBBY-005 Jack-o'-lanterns]].
+- **Candles** (HOS-LOBBY-006, Matthew): low-poly mesh candles (peach-tinted cream wax with drips, pale neon flame, one yellowish light per group; kit copies `ServerStorage.HalloweenLobbyKit.A05_Candle_*`). They replaced the lobby's 21 block candles, and groups of two or three sit beside the graves that have no pumpkin (`Workspace.LobbyCandles`). See [[HOS-LOBBY-006 Candles]].
+- **Rig podiums** (HOS-POD-001, Matthew): four podiums in the incubator pedestal's style (Crown, Obelisk, Rune, Harvest) in `ServerStorage.HOS_RigPodiums`, with a preview row in `Workspace._PodiumPreview`. Not placed in the lobby yet. See [[HOS-POD-001 Rig podiums]].
+- **Spin wheel** (HOS-LOBBY-007, Matthew): the structure for a Halloween spin wheel on the south end of the island, facing the altar (`Workspace.SpinWheel`). Stone posts with lanterns, a studded rim, 8 blank sectors and a crystal pointer, rebuildable from `tools/build/HOS-LOBBY-007_spin_wheel.lua`. Sector content and the spin aren't made yet. See [[HOS-LOBBY-007 Spin wheel]].
+- **Plaza floor** (HOS-LOBBY-008, Matthew): `Workspace.Ground.Ground_Plaza` is one 82-stud cylinder with the checker texture (`111949839624798`) and studs from the `HOS_Studs` MaterialVariant, replacing 42 strips. See [[HOS-LOBBY-008 Plaza floor]].
+- **Leaderboards** (HOS-LB-001, Matthew): the four Halloween boards in `Workspace.Leaderboards` show live this-server stats and turn to face each player. See [[HOS-LB-001 Halloween leaderboards]].
 
 ## Setup
 - **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
@@ -30,5 +47,3 @@ Start page for the project. Agents read this first (see `CLAUDE.md`).
 | `ScriptHistory/` | Read-only snapshots of the place's scripts |
 | `tools/` | MCP and upload scripts |
 
-## Delivery reports
-- [[HOS-LOBBY-001 Plaza]]: lobby Ground_Plaza made one checkered, studded brick (2026-10-18).
