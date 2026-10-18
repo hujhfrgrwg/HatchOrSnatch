@@ -47,6 +47,13 @@ How each reward pays:
 
 Built by `tools/build/HOS-SPIN-001/wheel_labels.lua`.
 
+**The sign over the wheel.** Another session's LobbyBillboards controller (on Hunter's instruction) replaces `SpinSign` with its own "SPIN WHEEL" chip and card, showing the free-spin state.
+- **Bug:** they were pinned to the first part found inside `Wheel`. That model turns whenever anyone spins, so a turn could carry the sign down to the base. Matthew: "Fix the overhead UI for the wheel to be above the wheel not in the ground."
+- **Fix:** they're now pinned to the fixed `SpinSign` part, or the frame if it's missing. In a playtest the card stayed at 31.6 studs, above the crystal, before and after a spin.
+- The before and after lines are in `docs/backups/HOS-SPIN-001_2026-10-18/LobbyBillboards_sign_fix.md`.
+
+![The sign above the wheel after a spin](HOS-SPIN-001/sign_above_wheel.jpg)
+
 ## The spin screen (`StarterGui.SpinWheelUI`)
 It uses the theme of the welcome-back gift card: a dark panel with an orange border, the orange banner, green buttons, gold tiles, the grey plate and the red X. It's a copy of `RetentionUI`, so it gets the same UI module (scrim, Escape, phone scale, button juice). No new art was needed.
 
