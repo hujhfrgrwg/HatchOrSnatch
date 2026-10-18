@@ -143,6 +143,13 @@ local function bindLocal(character: Model)
 			tracks[slot] = t
 		end
 	end
+	-- HOS-WEP-001 dual-wield skins swing both blades: SwingDual (SwingJab with the left arm mirrored)
+	local dt = load(animator, "SwingDual", resolve("SwingDual"))
+	if dt then
+		dt.Looped = false
+		dt.Priority = Enum.AnimationPriority.Action2
+		tracks.SwingDual = dt
+	end
 	-- the Catcher's lunge (Space): the two-handed overhead stab, over everything
 	local lt = load(animator, "LungeStab", resolve("LungeStab"))
 	if lt then
@@ -298,6 +305,9 @@ local function playSwing()
 	localSwingAt = now
 	local slot = SWINGS[nextSwing]
 	nextSwing = nextSwing % #SWINGS + 1
+	if r.character:FindFirstChild("Off Dagger") and r.tracks.SwingDual then
+		slot = "SwingDual" -- a dual-wield skin is worn (CharacterService puts the left blade in)
+	end
 	local t = r.tracks[slot]
 	if t then
 		for _, other in ipairs(SWINGS) do

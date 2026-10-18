@@ -399,7 +399,7 @@ end
 
 local function royal(plr: Player): boolean
 	local p = DataService.get(plr)
-	return p ~= nil and p.cosmetics.owned.hatch_royal == true
+	return p ~= nil and p.cosmetics.owned.hatch_royal == true and not (p.cosmetics.off or {}).hatch_royal
 end
 
 local function onHatch(plr: Player)

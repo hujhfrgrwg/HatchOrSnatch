@@ -21,6 +21,7 @@ Net.TO_CLIENT = {
 	"PracticeEvent", -- { kind = "tagged" | "crossed" }
 	"HatchResult", -- { ok, reason, pet, plan } after RequestHatch
 	"CrateResult", -- { ok, reason, emote, dupe, refund } after RequestOpenCrate
+	"WeaponCrateResult", -- { ok, reason, itemId, dupe, refund } after RequestWeaponCrate (HOS-WEP-001)
 	"ShopResult", -- { ok, reason, itemId, robux?, refunded? } or a Gem pack { ok, gems }
 	"AbilityFx", -- { userId, slot?, family, kind, ... } everyone: a pet's ability fired (telegraph)
 	"AbilityState", -- { family, readyAt, ok, reason } owner: cooldown / refusal
@@ -33,6 +34,8 @@ Net.TO_SERVER = {
 	"RequestTag", -- (targetUserId: number?, kind: "contact" | "swing" | "lunge", aim: Vector3? world direction of the hit)
 	"RequestLunge", -- (dir: Vector3) a Catcher's lunge started (Space); the server times the slow after it
 	"RequestOpenCrate", -- () open one Emote Crate with Gems (lobby only)
+	"RequestWeaponCrate", -- () open one Weapon Crate with Gems (lobby only, HOS-WEP-001)
+	"PedestalHit", -- (slot: number) a lobby weapon pedestal swung at you: the server knocks you down (HOS-WEP-001)
 	"RequestEmote", -- (emoteId: string) play an owned emote in the lobby; "" stops
 	"RequestQuestClaim", -- (questId: string)
 	"RequestAFK", -- (on: boolean)

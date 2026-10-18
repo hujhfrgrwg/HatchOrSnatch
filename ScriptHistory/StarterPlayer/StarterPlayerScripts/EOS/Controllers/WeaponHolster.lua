@@ -52,7 +52,7 @@ end
 
 local function slotOf(weapon: BasePart): string
 	local s = weapon:GetAttribute("HolsterSlot")
-	if s == "Hip" or s == "Back" then
+	if s == "Hip" or s == "Back" or s == "HipLeft" then -- HipLeft: a dual-wield skin's left blade (HOS-WEP-001)
 		return s
 	end
 	local size = weapon.Size
@@ -132,6 +132,10 @@ local function holsterOffset(character: Model, weapon: BasePart, body: BasePart,
 		-- the handle end sits just past the right edge of the body
 		local x = body.Size.X / 2 + 0.25 - (length / 2) * math.cos(a)
 		pos = Vector3.new(x, y, backZ)
+		if slot == "HipLeft" then -- the mirror image: hilt at the left hip, a little further off the back
+			handleDir = Vector3.new(-handleDir.X, handleDir.Y, 0)
+			pos = Vector3.new(-x, y, backZ + thickness + 0.02)
+		end
 	end
 	-- turn the weapon so its handle points handleDir and the flat of the blade lies on the back (+Z)
 	local want = CFrame.fromMatrix(Vector3.zero, handleDir, Vector3.zAxis)

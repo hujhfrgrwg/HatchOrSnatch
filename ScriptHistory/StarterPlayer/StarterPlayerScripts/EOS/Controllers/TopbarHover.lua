@@ -21,7 +21,7 @@ local LIFT = -3 -- juicy's hover lift
 local CAP = 16 -- 9-slice end caps in image px (the art is exported at 2x)
 local GROUPS = {
 	{ group = "TopLeft", grow = "right", names = { "QuestsButton", "IncubatorButton" } },
-	{ group = "TopRight", grow = "left", names = { "ServersButton", "StatsButton", "SettingsButton" } },
+	{ group = "TopRight", grow = "left", names = { "SettingsButton" } }, -- HOS-INV-001: one MENU square (HudDeclutter); Servers + Stats sit in its list
 }
 
 type Btn = {

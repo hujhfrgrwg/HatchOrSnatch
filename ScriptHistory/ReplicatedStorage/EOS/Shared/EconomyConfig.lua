@@ -260,6 +260,7 @@ export type ShopItem = {
 	slot: string?, -- abilitySkin: the cosmetics slot it is worn from (Wear / Take off, like cases)
 	skin: string?, -- knifeSkin: the template in ServerStorage.EOS_Assets.KnifeSkins
 	rarity: string?, -- knifeSkin: common / rare / epic / legendary
+	crateOnly: boolean?, -- knifeSkin: never in the daily store (crate only)
 }
 EconomyConfig.SHOP = {
 	{ id = "trail_spark", name = "Sparkle Trail", wallet = "gold", price = 40, kind = "trail", desc = "Your egg leaves sparkles. One match.", color = Color3.fromRGB(255, 236, 140) },
@@ -269,7 +270,7 @@ EconomyConfig.SHOP = {
 	{ id = "entrance_bolt", name = "Bolt Entrance", wallet = "gold", price = 1400, kind = "entrance", desc = "Arrive in the lobby with a lightning strike. Yours to keep.", color = Color3.fromRGB(150, 200, 255) },
 	{ id = "case_sunset", name = "Sunset Egg Case", wallet = "gold", price = 2400, kind = "case", desc = "This week's Gold colorway. Yours to keep.", color = Color3.fromRGB(255, 160, 96) },
 	{ id = "trailp_rainbow", name = "Rainbow Trail", wallet = "gems", price = 150, kind = "trailPerm", desc = "A rainbow trail on your egg in every match.", color = Color3.fromRGB(255, 120, 220), robux = 79, productId = 3718903405 },
-	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "Your pet's ability effects turn gold. Same timing and size.", color = Color3.fromRGB(255, 210, 58), robux = 119, productId = 3718903406 },
+	{ id = "fx_gold", name = "Gold Ability Colors", wallet = "gems", price = 250, kind = "abilityFx", desc = "A gold ring bursts under you every time your pet's ability fires.", color = Color3.fromRGB(255, 210, 58), robux = 119, productId = 3718903406 },
 	-- HOS-VFX-RES-001 Rift portal skins (from Hunter's resource place). Gems only until Hunter sets Robux prices.
 	{ id = "fx_rift_void", name = "Void Rift", wallet = "gems", price = 200, kind = "abilitySkin", slot = "riftSkin", desc = "Your Rift portals swirl violet. Same size and timing.", color = Color3.fromRGB(141, 75, 255) },
 	{ id = "fx_rift_inferno", name = "Inferno Rift", wallet = "gems", price = 200, kind = "abilitySkin", slot = "riftSkin", desc = "Your Rift portals burn orange. Same size and timing.", color = Color3.fromRGB(255, 92, 36) },
@@ -277,48 +278,154 @@ EconomyConfig.SHOP = {
 	{ id = "hatch_royal", name = "Royal Hatching", wallet = "gems", price = 350, kind = "hatchFx", desc = "A bigger hatching ceremony at the incubator.", color = Color3.fromRGB(200, 150, 255), robux = 159, productId = 3718903407 },
 } :: { ShopItem }
 
--- HOS-WEP-001 dagger skins (Hunter, 17 Oct): the Catcher's knife looks like one of these blades, shrunk to
--- knife size (templates in ServerStorage.EOS_Assets.KnifeSkins). Looks only: same hits, reach and timing.
--- Worn from cosmetics.knifeSkin (Wear / Take off, like the Rift skins). ipRisk = franchise models (Genshin
--- Impact, Devil May Cry, Korblox) Hunter chose to sell anyway; KNIFE_SKINS_IP_RISK = false pulls all of them.
-EconomyConfig.KNIFE_SKINS_IP_RISK = true
+-- HOS-WEP-001 dagger skins (Hunter, 17 Oct): the Catcher's knife looks like one of these, shrunk to knife
+-- size (templates in ServerStorage.EOS_Assets.KnifeSkins). Looks only: same hits, reach and timing. Worn from
+-- cosmetics.knifeSkin (Wear / Take off, like the Rift skins). rb_* = Roblox-made catalog gear (InsertService),
+-- the rest from Hunter's LargerWepModels folder and our own Spirit Blast. The franchise models (Genshin,
+-- Yamato, Korblox copy) were removed on Hunter's word (17 Oct 21:13Z); backup in docs/backups/HOS-WEP-001_*.
+EconomyConfig.KNIFE_SKINS_IP_RISK = false
 EconomyConfig.KNIFE_RARITY = {
 	common = { price = 150, color = Color3.fromRGB(190, 198, 206) },
 	rare = { price = 300, color = Color3.fromRGB(47, 168, 255) },
 	epic = { price = 500, color = Color3.fromRGB(180, 77, 255) },
 	legendary = { price = 900, color = Color3.fromRGB(255, 194, 28) },
 }
-EconomyConfig.KNIFE_SKINS = { -- skin (template name), name, rarity, ipRisk
-	{ "dark_greatsword", "Dark Greatsword", "legendary" },
-	{ "midnight_scythe", "Midnight Scythe", "legendary" },
-	{ "korblox_scythe", "Bone King Scythe", "legendary", true },
+-- the Weapon Crate (Shop > Weapons): a rarity by these odds (shown on the card), then one skin of it evenly;
+-- a duplicate refunds Gems by rarity. Robux openings stay hidden until a developer product exists.
+EconomyConfig.KNIFE_CRATE = {
+	gems = 250,
+	order = { "common", "rare", "epic", "legendary" },
+	odds = { common = 60, rare = 27, epic = 10, legendary = 3 },
+	refund = { common = 40, rare = 80, epic = 150, legendary = 300 },
+	-- bad-luck protection (Hunter 17 Oct: "you shouldnt be able to just buy whatever you want", so the crate is the
+	-- main way in): an Epic or better at the latest on the 10th opening since the last one, a Legendary on the 30th
+	pity = { epic = 10, legendary = 30 },
+}
+-- Tiers re-cut 17 Oct (Hunter: "pick the ones that are top dog to be higher rarities"): a pyramid, 8 / 11 / 15 / 16.
+EconomyConfig.KNIFE_SKINS = { -- skin (template name), name, rarity
 	{ "spirit_blast", "Spirit Blast", "legendary" }, -- an energy ball in the hand (our own effect)
-	{ "holy_sword", "Holy Sword", "epic" },
-	{ "blood_blade", "Blood Blade", "epic" },
-	{ "red_blade", "Crimson Fang", "epic" },
-	{ "g_mistsplitterreforged", "Tidecutter", "epic", true },
-	{ "g_freedomswornsword", "Windsworn", "epic", true },
+	{ "dual_spirit_blast", "Twin Spirit Blast", "legendary" },
+	{ "midnight_scythe", "Midnight Scythe", "legendary" },
+	{ "dark_greatsword", "Dark Greatsword", "legendary" },
+	{ "rb_double_bladed_scythe", "Double-Bladed Scythe", "legendary" },
+	{ "rb_bat_scythe", "Bat Scythe", "legendary" },
+	{ "rb_dragon_s_flame_sword", "Dragon's Flame Sword", "legendary" },
+	{ "dual_shattered_dimensions", "Twin Shattered Daggers", "legendary" },
+	{ "rb_ice_dragon_slayer", "Ice Dragon Slayer", "epic" },
+	{ "rb_darkheart", "Darkheart", "epic" },
+	{ "rb_illumina", "Illumina", "epic" },
+	{ "rb_crystal_blade_amethyst_attack", "Crystal Blade: Amethyst Attack", "epic" },
+	{ "rb_midnight_sword", "Midnight Sword", "epic" },
+	{ "rb_dagger_of_shattered_dimensions", "Dagger of Shattered Dimensions", "epic" },
+	{ "rb_all_hallow_s_sword", "All Hallow's Sword", "epic" },
+	{ "rb_red_laser_scythe", "Red Laser Scythe", "epic" },
+	{ "rb_blue_laser_scythe", "Blue Laser Scythe", "epic" },
+	{ "rb_green_laser_scythe", "Green Laser Scythe", "epic" },
+	{ "rb_darkest_arts_sword", "Darkest Arts Sword", "epic" },
+	{ "holy_sword", "Holy Sword", "rare" },
+	{ "blood_blade", "Blood Blade", "rare" },
+	{ "red_blade", "Crimson Fang", "rare" },
+	{ "rb_ghostwalker", "Ghostwalker", "rare" },
+	{ "rb_firebrand", "Firebrand", "rare" },
+	{ "rb_venomshank", "Venomshank", "rare" },
+	{ "dual_venomshank", "Twin Venomshanks", "rare" },
+	{ "dual_black_iron_katana", "Twin Black Iron Katanas", "rare" },
+	{ "dual_ghostfire_dagger", "Twin Ghostfire Daggers", "rare" },
+	{ "rb_sword_of_starlight", "Sword of Starlight", "rare" },
+	{ "rb_mythic_sword_of_the_earth", "Mythic Sword of the Earth", "rare" },
 	{ "shadow_katana", "Shadow Katana", "rare" },
 	{ "holiday_axe", "Frost Axe", "rare" },
-	{ "yamato", "Moonlit Katana", "rare", true },
-	{ "g_bakufusword", "Thunder Ronin", "rare", true },
-	{ "g_mistsplitterblade", "Violet Edge", "rare", true },
-	{ "g_lionsroarblade", "Lion Fang", "rare", true },
-	{ "g_boreassword", "Frostbite", "rare", true },
-	{ "g_dullblade", "Rookie Blade", "common", true },
-	{ "g_coolsteelblade", "Cold Steel", "common", true },
-	{ "g_prototypesword", "Prototype", "common", true },
+	{ "rb_sword_of_swords", "Sword of Swords", "rare" },
+	{ "rb_ghostfire_dagger", "Ghostfire Dagger", "rare" },
+	{ "dual_danger_dagger", "Twin Danger Daggers", "common" },
+	{ "rb_crimson_periastron_mu", "Crimson Periastron Mu", "common" },
+	{ "rb_azure_periastron_alpha", "Azure Periastron Alpha", "common" },
+	{ "rb_sword_of_the_epicblueness", "Sword of the Epicblueness", "common" },
+	{ "rb_sword_of_the_epicredness", "Sword of the Epicredness", "common" },
+	{ "rb_overseer_short_sword", "Overseer Short Sword", "common" },
+	{ "rb_colossal_blade", "Colossal Blade", "common" },
+	{ "rb_black_iron_katana", "Black Iron Katana", "common" },
+	{ "rb_diamond_blade_sword", "Diamond Blade Sword", "common" },
+	{ "rb_orc_blade", "Orc Blade", "common" },
+	{ "rb_scythe", "Scythe", "common" },
+	{ "rb_danger_dagger", "Danger Dagger", "common" },
+	{ "rb_elegant_blade", "Elegant Blade", "common" },
+	{ "rb_trusty_blade", "Trusty Blade", "common" },
+	{ "rb_knight_s_elder_blade", "Knight's Elder Blade", "common" },
+	{ "rb_spartan_sword", "Spartan Sword", "common" },
+}
+-- The daily weapon store (Hunter 17 Oct: "most of them should only be acquirable from the crate"): the only place a
+-- skin can be bought outright. 4 slots a day, the same for everyone, new at 00:00 UTC. Only these skins can show up
+-- there; every other one (all Legendaries, every twin, most Epics and Rares) is crate-only.
+EconomyConfig.KNIFE_DAILY = {
+	slots = { "epic", "rare", "common", "common" },
+	price = { epic = 600, rare = 300, common = 150 },
+	pool = {
+		rb_illumina = true, rb_ice_dragon_slayer = true, rb_midnight_sword = true,
+		holy_sword = true, rb_firebrand = true, rb_venomshank = true, rb_sword_of_starlight = true,
+		rb_mythic_sword_of_the_earth = true, shadow_katana = true, rb_sword_of_swords = true,
+		rb_crimson_periastron_mu = true, rb_azure_periastron_alpha = true, rb_sword_of_the_epicblueness = true,
+		rb_sword_of_the_epicredness = true, rb_overseer_short_sword = true, rb_colossal_blade = true,
+		rb_black_iron_katana = true, rb_diamond_blade_sword = true, rb_orc_blade = true, rb_scythe = true,
+		rb_danger_dagger = true, rb_elegant_blade = true, rb_trusty_blade = true, rb_knight_s_elder_blade = true,
+		rb_spartan_sword = true,
+	},
 }
 for _, k in ipairs(EconomyConfig.KNIFE_SKINS) do
 	if k[4] and not EconomyConfig.KNIFE_SKINS_IP_RISK then
 		continue
 	end
 	local r = EconomyConfig.KNIFE_RARITY[k[3]]
+	local daily = EconomyConfig.KNIFE_DAILY.pool[k[1]] == true
 	table.insert(EconomyConfig.SHOP, {
-		id = "knife_" .. k[1], name = k[2], wallet = "gems", price = r.price, kind = "knifeSkin", slot = "knifeSkin",
+		id = "knife_" .. k[1], name = k[2], wallet = "gems",
+		price = if daily then EconomyConfig.KNIFE_DAILY.price[k[3]] or r.price else r.price,
+		kind = "knifeSkin", slot = "knifeSkin",
 		desc = "Your Catcher knife becomes the " .. k[2] .. ". Same reach and timing.", color = r.color,
-		skin = k[1], rarity = k[3],
+		skin = k[1], rarity = k[3], crateOnly = not daily,
 	} :: any)
+end
+
+-- today's daily weapons: { itemId, ... } in slot order, for UTC day `day` (= floor(os.time() / 86400)). The same on
+-- every server: a seeded draw per slot, no repeats within a day, and nothing from yesterday's draw when the pool
+-- has something else.
+local function drawDaily(day: number, avoid: { [string]: boolean }?): { string }
+	local D = EconomyConfig.KNIFE_DAILY
+	-- (Random seeds next to each other start alike: scramble the day first and skip the first draws)
+	local rng = Random.new((day * 2654435761 + 97) % 2147483647)
+	for _ = 1, 4 do
+		rng:NextNumber()
+	end
+	local picked, out = {}, {}
+	for _, rarity in ipairs(D.slots) do
+		local pool, fresh = {}, {}
+		for _, k in ipairs(EconomyConfig.KNIFE_SKINS) do
+			local id = "knife_" .. k[1]
+			if k[3] == rarity and D.pool[k[1]] and not picked[id] then
+				table.insert(pool, id)
+				if not (avoid and avoid[id]) then
+					table.insert(fresh, id)
+				end
+			end
+		end
+		local from = if #fresh > 0 then fresh else pool
+		if #from > 0 then
+			local id = from[rng:NextInteger(1, #from)]
+			picked[id] = true
+			table.insert(out, id)
+		end
+	end
+	return out
+end
+function EconomyConfig.knifeDaily(day: number): { string }
+	local avoid = {}
+	for _, id in ipairs(drawDaily(day - 1, nil)) do
+		avoid[id] = true
+	end
+	return drawDaily(day, avoid)
+end
+function EconomyConfig.knifeOnSale(itemId: string, epochSeconds: number): boolean
+	return table.find(EconomyConfig.knifeDaily(math.floor(epochSeconds / 86400)), itemId) ~= nil
 end
 
 local byId: { [string]: ShopItem } = {}
@@ -339,7 +446,7 @@ end
 EconomyConfig.TAB_OF_KIND = {
 	trail = "trails", trailPerm = "trails", case = "cases",
 	burst = "effects", entrance = "effects", abilityFx = "effects", hatchFx = "effects", abilitySkin = "effects",
-	knifeSkin = "effects", -- HOS-WEP-001: until the Daggers tab is built
+	knifeSkin = "weapons", -- HOS-WEP-001: their own Weapons tab (Controllers/WeaponShopUI), not Cosmetics
 }
 EconomyConfig.FEATURED = {
 	weekly = "case_sunset", -- this week's colourway (the card counts down to Monday 00:00 UTC)

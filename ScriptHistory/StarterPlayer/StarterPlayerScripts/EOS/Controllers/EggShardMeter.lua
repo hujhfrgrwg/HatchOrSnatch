@@ -108,6 +108,12 @@ function Meter.compact(card: Instance?)
 			glass:SetAttribute("BaseH", baseH)
 			local h = if on then COMPACT_H else baseH :: number
 			glass.Size = UDim2.new(glass.Size.X, UDim.new(0, h))
+			local ring = glass:FindFirstChild("InnerRing") -- HOS-INV-001: the inner accent ring follows the glass (it stuck out below the compact plate)
+			if ring and ring:IsA("GuiObject") then
+				local ringH = ring:GetAttribute("BaseH") or ring.Size.Y.Offset
+				ring:SetAttribute("BaseH", ringH)
+				ring.Size = UDim2.new(ring.Size.X, UDim.new(0, h + (ringH - baseH)))
+			end
 			local shadow = v:FindFirstChild("DropShadow")
 			if shadow and shadow:IsA("GuiObject") then
 				shadow.Position = UDim2.new(shadow.Position.X, UDim.new(0, glass.Position.Y.Offset + h))

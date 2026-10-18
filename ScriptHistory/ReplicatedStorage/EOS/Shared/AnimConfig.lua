@@ -25,6 +25,8 @@ AnimConfig.ids = {
 	-- clip underneath)
 	SwingJab = "rbxassetid://70668465161245",
 	SwingSlash = "rbxassetid://73285276196206",
+	-- HOS-WEP-001 dual-wield skins: SwingJab with the left arm mirrored (uploaded to the group 17 Oct)
+	SwingDual = "rbxassetid://118186817039344",
 	-- the Catcher's lunge (Space): both hands overhead, blade straight down, driven into the ground while
 	-- lunging forward. Authored in Studio (ServerStorage.EOS_LungeAuthor); "" = Studio uses the local clip
 	LungeStab = "",

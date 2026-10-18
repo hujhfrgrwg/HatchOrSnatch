@@ -203,8 +203,7 @@ end
 -- phones: the design scale is ~0.36, so the card's 14-16 px lines render at 5-6 px (garbled). There the card keeps the
 -- slot, the rarity word and the meter, and drops the small lines (title, "pays +1 ... SHARD", the Catcher's cap/hint)
 local function compact(): boolean
-	local fit = root and root:FindFirstChildOfClass("UIScale")
-	return (fit and fit.Scale or 1) < 0.5
+	return true -- HOS-INV-001 clutter 8 (Hunter 18 Oct "do all"): the compact card on every screen, PC too
 end
 
 local function applyCompact(c: Instance)
@@ -243,7 +242,8 @@ local function refreshCard()
 	local c = card()
 	if not c then return end
 	local r = player:GetAttribute("EOS_Role")
-	local on = inMatch() and (r == "RUNNER" or r == "CATCHER" or r == "CAUGHT")
+	-- HOS-INV-001 clutter 9: a Catcher with no snatched egg has nothing to show (no EMPTY card)
+	local on = inMatch() and (r == "RUNNER" or ((r == "CATCHER" or r == "CAUGHT") and player:GetAttribute("EOS_EggStash") ~= nil))
 	EUI.setGroupHidden("EggCard", not on) -- through the runtime: its refreshHud re-shows hud groups when a panel closes
 	show(c, on)
 	if not on then return end

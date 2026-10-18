@@ -239,6 +239,19 @@ local function summon(t: any)
 	-- HOS-VFX-OVR: a pet without its own rigged entrance can have a "Summon" template (AbilityCosmetics.vfx);
 	-- rigged pets (beh) keep theirs exactly as built
 	local look = if beh then nil else AbilityCosmetics.vfx(t.species, "Summon")
+	-- HOS-INV-001: Gold Ability Colors shows for every pet. Rigged pets and Summon templates return below
+	-- before the (gold) ring, so the owner of the pass got nothing: a double gold ring under them here
+	if t.gold == true and who and (beh or (look and look ~= "Summon")) then
+		local gr = who:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if gr then
+			ring(gr.Position - Vector3.new(0, 2.6, 0), AbilityCosmetics.GOLD)
+			task.delay(0.15, function()
+				if gr.Parent then
+					ring(gr.Position - Vector3.new(0, 2.6, 0), AbilityCosmetics.GOLD)
+				end
+			end)
+		end
+	end
 	if who and look and look ~= "Summon" then
 		local r = who:FindFirstChild("HumanoidRootPart") :: BasePart?
 		if r then

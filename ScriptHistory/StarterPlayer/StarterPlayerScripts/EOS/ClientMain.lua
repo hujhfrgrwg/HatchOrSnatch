@@ -42,10 +42,14 @@ UIController.spectating = SpectateController.isActive
 UIController.startSpectate = SpectateController.start
 task.spawn(require(Controllers.RetentionController).init, UIController) -- HOS-RET-001
 task.spawn(require(Controllers.LeadCatcherController).init) -- HOS-LEAD-001: the paid Lead Catcher card in the lobby wait
+task.spawn(require(Controllers.BackpackController).init) -- HOS-INV-001: the Pets screen becomes the Backpack (Pets, Weapons, Cosmetics tabs)
+task.spawn(require(Controllers.HudDeclutter).init) -- HOS-INV-001 clutter pass: MENU square, one wallet plate, dash hints after 3 matches, streak row from the first clean crossing
+task.spawn(require(Controllers.ShopItemPreview).init) -- HOS-INV-001: hover previews for the Shop's Cosmetics and Featured cosmetic cards
 SlideFX.init() -- streaks on the floor and in the air for every slide (yours, other players', NPCs')
 FieldGems.init() -- field Gems: spin, sparkle, pickup burst, "+1"
 Outlines.init() -- Catchers / downed red, Runner teammates blue; per viewer, hidden behind walls
 FacePlayer.init() -- lobby leaderboards swivel to face you
+require(Controllers.ProximityFade).init() -- HOS-LOBBY-003: the pro altar's beam wall and PRO LOBBY signs fade in as you walk up
 Ragdoll.bindLocal() -- caught = your body ragdolls (the server builds the joints, your client simulates)
 
 -- every server->client remote has at least one listener (no "invocation queue exhausted")

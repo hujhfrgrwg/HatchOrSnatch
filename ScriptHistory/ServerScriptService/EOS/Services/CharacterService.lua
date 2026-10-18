@@ -265,6 +265,11 @@ local function setKnife(char: Model, on: boolean, plr: Player?)
 			oldMotor:Destroy()
 		end
 	end
+	local leftArm = char:FindFirstChild("Left Arm") :: BasePart?
+	local oldOff = leftArm and leftArm:FindFirstChild("Off Sword")
+	if oldOff then
+		oldOff:Destroy()
+	end
 	if not on or not arm then
 		return
 	end
@@ -272,7 +277,9 @@ local function setKnife(char: Model, on: boolean, plr: Player?)
 	local template = assets and assets:FindFirstChild("Minute Dagger")
 	local skinId = plr and CharacterService.knifeSkinOf and CharacterService.knifeSkinOf(plr)
 	local skins = assets and assets:FindFirstChild("KnifeSkins")
-	local skin = if skinId and skins then skins:FindFirstChild(skinId) else nil
+	-- no skin worn: the free default (Hunter 17 Oct: Knife_Combat "could be used as the default knife weapon"; "Fully
+	-- implement this end to end" 23:25), resized to knife size as template combat_knife; Minute Dagger if it's missing
+	local skin = if skins then skins:FindFirstChild(skinId or "combat_knife") else nil
 	if skin and skin:IsA("BasePart") and skin:FindFirstChild("Minute Sword") then
 		template = skin
 	end
@@ -280,6 +287,7 @@ local function setKnife(char: Model, on: boolean, plr: Player?)
 		return
 	end
 	local knife = template:Clone()
+	knife.Name = "Minute Dagger" -- the clips pose the joint by its part's name: every skin answers to it
 	knife:SetAttribute("EOS_Knife", true)
 	knife:SetAttribute("EOS_Egg", true) -- keeps setGroup from touching it (it never collides anyway)
 	local motor = knife:FindFirstChild("Minute Sword") :: Motor6D
@@ -288,6 +296,28 @@ local function setKnife(char: Model, on: boolean, plr: Player?)
 	knife.CFrame = arm.CFrame * motor.C0 * motor.C1:Inverse()
 	motor.Parent = arm
 	knife.Parent = char
+	-- dual-wield skins (Dual attribute): a mirrored copy in the left hand on its own joint ("Off Sword" ->
+	-- "Off Dagger", posed by SwingDual), holstered at the left hip
+	if template:GetAttribute("Dual") and leftArm then
+		local off = template:Clone()
+		off.Name = "Off Dagger"
+		off:SetAttribute("EOS_Knife", true)
+		off:SetAttribute("EOS_Egg", true)
+		off:SetAttribute("HolsterSlot", "HipLeft")
+		local om = off:FindFirstChild("Minute Sword") :: Motor6D
+		om.Name = "Off Sword"
+		local function mirror(cf: CFrame): CFrame -- reflect across the arm's X (left/right): a left-hand pose
+			local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = cf:GetComponents()
+			return CFrame.new(-x, y, z, r00, -r01, -r02, -r10, r11, r12, -r20, r21, r22)
+		end
+		om.C0 = mirror(om.C0)
+		om.C1 = mirror(om.C1)
+		om.Part0 = leftArm
+		om.Part1 = off
+		off.CFrame = leftArm.CFrame * om.C0 * om.C1:Inverse()
+		om.Parent = leftArm
+		off.Parent = char
+	end
 end
 
 -- ===== ragdoll =====

@@ -94,7 +94,7 @@ local function onHatch(plr: Player, rarity: any, family: any, allowHigher: any)
 		return true, pet
 	end)
 	local owns = DataService.get(plr)
-	local royal = owns ~= nil and owns.cosmetics.owned.hatch_royal == true
+	local royal = owns ~= nil and owns.cosmetics.owned.hatch_royal == true and not (owns.cosmetics.off or {}).hatch_royal
 	if not ok then
 		Net.event("HatchResult"):FireClient(plr, { ok = false, reason = info, plan = planOut })
 		if info ~= "NEEDS_HIGHER" and info ~= "CHOOSE_FAMILY" then
@@ -133,6 +133,7 @@ end
 local SHOP_WORDS = {
 	NOT_ENOUGH = "Not enough %s",
 	OWNED = "You already own that",
+	NOT_IN_STORE = "Not in today's store: try the Weapon Crate", -- HOS-WEP-001 daily weapon store
 	UNKNOWN = "That item isn't for sale",
 }
 
@@ -267,7 +268,7 @@ function EconomyService.startMatch(plr: Player)
 			return
 		end
 	end
-	if p.cosmetics.owned.trailp_rainbow then
+	if p.cosmetics.owned.trailp_rainbow and not (p.cosmetics.off or {}).trailp_rainbow then
 		matchTrail[plr] = "trailp_rainbow"
 	end
 end
@@ -413,6 +414,7 @@ function EconomyService.init()
 	Net.event("RequestUseItem").OnServerEvent:Connect(onUse)
 	Net.event("RequestSetCosmetic").OnServerEvent:Connect(onSetCosmetic)
 	CharacterService.onEggBuilt(decorateEgg)
+	require(script.Parent.WeaponCrateService).init({ toast = toast }) -- HOS-WEP-001: Weapon Crate + shop previews
 	CharacterService.knifeSkinOf = function(plr: Player): string? -- HOS-WEP-001: the worn dagger skin, if still owned and on sale
 		local p = DataService.get(plr)
 		local id = p and p.cosmetics.knifeSkin
@@ -430,7 +432,7 @@ function EconomyService.init()
 			task.delay(1, function()
 				local p = DataService.get(plr)
 				local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if p and root and p.cosmetics.owned.entrance_bolt and not inMatch(plr) and char.Parent then
+				if p and root and p.cosmetics.owned.entrance_bolt and not (p.cosmetics.off or {}).entrance_bolt and not inMatch(plr) and char.Parent then
 					bolt(root)
 				end
 			end)

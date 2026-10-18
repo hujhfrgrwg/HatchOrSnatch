@@ -53,8 +53,9 @@ local function teleport(ctx: any, dir: Vector3, showStart: boolean): (boolean, s
 	if showStart then
 		-- PORTAL HOP (HOS-VFX-004): a portal stands at each end for the windup, facing the way you go
 		endRing.Transparency = 1
-		-- HOS-VFX-RES-001: a worn Rift skin draws the portals, unless the pet has portals of its own
-		local look = if ctx.skin and AbilityCosmetics.vfx(ctx.species, "RiftPortal") == "RiftPortal" then ctx.skin else ctx.species
+		-- HOS-VFX-RES-001: a worn Rift skin draws the portals. HOS-INV-001: the skin the player bought wins over the
+		-- pet's own portals (every Rift pet has its own, so before this a skin never showed)
+		local look = ctx.skin or ctx.species
 		Shared.vfx("RiftPortal", Shared.groundBelow(root.Position) + PORTAL_UP, dir, look, ctx.level)
 		Shared.vfx("RiftPortal", Shared.groundBelow(dest) + PORTAL_UP, dir, look, ctx.level)
 	else

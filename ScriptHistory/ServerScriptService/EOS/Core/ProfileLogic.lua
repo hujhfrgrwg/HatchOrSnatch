@@ -48,6 +48,7 @@ function ProfileLogic.default(): any
 		cosmetics = { owned = {}, consumables = {}, case = "", trailNext = "" },
 		emotes = {}, -- [emoteId] = true (won from the Emote Crate; see Shared/EmoteConfig)
 		emoteWheel = {}, -- up to 6 owned emote ids on the G wheel ("" = empty slot)
+		weaponPity = { epic = 0, legendary = 0 }, -- Weapon Crate openings since the last Epic+ / Legendary (HOS-WEP-001)
 		receipts = {}, -- bounded exact-once ledger for Robux purchases (newest last)
 		shells = 0, -- V2 currency, moved into gold by migrate (kept for old saves)
 		unhatchedEggsByTier = eggs, -- V2 egg tokens, moved into materials by migrate
@@ -183,7 +184,7 @@ function ProfileLogic.migrate(raw: any): (any, boolean)
 	if p.equippedPet ~= "" and not petIds[p.equippedPet] then
 		p.equippedPet = ""
 	end
-	for _, k in ipairs({ "owned", "consumables" }) do
+	for _, k in ipairs({ "owned", "consumables", "off" }) do -- off: always-on looks the player switched off (HOS-INV-001)
 		if type(p.cosmetics[k]) ~= "table" then
 			p.cosmetics[k] = {}
 		end
@@ -522,6 +523,10 @@ function ProfileLogic.buy(p: any, itemId: string, econ: any): (boolean, string?,
 	if not consumable and p.cosmetics.owned[itemId] then
 		return false, "OWNED", item
 	end
+	-- HOS-WEP-001: a weapon skin is only bought outright while it is in today's daily store; the rest come from the crate
+	if item.kind == "knifeSkin" and econ.knifeOnSale and not econ.knifeOnSale(itemId, os.time()) then
+		return false, "NOT_IN_STORE", item
+	end
 	local wallet = item.wallet
 	if wallet ~= "gold" and wallet ~= "gems" then
 		return false, "BAD_WALLET", item
@@ -562,6 +567,19 @@ end
 
 -- Pick the egg case to show ("" = none) or the trail for the next match ("" = none).
 function ProfileLogic.setCosmetic(p: any, slot: string, itemId: string, econ: any): (boolean, string?)
+	-- HOS-INV-001 Backpack: switch an owned always-on look (no slot: Rainbow Trail, Gold Ability Colors, Bolt Entrance,
+	-- Royal Hatching) off or back on. Saved in cosmetics.off[itemId] = true.
+	if slot == "off" or slot == "on" then
+		local item = econ.item(itemId)
+		if not item or item.slot or item.kind == "case" or econ.isConsumable(item) or not p.cosmetics.owned[itemId] then
+			return false, "NOT_OWNED"
+		end
+		if type(p.cosmetics.off) ~= "table" then
+			p.cosmetics.off = {}
+		end
+		p.cosmetics.off[itemId] = if slot == "off" then true else nil
+		return true, nil
+	end
 	if slot ~= "case" and slot ~= "trailNext" and slot ~= "riftSkin" and slot ~= "knifeSkin" then
 		return false, "BAD_SLOT"
 	end
@@ -611,6 +629,43 @@ function ProfileLogic.openEmoteCrate(p: any, emoteId: string, emoteConfig: any):
 		p.emotes[emoteId] = true
 	end
 	return true, { emote = emoteId, dupe = dupe, refund = refund }
+end
+
+-- Weapon Crate (HOS-WEP-001), paid with Gems: the knife skin item is rolled by the caller BEFORE this runs. A new
+-- skin is owned and equipped (like buying it); a duplicate refunds its rarity's Gems. Returns (ok, reasonOrResult),
+-- result = { itemId, dupe, refund }.
+function ProfileLogic.openWeaponCrate(p: any, itemId: string, econ: any): (boolean, any)
+	local item = econ.item(itemId)
+	if not item or item.kind ~= "knifeSkin" then
+		return false, "UNKNOWN"
+	end
+	local C = econ.KNIFE_CRATE
+	if (p.gems or 0) < C.gems then
+		return false, "NOT_ENOUGH"
+	end
+	p.gems -= C.gems
+	-- the guarantee counters (KNIFE_CRATE.pity): reset by the rarity that came out
+	if type(p.weaponPity) ~= "table" then
+		p.weaponPity = { epic = 0, legendary = 0 }
+	end
+	local P = p.weaponPity
+	if item.rarity == "legendary" then
+		P.epic, P.legendary = 0, 0
+	elseif item.rarity == "epic" then
+		P.epic, P.legendary = 0, num(P.legendary, 0) + 1
+	else
+		P.epic, P.legendary = num(P.epic, 0) + 1, num(P.legendary, 0) + 1
+	end
+	local dupe = p.cosmetics.owned[itemId] == true
+	local refund = 0
+	if dupe then
+		refund = C.refund[item.rarity] or 0
+		p.gems += refund
+	else
+		p.cosmetics.owned[itemId] = true
+		p.cosmetics.knifeSkin = itemId
+	end
+	return true, { itemId = itemId, dupe = dupe, refund = refund }
 end
 
 -- Robux receipts share one bounded exact-once ledger (Gem packs, items, crates). true = new receipt (now recorded).
@@ -774,6 +829,7 @@ function ProfileLogic.clientView(p: any, questConfig: any): any
 		cosmetics = deepCopy(p.cosmetics),
 		emotes = deepCopy(p.emotes),
 		emoteWheel = deepCopy(p.emoteWheel),
+		weaponPity = deepCopy(p.weaponPity), -- HOS-WEP-001: the crate guarantee bars
 		stats = deepCopy(p.stats),
 		quests = quests,
 		questDate = p.dailyQuests.utcDate,

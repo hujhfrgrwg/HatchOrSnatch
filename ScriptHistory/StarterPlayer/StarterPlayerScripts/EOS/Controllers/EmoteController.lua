@@ -549,7 +549,7 @@ local function refreshMine()
 					if play and play:IsA("GuiButton") then UI.juicy(play, function() UI.close(); EmoteController.play(e.id) end) end
 					if eq and eq:IsA("GuiButton") then UI.juicy(eq, function() equip(e.id) end) end
 					if on and on:IsA("GuiButton") then UI.juicy(on, function() unequip(e.id) end) end
-					attachPreview(c:FindFirstChild("View"), e.id, 9.5)
+					attachPreview(c:FindFirstChild("View"), e.id, 13.5) -- HOS-INV-001: whole body in frame (9.5 cut heads and raised arms)
 				end
 			end
 			sc.CanvasSize = UDim2.fromOffset(0, 16 + math.ceil(#list / 4) * 288)
@@ -594,7 +594,7 @@ local function lazyOdds()
 		if sc and sc:IsA("ScrollingFrame") and view and not view:FindFirstChild("EOS_Preview") then
 			local y, h = c.AbsolutePosition.Y, c.AbsoluteSize.Y
 			if y + h > sc.AbsolutePosition.Y - 20 and y < sc.AbsolutePosition.Y + sc.AbsoluteSize.Y + 20 then
-				attachPreview(view, id, 9.5)
+				attachPreview(view, id, 12.5) -- HOS-INV-001: whole body in frame
 			end
 		end
 	end

@@ -102,7 +102,7 @@ local function onMatchStart(plr: Player)
 		family = pet.family,
 		species = pet.species,
 		rarity = pet.rarity,
-		gold = p.cosmetics.owned.fx_gold == true,
+		gold = p.cosmetics.owned.fx_gold == true and not (p.cosmetics.off or {}).fx_gold,
 		-- HOS-VFX-RES-001: a worn Rift skin (Void / Inferno / Frost portals); looks only
 		skin = if pet.family == "Rift" and type(p.cosmetics.riftSkin) == "string" and p.cosmetics.owned[p.cosmetics.riftSkin] then "skin:" .. p.cosmetics.riftSkin else nil,
 		readyAt = 0,

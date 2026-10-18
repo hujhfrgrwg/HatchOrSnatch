@@ -540,7 +540,7 @@ end
 -- match feed (HOS-FEED-001): each line is a clone of the hidden Feed1 row. It eases in from the right while
 -- fading up, holds, then eases out; the stack glides to its new slots whenever a line arrives or leaves.
 do -- (one block: keeps UIController under Luau's 200 top-level locals; only UIC.feed uses these)
-local FEED_HOLD, FEED_MAX = 8, 3
+local FEED_HOLD, FEED_MAX = 3, 2 -- HOS-INV-001 clutter 6 (Hunter 18 Oct): two rows at most, each gone after 3 s
 local FEED_MOVE = TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 local FEED_OUT = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 local FADE_PROPS = { Frame = "BackgroundTransparency", ImageLabel = "ImageTransparency", TextLabel = "TextTransparency", UIStroke = "Transparency" }
@@ -1523,6 +1523,7 @@ local function showReveal(t: any)
 		Sound.play("applause")
 		setIcon(sc, "Pet", art)
 		if petImg then UI.popFrom(petImg, 0.2) end
+		if t.royal then pcall(require(script.Parent.ShopItemPreview).royalBurst, sc) end -- HOS-INV-001: Royal Hatching's gold flash, rays and crown
 		for _, d in ipairs(hidden) do d.Visible = true end
 		if title and title:IsA("GuiObject") then UI.popFrom(title, 1.6) end
 		for _, d in (reveal or sc):GetDescendants() do
@@ -1800,7 +1801,7 @@ end
 
 -- Shop by what you buy (16 Oct, after Huss Valley): Featured, Trails, Egg Cases, Effects, Emotes, Gems.
 -- Gold items cost Gold; Gem items show a Gem price and (once its product exists) a Robux price.
-local SHOP_TABS = { featured = "TabFeatured", cosmetics = "TabCosmetics", emotes = "TabEmotes", passes = "TabPasses", gems = "TabGems" }
+local SHOP_TABS = { featured = "TabFeatured", cosmetics = "TabCosmetics", weapons = "TabWeapons", emotes = "TabEmotes", passes = "TabPasses", gems = "TabGems" } -- weapons: HOS-WEP-001 (Controllers/WeaponShopUI)
 -- Cosmetics (16 Oct, Hunter): Trails, Egg Cases and Effects in one tab; chips filter by EconomyConfig.TAB_OF_KIND
 local COS_FILTERS = { all = "FilterAll", trails = "FilterTrails", cases = "FilterCases", effects = "FilterEffects" }
 local COS_ORDER = { trails = 1, cases = 2, effects = 3 }
@@ -2152,11 +2153,12 @@ local function refreshShop()
 		if (key == "gems" or key == "passes") and t and t:IsA("GuiObject") then t.Visible = PURCHASES end
 	end
 	local pages = { PageFeatured = shopTab == "featured", PageItems = shopTab == "cosmetics", CosFilters = shopTab == "cosmetics",
-		PageEmotes = shopTab == "emotes", PagePasses = shopTab == "passes", GetGemsPage = shopTab == "gems" }
+		PageEmotes = shopTab == "emotes", PagePasses = shopTab == "passes", GetGemsPage = shopTab == "gems", PageWeapons = shopTab == "weapons" }
 	for nm, on in pairs(pages) do
 		local pg = find(sc, nm)
 		if pg and pg:IsA("GuiObject") then pg.Visible = on end
 	end
+	require(script.Parent.WeaponShopUI).refresh(sc, profile, shopTab == "weapons") -- HOS-WEP-001: cards, renders, hover stage
 	setText(sc, "GoldText", Format.full(profile.gold or 0))
 	setText(sc, "GemsText", Format.full(profile.gems or 0))
 	if shopTab == "featured" then
@@ -2246,7 +2248,7 @@ local function refreshShop()
 		end
 	elseif shopTab == "emotes" then
 		local gems = profile.gems or 0
-		setText(sc, "CrateSub", ("One of %d emotes per crate  ·  every chance shown inside"):format(UIC.emoteCount or 51))
+		setText(find(sc, "PageEmotes"), "CrateSub", ("One of %d emotes per crate  ·  every chance shown inside"):format(UIC.emoteCount or 51))
 		local rb = find(sc, "BtnCrateRobux")
 		if rb and rb:IsA("GuiObject") then rb.Visible = PURCHASES and UIC.crateProduct ~= nil and not UIC.crateBlocked end
 		local gb = find(sc, "BtnCrateGems")
@@ -2903,6 +2905,7 @@ local function wireButtons()
 	-- Shop: six tabs by what you buy
 	local shop = S.Shop
 	if shop then
+		require(script.Parent.WeaponShopUI).mount(shop) -- HOS-WEP-001: TabWeapons + PageWeapons go in before the tabs are wired
 		for key, nm in pairs(SHOP_TABS) do
 			onClick(find(shop, nm), function() shopTab = key; refreshShop() end)
 		end
