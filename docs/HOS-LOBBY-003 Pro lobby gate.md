@@ -11,11 +11,11 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
 
 `Workspace.CentralAltar.ProAltar.ProGate`, built by `tools/build/HOS-LOBBY-002_pro_altar.lua` with the rest of the altar.
 
-- **Beam wall:** a 32 × 32 square (half-width `GATE` = `HALF` + 5), just outside the stairs and jack-o'-lanterns. On each side:
-  - A curtain of camera-facing columns every 2 studs: 1.6 wide, 70 tall, purple.
-  - A transparency gradient from 0.72 at the bottom to 0.93 a third of the way up and fully clear at the top.
-  - Brighter 0.6-wide pillars at the corner and either side of the entrance.
-  - A thin neon line on the ground under the wall.
+- **Beam wall** (revised 18 Oct after Matthew's feedback that the column curtain looked like a jail cell): one flat beam per side, a 32 × 32 square (half-width `GATE` = `HALF` + 5) just outside the stairs and jack-o'-lanterns.
+  - **Wall:** 32.3 wide (the full side), 70 tall, not camera-facing. Purple, with a transparency gradient from 0.55 at the bottom to 0.92 by 40% of the height and fully clear at the top.
+  - **Glow band:** a second full-length beam on each side, 9 tall, brighter at the foot (0.35 fading to 1).
+  - **Ground line:** a thin neon line on the ground under each wall.
+  - **Orientation:** each wall's attachments have X = up (the beam's run), Y = outward (the face) and Z = along the side (the width).
 - **Signs:** a flat sign at each entrance, about 0.6 studs in front of the wall, 6–9.4 studs up, facing out.
   - 9 × 3.4 studs; the part is invisible and everything shows through its `SurfaceGui`.
   - A dark panel with a purple edge and a gold inner line.
@@ -41,7 +41,7 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
 
 ## Checked in a playtest
 
-- **Fade:** walking in and out along one axis gave these values, the same both ways, for all 76 beams and the signs.
+- **Fade:** walking in and out along one axis gave these values, the same both ways, for all the beams and the signs (measured on the first, column version; the controller treats the new wall beams the same way).
 
   | Distance from centre | Fade (1 = hidden) |
   |---|---|
@@ -52,7 +52,7 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
   | 20 | 0.00 |
 
 - **Errors:** none in the output.
-- **Look:** the first version was a washed-out white wall from an angle. Thinner columns, more transparency and a lower brightness fixed it. The altar now shows through, and the sign reads clearly in front of the wall.
+- **Look:** the first column version was a washed-out white wall from an angle, then read as jail bars once thinned. It's now one flat wall per side. The flat walls haven't been screenshotted yet: the playtest wouldn't start and the capture returned another window. If a wall shows as a thin line or sticks out sideways, swap the attachments' Y and Z axes in `wallBeam`.
 - **Stairs:** walking in from outside with real key presses, the character climbed the steps, crossed the dais and stopped on the circle, standing on the disc and inside `SummonZone`.
 - **Movement note:** the game moves characters with its own controller (`EOS_MoveDrive`) and keeps `Humanoid.WalkSpeed` at 0. Scripted `Humanoid:Move` does nothing, so movement tests need real key input.
 

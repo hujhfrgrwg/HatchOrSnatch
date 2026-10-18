@@ -370,34 +370,39 @@ gate:SetAttribute("FadeNear", GATE + 8) -- fully shown within this many studs of
 gate:SetAttribute("FadeFar", GATE + 20) -- fully hidden beyond this
 CollectionService:AddTag(gate, "EOS_ProximityFade")
 
-local CURTAIN_T = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 0.72), NumberSequenceKeypoint.new(0.05, 0.8),
-	NumberSequenceKeypoint.new(0.35, 0.93), NumberSequenceKeypoint.new(1, 1),
+local WALL_T = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(0.08, 0.72),
+	NumberSequenceKeypoint.new(0.4, 0.92), NumberSequenceKeypoint.new(1, 1),
 })
-local PILLAR_T = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(0.4, 0.75), NumberSequenceKeypoint.new(1, 1),
+local GLOW_T = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(0.3, 0.75), NumberSequenceKeypoint.new(1, 1),
 })
-local function column(line: BasePart, worldBase: Vector3, name: string, width: number, transparency: NumberSequence, c0: Color3, c1: Color3)
-	local a0 = Instance.new("Attachment")
-	a0.Name = name .. "Base"
-	a0.Position = line.CFrame:PointToObjectSpace(worldBase)
-	a0.Parent = line
-	local a1 = Instance.new("Attachment")
-	a1.Name = name .. "Top"
-	a1.Position = line.CFrame:PointToObjectSpace(worldBase + Vector3.new(0, BEAM_H, 0))
-	a1.Parent = line
+-- one flat (not camera-facing) beam spanning a whole side, from the ground line straight up.
+-- Attachment axes: X = up (the beam's run), Y = outward (the beam's face), Z = along the side (its width).
+local function wallBeam(line: BasePart, Q: CFrame, name: string, height: number, width: number, transparency: NumberSequence, c0: Color3, c1: Color3)
+	local base = (Q * CFrame.new(0, 0.03, GATE)).Position
+	local up, out = Vector3.yAxis, Q.LookVector * -1 -- Q's -LookVector is its +Z, i.e. outward
+	local function att(n: string, pos: Vector3)
+		local a = Instance.new("Attachment")
+		a.Name = n
+		a.CFrame = line.CFrame:ToObjectSpace(CFrame.fromMatrix(pos, up, out))
+		a.Parent = line
+		return a
+	end
 	local b = Instance.new("Beam")
 	b.Name = name
-	b.Attachment0, b.Attachment1 = a0, a1
-	b.FaceCamera = true
+	b.Attachment0 = att(name .. "Base", base)
+	b.Attachment1 = att(name .. "Top", base + Vector3.new(0, height, 0))
+	b.FaceCamera = false
 	b.Width0, b.Width1 = width, width
-	b.Segments = 12
+	b.Segments = 16
 	b.Color = ColorSequence.new(c0, c1)
 	b.Transparency = transparency
 	b.LightEmission = 1
 	b.LightInfluence = 0
 	b.Brightness = 1
 	b.Parent = line
+	return b
 end
 
 local signFont = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Heavy)
@@ -406,14 +411,9 @@ for k = 0, 3 do
 	local side = model(("Side_%d"):format(k + 1), gate)
 	-- glowing ground line along this side (alternate sides a hair taller so the corners don't flicker)
 	local line = box(side, "GroundLine", Q, -GATE - 0.15, 0, GATE - 0.15, GATE + 0.15, 0.06 + (k % 2) * 0.006, GATE + 0.15, C.glowPurple, { style = "neon", collide = false })
-	-- curtain of camera-facing columns every 2 studs (each side starts at its corner)
-	for x = -GATE, GATE - 2, 2 do
-		column(line, (Q * CFrame.new(x, 0.03, GATE)).Position, "Curtain", 1.6, CURTAIN_T, C.glowPurple, Color3.fromRGB(150, 110, 255))
-	end
-	-- brighter pillars at the corner and either side of the entrance
-	for _, x in { -GATE, -(ARM + 0.6), ARM + 0.6 } do
-		column(line, (Q * CFrame.new(x, 0.03, GATE)).Position, "Pillar", 0.6, PILLAR_T, Color3.fromRGB(225, 160, 255), C.glowPurple)
-	end
+	-- one full-length wall beam per side, plus a shorter brighter glow band at its foot
+	wallBeam(line, Q, "Wall", BEAM_H, 2 * GATE + 0.3, WALL_T, C.glowPurple, Color3.fromRGB(150, 110, 255))
+	wallBeam(line, Q, "WallGlow", 9, 2 * GATE + 0.3, GLOW_T, Color3.fromRGB(215, 150, 255), C.glowPurple)
 
 	-- flat sign over the entrance, facing out, just in front of the curtain
 	local sign = brick(side, "Sign", Vector3.new(9, 3.4, 0.2), Q * CFrame.new(0, 7.7, GATE + 0.6) * CFrame.Angles(0, math.pi, 0), C.deep, { style = "smooth", collide = false })
