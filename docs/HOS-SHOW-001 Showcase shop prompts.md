@@ -15,7 +15,7 @@ Matthew: "Make sure all of these have walk up pop up GUI that takes them to that
 | `Podium_Obelisk` (north) | Emote hologram (HOS-EMOTE-002) | **Emotes** | View in Shop / Emotes |
 
 - **Walk up:** within 8 studs of the podium's stand (about its edge), the Shop opens on that tab, once.
-- **Close it but stay:** a **hold-E (0.5 s)** prompt on the podium opens the same tab again. It only shows while the Shop is shut, never in a match, and reaches 10 studs.
+- **Close it but stay:** an **E prompt (a tap, no hold;** changed from a 0.5 s hold at Matthew's request) on the podium opens the same tab again. It only shows while the Shop is shut, never in a match, and reaches 10 studs.
 - **Walk away:** past 12 studs, a Shop the podium opened closes, and the walk-up is armed for next time. These are the spin wheel's distances and rule.
 - **Never opens over something else:** not when another menu is open, in a match, while spectating, dead, or before your profile has loaded.
 
@@ -33,7 +33,7 @@ For each podium, starting away from it and stepping to its edge:
 - Standing at each podium, the only prompt shown was that podium's own (the lobby crates' E prompts are out of range). No warnings or errors.
 - The prompt UI doesn't appear in Studio screenshots (Roblox draws it in its own GUI layer), so it was checked through `ProximityPromptService.PromptShown` instead.
 
-Re-checked after the change: the sword podium's walk-up and hold E both open **PageFeatured**.
+Re-checked after the change: the sword podium's walk-up and prompt both open **PageFeatured**. After the tap change, a single press and release of the prompt opened the Shop on all three podiums.
 
 ## Backup and undo
 - `WeaponFXBoot` as it was: `docs/backups/HOS-SHOW-001_2026-10-18/WeaponFXBoot.lua`. That is the live script, including another session's lobby crates start line, checked against Studio by length and checksum.

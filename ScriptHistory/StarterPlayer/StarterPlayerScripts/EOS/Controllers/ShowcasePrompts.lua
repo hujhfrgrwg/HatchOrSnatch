@@ -6,7 +6,7 @@
 --    the Shop on Featured, the emote hologram (HOS_EmoteShowcase) on Emotes.
 --  * Walk up (within OPEN_AT of the podium's stand) and the Shop opens on that tab, once. Walk away (past CLOSE_AT) and
 --    it closes again if the walk opened it, and the walk-up is armed for next time (the spin wheel's rule).
---  * Close the Shop while still standing there and a "hold E" prompt on the podium opens it again. The prompt only
+--  * Close the Shop while still standing there and an "E" prompt on the podium (a tap, no hold) opens it again. The prompt only
 --    shows while the Shop is shut, and never in a match.
 --  * Nothing goes to the server: the Shop is a client screen (UIController.openShopTab).
 --   ShowcasePrompts.start()   WeaponFXBoot, once
@@ -26,7 +26,7 @@ local ShowcasePrompts = {}
 local OPEN_AT, CLOSE_AT = 8, 12 -- studs (flat) from the podium's stand: open inside, re-arm / close outside (the
 -- spin wheel's distances; the slabs are 9-11 studs across, so you open it at the podium's edge)
 local PROMPT_RANGE = 10 -- studs the hold-E prompt reaches
-local HOLD = 0.5 -- seconds to hold E
+local HOLD = 0 -- a tap of E opens it (Matthew: no hold)
 local PROMPT_UP = 2.6 -- studs above the stand
 local TICK = 0.2 -- seconds between checks
 
