@@ -27,7 +27,10 @@ local OPEN_AT, CLOSE_AT = 8, 12 -- studs (flat) from the podium's stand: open in
 -- spin wheel's distances; the slabs are 9-11 studs across, so you open it at the podium's edge)
 local PROMPT_RANGE = 10 -- studs the hold-E prompt reaches
 local HOLD = 0 -- a tap of E opens it (Matthew: no hold)
-local PROMPT_UP = 2.6 -- studs above the stand
+-- the prompt sits low at the podium's front edge (toward the middle of the lobby), clear of the figure on it
+-- (Matthew: "Bring the prompt down to the feet and by the front of the podium so it doesnt interfere with the clone")
+local PROMPT_FRONT = 4.6 -- studs out from the stand toward the lobby's middle
+local PROMPT_UP = -0.9 -- studs from the stand's height (the stand is about 1.9 up the podium)
 local TICK = 0.2 -- seconds between checks
 
 -- tag -> the Shop tab it opens and the prompt's words
@@ -129,7 +132,10 @@ local function ensurePrompt(s: Spot)
 	local at = Instance.new("Attachment")
 	at.Name = "HOS_ShowcasePrompt" -- (this client only)
 	at.Parent = glow
-	at.WorldPosition = stand + Vector3.new(0, PROMPT_UP, 0) -- (after parenting: before, it's taken as 0,0,0)
+	local toMid = LobbyGate.centre() - stand
+	toMid = Vector3.new(toMid.X, 0, toMid.Z)
+	local front = if toMid.Magnitude > 0.1 then toMid.Unit * PROMPT_FRONT else Vector3.zero
+	at.WorldPosition = stand + front + Vector3.new(0, PROMPT_UP, 0) -- (after parenting: before, it's taken as 0,0,0)
 	local pp = Instance.new("ProximityPrompt")
 	pp.Name = "ShowcaseShop"
 	pp.ActionText = s.action
