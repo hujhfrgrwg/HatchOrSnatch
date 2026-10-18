@@ -362,6 +362,43 @@ zone.CanCollide = false
 zone.CastShadow = false
 zone:SetAttribute("Purpose", "Players standing in this volume are entering (summoning circle). Not wired to any code yet.")
 
+-- ===== gold octagon floor lines (like the concept's top view) =====
+-- An inner octagon framing the summoning circle and an outer one across the walkways. Each edge is cut
+-- where it would run under a corner plinth (|x| and |z| both past ARM), ending tucked into the plinth face.
+local floorLines = model("FloorLines", root)
+local LINE_GOLD = Color3.fromRGB(215, 155, 45)
+local function octagon(name: string, apothem: number, width: number, lift: number)
+	local half = apothem * math.tan(math.rad(22.5)) -- half an edge
+	local function open(x: number, z: number): boolean
+		return not (math.abs(x) > ARM + 0.05 and math.abs(z) > ARM + 0.05)
+	end
+	for i = 0, 7 do
+		local R = O * CFrame.Angles(0, math.rad(i * 45), 0) -- this edge runs along local X at z = apothem
+		local steps = 80
+		local runStart = nil
+		for j = 0, steps do
+			local t = -half + 2 * half * j / steps
+			local w = R * Vector3.new(t, 0, apothem)
+			local l = O:PointToObjectSpace(w)
+			local ok = j < steps and open(l.X, l.Z)
+			if ok and not runStart then
+				runStart = t
+			elseif not ok and runStart then
+				local t1 = if j == steps then half else t
+				local len = t1 - runStart
+				if len > 0.2 then
+					local mid = (runStart + t1) / 2
+					local h = 0.06 + lift + (i % 2) * 0.006 -- neighbouring edges overlap at the corners: alternate heights
+					brick(floorLines, name, Vector3.new(len + 0.04, h, width), R * CFrame.new(mid, D - 0.01 + h / 2, apothem), LINE_GOLD, { style = "neon", collide = false })
+				end
+				runStart = nil
+			end
+		end
+	end
+end
+octagon("InnerOctagon", 4.6 * CIRCLE / 1.2, 0.25, 0)
+octagon("OuterOctagon", 8, 0.3, 0.004)
+
 -- ===== pro gate: tall beam wall + PRO LOBBY / LOCKED signs (HOS-LOBBY-003) =====
 local GATE = HALF + 2.8 -- wall half-width: ~1 stud in front of the bottom step (stair cheek caps end at HALF + 2.2)
 local BEAM_H = 70

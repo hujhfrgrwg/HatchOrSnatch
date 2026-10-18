@@ -37,6 +37,7 @@ Revision 2 (18 Oct 2026, Matthew: lower, wider, more room in the middle):
 | **Spiked fences** | Low wooden fences hugging each corner block's two outer faces. |
 | **Jack-o'-lanterns** (4) | Kit `A04_JackOLantern` at 0.85 scale, one outside each corner, facing out. |
 | **Summoning circle** | A round stepped floor disc (r ≈ 3.8, set by `CIRCLE`) at the centre of the dais. It has a purple outer ring and an orange inner ring (24 neon segments each at 15° steps), eight purple runes between the rings and a glowing diamond sigil in the middle. Purple motes rise from it and a purple PointLight lights it. Players stand on it to enter. |
+| **Gold octagon lines** | Added 18 Oct from Matthew's second concept sheet (`HOS-LOBBY-002 altar reference B.webp`, top view). Two flat glowing gold octagon outlines on the dais floor (`ProAltar.FloorLines`, neon 215,155,45):<br>• an inner one framing the summoning circle (apothem 4.6, 0.25 wide)<br>• an outer one across the four walkways (apothem 8, 0.3 wide), whose diagonal sides stop where they meet the corner plinths<br>Neighbouring edges alternate height slightly so their overlapping corners don't flicker. |
 | **SummonZone** | `SummoningCircle.SummonZone`: invisible, no collision, 7.4 × 7 × 7.4 over the circle. It's a ready-made volume for the enter/summon code (e.g. `GetPartsInPart`). Its `Purpose` attribute explains it. **Not wired to any code yet.** |
 
 ## Style
