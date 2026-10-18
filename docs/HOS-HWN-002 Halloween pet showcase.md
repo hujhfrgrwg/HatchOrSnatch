@@ -3,7 +3,9 @@ tags: [delivery, lobby, pets, halloween]
 ticket: HOS-HWN-002
 date: 2026-10-18
 ---
-# HOS-HWN-002: Halloween pet showcase on the Crown podium
+# HOS-HWN-002: Halloween pet showcase (now on Podium_Harvest2)
+
+**Moved 18 Oct (Matthew: "Move the pet podium stuff to be swapped to where the Podium_Harvest2 is at right now").** The showcase now runs on `Workspace._PodiumPreview.Podium_Harvest2`, a copy of the Halloween Harvest podium Matthew placed on the east side at about (41, 10, 1465), mirroring the sword's Harvest podium on the west. As a copy of the Harvest, it carried the sword showcase (`HOS_WeaponShowcase` tag and `ShowcaseSkin`); both were removed and `HOS_PetShowcase` added. The Crown podium (lobby copy and master) lost its `HOS_PetShowcase` tag and shows its plain grey dummy again, and the build script no longer tags the Crown. Harvest2 has no master of its own (rebuilding the Harvest gives the sword version), so its tag was set by hand. Checked in a playtest: the pets cycle on Harvest2 (`docs/HOS-HWN-002_harvest2.jpg`), the sword avatar is only on the west Harvest, and the Crown shows its dummy. Studio undo step: "HOS-HWN-002 pet showcase to Podium_Harvest2". The rest of this note describes the original Crown setup; everything else (pets, moves, effects, sign) is unchanged.
 
 Matthew: "make one of the other pedestals be a pet cycling animation of all our sellable halloween pets. Show what it does with the ability and different animations." Podium: **Crown** (HOS-POD-001), where Matthew placed it at the south end of the island, about (0, 10, 1547). Later: "Remove the legendary line with the description on it" (done; see the sign below).
 
