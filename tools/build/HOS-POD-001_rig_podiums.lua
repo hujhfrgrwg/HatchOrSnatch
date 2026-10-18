@@ -193,17 +193,17 @@ local function buildRune(O: CFrame)
 end
 
 -- ===== D: Harvest (Halloween) =====
--- voxel pumpkin: a core block with four ribs and a stem + leaf; s = scale
-local function voxelPumpkin(parent: Instance, at: CFrame, s: number)
-	local p = model("Pumpkin", parent)
-	local h = 1.0 * s
-	brick(p, "Core", Vector3.new(1.3 * s, h, 1.3 * s), at * CFrame.new(0, h / 2, 0), C.pumpkin)
-	for i = 0, 3 do
-		local R = at * CFrame.Angles(0, math.rad(i * 90), 0)
-		brick(p, "Rib", Vector3.new(0.9 * s, h * 0.86, 0.3 * s), R * CFrame.new(0, h * 0.43 + 0.003 * i, -0.72 * s), if i % 2 == 0 then C.pumpkin else C.pumpkinDark)
-	end
-	brick(p, "Stem", Vector3.new(0.22 * s, 0.4 * s, 0.22 * s), at * CFrame.new(0.05 * s, h + 0.18 * s, 0) * CFrame.Angles(0, 0, math.rad(15)), C.stem, { style = "smooth" })
-	brick(p, "Leaf", Vector3.new(0.5 * s, 0.06, 0.32 * s), at * CFrame.new(0.32 * s, h + 0.04, 0.12 * s) * CFrame.Angles(0, math.rad(30), math.rad(15)), C.leaf, { style = "smooth" })
+-- the lobby's own jack-o'-lantern (ServerStorage.HalloweenLobbyKit.A04_JackOLantern, HOS-LOBBY-005), face to
+-- the front (-Z); s = size where 1 is about 1.8 studs wide (kit scale 0.55), seated on the surface at `at`
+local KIT_PUMPKIN = SS:WaitForChild("HalloweenLobbyKit"):WaitForChild("A04_JackOLantern")
+local function kitPumpkin(parent: Instance, at: CFrame, s: number)
+	local p = KIT_PUMPKIN:Clone()
+	p.Name = "JackOLantern"
+	p:ScaleTo(0.55 * s)
+	p:PivotTo(at)
+	local cf, size = p:GetBoundingBox()
+	p:PivotTo(p:GetPivot() + Vector3.new(0, at.Y - (cf.Y - size.Y / 2) + 0.002, 0))
+	p.Parent = parent
 	return p
 end
 -- voxel corn stalk: a thin stalk, two leaves and a cob in its husk
@@ -245,11 +245,11 @@ local function buildHarvest(O: CFrame)
 	starPedestal(m, O, 11)
 	local deco = model("Harvest", m)
 	local slabTop = BASE_H
-	-- pumpkins on the front corners, a small one up on tier 1
-	voxelPumpkin(deco, O * CFrame.new(-4.4, slabTop, -4.4) * CFrame.Angles(0, math.rad(15), 0), 1.0)
-	voxelPumpkin(deco, O * CFrame.new(-2.7, slabTop, -4.85) * CFrame.Angles(0, math.rad(-30), 0), 0.6)
-	voxelPumpkin(deco, O * CFrame.new(4.4, slabTop, -4.3) * CFrame.Angles(0, math.rad(-15), 0), 0.75)
-	voxelPumpkin(deco, O * CFrame.new(2.97, BASE_H + TIER_H, -2.97) * CFrame.Angles(0, math.rad(30), 0), 0.38)
+	-- the lobby's jack-o'-lanterns on the front corners, a small one up on tier 1
+	kitPumpkin(deco, O * CFrame.new(-4.4, slabTop, -4.4) * CFrame.Angles(0, math.rad(15), 0), 1.0)
+	kitPumpkin(deco, O * CFrame.new(-2.7, slabTop, -4.85) * CFrame.Angles(0, math.rad(-30), 0), 0.6)
+	kitPumpkin(deco, O * CFrame.new(4.4, slabTop, -4.3) * CFrame.Angles(0, math.rad(-15), 0), 0.75)
+	kitPumpkin(deco, O * CFrame.new(2.97, BASE_H + TIER_H, -2.97) * CFrame.Angles(0, math.rad(30), 0), 0.35)
 	-- corn on the back corners, a wheat bundle and a hay bale on the sides
 	cornStalk(deco, O * CFrame.new(-4.4, slabTop, 4.4) * CFrame.Angles(0, math.rad(30), 0), 2.6)
 	cornStalk(deco, O * CFrame.new(-3.0, slabTop, 4.95) * CFrame.Angles(0, math.rad(-15), 0), 2.1)

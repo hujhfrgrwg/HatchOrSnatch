@@ -28,13 +28,13 @@ Four podiums for showing rigs (characters / NPCs), to replace the current displa
 | **Crown** | The incubator pedestal in miniature: a ring of 8 capped blocks round the top tier, each with a small purple gem, and a purple disc. | 33 |
 | **Obelisk** | Four small obelisks on the slab's corners, each with a purple neon panel and glowing tip, and a purple neon rim round the top tier. | 37 |
 | **Rune** | Square tiers (not star-shaped) with gear-tooth edges on the bottom tier and glowing rune marks between the teeth. It has a neon line round the second tier and a purple crystal cluster with glowing tips on each corner. | 54 |
-| **Harvest** (Halloween) | The star tiers on a wider 11-stud slab so the props have room. It has voxel pumpkins in four sizes (one up on the first tier), three corn stalks with cobs and tassels, a wheat bundle, a hay bale and scattered red/orange/yellow leaves, with an orange glow disc. | 84 |
+| **Harvest** (Halloween) | The star tiers on a wider 11-stud slab so the props have room. It has the lobby's own jack-o'-lanterns (`ServerStorage.HalloweenLobbyKit.A04_JackOLantern`, HOS-LOBBY-005) in four sizes (kit scale 0.55 × 1.0 / 0.75 / 0.6 / 0.35, one up on the first tier, faces to the front). It also has three corn stalks with cobs and tassels, a wheat bundle, a hay bale and scattered red/orange/yellow leaves, with an orange glow disc. | 72 |
 
 ## Checks
 
 - **Dummies:** on each podium, the dummy stands upright with its feet exactly on the stand height.
 - **Flicker:** the coplanar sweep is clean on all four. The Obelisk's rim strips and the Rune's tier line alternate heights where they meet at the corners.
-- **Placement:** props sit only where the floor under them is clear of the tier above, so nothing clips into the tiers.
+- **Placement:** props sit only where the floor under them is clear of the tier above, so nothing clips into the tiers. Each jack-o'-lantern's body touches no other podium part.
 - **Bug found and fixed:** the `RigStand` marker was first set before it was attached to the disc, so it inherited the disc's rotation and the dummies came out lying down. It's now attached first.
 
 ## Rebuilding
