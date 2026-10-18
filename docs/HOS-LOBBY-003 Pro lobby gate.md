@@ -11,18 +11,19 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
 
 `Workspace.CentralAltar.ProAltar.ProGate`, built by `tools/build/HOS-LOBBY-002_pro_altar.lua` with the rest of the altar.
 
-- **Beam wall** (revised 18 Oct after Matthew's feedback that the column curtain looked like a jail cell): one flat beam per side, a 32 × 32 square (half-width `GATE` = `HALF` + 5) just outside the stairs and jack-o'-lanterns.
-  - **Wall:** 32.3 wide (the full side), 70 tall, not camera-facing. The incubator's purples (180,92,255 into 166,64,255), with a transparency gradient from 0.55 at the bottom to 0.92 by 40% of the height and fully clear at the top.
-  - **Glow band:** a second full-length beam on each side, 9 tall, brighter at the foot (0.35 fading to 1).
+- **Beam wall** (revised 18 Oct per Matthew): one flat beam per side, plus twinkling streaks. A 27.6 × 27.6 square (half-width `GATE` = `HALF` + 2.8), about a stud in front of the bottom step. The jack-o'-lanterns moved out to `HALF` + 5.2 and sit just outside its corners.
+  - **Wall:** 27.9 wide (the full side), 70 tall, not camera-facing. The incubator's purples (180,92,255 into 166,64,255), with a transparency gradient from 0.64 at the bottom to 0.92 by 40% of the height and fully clear at the top.
+  - **Glow band:** a second full-length beam on each side, 9 tall, purple (no white), 0.6 fading to 1.
+  - **Streaks:** 14 thinner flat beams per side over the wall for texture. They have irregular positions, widths 0.25–1.85 and heights 20–65, seeded per side so a rebuild gives the same pattern. Each is a hair further out than the last, so none share a plane. They carry a `Twinkle` attribute, and `ProximityFade` fades each one in and out on its own random rhythm like a sparkle, on top of the distance fade.
   - **Ground line:** a thin neon line on the ground under each wall.
-  - **Orientation:** a flat (not camera-facing) beam's width runs along its attachments' **Y** axis. Each wall's attachments have X = up (the beam's run), Y = along the side (the width) and Z = outward (the face). The first flat version had Y = outward: the four sheets stuck straight out from the side midpoints and crossed the whole lobby in a plus. Matthew caught it from a top-down view.
-- **Signs:** text only (18 Oct, Matthew: no bricks). One over each entrance, facing out, just in front of the wall, centred 11.2 studs up so it sits above the bright glow band.
+  - **Orientation:** a flat (not camera-facing) beam's width runs along its attachments' **Y** axis. Each beam's attachments have X = up (the beam's run), Y = along the side (the width) and Z = outward (the face). The first flat version had Y = outward: the four sheets stuck straight out from the side midpoints and crossed the whole lobby in a plus. Matthew caught it from a top-down view.
+- **Signs:** text only (18 Oct, Matthew: no bricks). One over each entrance, facing out, just in front of the wall, centred 9.6 studs up.
   - **Text:** "PRO LOBBY" over "LOCKED", the incubator sign's lavender (230,200,255) GothamSSm Heavy.
   - **Outline:** a 6 px near-black purple outline (24,6,44), so it reads against the glowing wall with no panel behind it. SurfaceGui brightness 1.2.
   - **Holder:** the text sits on an invisible holder part (`Sign`, transparency 1).
   - **Static:** it doesn't turn to face the player.
   - **Not always-on-top:** I tried `AlwaysOnTop` to stop the wall washing the text out. With it, Roblox didn't draw the text at all, first with a CanvasGroup and then without one, so it's off.
-- **No collision:** nothing in the gate blocks movement, and players can still walk up to the summoning circle. Blocking entry would need either a wall or a server check once pro access exists.
+- **Barrier:** `ProAltar.GateBarrier` holds four invisible walls on the gate line, 1 thick and 30 tall, so players can't get into the square while it's locked. They're `CanQuery` off (the camera passes through) and `CanTouch` off. They touch none of the altar's parts.
 
 ## The fade (client)
 
@@ -38,6 +39,7 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
   - Lights dim through `Brightness`.
   - It's smoothed over about a quarter of a second, and pieces that stream in later join the fade.
   - All of this is client-only, so each player sees only their own fade.
+- **Twinkle:** beams with the attribute `Twinkle = true` also pulse on their own sine (0.9–2.4 rad/s, random phase, squared so they spend longer dim).
 - **Reuse:** to make anything else fade by distance, tag its model `EOS_ProximityFade` and give it `FadeNear` / `FadeFar`.
 
 ## Checked in a playtest
@@ -55,7 +57,9 @@ The pro altar (HOS-LOBBY-002) now has a tall glowing beam wall round it and a **
 - **Errors:** none in the output.
 - **Look:** the first column version was a washed-out white wall from an angle, then read as jail bars once thinned. It's now one flat wall per side. After the axis fix, a top-down screenshot shows a closed square of light on the gate line with nothing outside it. A three-quarter view shows four walls meeting at the corners, and the incubator-style signs read clearly. (My earlier straight-on check missed the plus because the sheet facing the camera looked right from that angle; check from above.)
 - **Fade with text-only signs:** the 8 wall beams, the 8 text labels and their outlines were all hidden at 50 studs, half at 30 and shown at 20.
-- **Stairs:** walking in from outside with real key presses, the character climbed the steps, crossed the dais and stopped on the circle, standing on the disc and inside `SummonZone`.
+- **Stairs:** before the barrier, walking in from outside with real key presses, the character climbed the steps, crossed the dais and stopped on the circle, standing on the disc and inside `SummonZone`.
+- **Barrier:** with real key presses the character stopped against the barrier straight on (14.8 studs from the centre, wall face at 14.3) and in a corner (outside on both axes).
+- **Twinkle:** sampled over 2 seconds, the streaks swung independently between about 0 and 1 while the main wall stayed fully shown.
 - **Movement note:** the game moves characters with its own controller (`EOS_MoveDrive`) and keeps `Humanoid.WalkSpeed` at 0. Scripted `Humanoid:Move` does nothing, so movement tests need real key input.
 
 ## Backups

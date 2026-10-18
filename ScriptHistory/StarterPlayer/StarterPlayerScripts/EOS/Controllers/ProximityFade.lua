@@ -5,7 +5,9 @@
 -- FadeNear / FadeFar attributes (studs) are where it is fully shown / fully hidden.
 -- Beams and parts fade through LocalTransparencyModifier, CanvasGroups through GroupTransparency,
 -- text through TextTransparency, UIStrokes through Transparency, lights through Brightness (text and
--- strokes are faded directly because CanvasGroups don't draw in AlwaysOnTop SurfaceGuis). Streamed-in pieces join the fade as they arrive.
+-- strokes are faded directly because CanvasGroups don't draw in AlwaysOnTop SurfaceGuis). Streamed-in
+-- pieces join the fade as they arrive. Beams with a true "Twinkle" attribute also pulse in and out on
+-- their own random rhythm (sparkling), on top of the distance fade.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -16,16 +18,19 @@ local ProximityFade = {}
 local TAG = "EOS_ProximityFade"
 local RATE = 4 -- higher = snappier fade (exponential smoothing per second)
 local DEFAULT_NEAR, DEFAULT_FAR = 24, 36
+local TWINKLE_SPEED = { 0.9, 2.4 } -- radians per second, picked per beam
 
 type Entry = {
 	model: Model,
 	hidden: number, -- 0 = fully shown, 1 = fully hidden; -1 until the first frame snaps it
 	base: { [Instance]: number }, -- each piece's own resting value
+	twinkle: { [Beam]: { phase: number, speed: number } },
 	conns: { RBXScriptConnection },
 }
 local entries: { [Model]: Entry } = {}
 
 local player = Players.LocalPlayer
+local rng = Random.new()
 
 local function setPiece(inst: Instance, base: number, h: number)
 	if inst:IsA("Beam") then
@@ -54,6 +59,9 @@ local function remember(e: Entry, inst: Instance)
 		e.base[inst] = inst.Brightness
 	elseif inst:IsA("Beam") or inst:IsA("BasePart") then
 		e.base[inst] = 0
+		if inst:IsA("Beam") and inst:GetAttribute("Twinkle") == true then
+			e.twinkle[inst] = { phase = rng:NextNumber() * 2 * math.pi, speed = rng:NextNumber(TWINKLE_SPEED[1], TWINKLE_SPEED[2]) }
+		end
 	else
 		return
 	end
@@ -73,7 +81,7 @@ local function add(inst: Instance)
 		return
 	end
 	local model = inst :: Model
-	local e: Entry = { model = model, hidden = -1, base = {}, conns = {} }
+	local e: Entry = { model = model, hidden = -1, base = {}, twinkle = {}, conns = {} }
 	for _, d in model:GetDescendants() do
 		remember(e, d)
 	end
@@ -82,6 +90,7 @@ local function add(inst: Instance)
 	end))
 	table.insert(e.conns, model.DescendantRemoving:Connect(function(d)
 		e.base[d] = nil
+		e.twinkle[d :: any] = nil
 	end))
 	entries[model] = e
 end
@@ -96,11 +105,20 @@ local function remove(inst: Instance)
 	end
 end
 
+-- sparkle: each twinkling beam fades in and out on its own sine, sharpened so it spends longer dim
+local function twinkle(e: Entry, now: number)
+	for beam, tw in e.twinkle do
+		local pulse = (0.5 + 0.5 * math.sin(now * tw.speed + tw.phase)) ^ 2
+		(beam :: any).LocalTransparencyModifier = 1 - (1 - e.hidden) * pulse
+	end
+end
+
 local function step(dt: number)
 	local char = player.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local target = if root then root.Position else workspace.CurrentCamera.CFrame.Position
 	local k = 1 - math.exp(-RATE * dt)
+	local now = os.clock()
 	for model, e in entries do
 		if not model.Parent then
 			remove(model)
@@ -120,6 +138,9 @@ local function step(dt: number)
 		if h ~= e.hidden then
 			e.hidden = h
 			apply(e)
+		end
+		if e.hidden < 1 and next(e.twinkle) then
+			twinkle(e, now)
 		end
 	end
 end

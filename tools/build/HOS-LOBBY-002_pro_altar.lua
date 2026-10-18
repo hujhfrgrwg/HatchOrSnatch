@@ -230,7 +230,7 @@ for k = 0, 3 do
 		end
 		local f = piv:VectorToObjectSpace(sum / n - piv.Position) * Vector3.new(1, 0, 1)
 		local _, size = pumpkin:GetBoundingBox()
-		local pos = (Q * CFrame.new(HALF + 3.0, size.Y / 2 + 0.002, HALF + 3.0)).Position
+		local pos = (Q * CFrame.new(HALF + 5.2, size.Y / 2 + 0.002, HALF + 5.2)).Position -- just outside the gate's corner
 		local turn = CFrame.lookAt(Vector3.zero, outward.Unit) * CFrame.lookAt(Vector3.zero, f.Unit):Inverse()
 		pumpkin:PivotTo(CFrame.new(pos) * turn.Rotation * CFrame.Angles(0, math.rad(k % 2 == 0 and 15 or -15), 0))
 	end
@@ -363,7 +363,7 @@ zone.CastShadow = false
 zone:SetAttribute("Purpose", "Players standing in this volume are entering (summoning circle). Not wired to any code yet.")
 
 -- ===== pro gate: tall beam wall + PRO LOBBY / LOCKED signs (HOS-LOBBY-003) =====
-local GATE = HALF + 5 -- wall half-width: clear of the stairs and the jack-o'-lanterns
+local GATE = HALF + 2.8 -- wall half-width: ~1 stud in front of the bottom step (stair cheek caps end at HALF + 2.2)
 local BEAM_H = 70
 local gate = model("ProGate", root)
 gate:SetAttribute("FadeNear", GATE + 8) -- fully shown within this many studs of the centre
@@ -371,17 +371,18 @@ gate:SetAttribute("FadeFar", GATE + 20) -- fully hidden beyond this
 CollectionService:AddTag(gate, "EOS_ProximityFade")
 
 local WALL_T = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(0.08, 0.72),
+	NumberSequenceKeypoint.new(0, 0.64), NumberSequenceKeypoint.new(0.08, 0.76),
 	NumberSequenceKeypoint.new(0.4, 0.92), NumberSequenceKeypoint.new(1, 1),
 })
 local GLOW_T = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(0.3, 0.75), NumberSequenceKeypoint.new(1, 1),
+	NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(0.3, 0.86), NumberSequenceKeypoint.new(1, 1),
 })
--- one flat (not camera-facing) beam spanning a whole side, from the ground line straight up.
+-- a flat (not camera-facing) beam on one side, from the ground line straight up; x shifts it along
+-- the side, out pushes it outward (streaks sit a hair outside the wall so they never share its plane).
 -- Attachment axes: X = up (the beam's run), Y = along the side (a flat beam's width runs along its
 -- attachments' Y axis), Z = outward (the face). Measured: Y = outward gave four sheets crossing in a plus.
-local function wallBeam(line: BasePart, Q: CFrame, name: string, height: number, width: number, transparency: NumberSequence, c0: Color3, c1: Color3)
-	local base = (Q * CFrame.new(0, 0.03, GATE)).Position
+local function wallBeam(line: BasePart, Q: CFrame, name: string, height: number, width: number, transparency: NumberSequence, c0: Color3, c1: Color3, x: number?, out: number?)
+	local base = (Q * CFrame.new(x or 0, 0.03, GATE + (out or 0))).Position
 	local up, along = Vector3.yAxis, Q.RightVector -- the side runs along Q's X
 	local function att(n: string, pos: Vector3)
 		local a = Instance.new("Attachment")
@@ -419,10 +420,24 @@ for k = 0, 3 do
 	local line = box(side, "GroundLine", Q, -GATE - 0.15, 0, GATE - 0.15, GATE + 0.15, 0.06 + (k % 2) * 0.006, GATE + 0.15, C.glowPurple, { style = "neon", collide = false })
 	-- one full-length wall beam per side, plus a shorter brighter glow band at its foot
 	wallBeam(line, Q, "Wall", BEAM_H, 2 * GATE + 0.3, WALL_T, C.glowPurple, INC_STROKE)
-	wallBeam(line, Q, "WallGlow", 9, 2 * GATE + 0.3, GLOW_T, INC_TEXT, C.glowPurple)
+	wallBeam(line, Q, "WallGlow", 9, 2 * GATE + 0.3, GLOW_T, C.glowPurple, INC_STROKE)
+	-- thinner streak beams over the wall for texture, twinkling in and out on the client. Irregular spacing,
+	-- widths and heights (seeded, so a rebuild gives the same pattern), each a hair further out so no two
+	-- share a plane.
+	local rng = Random.new(31 + k)
+	for i = 1, 14 do
+		local x = -GATE + 1 + rng:NextNumber() * (2 * GATE - 2)
+		local w = 0.25 + rng:NextNumber() ^ 2 * 1.6
+		local h = 20 + rng:NextNumber() * 45
+		local t0 = 0.5 + rng:NextNumber() * 0.25
+		local seq = NumberSequence.new({ NumberSequenceKeypoint.new(0, t0), NumberSequenceKeypoint.new(0.5, 0.88), NumberSequenceKeypoint.new(1, 1) })
+		local tint = C.glowPurple:Lerp(Color3.fromRGB(205, 150, 255), rng:NextNumber() * 0.5)
+		local streak = wallBeam(line, Q, "Streak", h, w, seq, tint, INC_STROKE, x, 0.05 + i * 0.006)
+		streak:SetAttribute("Twinkle", true) -- ProximityFade fades it in and out like a sparkle
+	end
 
 	-- text-only sign over the entrance, facing out, in front of the wall: an invisible holder part for the text
-	local S = Q * CFrame.new(0, 11.2, GATE + 0.6) * CFrame.Angles(0, math.pi, 0) -- -Z faces out; above the bright glow band
+	local S = Q * CFrame.new(0, 9.6, GATE + 0.6) * CFrame.Angles(0, math.pi, 0) -- -Z faces out
 	local panel = brick(side, "Sign", Vector3.new(9, 3.4, 0.05), S, INC_PANEL, { style = "smooth", collide = false })
 	panel.Transparency = 1
 	panel.CastShadow = false
@@ -455,6 +470,17 @@ for k = 0, 3 do
 	label("Status", "LOCKED", 0.6, 0.28, 0.5)
 end
 gate.WorldPivot = O
+
+-- invisible walls on the gate line: nobody gets into the square while it's locked (the camera passes through)
+local barrier = model("GateBarrier", root)
+for k = 0, 3 do
+	local Q = O * CFrame.Angles(0, k * math.pi / 2, 0)
+	local wall = box(barrier, "BarrierWall", Q, -GATE - 0.5, 0, GATE - 0.5, GATE + 0.5, 30, GATE + 0.5, C.deep, { style = "smooth" })
+	wall.Transparency = 1
+	wall.CanQuery = false
+	wall.CanTouch = false
+	wall.CastShadow = false
+end
 
 -- ===== place it =====
 local rec = CHS:TryBeginRecording("HOS-LOBBY-002 pro altar")

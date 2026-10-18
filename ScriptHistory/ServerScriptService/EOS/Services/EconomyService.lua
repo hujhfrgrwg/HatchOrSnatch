@@ -161,6 +161,9 @@ local function onBuy(plr: Player, itemId: any)
 	if item then
 		Analytics.log(if item.wallet == "gems" then "GemsSink" else "GoldSink", { userId = plr.UserId, amount = item.price, reason = itemId })
 		-- no toast: ShopResult opens the client's Reward reveal (16 Oct)
+		if item.kind == "knifeSkin" then
+			CharacterService.refreshKnife(plr) -- HOS-INV-001: a bought skin is worn at once, on you in the lobby
+		end
 	end
 end
 
@@ -244,6 +247,8 @@ local function onSetCosmetic(plr: Player, slot: any, itemId: any)
 		toast(plr, "You don't have that yet", "warn")
 	elseif slot == "case" and plr.Character and plr.Character:FindFirstChild("EOS_Egg") then
 		CharacterService.setEgg(plr, plr:GetAttribute("EOS_Tier")) -- re-dress the egg you carry
+	elseif slot == "knifeSkin" then
+		CharacterService.refreshKnife(plr) -- HOS-INV-001: the carried weapon changes straight away
 	end
 end
 

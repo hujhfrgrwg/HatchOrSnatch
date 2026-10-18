@@ -170,6 +170,7 @@ local function onCrate(plr: Player, count: any)
 			p.cosmetics.knifeSkin = best.itemId -- x10 wears the best new skin, not the last one
 		end
 	end)
+	CharacterService.refreshKnife(plr) -- HOS-INV-001: the new skin shows on you straight away
 	ev:FireClient(plr, { ok = true, itemId = best.itemId, dupe = best.dupe, refund = best.refund, pity = scratch.weaponPity, multi = if multi then results else nil })
 	showcase(plr, best.itemId)
 	Analytics.log("GemsSink", { userId = plr.UserId, amount = price, reason = if multi then "weapon_crate_x10" else "weapon_crate" })
@@ -198,6 +199,7 @@ function WeaponCrateService.processReceipt(info: any, plr: Player, ledgerSize: n
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	if result then
+		CharacterService.refreshKnife(plr)
 		local now = DataService.get(plr)
 		Net.event("WeaponCrateResult"):FireClient(plr, { ok = true, itemId = result.itemId, dupe = result.dupe, refund = result.refund, pity = now and now.weaponPity, robux = true })
 		showcase(plr, result.itemId)

@@ -505,17 +505,12 @@ local function afterReel(kind: string, results: { any })
 			local ok, spin = pcall(function()
 				return mod and require(mod)
 			end)
-			-- wait for the reel to land on the best pull (its Reveal shows), give it a beat, then the ten cards replace it
-			local reveal = gui and gui:FindFirstChild("Reveal", true)
-			local t0 = os.clock()
+			-- the reel lands on the best pull and the player claims it (EmoteCrateSpin never auto-closes: closing it
+			-- from here would leave it waiting for a choice); the ten cards follow the claim
 			task.wait(1)
-			local frame = reveal and reveal.Parent
-			while os.clock() - t0 < 12 and not (reveal and reveal:IsA("GuiObject") and reveal.Visible and frame and frame:IsA("GuiObject") and frame.Visible) do
-				task.wait(0.1)
-			end
-			task.wait(1.4)
-			if ok and spin and spin.isBusy and spin.isBusy() and spin.close then
-				pcall(spin.close)
+			local t0 = os.clock()
+			while ok and spin and spin.isBusy and spin.isBusy() and os.clock() - t0 < 180 do
+				task.wait(0.2)
 			end
 		else
 			task.wait(2.6) -- the Weapons tab stage shows the best pull first

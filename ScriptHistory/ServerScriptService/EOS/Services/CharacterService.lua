@@ -571,8 +571,19 @@ function CharacterService.applyRole(plr: Player, role: string, tier: number?)
 	setGroup(char, roleGroup(char, role))
 	CharacterService.setEgg(plr, if role == "RUNNER" then (tier or 1) else nil)
 	setHighlight(char, nil) -- (clears the old server-side highlight) outlines are per viewer now: Controllers/Outlines
-	setKnife(char, role == "CATCHER", plr)
+	-- HOS-INV-001 (Hunter 18 Oct: "Your equipped weapon should be showing on your back, even in the lobby"): the worn
+	-- weapon is carried in the lobby too (WeaponHolster draws it on the body; nobody can swing it there)
+	setKnife(char, role == "CATCHER" or role == "LOBBY", plr)
 	CharacterService.refreshTag(plr)
+end
+
+-- HOS-INV-001: re-dress the weapon after a skin change (equip, crate, buy) when one is carried
+function CharacterService.refreshKnife(plr: Player)
+	local char = plr.Character
+	local role = plr:GetAttribute("EOS_Role")
+	if char and (role == "CATCHER" or role == "LOBBY") then
+		setKnife(char, true, plr)
+	end
 end
 
 -- the top speed this character should have right now (role speed, 0 while held, reduced while slowed)
