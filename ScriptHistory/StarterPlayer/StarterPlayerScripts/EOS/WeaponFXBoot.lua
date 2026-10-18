@@ -273,3 +273,9 @@ require(script.Parent:WaitForChild("Controllers"):WaitForChild("PetShowcase")).s
 
 -- HOS-EMOTE-002: the Obelisk podium's hologram of you cycling every emote, its own module
 require(script.Parent:WaitForChild("Controllers"):WaitForChild("EmoteShowcase")).start()
+
+-- HOS-WEP-001: the lobby crates (walk up, open one, the spin), their own module
+require(script.Parent:WaitForChild("Controllers"):WaitForChild("LobbyCrates")).start()
+
+-- HOS-SHOW-001: walking up to a showcase podium opens its part of the Shop; hold E to open it again
+require(script.Parent:WaitForChild("Controllers"):WaitForChild("ShowcasePrompts")).start()
