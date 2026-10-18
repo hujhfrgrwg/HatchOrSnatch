@@ -3,8 +3,8 @@
 --   idle      the egg turns and bobs over its pedestal, the orbit ring precesses, the floating crystals circle and bob,
 --             the lanterns sway on their chains and the neon (strips, beams, runes, sign, base disc, ring) breathes
 --   your egg  every player sees their own egg, a cracked-shell puzzle (EggPieces): SLOTS pieces that fit together,
---             placed bottom up, one per FILL / SLOTS of fill, each wearing the rarity of the shard that filled it
---             (ProfileState incubator.shards; the EggShardKit look). Every piece not placed yet shows as a ForceField
+--             placed bottom up, one per FILL / SLOTS of fill, all in one shard look (PIECE_LOOK; the shard flying in
+--             still shows the rarity you earned). Every piece not placed yet shows as a ForceField
 --             hologram of itself, so the whole egg is always outlined; a ready egg is solid and glows gold
 --   walk-up   stepping onto the platform opens the incubator screen (EggUIController's openIncubator); walking away
 --             closes it. Shards earned since the last visit (incubator.unseen) first fly from the player's back to the
@@ -33,6 +33,7 @@ local SLOTS = EggPieces.COUNT -- puzzle pieces (EggConfig.INCUBATOR.FILL is 18: 
 local SNAP = 1.6 -- studs out from its place a piece appears before it snaps in
 local HOLO = Color3.fromRGB(225, 175, 255) -- the hologram pieces (ForceField reads faint, so a light tint)
 local GOLD = Color3.fromRGB(255, 210, 58)
+local PIECE_LOOK = "epic" -- every egg piece wears this EggShardKit look (SA_<rarity>), whatever shard filled it
 
 local deps: any = {}
 local S: any = nil -- the bound model's state (rebuilt when the model streams in again)
@@ -224,14 +225,14 @@ local function setSlot(i: number, rarity: string?, animate: boolean, pop: boolea
 	if not sl then return end
 	if rarity and rarity ~= sl.rarity then
 		local kit = ReplicatedStorage:FindFirstChild("EggShardKit")
-		local sa = kit and kit:FindFirstChild("SA_" .. rarity)
+		local sa = kit and kit:FindFirstChild("SA_" .. PIECE_LOOK)
 		for _, p in sl.parts do
 			if p:IsA("MeshPart") then -- the shard atlas
 				local old = p:FindFirstChildOfClass("SurfaceAppearance")
 				if old then old:Destroy() end
 				if sa then sa:Clone().Parent = p end
 			else -- wedge fallback: the rarity's colour
-				p.Color = colorOf(rarity)
+				p.Color = colorOf(PIECE_LOOK)
 			end
 		end
 	end

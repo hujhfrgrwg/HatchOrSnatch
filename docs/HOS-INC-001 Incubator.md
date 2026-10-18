@@ -21,7 +21,9 @@ The lobby incubator (`Workspace.Incubator.Incubator`) is now animated and wired 
 - **Walk-up:** stepping within 11 studs of the egg opens the incubator screen (`EggUIController`'s `openIncubator`), and walking past 14 studs closes it. It only closes a screen the walk-up opened, and it never opens during a match.
 - **Your egg:**
   - The egg is cut along jagged crack lines into 18 pieces that fit together: a bottom cap, rings of 5, 6 and 5 pieces, and a top cap.
-  - Pieces are placed bottom up, one per 1/18 of fill. Each piece wears the rarity of the shard that filled it, using the same texture atlas as the egg shards (`EggShardKit` `SA_<rarity>`).
+  - Pieces are placed bottom up, one per 1/18 of fill. Since 18 Oct (Matthew: "have all the shards look the same for color"), every piece wears one look, whatever shard filled it. That look is `PIECE_LOOK` in `IncubatorWorld`, now `"epic"` (purple), taken from the egg shard texture atlas (`EggShardKit` `SA_<rarity>`). The shard flying in still shows the rarity you earned.
+
+    ![All pieces in one look](HOS-INC-001/ingame_one_look.jpg)
   - Every piece that isn't placed yet shows as a ForceField hologram of its own curved mesh. An empty egg is a whole hologram egg with the crack lines showing, and it fills in solid piece by piece.
   - A full egg is solid and glows gold.
 - **Shards flying in:** shards earned since the last visit fly from the player's back to the egg one by one when they walk up. As each one lands, its pieces appear just outside the egg and snap into place, with a pulse and a sound. After that the server's list of unseen shards is cleared.
