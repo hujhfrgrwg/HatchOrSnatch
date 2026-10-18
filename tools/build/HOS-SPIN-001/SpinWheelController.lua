@@ -427,7 +427,20 @@ local function openPrize(res)
 	pendingPrize = res
 	local text, img = describe(g)
 	local rev = prize.Reveal
-	for _, n in { "Icon", "IconShadow" } do rev[n].Image = img end
+	-- a weapon shows a 3D render of itself (knife skins have no 2D icon), like the Shop's reward reveal
+	local item = g.kind == "weapon" and EconomyConfig.item(g.itemId)
+	local skin = item and (item :: any).skin
+	for _, n in { "Icon", "IconShadow" } do
+		local im = rev[n]
+		local old = im:FindFirstChild("SkinRender")
+		if old then old:Destroy() end
+		if im:GetAttribute("BaseT") == nil then im:SetAttribute("BaseT", im.ImageTransparency) end
+		im.Image = img
+		im.ImageTransparency = if skin then 1 else im:GetAttribute("BaseT")
+	end
+	if skin then
+		pcall(function() require(script.Parent.WeaponShopUI).renderSkin(rev.Icon, skin) end)
+	end
 	setText(rev, "ItemName", text)
 	UI.open("Prize", { keepHistory = UI.isOpen("Spin") })
 	local rays = rev:FindFirstChild("Rays")

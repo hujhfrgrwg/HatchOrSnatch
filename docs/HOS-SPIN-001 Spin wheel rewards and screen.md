@@ -98,7 +98,7 @@ Tested:
   - The wallet ended at exactly 2,000 Gold, the sum of the labels.
   - Shards flew to the incubator button and coins to the wallet, each from its own wheel.
 - **Weapon:** I forced one roll to slot 1 (temporarily, in the playtest only).
-  - The single wheel landed on the weapon, and the popup showed "All Hallow's Sword".
+  - The single wheel landed on the weapon, and the popup showed "All Hallow's Sword" as its 3D render.
   - The profile owned and had equipped `knife_rb_all_hallow_s_sword`, and Gold was unchanged.
 
 **Opening and closing:** walking up to the front of the wheel opens the screen, and walking away closes it. If the player closes it with X, it stays shut until they walk away and come back. It never opens in a match, while spectating, or over another panel.
@@ -125,7 +125,7 @@ Built by `tools/build/HOS-SPIN-001/build_ui.lua`. The controller is `StarterPlay
 
 ## Waiting on Matthew / Hunter
 - **The weapon:** it's the All Hallow's Sword (legendary) as a stand-in. Say which one and it's one line (`weaponId` on slot 1).
-  - The popup uses the generic knife icon, because knife skins have no 2D icon; the shop shows them as 3D previews.
+  - Knife skins have no 2D icon, so a weapon prize shows the shop's 3D render of the skin instead (`WeaponShopUI.renderSkin`), as the shop's reward reveal does. Matthew: "If no 2d icon, then show the viewport used."
 - **Robux spin packs:** prices are placeholders (49 / 349 / 2,900, as in the reference). They need developer products created, and the ids go in `SpinWheelConfig.PACKS`. Until then the tiles say "Spin packs aren't on sale yet".
 - **Free spin interval:** 15 minutes, to match the reference. Change `FREE_SECONDS` if you want something else.
 - The stud texture on the wheel is still the egg-pack one with "L"s until the custom stud texture is uploaded (see [[HOS-LOBBY-007 Spin wheel]]).
