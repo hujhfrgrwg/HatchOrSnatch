@@ -61,7 +61,8 @@ Compared with the reference, the screen has one weapon slot instead of two. The 
 
 **Right side**
 - The wheel, a ViewportFrame with a copy of the lobby wheel and crystal. The reward icons ride on their sectors as it turns. It spins clockwise with a ticking sound, then eases onto the result.
-- When it stops, the prize popup opens (below).
+- **One spin plays on the big lobby wheel.** The spin screen closes and the camera eases round to face the wheel. The wheel turns to the result, ticking as it goes, then the prize popup opens (below). Matthew: "If they only roll a single spin, have it just show on the big wheel instead of UI."
+- **A reward replaces the spin screen.** Neither the prize popup nor the x5/x10 wheels stack on top of it. After COLLECT!, the spin screen comes back about a second later if you're still at the wheel. Matthew: "When they get the reward close the spin UI behind it."
 - **SPIN x5 / x10** open that many wheels at once instead (`Root.Multi`, over the same black shade): 5 in a row, or 2 rows of 5.
   - They all start together and each settles in its own time, landing on its own roll. The prize shows under each wheel as it lands (a wheel landing on 250 Gold paid exactly that), then **COLLECT!** appears.
   - On collect, each prize flies home from its own wheel.

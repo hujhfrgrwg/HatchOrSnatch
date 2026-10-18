@@ -2,10 +2,11 @@
 -- SpinWheelController (HOS-SPIN-001, 18 Oct 2026, Matthew): the lobby spin wheel on the client.
 --  * walk up to the wheel (Workspace.SpinWheel) and the spin screen opens (SpinWheelUI, built by
 --    tools/build/HOS-SPIN-001/build_ui.lua); walk away and it closes. Closed with X, it waits until you've left.
---  * SPIN! / SPIN x5 / SPIN x10 ask the server (EOS_SpinWheel.Spin), which rolls and pays; the screen's wheel then
---    turns to the result and the prize pops up in the middle over a black shade (Root.Prize). SPIN x5 / x10 open that
---    many wheels at once instead (Root.Multi), all spinning together, each landing on its own prize, which shows under
---    it. What a wheel lands on is exactly what that spin paid. COLLECT! sends it home: Gold and Gems fly as single
+--  * SPIN! / SPIN x5 / SPIN x10 ask the server (EOS_SpinWheel.Spin), which rolls and pays. One spin closes the spin
+--    screen and plays on the big lobby wheel (the camera eases round to face it), then the prize pops up in the middle
+--    over a black shade (Root.Prize). SPIN x5 / x10 open that many wheels at once instead (Root.Multi), all spinning
+--    together, each landing on its own prize, which shows under it. The spin screen is closed behind a reward and
+--    comes back a moment after COLLECT! if you're still at the wheel. What a wheel lands on is exactly what that spin paid. COLLECT! sends it home: Gold and Gems fly as single
 --    coins / gems to the HUD wallet (bottom left), egg shards to the HUD's incubator button (top left), each from the
 --    wheel or popup it was won on. The wallet waits for them: its count-up (EOSUI's UI.countTo) is held from the spin
 --    until the first coin lands.
@@ -38,6 +39,7 @@ local state = nil
 local clockOffset = 0
 local spinning = false
 local oddsMode = false
+local openedByWalk, armed = false, true -- walk-up: armed = may open when you're in range
 
 local OPEN_AT, CLOSE_AT = 8, 12 -- studs from the spot in front of the steps
 local TURNS = 4 -- full turns before it settles
@@ -131,7 +133,8 @@ local function bindWorld()
 	if world.angle % TAU ~= 0 then turn(w, world.rest, world.centre, world.axis, world.angle) end
 end
 
-local function spinWorld(slot: number)
+-- mine = this player's own spin: ticks as it turns, and the caller waits for it to stop
+local function spinWorld(slot: number, mine: boolean?)
 	bindWorld()
 	world.token += 1
 	local token = world.token
@@ -144,14 +147,39 @@ local function spinWorld(slot: number)
 		return
 	end
 	local t0 = os.clock()
+	local lastSector = math.floor(a0 / STEP + 0.5)
 	while token == world.token and w.Parent do
 		local u = math.min(1, (os.clock() - t0) / C.SPIN_TIME)
 		world.angle = a0 + (a1 - a0) * ease(u)
 		turn(w, world.rest, world.centre, world.axis, world.angle)
+		local sector = math.floor(world.angle / STEP + 0.5)
+		if mine and sector ~= lastSector then
+			lastSector = sector
+			Sound.play("click", 0.9 + 0.3 * (1 - u))
+		end
 		if u >= 1 then break end
 		RunService.RenderStepped:Wait()
 	end
 	world.angle %= TAU
+end
+
+-- the camera eases round to face the big wheel for your own spin, then hands back
+local camSaved = nil
+local function focusWheel(on: boolean)
+	local cam = workspace.CurrentCamera
+	local sw = workspace:FindFirstChild("SpinWheel")
+	if not cam then return end
+	if on then
+		if not sw or camSaved then return end
+		camSaved = cam.CameraType
+		local pv = sw:GetPivot()
+		cam.CameraType = Enum.CameraType.Scriptable
+		local goal = CFrame.lookAt(pv:PointToWorldSpace(Vector3.new(0, 12.5, 23)), pv:PointToWorldSpace(Vector3.new(0, 12, 0)))
+		TweenService:Create(cam, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { CFrame = goal }):Play()
+	elseif camSaved then
+		cam.CameraType = camSaved
+		camSaved = nil
+	end
 end
 
 ---------------------------------------------------------------- screen state
@@ -442,7 +470,7 @@ local function openPrize(res)
 		pcall(function() require(script.Parent.WeaponShopUI).renderSkin(rev.Icon, skin) end)
 	end
 	setText(rev, "ItemName", text)
-	UI.open("Prize", { keepHistory = UI.isOpen("Spin") })
+	UI.open("Prize") -- the spin screen closes behind it
 	local rays = rev:FindFirstChild("Rays")
 	if rays then UI.spin(rays, 18) end
 	UI.popFrom(rev.Icon, 0.4, 0.1)
@@ -508,7 +536,7 @@ local function openMulti(res)
 	end
 	setText(multi, "Title", "SPIN x" .. n .. "!")
 	multi.BtnCollect.Visible = false
-	UI.open("Multi", { keepHistory = UI.isOpen("Spin") })
+	UI.open("Multi") -- the spin screen closes behind it
 	-- all together; each settles in its own time
 	local t0 = os.clock()
 	local lastSector = 0
@@ -569,6 +597,8 @@ local function collect(closeIt: boolean)
 	end
 	if closeIt and UI.isOpen(scr) then UI.close() end
 	sendHome(items)
+	-- the spin screen comes back once the prizes are on their way, if you're still at the wheel
+	task.delay(1.2, function() armed = true end)
 end
 
 ---------------------------------------------------------------- spinning
@@ -616,33 +646,24 @@ local function spin(count: number)
 		sendHome(items)
 		return
 	end
+	-- the reward replaces the spin screen; it comes back after COLLECT! (collect re-arms the walk-up)
+	armed = false
+	openedByWalk = false
 	if count > 1 then
+		task.spawn(spinWorld, res.best) -- the big wheel turns too, to the best of them
 		openMulti(res)
 		spinning = false
 		refresh()
 		return
 	end
-	-- one spin: the screen's wheel turns to it (the lobby's turns from Spun)
-	local a0 = ui.angle
-	local a1 = targetFor(a0, res.slots[1])
-	local t0 = os.clock()
-	local lastSector = math.floor(a0 / STEP + 0.5)
-	while true do
-		local u = math.min(1, (os.clock() - t0) / C.SPIN_TIME)
-		local a = a0 + (a1 - a0) * ease(u)
-		setUiAngle(a)
-		local sector = math.floor(a / STEP + 0.5)
-		if sector ~= lastSector and gui.Enabled and UI.isOpen("Spin") then
-			lastSector = sector
-			Sound.play("click", 0.9 + 0.3 * (1 - u))
-		end
-		if u >= 1 then break end
-		RunService.RenderStepped:Wait()
-	end
-	ui.angle %= TAU
+	-- one spin plays on the big lobby wheel
+	if UI.isOpen("Spin") then UI.close() end
+	focusWheel(true)
+	spinWorld(res.slots[1], true)
 	spinning = false
 	refresh()
-	task.wait(0.35) -- a beat on the winning slot
+	task.wait(0.45) -- a beat on the winning slot
+	focusWheel(false)
 	openPrize(res)
 end
 
@@ -675,8 +696,6 @@ local function sizeCard()
 	sc:SetAttribute("Base", k)
 	sc.Scale = k
 end
-
-local openedByWalk, armed = false, true
 
 local function spot(): Vector3?
 	local sw = workspace:FindFirstChild("SpinWheel")
@@ -771,7 +790,9 @@ function SpinWheelController.init(uiController)
 		clockOffset = (tonumber(v.serverNow) or os.time()) - os.time()
 		if not spinning then refresh() end
 	end)
-	remotes:WaitForChild("Spun").OnClientEvent:Connect(function(_userId, slot)
+	remotes:WaitForChild("Spun").OnClientEvent:Connect(function(userId, slot)
+		-- your own spins drive the big wheel from spin(), in step with the reward
+		if userId == player.UserId then return end
 		if type(slot) == "number" and C.SLOTS[slot] then task.spawn(spinWorld, slot) end
 	end)
 	remotes:WaitForChild("Ask"):FireServer()
