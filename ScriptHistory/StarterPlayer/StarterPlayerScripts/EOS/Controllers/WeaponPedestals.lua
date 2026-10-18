@@ -571,4 +571,8 @@ function WeaponPedestals.start()
 	end)
 end
 
+-- HOS-WEP-002: the Halloween podium's showcase (WeaponShowcase) builds its copy and weapon the same way
+WeaponPedestals.makeAvatarTemplate = makeAvatarTemplate
+WeaponPedestals.wield = wield
+
 return WeaponPedestals

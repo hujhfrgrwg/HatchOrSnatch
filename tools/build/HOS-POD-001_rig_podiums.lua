@@ -268,6 +268,9 @@ local function buildHarvest(O: CFrame)
 		brick(deco, "Leaf", Vector3.new(0.42, 0.05, 0.3), O * CFrame.new(sp[1], topY + 0.025 + i * 0.001, sp[3]) * CFrame.Angles(0, math.rad(15 * rng:NextInteger(0, 11)), 0), leafColors[rng:NextInteger(1, 3)], { style = "smooth", collide = false })
 	end
 	standDisc(m, O, TOP, C.orange)
+	-- HOS-WEP-002: WeaponShowcase (client) puts your avatar here holding this skin, looping idle, jab and lunge
+	m:SetAttribute("ShowcaseSkin", "rb_all_hallow_s_sword")
+	game:GetService("CollectionService"):AddTag(m, "HOS_WeaponShowcase")
 	return m
 end
 

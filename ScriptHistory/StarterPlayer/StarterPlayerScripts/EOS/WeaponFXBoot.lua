@@ -264,3 +264,6 @@ end)
 
 -- the lobby pedestals (today's store + the crate showcase): their own module, started here
 require(script.Parent:WaitForChild("Controllers"):WaitForChild("WeaponPedestals")).start()
+
+-- HOS-WEP-002: the Halloween podium's showcase (your avatar with the All Hallow's Sword), its own module
+require(script.Parent:WaitForChild("Controllers"):WaitForChild("WeaponShowcase")).start()
