@@ -1,7 +1,10 @@
 -- HOS-LOBBY-002: pro altar in the middle of the Halloween lobby plaza, with a summoning circle
 -- in the middle where players stand to enter (SummonZone marks the volume for gameplay code).
+-- HOS-LOBBY-003: ProGate = a tall fading beam wall round it and a PRO LOBBY / LOCKED sign over each
+-- entrance; the client controller ProximityFade fades it in near the altar and out away from it.
 -- Lobby style: Plastic + Studs surfaces, the kit's stone purples, Neon only for glow accents.
 local CHS = game:GetService("ChangeHistoryService")
+local CollectionService = game:GetService("CollectionService")
 local kit = game:GetService("ServerStorage"):WaitForChild("HalloweenLobbyKit")
 
 local CENTRE_XZ = Vector3.new(0, 0, 1500)
@@ -358,6 +361,124 @@ zone.Transparency = 1
 zone.CanCollide = false
 zone.CastShadow = false
 zone:SetAttribute("Purpose", "Players standing in this volume are entering (summoning circle). Not wired to any code yet.")
+
+-- ===== pro gate: tall beam wall + PRO LOBBY / LOCKED signs (HOS-LOBBY-003) =====
+local GATE = HALF + 5 -- wall half-width: clear of the stairs and the jack-o'-lanterns
+local BEAM_H = 70
+local gate = model("ProGate", root)
+gate:SetAttribute("FadeNear", GATE + 8) -- fully shown within this many studs of the centre
+gate:SetAttribute("FadeFar", GATE + 20) -- fully hidden beyond this
+CollectionService:AddTag(gate, "EOS_ProximityFade")
+
+local CURTAIN_T = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 0.72), NumberSequenceKeypoint.new(0.05, 0.8),
+	NumberSequenceKeypoint.new(0.35, 0.93), NumberSequenceKeypoint.new(1, 1),
+})
+local PILLAR_T = NumberSequence.new({
+	NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(0.4, 0.75), NumberSequenceKeypoint.new(1, 1),
+})
+local function column(line: BasePart, worldBase: Vector3, name: string, width: number, transparency: NumberSequence, c0: Color3, c1: Color3)
+	local a0 = Instance.new("Attachment")
+	a0.Name = name .. "Base"
+	a0.Position = line.CFrame:PointToObjectSpace(worldBase)
+	a0.Parent = line
+	local a1 = Instance.new("Attachment")
+	a1.Name = name .. "Top"
+	a1.Position = line.CFrame:PointToObjectSpace(worldBase + Vector3.new(0, BEAM_H, 0))
+	a1.Parent = line
+	local b = Instance.new("Beam")
+	b.Name = name
+	b.Attachment0, b.Attachment1 = a0, a1
+	b.FaceCamera = true
+	b.Width0, b.Width1 = width, width
+	b.Segments = 12
+	b.Color = ColorSequence.new(c0, c1)
+	b.Transparency = transparency
+	b.LightEmission = 1
+	b.LightInfluence = 0
+	b.Brightness = 1
+	b.Parent = line
+end
+
+local signFont = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Heavy)
+for k = 0, 3 do
+	local Q = O * CFrame.Angles(0, k * math.pi / 2, 0) -- local +Z = outward
+	local side = model(("Side_%d"):format(k + 1), gate)
+	-- glowing ground line along this side (alternate sides a hair taller so the corners don't flicker)
+	local line = box(side, "GroundLine", Q, -GATE - 0.15, 0, GATE - 0.15, GATE + 0.15, 0.06 + (k % 2) * 0.006, GATE + 0.15, C.glowPurple, { style = "neon", collide = false })
+	-- curtain of camera-facing columns every 2 studs (each side starts at its corner)
+	for x = -GATE, GATE - 2, 2 do
+		column(line, (Q * CFrame.new(x, 0.03, GATE)).Position, "Curtain", 1.6, CURTAIN_T, C.glowPurple, Color3.fromRGB(150, 110, 255))
+	end
+	-- brighter pillars at the corner and either side of the entrance
+	for _, x in { -GATE, -(ARM + 0.6), ARM + 0.6 } do
+		column(line, (Q * CFrame.new(x, 0.03, GATE)).Position, "Pillar", 0.6, PILLAR_T, Color3.fromRGB(225, 160, 255), C.glowPurple)
+	end
+
+	-- flat sign over the entrance, facing out, just in front of the curtain
+	local sign = brick(side, "Sign", Vector3.new(9, 3.4, 0.2), Q * CFrame.new(0, 7.7, GATE + 0.6) * CFrame.Angles(0, math.pi, 0), C.deep, { style = "smooth", collide = false })
+	sign.Transparency = 1
+	sign.CastShadow = false
+	local gui = Instance.new("SurfaceGui")
+	gui.Name = "SignGui"
+	gui.Face = Enum.NormalId.Front
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 60
+	gui.LightInfluence = 0
+	gui.Brightness = 1.3
+	gui.Parent = sign
+	local fade = Instance.new("CanvasGroup")
+	fade.Name = "Fade"
+	fade.Size = UDim2.fromScale(1, 1)
+	fade.BackgroundTransparency = 1
+	fade.Parent = gui
+	local panel = Instance.new("Frame")
+	panel.Name = "Panel"
+	panel.AnchorPoint = Vector2.new(0.5, 0.5)
+	panel.Position = UDim2.fromScale(0.5, 0.5)
+	panel.Size = UDim2.new(1, -12, 1, -12)
+	panel.BackgroundColor3 = Color3.fromRGB(28, 22, 40)
+	panel.BackgroundTransparency = 0.08
+	panel.Parent = fade
+	Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 18)
+	local edge = Instance.new("UIStroke")
+	edge.Color = C.glowPurple
+	edge.Thickness = 5
+	edge.Parent = panel
+	local inner = Instance.new("Frame")
+	inner.Name = "Inner"
+	inner.AnchorPoint = Vector2.new(0.5, 0.5)
+	inner.Position = UDim2.fromScale(0.5, 0.5)
+	inner.Size = UDim2.new(1, -22, 1, -22)
+	inner.BackgroundTransparency = 1
+	inner.Parent = panel
+	Instance.new("UICorner", inner).CornerRadius = UDim.new(0, 12)
+	local innerEdge = Instance.new("UIStroke")
+	innerEdge.Color = C.gold
+	innerEdge.Thickness = 2
+	innerEdge.Transparency = 0.3
+	innerEdge.Parent = inner
+	local function label(name: string, text: string, y: number, h: number, color: Color3)
+		local t = Instance.new("TextLabel")
+		t.Name = name
+		t.AnchorPoint = Vector2.new(0.5, 0)
+		t.Position = UDim2.fromScale(0.5, y)
+		t.Size = UDim2.fromScale(0.86, h)
+		t.BackgroundTransparency = 1
+		t.FontFace = signFont
+		t.Text = text
+		t.TextScaled = true
+		t.TextColor3 = color
+		t.Parent = panel
+		local st = Instance.new("UIStroke")
+		st.Color = Color3.fromRGB(20, 12, 30)
+		st.Thickness = 3
+		st.Parent = t
+	end
+	label("Title", "PRO LOBBY", 0.1, 0.48, C.gold)
+	label("Status", "LOCKED", 0.6, 0.28, Color3.fromRGB(255, 95, 95))
+end
+gate.WorldPivot = O
 
 -- ===== place it =====
 local rec = CHS:TryBeginRecording("HOS-LOBBY-002 pro altar")
