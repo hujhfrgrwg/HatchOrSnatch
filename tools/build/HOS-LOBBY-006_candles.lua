@@ -10,7 +10,8 @@
 --      in A05_CandleCluster)
 --   3. swaps every block candle in the lobby (ProAltar corners, the incubator dais, FloorProps) for a copy: same name,
 --      parent, height and ground
---   4. keeps one light per group of candles: the tallest candle's, and only where no other kept light is within LIGHT_GAP
+--   4. keeps one light per group of candles: the tallest candle's, and only where no other kept light, and no pumpkin light
+--      (HOS-LOBBY-005), is within LIGHT_GAP (Matthew, on the incubator dais: "too much lighting going on here")
 -- The old candles and the old kit candles go to ServerStorage._Backups.HOS-LOBBY-006_2026-10-18_BlockCandles.
 local ServerStorage = game:GetService("ServerStorage")
 local CHS = game:GetService("ChangeHistoryService")
@@ -166,6 +167,10 @@ table.sort(swapped, function(a, b)
 	return sa.Y > sb.Y
 end)
 local lit = {}
+for _, d in workspace:GetDescendants() do
+	if d:IsA("PointLight") and d.Parent.Name == "A04_Light_OPTIONAL" then table.insert(lit, d.Parent.Position) end
+end
+local pumpkinLights = #lit
 for _, c in swapped do
 	local lp = c:FindFirstChildWhichIsA("PointLight", true).Parent
 	local near = false
@@ -179,4 +184,4 @@ for _, c in swapped do
 end
 
 pcall(CHS.SetWaypoint, CHS, "HOS-LOBBY-006: low-poly candles")
-return ("swapped %d candles, %d lights"):format(#swapped, #lit)
+return ("swapped %d candles, %d lights"):format(#swapped, #lit - pumpkinLights)

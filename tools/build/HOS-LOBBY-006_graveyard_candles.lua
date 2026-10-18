@@ -1,7 +1,7 @@
 --!nocheck
 -- HOS-LOBBY-006 (18 Oct 2026, Matthew): small groups of candles beside the lobby graves that have no pumpkin (the pumpkins
 -- are HOS-LOBBY-005) and at least PUMPKIN_GAP from any pumpkin, two or three candles each, a bit smaller than the kit ones. Only the tallest candle in a group keeps
--- its light. Rebuildable: clears Workspace.LobbyCandles and places them again (same spots every time).
+-- its light, and only when no pumpkin light is within LIGHT_GAP. Rebuildable: clears Workspace.LobbyCandles and places them again (same spots every time).
 -- Needs the kit candles, ServerStorage.HalloweenLobbyKit.A05_Candle_Large/Medium/Small (tools/build/HOS-LOBBY-006_candles.lua).
 local ServerStorage = game:GetService("ServerStorage")
 local CHS = game:GetService("ChangeHistoryService")
@@ -17,11 +17,15 @@ local CENTRE = Vector3.new(0, 10, 1500)
 local GRAVES = { "Grave_03", "Grave_06", "Grave_09", "Grave_13", "Grave_17" }
 local GROUPS = { { "Large", "Small" }, { "Medium", "Small", "Small" }, { "Large", "Medium" } }
 local PUMPKIN_GAP = 4
+local LIGHT_GAP = 5 -- a pumpkin's light this close lights the candles too
 
-local pumpkins = {}
+local pumpkins, pumpkinLights = {}, {}
 local pf = workspace:FindFirstChild("LobbyPumpkins")
 for _, p in (pf and pf:GetChildren() or {}) do
 	table.insert(pumpkins, p:GetPivot().Position)
+end
+for _, d in workspace:GetDescendants() do
+	if d:IsA("PointLight") and d.Parent.Name == "A04_Light_OPTIONAL" then table.insert(pumpkinLights, d.Parent.Position) end
 end
 local function nearPumpkin(at: Vector3): boolean
 	for _, p in pumpkins do
@@ -98,11 +102,18 @@ for gi, name in GRAVES do
 		if #group:GetChildren() == 0 then
 			group:Destroy()
 		else
-			-- one light per group: the tallest candle's
+			-- one light per group: the tallest candle's, unless a pumpkin's light is already close
 			local tallest, th = nil, -1
 			for _, c in group:GetChildren() do
 				local _, sz = c:GetBoundingBox()
 				if sz.Y > th then tallest, th = c, sz.Y end
+			end
+			local at = tallest:FindFirstChildWhichIsA("PointLight", true).Parent.Position
+			for _, p in pumpkinLights do
+				if (p - at).Magnitude < LIGHT_GAP then
+					tallest = nil
+					break
+				end
 			end
 			for _, c in group:GetChildren() do
 				if c ~= tallest then c:FindFirstChildWhichIsA("PointLight", true).Parent:Destroy() end

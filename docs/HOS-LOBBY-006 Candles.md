@@ -45,6 +45,8 @@ Candle lights off, then on:
 - **New:** `Workspace.LobbyCandles`, groups of two or three candles at 70–85% size beside Grave_03, 06, 09, 13 and 17 (12 candles in all). Those are graves without a pumpkin, and each group stays at least 4 studs from any pumpkin.
   - Rebuild with `tools/build/HOS-LOBBY-006_graveyard_candles.lua`: it clears the folder and places the same spots again (fixed seed).
 - **Lights:** one per group. Only the tallest candle keeps its light, and only when no other kept light is within 5 studs. That leaves 8 lights on the swapped candles and 5 on the new groups, 13 in all (the old candles had 21 very dim ones: range 5, brightness 0.12).
+  - A candle group within 5 studs of a pumpkin light has no light of its own. On the incubator dais the two candle groups sit beside the pumpkins, so they lost their lights (Matthew: "too much lighting going on here").
+  - As of 18 Oct there are 9 candle lights: one per altar corner and one per grave group. The FloorProps candle group has since been removed from the place in Studio, and that wasn't part of this ticket.
 
 ## Backups
 `ServerStorage._Backups.HOS-LOBBY-006_2026-10-18_BlockCandles` holds the 21 old candles and the old kit candles (`Kit_*`, `KitCluster_*`). Each old candle has a `HOS_WasAt` attribute with its old path. No scripts were changed.
