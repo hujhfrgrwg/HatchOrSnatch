@@ -118,6 +118,15 @@ Checked in a playtest:
 
 ![The leaned trapezoid sign](HOS-INC-001/sign_trapezoid.jpg)
 
+- **Premium stand:** new `A09_PedestalTrim` model (16 parts). It doesn't change any original part, so deleting it undoes the trim.
+  - a gold band (Foil) just under the top edge of each tier
+  - a glowing purple band round the two lower risers
+  - a gold collar round the glowing disc, and a neon ring inlaid in the top tier
+  - gold caps on the 8 blocks
+  - Rebuild or tweak the colours with `tools/build/HOS-INC-001_pedestal_trim.lua`.
+
+![The trimmed stand](HOS-INC-001/pedestal_trim.jpg)
+
 ## Notes
 - **Why the pieces are baked:** building the pieces at runtime with EditableMesh worked in Studio, but a player's client ran out of its EditableMesh memory budget after 8 of the 18 pieces, and phones get less. Baked meshes have no such limit and don't need the "Allow Mesh / Image APIs" setting.
 - **The egg HTML** lives on Hunter's PC and isn't in the repo, so the look follows the in-game `EggShardKit` shards and their texture atlas (`HOS-INC-001/shard_atlas_samples.png`: common, rare, epic, legendary).
