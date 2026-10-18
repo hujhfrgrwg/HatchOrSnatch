@@ -85,3 +85,4 @@ The Emote Crate card's four buttons (250 Gems, 149 Robux, OPEN 10, SEE ALL) were
 - **Fix:** their backgrounds are now built from frames: a dark outline, a darker bottom lip, a softer gradient face, and the place's stud texture fading in toward the right. Built by `tools/build/HOS-ICON-001/button_faces.lua`. They stay sharp at any size.
 - **OPEN 10:** CrateExtras clones this button at runtime, and the copy gets the same face.
 - Details and backups: `docs/backups/HOS-ICON-001_2026-10-18/changes.md`. Screenshot: `docs/HOS-ICON-001/shop_card_buttons_round6.png`.
+- **Colours (round 7):** each button has one colour per job, so players don't have to read: green for Gems (250 and OPEN 10), gold for Robux (149), blue for SEE ALL. The rest of the shop still uses purple for Robux.

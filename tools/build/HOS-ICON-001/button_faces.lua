@@ -11,8 +11,9 @@ local STUDS = "rbxassetid://75407673232479"
 
 local PALETTE = {
 	gems = { top = Color3.fromRGB(122, 206, 92), face = Color3.fromRGB(86, 176, 66), lip = Color3.fromRGB(46, 112, 44) },
-	robux = { top = Color3.fromRGB(170, 112, 214), face = Color3.fromRGB(132, 78, 184), lip = Color3.fromRGB(82, 44, 124) },
-	see = { top = Color3.fromRGB(246, 182, 84), face = Color3.fromRGB(222, 140, 48), lip = Color3.fromRGB(150, 84, 28) },
+	-- one colour per job so players needn't read (Matthew 18 Oct): green = Gems, gold = Robux, blue = look
+	robux = { top = Color3.fromRGB(255, 214, 92), face = Color3.fromRGB(240, 176, 36), lip = Color3.fromRGB(166, 106, 18) },
+	see = { top = Color3.fromRGB(110, 188, 255), face = Color3.fromRGB(56, 138, 232), lip = Color3.fromRGB(28, 78, 158) },
 }
 local EDGE = Color3.fromRGB(20, 14, 26)
 

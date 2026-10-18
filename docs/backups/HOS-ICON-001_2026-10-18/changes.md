@@ -85,3 +85,9 @@ The second line only ever makes OPEN 10's text smaller, so it fits the button's 
 - **Old image ids:** each new `Art` keeps its old id in `HOS_WasImage`. The full pre-edit buttons are in Studio at `ServerStorage._Backups.HOS-ICON-001_2026-10-18.Btn*_round6_before`.
 - **CrateExtras is unchanged.** Its `sliceArt` only touches ImageLabels named Art, so it skips the Frame. Its `resize` still sizes the Frame (offset size = button size), so the runtime OPEN 10 clone gets a 330 × 84 face.
 - **Checked in a playtest:** all four buttons have clean corners and full bottom edges. Screenshot: `docs/HOS-ICON-001/shop_card_buttons_round6.png`.
+
+## Seventh round (18 Oct): one colour per job (Matthew: "it's just confusing to know whats what without reading")
+Gems was green and Robux was purple, but both icons are green and the rest of the shop uses purple for many things, so the colours didn't say which was which. Only `Art.Lip.BackgroundColor3` and `Art.Face.UIGradient.Color` changed (top / face / lip):
+- **Robux (149):** gold, (255, 214, 92) / (240, 176, 36) / (166, 106, 18). It was purple, (170, 112, 214) / (132, 78, 184) / (82, 44, 124).
+- **SEE ALL:** blue, matching its blue eye, (110, 188, 255) / (56, 138, 232) / (28, 78, 158). It was orange, (246, 182, 84) / (222, 140, 48) / (150, 84, 28). It moved off orange so it isn't mistaken for the gold Robux button.
+- **Gems (250) and OPEN 10:** still green, like the gem icon and the Gems wallet.
