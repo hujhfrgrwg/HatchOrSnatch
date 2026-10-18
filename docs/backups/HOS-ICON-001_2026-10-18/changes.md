@@ -29,3 +29,12 @@ The Studio copies from before this round are `ServerStorage._Backups.HOS-ICON-00
   - **Hidden (Visible = false):** `CrateSub`, the odds rows (`T_Common`, `T_Rare`, `T_Epic`, `T_Legendary` and their `T_*Each` lines) and `T_ADuplicateRefundsGemsEmo`, each with its shadow.
   - **Moved up** to one stack beside the crate: `T_EmoteCrate` (and its shadow) to y 92 / 97, `BtnCrateGems` and `BtnCrateRobux` to y 196, `BtnSeeEmotes` to y 298. Each keeps its old position in `HOS_WasPos`.
   - CrateExtras puts its runtime OPEN 10 button where SEE ALL is when it mounts, so it follows.
+
+## Third round (18 Oct): less dead space, a brighter SEE ALL
+Every moved or resized element keeps its old values in `HOS_WasPos`, `HOS_WasSize`, `HOS_WasTextSize` and `HOS_WasImage`.
+- **Crate art:** `CrateArt` and its shadow go from 360 to 440, at (20, 62) and (20, 66).
+- **Title:** `T_EmoteCrate` and its shadow are 1.3× (520 × 94, text and stroke ×1.3), at (470, 136) and (470, 142).
+- **Price buttons:** `BtnCrateGems` at (470, 252), `BtnCrateRobux` at (826, 252).
+- **SEE ALL:** `BtnSeeEmotes` is at (470, 358), now 340 × 64, the width CrateExtras gives it at runtime. CrateExtras puts OPEN 10 at 470 and moves SEE ALL to 826.
+  - Its art is the Shop's active-tab orange (`134988778468442`), sliced so the corners stay crisp. It used to be the gray `118469927722961`.
+  - It has a new eye icon (`I_eye` with `I_eyeShadow`, the `spectate` icon `90110240378916`), and the label moved right to make room.

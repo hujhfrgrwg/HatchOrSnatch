@@ -1,0 +1,41 @@
+newmtl Planks
+Kd 0.0706 0.5608 0.6902
+Ks 0.2 0.2 0.2
+Ns 90
+d 1
+
+newmtl InsideGlow
+Kd 1.0000 0.4353 0.8157
+Ks 0.2 0.2 0.2
+Ns 0
+d 1
+
+newmtl Gold
+Kd 1.0000 0.7608 0.2275
+Ks 0.9 0.8 0.5
+Ns 156
+d 1
+
+newmtl LidPlanks
+Kd 0.0824 0.6000 0.7294
+Ks 0.2 0.2 0.2
+Ns 100
+d 1
+
+newmtl LidUnderside
+Kd 0.8471 0.1882 0.6196
+Ks 0.2 0.2 0.2
+Ns 0
+d 1
+
+newmtl ShieldField
+Kd 0.1725 0.0275 0.3216
+Ks 0.2 0.2 0.2
+Ns 130
+d 1
+
+newmtl Note
+Kd 1.0000 0.2392 0.7333
+Ks 0.2 0.2 0.2
+Ns 160
+d 1

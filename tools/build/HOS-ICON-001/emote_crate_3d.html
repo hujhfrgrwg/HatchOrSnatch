@@ -147,12 +147,12 @@ function plankTexture(seams) {
   t.anisotropy = 8;
   return t;
 }
-const teal = new THREE.MeshPhysicalMaterial({ map: plankTexture([180, 345]), roughness: .55, clearcoat: .3, clearcoatRoughness: .35, envMapIntensity: .25 });
-const tealLid = new THREE.MeshPhysicalMaterial({ map: plankTexture([256]), roughness: .5, clearcoat: .35, clearcoatRoughness: .3, envMapIntensity: .25 });
-const gold = new THREE.MeshStandardMaterial({ color: 0xffc23a, metalness: 1, roughness: .22, envMapIntensity: 1.5 });
-const goldDark = new THREE.MeshStandardMaterial({ color: 0xd88914, metalness: 1, roughness: .3, envMapIntensity: 1.3 });
-const purple = new THREE.MeshPhysicalMaterial({ color: 0x2c0752, roughness: .35, clearcoat: 1, clearcoatRoughness: .15, envMapIntensity: .4 });
-const pink = new THREE.MeshPhysicalMaterial({ color: 0xff3dbb, emissive: 0xa00a66, emissiveIntensity: .3, roughness: .2, clearcoat: 1, clearcoatRoughness: .05 });
+const teal = new THREE.MeshPhysicalMaterial({ name: 'Planks', map: plankTexture([180, 345]), roughness: .55, clearcoat: .3, clearcoatRoughness: .35, envMapIntensity: .25 });
+const tealLid = new THREE.MeshPhysicalMaterial({ name: 'LidPlanks', map: plankTexture([256]), roughness: .5, clearcoat: .35, clearcoatRoughness: .3, envMapIntensity: .25 });
+const gold = new THREE.MeshStandardMaterial({ name: 'Gold', color: 0xffc23a, metalness: 1, roughness: .22, envMapIntensity: 1.5 });
+const goldDark = new THREE.MeshStandardMaterial({ name: 'GoldDark', color: 0xd88914, metalness: 1, roughness: .3, envMapIntensity: 1.3 });
+const purple = new THREE.MeshPhysicalMaterial({ name: 'ShieldField', color: 0x2c0752, roughness: .35, clearcoat: 1, clearcoatRoughness: .15, envMapIntensity: .4 });
+const pink = new THREE.MeshPhysicalMaterial({ name: 'Note', color: 0xff3dbb, emissive: 0xa00a66, emissiveIntensity: .3, roughness: .2, clearcoat: 1, clearcoatRoughness: .05 });
 // inside the chest: a pool of hot pink light, white at its heart
 function glowTexture() {
   const c = document.createElement('canvas'); c.width = c.height = 256;
@@ -162,7 +162,7 @@ function glowTexture() {
   g.fillStyle = r; g.fillRect(0, 0, 256, 256);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
-const inside = new THREE.MeshBasicMaterial({ map: glowTexture() });
+const inside = new THREE.MeshBasicMaterial({ name: 'InsideGlow', map: glowTexture() });
 const insideDark = new THREE.MeshStandardMaterial({ color: 0x0a3f62, roughness: .8 });
 
 // ---------------------------------------------------------------- the chest
@@ -176,7 +176,7 @@ body.position.y = H / 2;
 chest.add(body);
 const glowTop = new THREE.Mesh(new THREE.PlaneGeometry(W - .3, D - .3), inside);
 glowTop.rotation.x = -Math.PI / 2;
-glowTop.position.y = H + .002;
+glowTop.position.y = H + .012; // clear of the body top and the rim band's top face (both at H): no z-fighting
 chest.add(glowTop);
 
 function box(w, h, d, mat, x, y, z, r = .03) {
@@ -217,7 +217,7 @@ barrel.rotation.z = Math.PI / 2; // the axis along x; theta 0..pi is then the to
 barrel.position.y = LIP;
 lid.add(barrel);
 // underside of the lid, lit pink by the glow
-const under = new THREE.Mesh(new THREE.PlaneGeometry(W - .1, D - .1), new THREE.MeshBasicMaterial({ color: 0xd8309e, side: THREE.DoubleSide }));
+const under = new THREE.Mesh(new THREE.PlaneGeometry(W - .1, D - .1), new THREE.MeshBasicMaterial({ name: 'LidUnderside', color: 0xd8309e, side: THREE.DoubleSide }));
 under.rotation.x = Math.PI / 2;
 under.position.y = .005;
 lid.add(under);
@@ -225,11 +225,21 @@ lid.add(under);
 const lipBand = new THREE.Mesh(new RoundedBoxGeometry(W + .1, LIP * .7, D + .1, 3, .04), gold);
 lipBand.position.y = LIP * .45;
 lid.add(lipBand);
-for (const x of [-W / 2 + BAND / 2 - .01, W / 2 - BAND / 2 + .01]) {
-  const b = new THREE.Mesh(new THREE.CylinderGeometry(R + .06, R + .06, BAND, 48, 1, false, 0, Math.PI), gold);
+// the end bands: open half-tubes round the barrel ends, reaching .03 past the barrel's flat caps, each closed by a
+// half ring at its outer end. Nothing here shares a plane with the barrel (the old closed bands' caps sat exactly on
+// the barrel's caps and z-fought: Matthew 18 Oct "fix the z fighting on it")
+const goldInside = gold.clone(); goldInside.side = THREE.DoubleSide;
+for (const sx of [-1, 1]) {
+  const b = new THREE.Mesh(new THREE.CylinderGeometry(R + .06, R + .06, BAND, 48, 1, true, 0, Math.PI), goldInside);
   b.rotation.z = Math.PI / 2;
-  b.position.set(x, LIP, 0);
+  b.position.set(sx * (W / 2 + .03 - BAND / 2), LIP, 0);
+  b.name = 'LidBand';
   lid.add(b);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(R - .05, R + .06, 48, 1, 0, Math.PI), goldInside);
+  ring.rotation.y = sx * Math.PI / 2; // facing out of the end
+  ring.position.set(sx * (W / 2 + .03), LIP, 0);
+  ring.name = 'LidBandRing';
+  lid.add(ring);
 }
 for (const x of [-W / 2 + BAND / 2, W / 2 - BAND / 2]) { const m = new THREE.Mesh(rivetGeo, gold); m.position.set(x, LIP * .45, D / 2 + .06); m.scale.z = .6; lid.add(m); }
 
@@ -304,6 +314,28 @@ if (params.has('orbit')) {
     placeCam(); draw();
   });
 }
+// the model for the repo (render.mjs EXPORT=1): OBJ (+ MTL written by render.mjs) and a GLB with materials
+window.__export = async () => {
+  const { OBJExporter } = await import('three/addons/exporters/OBJExporter.js');
+  const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
+  chest.updateMatrixWorld(true);
+  const named = new Map();
+  const count = {};
+  chest.traverse(o => {
+    if (!o.isMesh) return;
+    if (!o.material.name) o.material.name = 'mat' + named.size;
+    named.set(o.material.name, o.material);
+    const base = o.name || o.material.name; // e.g. Gold_3, Planks_0, LidBand_1
+    count[base] = (count[base] || 0) + 1;
+    o.name = base + '_' + (count[base] - 1);
+  });
+  // textured materials export their texture's main colour for the OBJ's MTL
+  const KD = { Planks: '128fb0', LidPlanks: '1599ba', InsideGlow: 'ff6fd0' };
+  const obj = new OBJExporter().parse(chest);
+  const glb = await new GLTFExporter().parseAsync(chest, { binary: true });
+  const mats = [...named.values()].map(m => ({ name: m.name, color: KD[m.name] || (m.color ? m.color.getHexString() : 'ffffff'), metal: m.metalness ?? 0, rough: m.roughness ?? 1 }));
+  return { obj, glb: Array.from(new Uint8Array(glb)), mats };
+};
 window.__ready = true;
 </script>
 </body>

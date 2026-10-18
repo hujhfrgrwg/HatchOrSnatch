@@ -24,7 +24,8 @@ fs.mkdirSync(path.join(tmp, 'vendor', 'addons', 'environments'), { recursive: tr
 const three = path.join(nm, 'three');
 fs.copyFileSync(path.join(three, 'build', 'three.module.js'), path.join(tmp, 'vendor', 'three.module.js'));
 if (fs.existsSync(path.join(three, 'build', 'three.core.js'))) fs.copyFileSync(path.join(three, 'build', 'three.core.js'), path.join(tmp, 'vendor', 'three.core.js'));
-for (const f of ['geometries/RoundedBoxGeometry.js', 'environments/RoomEnvironment.js']) {
+for (const d of ['exporters', 'utils']) fs.mkdirSync(path.join(tmp, 'vendor', 'addons', d), { recursive: true });
+for (const f of ['geometries/RoundedBoxGeometry.js', 'environments/RoomEnvironment.js', 'exporters/OBJExporter.js', 'exporters/GLTFExporter.js', 'utils/TextureUtils.js']) {
   fs.copyFileSync(path.join(three, 'examples', 'jsm', f), path.join(tmp, 'vendor', 'addons', f));
 }
 
@@ -41,6 +42,18 @@ await page.waitForFunction(() => window.__ready === true, null, { timeout: 60000
 await page.waitForTimeout(400);
 const out = path.join(repo, 'docs', 'HOS-ICON-001', process.env.OUT_NAME || 'emote_crate_icon_3d@2x.png');
 await page.locator('#stage').screenshot({ path: out, omitBackground: true });
+if (process.env.EXPORT) { // the model itself: docs/HOS-ICON-001/model/EmoteCrate.obj / .mtl / .glb
+  const res = await page.evaluate(() => window.__export());
+  const dir = path.join(repo, 'docs', 'HOS-ICON-001', 'model');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'EmoteCrate.obj'), 'mtllib EmoteCrate.mtl\n' + res.obj);
+  fs.writeFileSync(path.join(dir, 'EmoteCrate.mtl'), res.mats.map(m => {
+    const [r, g, b] = [0, 2, 4].map(i => (parseInt(m.color.slice(i, i + 2), 16) / 255).toFixed(4));
+    return `newmtl ${m.name}\nKd ${r} ${g} ${b}\nKs ${m.metal > .5 ? '0.9 0.8 0.5' : '0.2 0.2 0.2'}\nNs ${Math.round((1 - m.rough) * 200)}\nd 1\n`;
+  }).join('\n'));
+  fs.writeFileSync(path.join(dir, 'EmoteCrate.glb'), Buffer.from(res.glb));
+  console.log('model: ' + res.mats.length + ' materials, obj ' + res.obj.length + ' chars, glb ' + res.glb.length + ' bytes');
+}
 await browser.close();
 if (errors.length) console.log('page errors:\n' + errors.join('\n'));
 console.log('wrote', out);

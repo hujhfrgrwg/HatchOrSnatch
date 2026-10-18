@@ -22,6 +22,18 @@ The same day, the Shop's Emote Crate card lost its text clutter (Matthew: "We do
 
 The odds are still on the Emotes screen's crate page, where players go to see what's inside.
 
+**Round 3 (Matthew: "put the obj of the crate in github, but fix the z fighting on it first. We also got too much dead space now… make the see all 51 emotes button more attractive… gray signifies deactivated/locked"):**
+- **Z-fighting fixed.**
+  - The lid's gold end bands were closed half-cylinders whose flat caps sat exactly on the barrel's caps, which made streaks. They're now open half-tubes reaching .03 past the barrel ends, each closed by a half ring.
+  - The inside glow is lifted clear of the body top and the rim band, which also shared a plane.
+- **The model is in the repo** as `docs/HOS-ICON-001/model/`:
+  - `EmoteCrate.obj` and `.mtl`: 31 named parts (`Planks_0`, `Gold_3`, `LidBand_1`…) and 7 materials.
+  - `EmoteCrate.glb`: the same, with the plank and glow textures.
+  - The model is about 2.8 × 2.7 × 1.9 units, with the lid open as in the icon.
+  - It's exported from the same page (`EXPORT=1 … render.mjs`).
+- **The card:** a bigger crate (440), a 1.3× title, and the buttons centred down the card beside it.
+- **SEE ALL 51 EMOTES** is now the Shop's bright orange (the active-tab art) with an eye icon, so it reads as something to press rather than locked.
+
 Matthew: "Generate a 2d icon for the emote crate. Rn it's the default crate icon. Take inspiration from our other icon styles." Then: "fit the tune note inside the purple. so make it smaller."
 
 ![Icon and sizes](HOS-ICON-001/emote_crate_icon_preview.png)
