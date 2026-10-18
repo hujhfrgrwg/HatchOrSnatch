@@ -118,14 +118,20 @@ Checked in a playtest:
 
 ![The leaned trapezoid sign](HOS-INC-001/sign_trapezoid.jpg)
 
-- **Curved stand** (Matthew: "more premium", then "not as blocky, have some curve to the podium, not bricks"): the stepped tiers and the 8 blocks are replaced by `A09_Pedestal`:
-  - a wide, smooth base dome (radius 4.6, rising 1 stud) with a glowing ring at its foot
-  - a smaller dome rising out of it, with a gold band where they meet
-  - a round plinth under the glowing disc, with a gold rim, a gold collar round the disc and a neon ring between them
-  - The domes are ellipsoids (SpecialMesh spheres), with no new uploads.
-  - The old tiers and blocks are in `ServerStorage._Backups.HOS-INC-001_2026-10-18_IncubatorPedestal`. Rebuild or tweak it with `tools/build/HOS-INC-001_pedestal.lua`.
+- **Base (dais):** this went through a few rounds with Matthew:
+  - "more premium": gold and neon trim
+  - "not as blocky, have some curve": stacked domes
+  - "too much like a ufo": an egg-cup goblet
+  - "make the bottom like this": the concept art. That's the current build, `A09_Dais`.
 
-![The curved stand](HOS-INC-001/pedestal_curved.jpg)
+  What `A09_Dais` has:
+  - three octagonal studded stone steps (each a square plus the square turned 45°)
+  - eight capped stone blocks ringing the glowing disc
+  - a soft purple light column off the disc
+  - candle clusters either side of the sign, and jack-o'-lanterns beside the bottom step. These are cloned from the lobby altar's own props, so they match the lobby.
+  - The old tiers and blocks are in `ServerStorage._Backups.HOS-INC-001_2026-10-18_IncubatorPedestal`. Rebuild or tweak it (step sizes, colours, prop spots) with `tools/build/HOS-INC-001_pedestal.lua`.
+
+![The dais](HOS-INC-001/dais.jpg)
 
 ## Notes
 - **Why the pieces are baked:** building the pieces at runtime with EditableMesh worked in Studio, but a player's client ran out of its EditableMesh memory budget after 8 of the 18 pieces, and phones get less. Baked meshes have no such limit and don't need the "Allow Mesh / Image APIs" setting.
