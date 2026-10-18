@@ -35,6 +35,9 @@ Arena maps are built from code: `ServerStorage.EOSBuild.Maps` (`MapDefs` plus on
 - **Halloween pet showcase** (HOS-HWN-002, Matthew): the Crown podium (south end) cycles the Halloween shop's pets through idle, move, hop, run and both ability casts with their real effects, under a sign with the name and the current move (client `PetShowcase`, podiums tagged `HOS_PetShowcase`). See [[HOS-HWN-002 Halloween pet showcase]].
 - **Leaderboards** (HOS-LB-001, Matthew): the four Halloween boards in `Workspace.Leaderboards` show live this-server stats and turn to face each player. See [[HOS-LB-001 Halloween leaderboards]].
 
+## Pets
+- **Witch's Cat smoke fix** (HOS-HWN-002, Matthew): the cat's cauldron/violet smoke (summon, split, poof, snare templates in `ReplicatedStorage.VFX`) was drawing its whole 4×4 flipbook sheet; the emitters are now Grid4x4 one-shot flipbooks. See [[HOS-HWN-002 Witch cat smoke flipbook]].
+
 ## Setup
 - **Studio MCP:** `.mcp.json` points at Hunter's ngrok tunnel; cloud sessions need `ROBLOX_MCP_TOKEN` in their environment. On the PC: `tools\mcp\start_mcp_server.ps1` (server and Studio plugin must be the same version, 3.2.1).
 - **Uploads:** `tools\upload\upload_assets.py` (Open Cloud; key and creator from the environment).
