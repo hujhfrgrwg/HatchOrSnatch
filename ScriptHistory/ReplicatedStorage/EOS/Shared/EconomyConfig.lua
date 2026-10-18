@@ -296,7 +296,11 @@ EconomyConfig.KNIFE_CRATE = {
 	gems = 250,
 	order = { "common", "rare", "epic", "legendary" },
 	odds = { common = 60, rare = 27, epic = 10, legendary = 3 },
-	refund = { common = 40, rare = 80, epic = 150, legendary = 300 },
+	refund = { common = 40, rare = 80, epic = 150, legendary = 300 }, -- (before 18 Oct: duplicates refunded these Gems)
+	-- HOS-INV-001 (Hunter 18 Oct "Do all of it"): a duplicate gives Weapon Shards instead; shards forge any skin you
+	-- don't own (Backpack > Weapons), so bad luck always moves you toward the one you want
+	shards = { common = 10, rare = 25, epic = 60, legendary = 150 },
+	forge = { common = 120, rare = 300, epic = 700, legendary = 1500 },
 	-- bad-luck protection (Hunter 17 Oct: "you shouldnt be able to just buy whatever you want", so the crate is the
 	-- main way in): an Epic or better at the latest on the 10th opening since the last one, a Legendary on the 30th
 	pity = { epic = 10, legendary = 30 },
@@ -305,6 +309,15 @@ EconomyConfig.KNIFE_CRATE = {
 	robux = 149,
 	productId = 3719377809 :: number?, -- "Weapon Crate" developer product (tools/upload/create_weapon_crate_product.py)
 }
+-- HOS-INV-001: collect every skin of a rarity = that set's Gems, once. The Legendary set also makes you a Weapon
+-- Master: a gold WEAPON MASTER line on your name tag and a gold glow on your weapon (CharacterService).
+EconomyConfig.WEAPON_SETS = {
+	{ rarity = "common", gems = 300 },
+	{ rarity = "rare", gems = 750 },
+	{ rarity = "epic", gems = 1500 },
+	{ rarity = "legendary", gems = 3000, title = "WEAPON MASTER" },
+}
+
 -- Tiers re-cut 17 Oct (Hunter: "pick the ones that are top dog to be higher rarities"): a pyramid, 8 / 11 / 15 / 16.
 EconomyConfig.KNIFE_SKINS = { -- skin (template name), name, rarity
 	{ "spirit_blast", "Spirit Blast", "legendary" }, -- an energy ball in the hand (our own effect)

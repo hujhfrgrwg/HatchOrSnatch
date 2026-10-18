@@ -426,7 +426,10 @@ for k = 0, 3 do
 	-- share a plane.
 	local rng = Random.new(31 + k)
 	for i = 1, 14 do
-		local x = -GATE + 1 + rng:NextNumber() * (2 * GATE - 2)
+		local x = 5.5 + rng:NextNumber() * (GATE - 6.5) -- keep clear of the sign (9 wide, centred)
+		if rng:NextNumber() < 0.5 then
+			x = -x
+		end
 		local w = 0.25 + rng:NextNumber() ^ 2 * 1.6
 		local h = 20 + rng:NextNumber() * 45
 		local t0 = 0.5 + rng:NextNumber() * 0.25
@@ -449,6 +452,23 @@ for k = 0, 3 do
 	gui.LightInfluence = 0
 	gui.Brightness = 1.2
 	gui.Parent = panel
+	-- soft dark glow behind the text (GUI only, no part): a dark purple pill that fades out at its ends
+	local backdrop = Instance.new("Frame")
+	backdrop.Name = "Backdrop"
+	backdrop.AnchorPoint = Vector2.new(0.5, 0.5)
+	backdrop.Position = UDim2.fromScale(0.5, 0.5)
+	backdrop.Size = UDim2.fromScale(1, 0.98)
+	backdrop.BackgroundColor3 = Color3.fromRGB(16, 6, 30)
+	backdrop.BackgroundTransparency = 0.3
+	backdrop.BorderSizePixel = 0
+	backdrop.Parent = gui
+	Instance.new("UICorner", backdrop).CornerRadius = UDim.new(0.5, 0)
+	local soft = Instance.new("UIGradient")
+	soft.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.2, 0),
+		NumberSequenceKeypoint.new(0.8, 0), NumberSequenceKeypoint.new(1, 1),
+	})
+	soft.Parent = backdrop
 	local function label(name: string, text: string, y: number, h: number, w: number)
 		local t = Instance.new("TextLabel")
 		t.Name = name
@@ -460,6 +480,7 @@ for k = 0, 3 do
 		t.Text = text
 		t.TextScaled = true
 		t.TextColor3 = INC_TEXT
+		t.ZIndex = 2
 		t.Parent = gui -- ProximityFade fades the text and its outline directly
 		local st = Instance.new("UIStroke")
 		st.Color = Color3.fromRGB(24, 6, 44) -- near-black purple: with no panel behind it the text needs contrast against the wall

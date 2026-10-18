@@ -220,6 +220,11 @@ function CharacterService.refreshTag(plr: Player)
 		local afk = plr:GetAttribute("EOS_AFK") == true
 		-- reference style: "Lv. 12  ·  4 wins  ·  AFK" (Lv = account level from match XP, 16 Oct; was the best egg level)
 		status.Text = ("Lv. %d  ·  %d %s%s"):format(level, wins, if wins == 1 then "win" else "wins", if afk then "  ·  AFK" else "")
+		-- HOS-INV-001: the Legendary weapon set's title, in deeper gold ahead of the level
+		status.RichText = true
+		if plr:GetAttribute("EOS_WeaponMaster") == true then
+			status.Text = '<font color="#FFA820">WEAPON MASTER</font>  ·  ' .. status.Text
+		end
 		status.TextColor3 = if afk then Color3.fromRGB(190, 190, 200) else Color3.fromRGB(255, 226, 120)
 		nameLabel.TextColor3 = Color3.new(1, 1, 1)
 	end
@@ -296,6 +301,28 @@ local function setKnife(char: Model, on: boolean, plr: Player?)
 	knife.CFrame = arm.CFrame * motor.C0 * motor.C1:Inverse()
 	motor.Parent = arm
 	knife.Parent = char
+	-- HOS-INV-001: Weapon Masters (every Legendary skin, EconomyConfig.WEAPON_SETS) get a gold glow on the weapon
+	if plr and plr:GetAttribute("EOS_WeaponMaster") == true then
+		local h = Instance.new("Highlight")
+		h.Name = "EOS_MasterGlow"
+		h.FillColor = Color3.fromRGB(255, 200, 60)
+		h.FillTransparency = 0.7
+		h.OutlineColor = Color3.fromRGB(255, 215, 90)
+		h.OutlineTransparency = 0.2
+		h.DepthMode = Enum.HighlightDepthMode.Occluded
+		h.Parent = knife
+		local pe = Instance.new("ParticleEmitter")
+		pe.Name = "EOS_MasterSparkle"
+		pe.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		pe.Color = ColorSequence.new(Color3.fromRGB(255, 215, 90))
+		pe.LightEmission = 0.8
+		pe.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(1, 0) })
+		pe.Lifetime = NumberRange.new(0.5, 0.9)
+		pe.Rate = 6
+		pe.Speed = NumberRange.new(0.3, 0.8)
+		pe.SpreadAngle = Vector2.new(180, 180)
+		pe.Parent = knife
+	end
 	-- dual-wield skins (Dual attribute): a mirrored copy in the left hand on its own joint ("Off Sword" ->
 	-- "Off Dagger", posed by SwingDual), holstered at the left hip
 	if template:GetAttribute("Dual") and leftArm then

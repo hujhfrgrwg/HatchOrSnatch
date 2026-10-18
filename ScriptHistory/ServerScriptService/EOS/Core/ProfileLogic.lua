@@ -676,14 +676,64 @@ function ProfileLogic.openWeaponCrate(p: any, itemId: string, econ: any, priceOv
 	end
 	local dupe = p.cosmetics.owned[itemId] == true
 	local refund = 0
-	if dupe then
-		refund = C.refund[item.rarity] or 0
-		p.gems += refund
+	local shards = 0
+	if dupe then -- HOS-INV-001 (Hunter 18 Oct "Do all of it"): a duplicate gives Weapon Shards, which forge any skin
+		shards = (C.shards or {})[item.rarity] or 0
+		p.weaponShards = num(p.weaponShards, 0) + shards
 	else
 		p.cosmetics.owned[itemId] = true
 		p.cosmetics.knifeSkin = itemId
 	end
-	return true, { itemId = itemId, dupe = dupe, refund = refund }
+	return true, { itemId = itemId, dupe = dupe, refund = refund, shards = shards }
+end
+
+-- HOS-INV-001: forge a knife skin you don't own with Weapon Shards (KNIFE_CRATE.forge by rarity). Worn straight away.
+function ProfileLogic.forgeSkin(p: any, itemId: string, econ: any): (boolean, any)
+	local item = econ.item(itemId)
+	if not item or item.kind ~= "knifeSkin" then
+		return false, "UNKNOWN"
+	end
+	if p.cosmetics.owned[itemId] then
+		return false, "OWNED"
+	end
+	local cost = (econ.KNIFE_CRATE.forge or {})[item.rarity]
+	if not cost then
+		return false, "UNKNOWN"
+	end
+	if num(p.weaponShards, 0) < cost then
+		return false, "NOT_ENOUGH"
+	end
+	p.weaponShards = num(p.weaponShards, 0) - cost
+	p.cosmetics.owned[itemId] = true
+	p.cosmetics.knifeSkin = itemId
+	return true, { itemId = itemId, cost = cost }
+end
+
+-- HOS-INV-001: every knife skin of one rarity owned = that set's reward, once (econ.WEAPON_SETS). Returns the sets
+-- completed by this call (their rewards are already added).
+function ProfileLogic.weaponSets(p: any, econ: any): { string }
+	if type(p.weaponSets) ~= "table" then
+		p.weaponSets = {}
+	end
+	local have, total = {}, {}
+	for _, it in ipairs(econ.SHOP) do
+		if it.kind == "knifeSkin" and it.rarity then
+			total[it.rarity] = (total[it.rarity] or 0) + 1
+			if p.cosmetics.owned[it.id] then
+				have[it.rarity] = (have[it.rarity] or 0) + 1
+			end
+		end
+	end
+	local done = {}
+	for _, set in ipairs(econ.WEAPON_SETS or {}) do
+		local r = set.rarity
+		if not p.weaponSets[r] and (total[r] or 0) > 0 and (have[r] or 0) >= total[r] then
+			p.weaponSets[r] = true
+			p.gems += set.gems or 0
+			table.insert(done, r)
+		end
+	end
+	return done
 end
 
 -- Robux receipts share one bounded exact-once ledger (Gem packs, items, crates). true = new receipt (now recorded).
@@ -802,13 +852,15 @@ function ProfileLogic.grantPurchasedGems(p: any, receiptId: string, gems: number
 			return false, "DUPLICATE"
 		end
 	end
-	p.gems += math.floor(gems)
+	-- HOS-INV-001: the first Gem pack ever bought counts double (shown on the Gem shop until then)
+	local first = num(p.stats.gemsPurchased, 0) == 0
+	p.gems += math.floor(gems) * (if first then 2 else 1)
 	p.stats.gemsPurchased += math.floor(gems)
 	table.insert(p.receipts, receiptId)
 	while #p.receipts > ledgerSize do
 		table.remove(p.receipts, 1)
 	end
-	return true, nil
+	return true, if first then "FIRST_2X" else nil
 end
 
 function ProfileLogic.setFlag(p: any, field: string, value: boolean): boolean
@@ -861,6 +913,8 @@ function ProfileLogic.clientView(p: any, questConfig: any): any
 		emotes = deepCopy(p.emotes),
 		emoteWheel = deepCopy(p.emoteWheel),
 		weaponPity = deepCopy(p.weaponPity), -- HOS-WEP-001: the crate guarantee bars
+		weaponShards = num(p.weaponShards, 0), -- HOS-INV-001: from duplicate skins, forge any skin
+		weaponSets = deepCopy(p.weaponSets or {}), -- HOS-INV-001: completed rarity sets
 		emotePity = deepCopy(p.emotePity), -- HOS-INV-001: the Emote Crate guarantee lines
 		stats = deepCopy(p.stats),
 		quests = quests,

@@ -337,6 +337,7 @@ GameConfig.RateLimits = {
 	RequestHatch = { max = 3, window = 2 },
 	RequestOpenCrate = { max = 1, window = 1.5 },
 	RequestWeaponCrate = { max = 1, window = 1.5 }, -- HOS-WEP-001
+	RequestForgeSkin = { max = 1, window = 1 }, -- HOS-INV-001
 	RequestEmote = { max = 6, window = 2 },
 	RequestEquipPet = { max = 4, window = 2 },
 	RequestBuy = { max = 4, window = 2 },

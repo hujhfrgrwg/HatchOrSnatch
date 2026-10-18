@@ -4,7 +4,8 @@
 -- Client-only, nothing replicates. Distance is measured flat from the model's pivot; the model's
 -- FadeNear / FadeFar attributes (studs) are where it is fully shown / fully hidden.
 -- Beams and parts fade through LocalTransparencyModifier, CanvasGroups through GroupTransparency,
--- text through TextTransparency, UIStrokes through Transparency, lights through Brightness (text and
+-- text through TextTransparency, UIStrokes through Transparency, Frames through BackgroundTransparency,
+-- lights through Brightness (text and
 -- strokes are faded directly because CanvasGroups don't draw in AlwaysOnTop SurfaceGuis). Streamed-in
 -- pieces join the fade as they arrive. Beams with a true "Twinkle" attribute also pulse in and out on
 -- their own random rhythm (sparkling), on top of the distance fade.
@@ -41,6 +42,8 @@ local function setPiece(inst: Instance, base: number, h: number)
 		inst.GroupTransparency = base + (1 - base) * h
 	elseif inst:IsA("TextLabel") then
 		inst.TextTransparency = base + (1 - base) * h
+	elseif inst:IsA("Frame") then
+		inst.BackgroundTransparency = base + (1 - base) * h
 	elseif inst:IsA("UIStroke") then
 		inst.Transparency = base + (1 - base) * h
 	elseif inst:IsA("Light") then
@@ -53,6 +56,8 @@ local function remember(e: Entry, inst: Instance)
 		e.base[inst] = inst.GroupTransparency
 	elseif inst:IsA("TextLabel") then
 		e.base[inst] = inst.TextTransparency
+	elseif inst:IsA("Frame") then
+		e.base[inst] = inst.BackgroundTransparency
 	elseif inst:IsA("UIStroke") then
 		e.base[inst] = inst.Transparency
 	elseif inst:IsA("Light") then

@@ -35,6 +35,7 @@ Net.TO_SERVER = {
 	"RequestLunge", -- (dir: Vector3) a Catcher's lunge started (Space); the server times the slow after it
 	"RequestOpenCrate", -- () open one Emote Crate with Gems (lobby only)
 	"RequestWeaponCrate", -- () open one Weapon Crate with Gems (lobby only, HOS-WEP-001)
+	"RequestForgeSkin", -- (itemId: string) forge a knife skin with Weapon Shards (HOS-INV-001)
 	"PedestalHit", -- (slot: number) a lobby weapon pedestal swung at you: the server knocks you down (HOS-WEP-001)
 	"RequestEmote", -- (emoteId: string) play an owned emote in the lobby; "" stops
 	"RequestQuestClaim", -- (questId: string)

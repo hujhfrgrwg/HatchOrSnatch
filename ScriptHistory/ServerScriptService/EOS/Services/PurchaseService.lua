@@ -46,6 +46,7 @@ for _, r in ipairs(EmoteConfig.ROBUX) do
 	end
 end
 local rng = Random.new()
+local firstPack: { [Player]: boolean } = {} -- HOS-INV-001: the last granted pack was the doubled first one
 
 local function settle(plr: Player, receipt: string, fn: (any) -> ()): boolean
 	return DataService.commit(plr, "receipt:" .. receipt, fn)
@@ -116,15 +117,20 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 	local receipt = tostring(info.PurchaseId)
 	local granted = false
 	local saved = DataService.commit(plr, "receipt:" .. receipt, function(p)
-		local ok = ProfileLogic.grantPurchasedGems(p, receipt, pack.gems, RECEIPT_LEDGER)
-		if ok then granted = true end
+		local ok, why = ProfileLogic.grantPurchasedGems(p, receipt, pack.gems, RECEIPT_LEDGER)
+		if ok then granted = true firstPack[plr] = why == "FIRST_2X" end
 	end)
 	if not saved then
 		Analytics.warn("PersistenceError", "receipt" .. receipt, "Gem pack receipt not saved yet; Roblox will retry", { userId = plr.UserId, reason = "RECEIPT_NOT_SAVED" })
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	if granted then
-		Net.event("ShopResult"):FireClient(plr, { ok = true, gems = pack.gems }) -- the client's Reward reveal
+		local first = firstPack[plr] == true -- HOS-INV-001: the first Gem pack counts double
+		firstPack[plr] = nil
+		Net.event("ShopResult"):FireClient(plr, { ok = true, gems = if first then pack.gems * 2 else pack.gems, firstBonus = first }) -- the client's Reward reveal
+		if first then
+			Net.event("Toast"):FireClient(plr, { text = ("First purchase bonus: 2x Gems! +%d"):format(pack.gems * 2), kind = "reward" })
+		end
 		Analytics.log("GemsSource", { userId = plr.UserId, amount = pack.gems, reason = "robux_pack", robux = info.CurrencySpent, productId = info.ProductId, purchaseId = receipt })
 	end
 	return Enum.ProductPurchaseDecision.PurchaseGranted

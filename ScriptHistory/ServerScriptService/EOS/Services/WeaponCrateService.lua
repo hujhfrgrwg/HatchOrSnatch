@@ -2,7 +2,7 @@
 -- WeaponCrateService (server): the Weapon Crate and the knife-skin previews, HOS-WEP-001.
 --  * RequestWeaponCrate()  250 Gems -> one knife skin. The rarity is rolled by EconomyConfig.KNIFE_CRATE.odds
 --                          (shown on the crate card), then one skin of that rarity, evenly. Odds never change with
---                          what you own; a duplicate refunds Gems by rarity. A new skin is equipped straight away
+--                          what you own; a duplicate gives Weapon Shards by rarity (HOS-INV-001). A new skin is equipped straight away
 --                          (like buying one). Answer: WeaponCrateResult { ok, reason?, itemId, dupe, refund }.
 --  * The skin templates live in ServerStorage.EOS_Assets.KnifeSkins (the server builds the knife from them); a
 --    copy without scripts goes to ReplicatedStorage.EOS_KnifeSkinPreviews so the shop can draw each one in 3D.
@@ -171,6 +171,7 @@ local function onCrate(plr: Player, count: any)
 		end
 	end)
 	CharacterService.refreshKnife(plr) -- HOS-INV-001: the new skin shows on you straight away
+	task.defer(require(script.Parent.WeaponExtras).checkSets, plr) -- HOS-INV-001: weapon sets
 	ev:FireClient(plr, { ok = true, itemId = best.itemId, dupe = best.dupe, refund = best.refund, pity = scratch.weaponPity, multi = if multi then results else nil })
 	showcase(plr, best.itemId)
 	Analytics.log("GemsSink", { userId = plr.UserId, amount = price, reason = if multi then "weapon_crate_x10" else "weapon_crate" })
@@ -200,6 +201,7 @@ function WeaponCrateService.processReceipt(info: any, plr: Player, ledgerSize: n
 	end
 	if result then
 		CharacterService.refreshKnife(plr)
+		task.defer(require(script.Parent.WeaponExtras).checkSets, plr)
 		local now = DataService.get(plr)
 		Net.event("WeaponCrateResult"):FireClient(plr, { ok = true, itemId = result.itemId, dupe = result.dupe, refund = result.refund, pity = now and now.weaponPity, robux = true })
 		showcase(plr, result.itemId)
@@ -276,6 +278,7 @@ function WeaponCrateService.init(deps: { toast: (Player, string, string?) -> () 
 	publishPreviews()
 	Net.event("RequestWeaponCrate").OnServerEvent:Connect(onCrate)
 	Net.event("PedestalHit").OnServerEvent:Connect(onPedestalHit)
+	require(script.Parent.WeaponExtras).init() -- HOS-INV-001: forge, weapon sets, inspect attributes
 	game:GetService("Players").PlayerRemoving:Connect(function(plr)
 		restricted[plr] = nil
 		lastPedestalHit[plr] = nil
