@@ -8,7 +8,7 @@ date: 2026-10-18
 Matthew: "Using the obelisk podium, let's have it be a rig for cycling through all the emotes. we can have it be it's own player as a ghost (forcefield) purple and have a beam below it kinda as if it's showing a hologram projection light from the ground." Follow-ups while building: "Too transparent", and "have it float up a bit with slight up and down. when it swaps through emotes, have it suck in and out from the bottom too". The Obelisk is where Matthew placed it, on the north side at about (26, 10, 1454).
 
 ## What players see
-- **A hologram of you:** a copy of your own avatar with the clothes and face removed. Every part is **ForceField** in purple (176, 98, 255), with a purple Highlight that fills it fairly solid (fill 0.35) and outlines it in light purple.
+- **A hologram of you:** a copy of your own avatar with the clothes and face removed. Every part is **ForceField** in purple (176, 98, 255). **Each body part and accessory has its own Highlight** (fill 0.35, light purple outline), so every limb, the head and each hat or hair piece is outlined separately, not just the silhouette (Matthew's follow-up).
 - **Floating:** it floats 0.9 studs above the podium's glow disc and bobs ±0.15 studs.
 - **The emotes:** it plays **every emote in EmoteConfig (51)** in the list's order, with the emote's name above it in its rarity colour. A looping emote shows for whole loops, about 5.5 s (4–9 s); a once-only emote plays through and holds 0.6 s. Emotes that mime a prop (Trick or Treat's bag, Reaper's Ride's scythe, Surfer's board ...) get their light construct, as on a player.
 - **Swapping:** between emotes it **sucks down into the projector** (0.22 s, shrinking to 5% toward the disc as it fades) and **grows back out** with the next emote (0.3 s). It also flickers briefly every few seconds.
@@ -30,6 +30,9 @@ Matthew: "Using the obelisk podium, let's have it be a rig for cycling through a
 - The scale dropped to 0.05 at a swap and was back to full after. At full size the root rode 0.9 ± 0.15 studs above standing height.
 - No errors. The sword showcase, the pet showcase and the five weapon pedestals still ran alongside it.
 - Screenshots: `docs/HOS-EMOTE-002_hologram_tpose.jpg` (floating, the cone below), `docs/HOS-EMOTE-002_hologram_trick_or_treat.jpg` (before the float), `docs/HOS-EMOTE-002_hologram_loser_dance.jpg`.
+
+## Highlight budget
+Roblox draws at most 31 Highlights at once, and the game's match outlines (`Outlines`: red Catchers, blue teammates) use them too. So the hologram uses at most `GLOW_MAX` = 16: the body parts first, then the largest accessories. A very accessory-heavy avatar leaves its smallest pieces unoutlined; they keep the ForceField and fill colour. All of them are switched off whenever the showcases rest (in a match, or with the camera away from the lobby). Checked: 8 Highlights for an 8-part avatar near the podium, 0 with the camera away, 8 again on return. Screenshot: `docs/HOS-EMOTE-002_hologram_part_outlines.jpg`.
 
 ## Notes
 - The sign is plain FredokaOne text, like the pet showcase's.

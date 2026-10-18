@@ -8,8 +8,10 @@
 --    a once-only emote plays through. Emotes that mime a prop get their light construct (EmoteFX, via EOS_Emote on the
 --    copy, the way the results podium does it). No songs: only players and lobby NPCs carry those.
 --  * The projector: a soft cone of purple light from the podium's glow disc, fading out by the chest (two camera-facing
---    Beams, kept dim so the figure reads through them), specks drifting up and a soft light. A purple Highlight outlines
---    the figure and fills it fairly solid purple under the field. It floats a little above the disc with a slow bob,
+--    Beams, kept dim so the figure reads through them), specks drifting up and a soft light. Each body part and accessory
+--    has its own purple Highlight (outline + a fairly solid fill), so every limb and hat is outlined, not just the
+--    silhouette; at most GLOW_MAX of them (Roblox draws 31 Highlights at once), off while the showcase rests (in a match
+--    the game's outlines need them). It floats a little above the disc with a slow bob,
 --    flickers now and then, and between emotes it sucks down into the projector and grows back out of it.
 --  * A sign above shows the emote's name in its rarity colour.
 --  * The copy is built like the lobby pedestals' (WeaponPedestals.makeAvatarTemplate), then turned to a hologram:
@@ -40,6 +42,7 @@ local ONCE_HOLD = 0.6 -- after a once-only emote ends
 local LOAD_WAIT = 6 -- seconds to wait for a clip to load before skipping it
 local HOVER, BOB, BOB_SPEED = 0.9, 0.15, 1.6 -- studs it floats above the disc, bob height, bob speed (radians/s)
 local SUCK_IN, SUCK_OUT, MIN_SCALE = 0.22, 0.3, 0.05 -- seconds down into the projector and back out; scale at the bottom
+local GLOW_MAX = 16 -- per-part Highlights at most: the body first, then the biggest accessories
 
 type Show = {
 	podium: Model,
@@ -55,6 +58,8 @@ type Show = {
 	nextFlicker: number,
 	flickerUntil: number,
 	lift: number, -- studs from the feet to the root at full size
+	glows: { Highlight },
+	glowOn: boolean,
 	scale: number,
 	swap: string?, -- "in" (sucking down) / "out" (growing back) between emotes
 	swapT: number,
@@ -286,14 +291,29 @@ local function buildAvatar(s: Show)
 	root.CFrame = stand + Vector3.new(0, lift, 0)
 	s.lift, s.scale = lift, 1
 	s.parts = ghostify(av)
-	local hl = Instance.new("Highlight")
-	hl.Name = "HologramGlow"
-	hl.FillColor = GHOST
-	hl.FillTransparency = 0.35 -- (Matthew: the bare field read too see-through)
-	hl.OutlineColor = GHOST:Lerp(Color3.new(1, 1, 1), 0.45)
-	hl.OutlineTransparency = 0
-	hl.DepthMode = Enum.HighlightDepthMode.Occluded
-	hl.Parent = av
+	-- one Highlight per part (Matthew: every body part and accessory outlined, not just the whole figure)
+	local order = table.clone(s.parts)
+	table.sort(order, function(a, b)
+		local ab, bb = a.Parent == av, b.Parent == av -- (body parts sit straight in the model, accessory handles don't)
+		if ab ~= bb then
+			return ab
+		end
+		return a.Size.Magnitude > b.Size.Magnitude
+	end)
+	s.glows = {}
+	for i = 1, math.min(#order, GLOW_MAX) do
+		local hl = Instance.new("Highlight")
+		hl.Name = "HologramGlow"
+		hl.Adornee = order[i]
+		hl.FillColor = GHOST
+		hl.FillTransparency = 0.35 -- (Matthew: the bare field read too see-through)
+		hl.OutlineColor = GHOST:Lerp(Color3.new(1, 1, 1), 0.45)
+		hl.OutlineTransparency = 0
+		hl.DepthMode = Enum.HighlightDepthMode.Occluded
+		hl.Enabled = s.glowOn
+		hl.Parent = order[i]
+		table.insert(s.glows, hl)
+	end
 	av.Parent = holder()
 	s.avatar = av
 	local hum = av:FindFirstChildOfClass("Humanoid")
@@ -323,6 +343,16 @@ local function place(s: Show, now: number)
 	if root and stand then
 		local up = HOVER + math.sin(now * BOB_SPEED) * BOB
 		root.CFrame = stand + Vector3.new(0, (up + s.lift) * s.scale, 0)
+	end
+end
+
+local function setGlow(s: Show, on: boolean)
+	if s.glowOn == on then
+		return
+	end
+	s.glowOn = on
+	for _, hl in s.glows do
+		hl.Enabled = on
 	end
 end
 
@@ -417,7 +447,7 @@ local function add(p: Instance)
 	end
 	local s: Show = {
 		podium = p, stand = nil, dummy = nil, avatar = nil, parts = {}, idx = 1, track = nil, tracks = {}, t = 0,
-		len = nil, nextFlicker = 0, flickerUntil = 0, lift = 3, scale = 1, swap = nil, swapT = 0, projector = nil,
+		len = nil, nextFlicker = 0, flickerUntil = 0, lift = 3, glows = {}, glowOn = true, scale = 1, swap = nil, swapT = 0, projector = nil,
 		sign = nil,
 	}
 	shows[p] = s
@@ -480,6 +510,9 @@ function EmoteShowcase.start()
 		local lastScan = os.clock()
 		RunService.Heartbeat:Connect(function(dt)
 			if not LobbyGate.active() then
+				for _, s in shows do
+					setGlow(s, false) -- (the match's outlines need the Highlight budget)
+				end
 				return -- HOS-LOBBY-004: rests in a match and while the camera is away from the lobby
 			end
 			local now = os.clock()
@@ -493,6 +526,7 @@ function EmoteShowcase.start()
 				end
 			end
 			for _, s in shows do
+				setGlow(s, true)
 				local stand = s.stand
 				if stand and LobbyGate.near(stand.Position, LobbyGate.ANIM_RANGE) then
 					update(s, math.min(dt, 0.1), now)
