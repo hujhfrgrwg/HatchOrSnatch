@@ -111,6 +111,13 @@ Checked in a playtest:
 
 ![Front, with both lanterns and the bigger egg](HOS-INC-001/ingame_front_big_egg.jpg)
 
+- **Sign:** the INCUBATOR plaque is now a trapezoid, 6.6 studs wide at the bottom and 5.0 at the top (`A09_Sign.A09_SignPlaque`, a SubtractAsync union). It leans back 40° from its front-bottom edge, so the text faces up at players.
+  - The text panel narrowed to 5.0 studs, and the sparkles moved in to match.
+  - The egg-icon block used to sit on top of the plaque. It moved 0.95 studs back to stand on the platform just behind the plaque's top edge, keeping the same top and icon height.
+  - Rebuild or tweak (lean, top width) with `tools/build/HOS-INC-001_incubator_sign.lua`. It always starts from the originals in `ServerStorage._Backups.HOS-INC-001_2026-10-18_IncubatorSign`.
+
+![The leaned trapezoid sign](HOS-INC-001/sign_trapezoid.jpg)
+
 ## Notes
 - **Why the pieces are baked:** building the pieces at runtime with EditableMesh worked in Studio, but a player's client ran out of its EditableMesh memory budget after 8 of the 18 pieces, and phones get less. Baked meshes have no such limit and don't need the "Allow Mesh / Image APIs" setting.
 - **The egg HTML** lives on Hunter's PC and isn't in the repo, so the look follows the in-game `EggShardKit` shards and their texture atlas (`HOS-INC-001/shard_atlas_samples.png`: common, rare, epic, legendary).
