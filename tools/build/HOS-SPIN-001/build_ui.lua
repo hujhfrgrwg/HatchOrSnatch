@@ -262,8 +262,10 @@ for i, s in C.SLOTS do
 	f:SetAttribute("Slot", i)
 	local isz = if s.kind == "weapon" then 66 else 56
 	local ic = icon(f, "Icon", C.icon(s), (100 - isz) / 2, 6, isz, 4)
+	if s.kind == "weapon" then
+		ic.ImageColor3 = Color3.fromRGB(40, 22, 8) -- dark until SpinWheelController draws the skin over it (HOS-SPIN-002)
+	end
 	if s.kind == "weapon" and s.mystery then
-		ic.ImageColor3 = Color3.fromRGB(40, 22, 8)
 		pair(f, "Mystery", "?", 0, 4, 100, 60, 52, T.head, T.headSh, Enum.TextXAlignment.Center, 6)
 	end
 	pair(f, "Amount", C.short(s), 0, 70, 100, 28, if s.kind == "weapon" then 19 else 25, T.count, T.countSh, Enum.TextXAlignment.Center, 8)

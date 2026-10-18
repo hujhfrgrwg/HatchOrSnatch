@@ -5,7 +5,8 @@
 --
 -- kinds:
 --   weapon  weaponId = a knife skin item id (EconomyConfig.item): won = owned and equipped; a duplicate gives Weapon
---           Shards like a crate. mystery = the wheel shows a dark knife with a "?" instead of saying which.
+--           Shards like a crate. The wheel shows the skin itself (a 3D render, SpinWheelController), like the prize
+--           popup; mystery = a dark knife with a "?" instead of saying which.
 --           (nil weaponId would pay fallbackGold, but then the slot lands on a weapon and pays Gold: keep one set.)
 --   gold / gems   amount
 --   shard   rarity ("common" | "rare" | "epic" | "legendary"): one egg shard into the incubator, flies in at the lobby
@@ -22,8 +23,9 @@ local DEEP = Color3.fromRGB(80, 40, 130)
 local DARK = Color3.fromRGB(40, 32, 58)
 
 C.SLOTS = {
-	-- placeholder weapon until Matthew picks it (18 Oct): the All Hallow's Sword, so what it lands on is what you get
-	{ kind = "weapon", weaponId = "knife_rb_all_hallow_s_sword", mystery = true, fallbackGold = 1000, weight = 1, color = ORANGE },
+	-- the All Hallow's Sword, shown on the wheel (Matthew 18 Oct: "Have the weapon be the hallow icon for spin the wheel
+	-- since thats what the item is")
+	{ kind = "weapon", weaponId = "knife_rb_all_hallow_s_sword", fallbackGold = 1000, weight = 1, color = ORANGE },
 	{ kind = "gold", amount = 250, weight = 20, color = PURPLE },
 	{ kind = "shard", rarity = "common", weight = 17, color = DEEP },
 	{ kind = "gems", amount = 3, weight = 15, color = DARK },
@@ -41,7 +43,7 @@ C.PACKS = {
 }
 
 C.ICONS = {
-	weapon = "rbxassetid://114397729012864", -- placeholder knife until the weapon is picked
+	weapon = "rbxassetid://114397729012864", -- a dark knife under the weapon slot until its skin's render is made
 	gold = "rbxassetid://97477413390638",
 	gems = "rbxassetid://111102563440206",
 	common = "rbxassetid://76372701778308",
@@ -75,10 +77,11 @@ function C.icon(s: any): string
 	return C.ICONS[s.kind] or ""
 end
 
--- the short text on the wheel ("250", "WEAPON", "Rare")
+-- the short text on the wheel ("250"). A weapon and a shard show themselves, so no words (Matthew: the WEAPON label
+-- "just takes up space", "Same with the Common and rare label on the shards")
 function C.short(s: any): string
-	if s.kind == "weapon" then return "WEAPON" end
-	if s.kind == "shard" then return (s.rarity:gsub("^%l", string.upper)) end
+	if s.kind == "weapon" then return if s.mystery then "WEAPON" else "" end
+	if s.kind == "shard" then return "" end
 	return tostring(s.amount)
 end
 

@@ -102,9 +102,11 @@ for i, s in C.SLOTS do
 	ic.ImageTransparency = 0
 	ic.ZIndex = 2
 	ic.Parent = f
+	if big then
+		ic.ImageColor3 = Color3.fromRGB(40, 22, 8) -- dark until SpinWheelController draws the skin over it (HOS-SPIN-002)
+	end
 	if big and s.mystery then
-		ic.ImageColor3 = Color3.fromRGB(40, 22, 8) -- the placeholder weapon is a dark silhouette with a "?"
-		label(f, "Mystery", "?", UDim2.new(0.5, 0, 0.5, -40), UDim2.fromOffset(200, 150), 130, 9)
+		label(f, "Mystery", "?", UDim2.new(0.5, 0, 0.5, -40), UDim2.fromOffset(200, 150), 130, 9) -- a mystery weapon adds a "?"
 	end
 	label(f, "Amount", C.short(s), UDim2.new(0.5, 0, 0.5, 92), UDim2.fromOffset(260, 80), if s.kind == "shard" then 56 elseif big then 50 else 70, 7)
 end

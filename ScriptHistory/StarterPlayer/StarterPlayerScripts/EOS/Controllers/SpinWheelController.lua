@@ -13,6 +13,7 @@
 --  * the big wheel in the lobby turns for everyone near it when anyone spins (Spun); far away it just jumps
 --  * the sign over the crystal shows the free spin timer
 --  * spin packs prompt their developer product (SpinWheelConfig.PACKS; not on sale until they have a productId)
+--  * the weapon slot shows its weapon (HOS-SPIN-002): a 3D render of the skin on every wheel (dressWeapon)
 -- Wheel angles are radians, counter-clockwise as you face the wheel; slot k is at the top when the angle is
 -- (k - 1) * 45 degrees (mod a full turn). The wheel spins clockwise.
 local Players = game:GetService("Players")
@@ -93,6 +94,102 @@ end
 
 local function ease(u: number): number
 	return 1 - (1 - u) ^ 4
+end
+
+---------------------------------------------------------------- the weapon slot shows the weapon
+-- HOS-SPIN-002 (Matthew 18 Oct: "Have the weapon be the hallow icon for spin the wheel since thats what the item is").
+-- Knife skins have no 2D icon, so the weapon slot carries a 3D render of its skin (WeaponShopUI.renderSkin, as the
+-- prize popup does) and a black copy of it as the shadow. The dark knife under it shows until the render is made (the
+-- server publishes the skin previews a moment after join). Slots marked mystery keep the dark knife and "?".
+local WEAPON_ZOOM, WEAPON_DROP = 1.75, 0.06 -- the render's size against the old icon, and how far down it sits (of the icon)
+
+local function weaponSkin(k: number?): string?
+	local s = k and C.SLOTS[k]
+	local item = s and s.kind == "weapon" and not s.mystery and s.weaponId and EconomyConfig.item(s.weaponId)
+	return item and (item :: any).skin
+end
+
+local function renderInto(holder: GuiObject, skin: string): GuiObject?
+	local ok, r = pcall(function()
+		return require(script.Parent.WeaponShopUI).renderSkin(holder, skin)
+	end)
+	if not ok or not r then return nil end
+	r.AnchorPoint = Vector2.new(0.5, 0.5)
+	r.Position = UDim2.fromScale(0.5, 0.5 + WEAPON_DROP)
+	r.Size = UDim2.fromScale(WEAPON_ZOOM, WEAPON_ZOOM)
+	return r
+end
+
+-- slots = one wheel's slot frames (the screen's, an x5 / x10 copy, the lobby wheel's overlay); true once all are drawn
+local function dressWeapon(slots: Instance?): boolean
+	if not slots then return false end
+	local done = true
+	for _, f in slots:GetChildren() do
+		local skin = weaponSkin(f:GetAttribute("Slot") or tonumber(f.Name:match("^Slot(%d+)$")))
+		local icon = skin and f:FindFirstChild("Icon")
+		if not icon or icon:FindFirstChild("SkinRender") then continue end
+		if not renderInto(icon, skin) then
+			done = false
+			continue
+		end
+		icon.ImageTransparency = 1
+		local sh = f:FindFirstChild("IconShadow")
+		local r = sh and renderInto(sh, skin)
+		if r then
+			r.ImageColor3 = Color3.new(0, 0, 0)
+			r.ImageTransparency = sh.ImageTransparency
+			sh.ImageTransparency = 1
+		end
+		for _, n in { "Mystery", "MysteryShadow" } do
+			local m = f:FindFirstChild(n)
+			if m then m.Visible = false end
+		end
+	end
+	return done
+end
+
+-- the lobby wheel: a ViewportFrame on a SurfaceGui in the Workspace draws nothing, so its weapon slot is copied onto a
+-- SurfaceGui in PlayerGui adorned to the same part, and the render goes there (made again when the wheel streams back)
+local worldGui = nil
+local function dressWorld()
+	local sw = workspace:FindFirstChild("SpinWheel")
+	local wheel = sw and sw:FindFirstChild("Wheel")
+	local labels = wheel and wheel:FindFirstChild("Labels")
+	local rewards = labels and labels:FindFirstChild("Rewards")
+	if not rewards or (worldGui and worldGui.Parent and worldGui.Adornee == labels) then return end
+	if worldGui then worldGui:Destroy() end
+	worldGui = nil
+	local g = Instance.new("SurfaceGui")
+	g.Name = "SpinWheelWeapon"
+	g.ResetOnSpawn = false
+	g.Adornee = labels
+	for _, k in { "Face", "SizingMode", "PixelsPerStud", "CanvasSize", "LightInfluence", "Brightness", "ZIndexBehavior" } do
+		g[k] = rewards[k]
+	end
+	local olds = {}
+	for _, f in rewards:GetChildren() do
+		local skin = weaponSkin(tonumber(f.Name:match("^Slot(%d+)$")))
+		if skin and f:FindFirstChild("Icon") then
+			local c = f:Clone()
+			for _, d in c:GetChildren() do
+				if d.Name ~= "Icon" and d.Name ~= "IconShadow" then d:Destroy() end
+			end
+			c.Parent = g
+			table.insert(olds, f)
+		end
+	end
+	g.Parent = player:WaitForChild("PlayerGui")
+	if #olds == 0 or not dressWeapon(g) then
+		g:Destroy() -- (no previews yet: again next time)
+		return
+	end
+	for _, f in olds do
+		for _, n in { "Icon", "IconShadow" } do
+			local im = f:FindFirstChild(n)
+			if im then im.ImageTransparency = 1 end
+		end
+	end
+	worldGui = g
 end
 
 ---------------------------------------------------------------- the screen's wheel
@@ -513,6 +610,7 @@ local function openMulti(res)
 		local sl = miniTemplate.slots:Clone()
 		sl.Position = UDim2.fromOffset(0, 0)
 		sl.Parent = f
+		dressWeapon(sl)
 		-- the prize under the wheel, shown when it lands
 		local labels = {}
 		for j, src in { nameSh, nameSrc } do
@@ -803,7 +901,14 @@ function SpinWheelController.init(uiController)
 	bindWorld()
 
 	task.spawn(function()
+		local dressed, dressAt = false, 0
 		while gui.Parent do
+			-- the weapon slot's render: the screen's wheel once, the lobby wheel's whenever it streams back in
+			if os.clock() >= dressAt then
+				dressAt = os.clock() + 1
+				if not dressed then dressed = dressWeapon(slotsFrame) end
+				pcall(dressWorld)
+			end
 			local ok, err = pcall(tickWalk)
 			if not ok then warn("[SpinWheel] walk-up: " .. tostring(err)) end
 			if not spinning then pcall(refresh) end
